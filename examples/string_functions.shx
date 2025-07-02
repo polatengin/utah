@@ -1,0 +1,53 @@
+const message: string = "Hello, World!";
+const name: string = "Alice";
+const email: string = "  alice@Example.COM  ";
+const csvData: string = "apple,banana,cherry,date";
+const sentence: string = "Hello world from Utah";
+
+// String length
+let messageLength: number = message.length();
+
+// String slicing
+let greeting: string = message.slice(0, 5);
+let world: string = message.slice(7);
+
+// String case conversion
+let upperMessage: string = message.toUpperCase();
+let lowerMessage: string = message.toLowerCase();
+
+// String trimming
+let trimmedEmail: string = email.trim();
+
+// String replacement
+let newMessage: string = message.replace("World", "Universe");
+let allHs: string = message.replaceAll("l", "L");
+
+// String checking functions
+let startsWithHello: boolean = message.startsWith("Hello");
+let endsWithExclamation: boolean = message.endsWith("!");
+let containsWorld: boolean = message.includes("World");
+
+// Split CSV data
+let fruits: string = csvData.split(",");
+
+// Split sentence by spaces
+let words: string = sentence.split(" ");
+
+function demonstrateStringFunctions(): void {
+  console.log(`Original message: ${message}`);
+  console.log(`Message length: ${messageLength}`);
+  console.log(`Greeting: ${greeting}`);
+  console.log(`World part: ${world}`);
+  console.log(`Uppercase: ${upperMessage}`);
+  console.log(`Lowercase: ${lowerMessage}`);
+  console.log(`Trimmed email: ${trimmedEmail}`);
+  console.log(`New message: ${newMessage}`);
+  console.log(`All Ls replaced: ${allHs}`);
+  console.log(`Starts with Hello: ${startsWithHello}`);
+  console.log(`Ends with !: ${endsWithExclamation}`);
+  console.log(`Contains World: ${containsWorld}`);
+  console.log("Fruits array created from: ${csvData}");
+  console.log("Words array created from: ${sentence}");
+}
+
+demonstrateStringFunctions();

@@ -53,6 +53,85 @@ else
 fi
 ```
 
+## 🔧 String Manipulation Functions
+
+Utah supports a comprehensive set of string manipulation functions that are familiar to JavaScript/TypeScript developers but transpile to efficient bash code.
+
+### Available String Functions
+
+#### String Properties
+
+- `string.length()` - Get the length of a string
+
+#### String Transformation
+
+- `string.slice(start, end?)` - Extract a substring
+- `string.toUpperCase()` - Convert to uppercase
+- `string.toLowerCase()` - Convert to lowercase
+- `string.trim()` - Remove leading and trailing whitespace
+- `string.replace(search, replacement)` - Replace first occurrence
+- `string.replaceAll(search, replacement)` - Replace all occurrences
+
+#### String Testing
+
+- `string.startsWith(prefix)` - Check if string starts with prefix
+- `string.endsWith(suffix)` - Check if string ends with suffix
+- `string.includes(substring)` - Check if string contains substring
+
+#### String Splitting
+
+- `string.split(delimiter)` - Split string into array
+
+### Example Usage
+
+```shx
+const message: string = "Hello, World!";
+const email: string = "  user@example.com  ";
+
+// Get string length
+let length: number = message.length();
+
+// Extract substring
+let greeting: string = message.slice(0, 5); // "Hello"
+
+// Case conversion
+let upper: string = message.toUpperCase(); // "HELLO, WORLD!"
+let lower: string = message.toLowerCase(); // "hello, world!"
+
+// Trim whitespace
+let cleanEmail: string = email.trim(); // "user@example.com"
+
+// Replace text
+let newMsg: string = message.replace("World", "Universe"); // "Hello, Universe!"
+
+// Boolean checks
+let startsWithHello: boolean = message.startsWith("Hello"); // true
+let endsWithExclamation: boolean = message.endsWith("!"); // true
+let containsWorld: boolean = message.includes("World"); // true
+```
+
+### Generated Bash Code
+
+The string functions transpile to efficient bash parameter expansion and built-in commands:
+
+```bash
+readonly message="Hello, World!"
+readonly email="  user@example.com  "
+
+length="${#message}"
+greeting="${message:0:5}"
+upper="${message^^}"
+lower="${message,,}"
+cleanEmail=$(echo "${email}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+newMsg="${message/World/Universe}"
+
+if [[ "${message}" == "Hello"* ]]; then
+  startsWithHello="true"
+else
+  startsWithHello="false"
+fi
+```
+
 ## 🚧 Roadmap
 
 - [x] `string` data type
@@ -103,7 +182,7 @@ fi
 
 - [ ] Support for functions with multiple return values
 
-- [ ] Enhanced string manipulation functions
+- [x] Enhanced string manipulation functions
 
 - [ ] File I/O operations (read/write files)
 

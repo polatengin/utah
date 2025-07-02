@@ -15,20 +15,29 @@ public class Parser
 
     for (int i = 0; i < _lines.Length; i++)
     {
-      string line = _lines[i].Trim();
+      var line = _lines[i].Trim();
 
       if (line.StartsWith("let "))
       {
         var match = Regex.Match(line, @"let (\w+): (\w+) = (.+);");
         if (match.Success)
         {
-          program.Statements.Add(new VariableDeclaration
+          var value = match.Groups[3].Value;
+          var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+          if (stringFuncNode != null)
           {
-            Name = match.Groups[1].Value,
-            Type = match.Groups[2].Value,
-            Value = match.Groups[3].Value.Trim('"'),
-            IsConst = false
-          });
+            program.Statements.Add(stringFuncNode);
+          }
+          else
+          {
+            program.Statements.Add(new VariableDeclaration
+            {
+              Name = match.Groups[1].Value,
+              Type = match.Groups[2].Value,
+              Value = value.Trim('"'),
+              IsConst = false
+            });
+          }
         }
       }
       else if (line.StartsWith("const "))
@@ -36,13 +45,22 @@ public class Parser
         var match = Regex.Match(line, @"const (\w+): (\w+) = (.+);");
         if (match.Success)
         {
-          program.Statements.Add(new VariableDeclaration
+          var value = match.Groups[3].Value;
+          var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+          if (stringFuncNode != null)
           {
-            Name = match.Groups[1].Value,
-            Type = match.Groups[2].Value,
-            Value = match.Groups[3].Value.Trim('"'),
-            IsConst = true
-          });
+            program.Statements.Add(stringFuncNode);
+          }
+          else
+          {
+            program.Statements.Add(new VariableDeclaration
+            {
+              Name = match.Groups[1].Value,
+              Type = match.Groups[2].Value,
+              Value = value.Trim('"'),
+              IsConst = true
+            });
+          }
         }
       }
       else if (line.StartsWith("function "))
@@ -68,24 +86,48 @@ public class Parser
           if (inner.StartsWith("let "))
           {
             var match = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
-            func.Body.Add(new VariableDeclaration
+            if (match.Success)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = match.Groups[3].Value.Trim('"'),
-              IsConst = false
-            });
+              var value = match.Groups[3].Value;
+              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              if (stringFuncNode != null)
+              {
+                func.Body.Add(stringFuncNode);
+              }
+              else
+              {
+                func.Body.Add(new VariableDeclaration
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = value.Trim('"'),
+                  IsConst = false
+                });
+              }
+            }
           }
           else if (inner.StartsWith("const "))
           {
             var match = Regex.Match(inner, @"const (\w+): (\w+) = (.+);");
-            func.Body.Add(new VariableDeclaration
+            if (match.Success)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = match.Groups[3].Value.Trim('"'),
-              IsConst = true
-            });
+              var value = match.Groups[3].Value;
+              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              if (stringFuncNode != null)
+              {
+                func.Body.Add(stringFuncNode);
+              }
+              else
+              {
+                func.Body.Add(new VariableDeclaration
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = value.Trim('"'),
+                  IsConst = true
+                });
+              }
+            }
           }
           else if (inner.StartsWith("console.log"))
           {
@@ -160,24 +202,48 @@ public class Parser
           else if (inner.StartsWith("let "))
           {
             var m = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
-            ifStmt.ThenBody.Add(new VariableDeclaration
+            if (m.Success)
             {
-              Name = m.Groups[1].Value,
-              Type = m.Groups[2].Value,
-              Value = m.Groups[3].Value.Trim('"'),
-              IsConst = false
-            });
+              var value = m.Groups[3].Value;
+              var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
+              if (stringFuncNode != null)
+              {
+                ifStmt.ThenBody.Add(stringFuncNode);
+              }
+              else
+              {
+                ifStmt.ThenBody.Add(new VariableDeclaration
+                {
+                  Name = m.Groups[1].Value,
+                  Type = m.Groups[2].Value,
+                  Value = value.Trim('"'),
+                  IsConst = false
+                });
+              }
+            }
           }
           else if (inner.StartsWith("const "))
           {
             var m = Regex.Match(inner, @"const (\w+): (\w+) = (.+);");
-            ifStmt.ThenBody.Add(new VariableDeclaration
+            if (m.Success)
             {
-              Name = m.Groups[1].Value,
-              Type = m.Groups[2].Value,
-              Value = m.Groups[3].Value.Trim('"'),
-              IsConst = true
-            });
+              var value = m.Groups[3].Value;
+              var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
+              if (stringFuncNode != null)
+              {
+                ifStmt.ThenBody.Add(stringFuncNode);
+              }
+              else
+              {
+                ifStmt.ThenBody.Add(new VariableDeclaration
+                {
+                  Name = m.Groups[1].Value,
+                  Type = m.Groups[2].Value,
+                  Value = value.Trim('"'),
+                  IsConst = true
+                });
+              }
+            }
           }
           else if (inner.StartsWith("exit "))
           {
@@ -262,5 +328,145 @@ public class Parser
     }
 
     return program;
+  }
+
+  private StringFunction? ParseStringFunction(string targetVariable, string expression)
+  {
+    // Parse string.length() -> StringLength
+    var lengthMatch = Regex.Match(expression, @"(\w+)\.length\(\)");
+    if (lengthMatch.Success)
+    {
+      return new StringLength
+      {
+        TargetVariable = targetVariable,
+        SourceString = lengthMatch.Groups[1].Value
+      };
+    }
+
+    // Parse string.slice(start, end?) -> StringSlice
+    var sliceMatch = Regex.Match(expression, @"(\w+)\.slice\((\d+)(?:,\s*(\d+))?\)");
+    if (sliceMatch.Success)
+    {
+      var endIndex = sliceMatch.Groups[3].Success ? int.Parse(sliceMatch.Groups[3].Value) : (int?)null;
+      return new StringSlice
+      {
+        TargetVariable = targetVariable,
+        SourceString = sliceMatch.Groups[1].Value,
+        StartIndex = int.Parse(sliceMatch.Groups[2].Value),
+        EndIndex = endIndex
+      };
+    }
+
+    // Parse string.replace(search, replace) -> StringReplace
+    var replaceMatch = Regex.Match(expression, @"(\w+)\.replace\(""([^""]+)"",\s*""([^""]*)""\)");
+    if (replaceMatch.Success)
+    {
+      return new StringReplace
+      {
+        TargetVariable = targetVariable,
+        SourceString = replaceMatch.Groups[1].Value,
+        SearchPattern = replaceMatch.Groups[2].Value,
+        ReplaceWith = replaceMatch.Groups[3].Value,
+        ReplaceAll = false
+      };
+    }
+
+    // Parse string.replaceAll(search, replace) -> StringReplace
+    var replaceAllMatch = Regex.Match(expression, @"(\w+)\.replaceAll\(""([^""]+)"",\s*""([^""]*)""\)");
+    if (replaceAllMatch.Success)
+    {
+      return new StringReplace
+      {
+        TargetVariable = targetVariable,
+        SourceString = replaceAllMatch.Groups[1].Value,
+        SearchPattern = replaceAllMatch.Groups[2].Value,
+        ReplaceWith = replaceAllMatch.Groups[3].Value,
+        ReplaceAll = true
+      };
+    }
+
+    // Parse string.toUpperCase() -> StringToUpper
+    var upperMatch = Regex.Match(expression, @"(\w+)\.toUpperCase\(\)");
+    if (upperMatch.Success)
+    {
+      return new StringToUpper
+      {
+        TargetVariable = targetVariable,
+        SourceString = upperMatch.Groups[1].Value
+      };
+    }
+
+    // Parse string.toLowerCase() -> StringToLower
+    var lowerMatch = Regex.Match(expression, @"(\w+)\.toLowerCase\(\)");
+    if (lowerMatch.Success)
+    {
+      return new StringToLower
+      {
+        TargetVariable = targetVariable,
+        SourceString = lowerMatch.Groups[1].Value
+      };
+    }
+
+    // Parse string.trim() -> StringTrim
+    var trimMatch = Regex.Match(expression, @"(\w+)\.trim\(\)");
+    if (trimMatch.Success)
+    {
+      return new StringTrim
+      {
+        TargetVariable = targetVariable,
+        SourceString = trimMatch.Groups[1].Value
+      };
+    }
+
+    // Parse string.startsWith("prefix") -> StringStartsWith
+    var startsWithMatch = Regex.Match(expression, @"(\w+)\.startsWith\(""([^""]+)""\)");
+    if (startsWithMatch.Success)
+    {
+      return new StringStartsWith
+      {
+        TargetVariable = targetVariable,
+        SourceString = startsWithMatch.Groups[1].Value,
+        Prefix = startsWithMatch.Groups[2].Value
+      };
+    }
+
+    // Parse string.endsWith("suffix") -> StringEndsWith
+    var endsWithMatch = Regex.Match(expression, @"(\w+)\.endsWith\(""([^""]+)""\)");
+    if (endsWithMatch.Success)
+    {
+      return new StringEndsWith
+      {
+        TargetVariable = targetVariable,
+        SourceString = endsWithMatch.Groups[1].Value,
+        Suffix = endsWithMatch.Groups[2].Value
+      };
+    }
+
+    // Parse string.includes("substring") -> StringContains
+    var includesMatch = Regex.Match(expression, @"(\w+)\.includes\(""([^""]+)""\)");
+    if (includesMatch.Success)
+    {
+      return new StringContains
+      {
+        TargetVariable = targetVariable,
+        SourceString = includesMatch.Groups[1].Value,
+        Substring = includesMatch.Groups[2].Value
+      };
+    }
+
+    // Parse string.split("delimiter") -> StringSplit
+    var splitMatch = Regex.Match(expression, @"(\w+)\.split\(""([^""]*)""\)");
+    if (splitMatch.Success)
+    {
+      return new StringSplit
+      {
+        TargetVariable = targetVariable,
+        SourceString = splitMatch.Groups[1].Value,
+        Delimiter = splitMatch.Groups[2].Value,
+        ResultArrayName = targetVariable
+      };
+    }
+
+    return null;
   }
 }
