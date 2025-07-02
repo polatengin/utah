@@ -128,6 +128,26 @@ public class Compiler
         lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< \"${{{sp.SourceString}}}\"");
         break;
 
+      case EnvGet eg:
+        lines.Add($"{eg.AssignTo}=\"${{{eg.VariableName}:-{eg.DefaultValue}}}\"");
+        break;
+
+      case EnvSet es:
+        lines.Add($"export {es.VariableName}=\"{es.Value}\"");
+        break;
+
+      case EnvLoad el:
+        lines.Add($"if [ -f \"{el.FilePath}\" ]; then");
+        lines.Add($"  set -a");
+        lines.Add($"  source \"{el.FilePath}\"");
+        lines.Add($"  set +a");
+        lines.Add($"fi");
+        break;
+
+      case EnvDelete ed:
+        lines.Add($"unset {ed.VariableName}");
+        break;
+
       case ExitStatement e:
         lines.Add($"exit {e.ExitCode}");
         break;
@@ -228,6 +248,26 @@ public class Compiler
 
       case StringSplit sp:
         lines.Add($"  IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< \"${{{sp.SourceString}}}\"");
+        break;
+
+      case EnvGet eg:
+        lines.Add($"  {eg.AssignTo}=\"${{{eg.VariableName}:-{eg.DefaultValue}}}\"");
+        break;
+
+      case EnvSet es:
+        lines.Add($"  export {es.VariableName}=\"{es.Value}\"");
+        break;
+
+      case EnvLoad el:
+        lines.Add($"  if [ -f \"{el.FilePath}\" ]; then");
+        lines.Add($"    set -a");
+        lines.Add($"    source \"{el.FilePath}\"");
+        lines.Add($"    set +a");
+        lines.Add($"  fi");
+        break;
+
+      case EnvDelete ed:
+        lines.Add($"  unset {ed.VariableName}");
         break;
     }
 

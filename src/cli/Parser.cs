@@ -23,20 +23,28 @@ public class Parser
         if (match.Success)
         {
           var value = match.Groups[3].Value;
-          var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-          if (stringFuncNode != null)
+          var envNode = ParseEnvFunction(match.Groups[1].Value, value);
+          if (envNode != null)
           {
-            program.Statements.Add(stringFuncNode);
+            program.Statements.Add(envNode);
           }
           else
           {
-            program.Statements.Add(new VariableDeclaration
+            var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+            if (stringFuncNode != null)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = value.Trim('"'),
-              IsConst = false
-            });
+              program.Statements.Add(stringFuncNode);
+            }
+            else
+            {
+              program.Statements.Add(new VariableDeclaration
+              {
+                Name = match.Groups[1].Value,
+                Type = match.Groups[2].Value,
+                Value = value.Trim('"'),
+                IsConst = false
+              });
+            }
           }
         }
       }
@@ -46,20 +54,28 @@ public class Parser
         if (match.Success)
         {
           var value = match.Groups[3].Value;
-          var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-          if (stringFuncNode != null)
+          var envNode = ParseEnvFunction(match.Groups[1].Value, value);
+          if (envNode != null)
           {
-            program.Statements.Add(stringFuncNode);
+            program.Statements.Add(envNode);
           }
           else
           {
-            program.Statements.Add(new VariableDeclaration
+            var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+            if (stringFuncNode != null)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = value.Trim('"'),
-              IsConst = true
-            });
+              program.Statements.Add(stringFuncNode);
+            }
+            else
+            {
+              program.Statements.Add(new VariableDeclaration
+              {
+                Name = match.Groups[1].Value,
+                Type = match.Groups[2].Value,
+                Value = value.Trim('"'),
+                IsConst = true
+              });
+            }
           }
         }
       }
@@ -356,6 +372,15 @@ public class Parser
         }
         program.Statements.Add(new ConsoleLog { Message = msg });
       }
+      else if (line.StartsWith("env."))
+      {
+        // Parse standalone env function calls
+        var envNode = ParseStandaloneEnvFunction(line);
+        if (envNode != null)
+        {
+          program.Statements.Add(envNode);
+        }
+      }
       else if (line.Contains("(") && line.Contains(");"))
       {
         var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
@@ -505,6 +530,73 @@ public class Parser
         SourceString = splitMatch.Groups[1].Value,
         Delimiter = splitMatch.Groups[2].Value,
         ResultArrayName = targetVariable
+      };
+    }
+
+    return null;
+  }
+
+  private Node? ParseEnvFunction(string targetVariable, string expression)
+  {
+    // Parse env.get("VAR_NAME", "default") -> EnvGet
+    var envGetMatch = Regex.Match(expression, @"env\.get\(""([^""]+)"",\s*""([^""]*)""\)");
+    if (envGetMatch.Success)
+    {
+      return new EnvGet
+      {
+        AssignTo = targetVariable,
+        VariableName = envGetMatch.Groups[1].Value,
+        DefaultValue = envGetMatch.Groups[2].Value
+      };
+    }
+
+    // Parse boolean expressions like env.get("DEBUG", "false") === "true"
+    var boolEnvMatch = Regex.Match(expression, @"env\.get\(""([^""]+)"",\s*""([^""]*)""\)\s*===\s*""([^""]*)""");
+    if (boolEnvMatch.Success)
+    {
+      // For boolean expressions, we'll create a special variable assignment
+      return new VariableDeclaration
+      {
+        Name = targetVariable,
+        Type = "boolean",
+        Value = $"[ \"${{{boolEnvMatch.Groups[1].Value}:-{boolEnvMatch.Groups[2].Value}}}\" = \"{boolEnvMatch.Groups[3].Value}\" ]",
+        IsConst = false
+      };
+    }
+
+    return null;
+  }
+
+  private Node? ParseStandaloneEnvFunction(string line)
+  {
+    // Parse env.set("VAR_NAME", "value");
+    var envSetMatch = Regex.Match(line, @"env\.set\(""([^""]+)"",\s*""([^""]*)""\);");
+    if (envSetMatch.Success)
+    {
+      return new EnvSet
+      {
+        VariableName = envSetMatch.Groups[1].Value,
+        Value = envSetMatch.Groups[2].Value
+      };
+    }
+
+    // Parse env.load("filepath");
+    var envLoadMatch = Regex.Match(line, @"env\.load\(""([^""]+)""\);");
+    if (envLoadMatch.Success)
+    {
+      return new EnvLoad
+      {
+        FilePath = envLoadMatch.Groups[1].Value
+      };
+    }
+
+    // Parse env.delete("VAR_NAME");
+    var envDeleteMatch = Regex.Match(line, @"env\.delete\(""([^""]+)""\);");
+    if (envDeleteMatch.Success)
+    {
+      return new EnvDelete
+      {
+        VariableName = envDeleteMatch.Groups[1].Value
       };
     }
 

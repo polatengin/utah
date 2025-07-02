@@ -114,3 +114,27 @@ public class StringSplit : StringFunction
   public string Delimiter = string.Empty;
   public string ResultArrayName = string.Empty;
 }
+
+// Environment variable operations
+public class EnvGet : Node
+{
+  public string VariableName = string.Empty;
+  public string DefaultValue = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name
+}
+
+public class EnvSet : Node
+{
+  public string VariableName = string.Empty;
+  public string Value = string.Empty;
+}
+
+public class EnvLoad : Node
+{
+  public string FilePath = string.Empty;
+}
+
+public class EnvDelete : Node
+{
+  public string VariableName = string.Empty;
+}
