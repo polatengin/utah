@@ -43,7 +43,14 @@ public class Compiler
 
       case FunctionCall c:
         var bashArgs = c.Arguments.Select(a => a.Contains("\"") ? a : $"\"${a}\"").ToList();
-        lines.Add($"{c.Name} {string.Join(" ", bashArgs)}");
+        if (bashArgs.Count > 0)
+        {
+          lines.Add($"{c.Name} {string.Join(" ", bashArgs)}");
+        }
+        else
+        {
+          lines.Add(c.Name);
+        }
         break;
 
       case ConsoleLog log:
