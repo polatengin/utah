@@ -19,7 +19,7 @@ public class Transpiler
         switch (stmt)
         {
             case VariableDeclaration v:
-                lines.Add($"{v.Name}=\"{ v.Value}\"");
+                lines.Add($"{v.Name}=\"{v.Value}\"");
                 break;
 
             case FunctionDeclaration f:
@@ -28,29 +28,29 @@ public class Transpiler
                 {
                     var (paramName, _) = f.Parameters[j];
                     lines.Add($"  local {paramName}=\"${{j + 1}}\"");
-        }
-        foreach (var b in f.Body)
-            lines.AddRange(TranspileBlock(b));
-        lines.Add("}");
-        break;
+                }
+                foreach (var b in f.Body)
+                    lines.AddRange(TranspileBlock(b));
+                lines.Add("}");
+                break;
 
             case FunctionCall c:
-            lines.Add($"{c.Name} {string.Join(" ", c.Arguments.Select(a => $"\\\"{a}\\\""))}");
-            break;
+                lines.Add($"{c.Name} {string.Join(" ", c.Arguments.Select(a => $"\\\"{a}\\\""))}");
+                break;
 
-        case ConsoleLog log:
-            lines.Add($"echo \"{ log.Message}\"");
-            break;
+            case ConsoleLog log:
+                lines.Add($"echo \"{log.Message}\"");
+                break;
 
-        case IfStatement ifs:
-            lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
-            foreach (var b in ifs.ThenBody)
-                lines.AddRange(TranspileBlock(b));
-            lines.Add("else");
-            foreach (var b in ifs.ElseBody)
-                lines.AddRange(TranspileBlock(b));
-            lines.Add("fi");
-            break;
+            case IfStatement ifs:
+                lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
+                foreach (var b in ifs.ThenBody)
+                    lines.AddRange(TranspileBlock(b));
+                lines.Add("else");
+                foreach (var b in ifs.ElseBody)
+                    lines.AddRange(TranspileBlock(b));
+                lines.Add("fi");
+                break;
         }
 
         return lines;
@@ -63,10 +63,10 @@ public class Transpiler
         switch (stmt)
         {
             case VariableDeclaration v:
-                lines.Add($"  local {v.Name}=\"{ v.Value}\"");
+                lines.Add($"  local {v.Name}=\"{v.Value}\"");
                 break;
             case ConsoleLog log:
-                lines.Add($"  echo \"{ log.Message}\"");
+                lines.Add($"  echo \"{log.Message}\"");
                 break;
             case ReturnStatement ret:
                 lines.Add($"  echo \"${ret.Value}\"");
