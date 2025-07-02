@@ -2,7 +2,14 @@
   "name": "Utah Development Environment",
   "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/node": ""
+    "ghcr.io/devcontainers/features/node:1.6.3": {},
+    "ghcr.io/devcontainers-extra/features/npm-packages:1.0.1": {
+      "packages": [
+        "yo@latest",
+        "generator-code@latest",
+        "npm-check-updates@latest"
+      ]
+    }
   },
   "customizations": {
     "vscode": {
