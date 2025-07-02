@@ -15,12 +15,15 @@
     "vscode": {
       "extensions": [
         "bierner.markdown-preview-github-styles",
+        "connor4312.esbuild-problem-matchers",
         "DavidAnson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
         "EditorConfig.EditorConfig",
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "ms-dotnettools.csharp",
-        "ms-dotnettools.csdevkit"
+        "ms-dotnettools.csdevkit",
+        "ms-vscode.extension-test-runner"
       ]
     }
   }
