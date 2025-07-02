@@ -64,7 +64,22 @@ public class Parser
                     {
                         var match = Regex.Match(inner, @"console\.log\((.+)\);");
                         var raw = match.Groups[1].Value.Trim();
-                        string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
+                        string msg;
+                        if (raw.StartsWith("`"))
+                        {
+                            // Template literal
+                            msg = raw[1..^1];
+                        }
+                        else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+                        {
+                            // String literal
+                            msg = raw[1..^1];
+                        }
+                        else
+                        {
+                            // Variable reference
+                            msg = $"${raw}";
+                        }
                         func.Body.Add(new ConsoleLog { Message = msg });
                     }
                     else if (inner.StartsWith("return "))
@@ -97,7 +112,22 @@ public class Parser
                     {
                         var m = Regex.Match(inner, @"console\.log\((.+)\);");
                         var raw = m.Groups[1].Value.Trim();
-                        string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
+                        string msg;
+                        if (raw.StartsWith("`"))
+                        {
+                            // Template literal
+                            msg = raw[1..^1];
+                        }
+                        else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+                        {
+                            // String literal
+                            msg = raw[1..^1];
+                        }
+                        else
+                        {
+                            // Variable reference
+                            msg = $"${raw}";
+                        }
                         ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
                     }
                     else if (inner.StartsWith("let "))
@@ -129,7 +159,22 @@ public class Parser
                         {
                             var m = Regex.Match(inner, @"console\.log\((.+)\);");
                             var raw = m.Groups[1].Value.Trim();
-                            string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
+                            string msg;
+                            if (raw.StartsWith("`"))
+                            {
+                                // Template literal
+                                msg = raw[1..^1];
+                            }
+                            else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+                            {
+                                // String literal
+                                msg = raw[1..^1];
+                            }
+                            else
+                            {
+                                // Variable reference
+                                msg = $"${raw}";
+                            }
                             ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
                         }
                         else if (inner.StartsWith("exit "))
@@ -157,7 +202,22 @@ public class Parser
             {
                 var match = Regex.Match(line, @"console\.log\((.+)\);");
                 var raw = match.Groups[1].Value.Trim();
-                string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
+                string msg;
+                if (raw.StartsWith("`"))
+                {
+                    // Template literal
+                    msg = raw[1..^1];
+                }
+                else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+                {
+                    // String literal
+                    msg = raw[1..^1];
+                }
+                else
+                {
+                    // Variable reference
+                    msg = $"${raw}";
+                }
                 program.Statements.Add(new ConsoleLog { Message = msg });
             }
         }
