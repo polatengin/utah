@@ -388,7 +388,7 @@ public class Parser
         {
           Name = match.Groups[1].Value,
           Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(a => a.Trim().Trim('"')).ToList()
+                .Select(a => a.Trim()).ToList()
         });
       }
     }

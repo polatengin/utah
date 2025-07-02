@@ -42,7 +42,19 @@ public class Compiler
         break;
 
       case FunctionCall c:
-        var bashArgs = c.Arguments.Select(a => a.Contains("\"") ? a : $"\"${a}\"").ToList();
+        var bashArgs = c.Arguments.Select(a => 
+        {
+          if (a.StartsWith("\"") && a.EndsWith("\""))
+          {
+            // String literal - use as-is
+            return a;
+          }
+          else
+          {
+            // Variable reference - add $ prefix
+            return $"\"${a}\"";
+          }
+        }).ToList();
         if (bashArgs.Count > 0)
         {
           lines.Add($"{c.Name} {string.Join(" ", bashArgs)}");
