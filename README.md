@@ -75,3 +75,45 @@ fi
 | string | Quoted Bash string
 | number | Quoted number string
 | boolean | true / false (as strings)
+
+## 🛣 Roadmap
+
+[] Support for for, while, and break
+
+[] Arrays and basic data structures
+
+[] Comment support (// and /* */)
+
+[] import syntax for splitting .shx files
+
+[] Typed return values and richer type checking
+
+[] Error handling: try/catch, trap
+
+[] More complex expressions and operators
+
+[] Process Substitution and environment variables
+
+[] Lastpipe operator
+
+[] Parameter expansion and manipulation
+
+[] Support for functions with multiple return values
+
+[] Enhanced string manipulation functions
+
+[] File I/O operations (read/write files)
+
+[] Support for command substitution
+
+[] Improved error messages and debugging support
+
+[] Support for async/await patterns
+
+[] Job queueing and parallel execution
+
+[] Time and Resource monitoring
+
+[] More built-in functions and utilities
+
+[] VS Code extension for syntax highlighting
