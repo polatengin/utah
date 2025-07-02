@@ -127,6 +127,10 @@ public class Transpiler
       case StringSplit sp:
         lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< \"${{{sp.SourceString}}}\"");
         break;
+
+      case ExitStatement e:
+        lines.Add($"exit {e.ExitCode}");
+        break;
     }
 
     return lines;

@@ -1,0 +1,41 @@
+// Comprehensive exit functionality test for Utah CLI
+const appName: string = "Utah Exit Test Suite";
+
+// Test functions with different exit codes
+function exitWithSuccess(): void {
+  console.log("Function: Exiting with success code");
+  exit(0);
+}
+
+function exitWithError(): void {
+  console.log("Function: Exiting with error code");
+  exit(1);
+}
+
+function exitWithCustomCode(): void {
+  console.log("Function: Exiting with custom code 42");
+  exit(42);
+}
+
+function exitWithHighCode(): void {
+  console.log("Function: Exiting with high code 123");
+  exit(123);
+}
+
+// Test function that demonstrates exit behavior
+function testDirectExit(): void {
+  console.log("Testing direct exit from function with code 77");
+  exit(77);
+}
+
+// Main test execution
+console.log(`Starting ${appName}`);
+
+// Test 1: Function exit test (default behavior)
+console.log("Test: Calling function that will exit with custom code");
+exitWithCustomCode();
+
+// These lines should never be reached when function exit is called
+console.log("This line should never be executed");
+console.log("Neither should this line");
+exit(99);

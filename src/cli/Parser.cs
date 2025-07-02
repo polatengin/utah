@@ -161,6 +161,15 @@ public class Parser
             int code = int.Parse(inner.Substring(5).TrimEnd(';'));
             func.Body.Add(new ExitStatement { ExitCode = code });
           }
+          else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
+          {
+            var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
+            if (exitMatch.Success)
+            {
+              int code = int.Parse(exitMatch.Groups[1].Value);
+              func.Body.Add(new ExitStatement { ExitCode = code });
+            }
+          }
 
           i++;
         }
@@ -250,6 +259,15 @@ public class Parser
             int code = int.Parse(inner.Substring(5).TrimEnd(';'));
             ifStmt.ThenBody.Add(new ExitStatement { ExitCode = code });
           }
+          else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
+          {
+            var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
+            if (exitMatch.Success)
+            {
+              int code = int.Parse(exitMatch.Groups[1].Value);
+              ifStmt.ThenBody.Add(new ExitStatement { ExitCode = code });
+            }
+          }
           i++;
         }
 
@@ -287,21 +305,34 @@ public class Parser
               int code = int.Parse(inner.Substring(5).TrimEnd(';'));
               ifStmt.ElseBody.Add(new ExitStatement { ExitCode = code });
             }
+            else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
+            {
+              var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
+              if (exitMatch.Success)
+              {
+                int code = int.Parse(exitMatch.Groups[1].Value);
+                ifStmt.ElseBody.Add(new ExitStatement { ExitCode = code });
+              }
+            }
             i++;
           }
         }
 
         program.Statements.Add(ifStmt);
       }
-      else if (line.Contains("(") && line.Contains(");"))
+      else if (line.StartsWith("exit "))
       {
-        var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
-        program.Statements.Add(new FunctionCall
+        int code = int.Parse(line.Substring(5).TrimEnd(';'));
+        program.Statements.Add(new ExitStatement { ExitCode = code });
+      }
+      else if (line.StartsWith("exit(") && line.EndsWith(");"))
+      {
+        var exitMatch = Regex.Match(line, @"exit\((\d+)\);");
+        if (exitMatch.Success)
         {
-          Name = match.Groups[1].Value,
-          Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(a => a.Trim().Trim('"')).ToList()
-        });
+          int code = int.Parse(exitMatch.Groups[1].Value);
+          program.Statements.Add(new ExitStatement { ExitCode = code });
+        }
       }
       else if (line.StartsWith("console.log"))
       {
@@ -324,6 +355,16 @@ public class Parser
           msg = $"${raw}";
         }
         program.Statements.Add(new ConsoleLog { Message = msg });
+      }
+      else if (line.Contains("(") && line.Contains(");"))
+      {
+        var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
+        program.Statements.Add(new FunctionCall
+        {
+          Name = match.Groups[1].Value,
+          Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(a => a.Trim().Trim('"')).ToList()
+        });
       }
     }
 
