@@ -2,6 +2,8 @@
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
+📦 File Extension: `.shx`
+
 ## 🚀 How It Works
 
 Write code in `.shx` using modern, friendly typescript-like syntax.
@@ -49,32 +51,33 @@ else
 fi
 ```
 
-## ✅ Features & Language Support
-
-📦 File Extension: `.shx`
-
-## 🧠 Supported Language Constructs
-
-| Feature | Supported | Notes
-|---------|-----------|-----------------------
-| let declarations | ✅ | With types: string, number, boolean
-| Function definitions | ✅ | With typed params and optional return
-| Return statements | ✅ | return value; for simple values
-| Boolean logic | ✅ | if, else, ==, !=, true, false
-| Console logging | ✅ | console.log("...") and template strings
-| String interpolation | ✅ | Use backticks: `Hello, ${name}`
-| Function calls | ✅ | Arguments passed positionally
-| Exit script | ✅ | exit(1); or exit(0);
-| Comments | 🚧 | Not supported yet
-| Loops (for, while) | 🚧 | Planned
-
 ## 🛣 Roadmap
 
-- [x] string data type
+- [x] `string` data type
 
-- [x] number data type
+- [x] `number` data type
 
-- [x] boolean data type
+- [x] `boolean` data type
+
+- [x] `let` declarations with type annotations
+
+- [x] `function` definitions with typed parameters
+
+- [x] `return` statements for simple values
+
+- [x] `if` statements with boolean logic
+
+- [x] `else` statements
+
+- [x] `console.log` for output
+
+- [x] String interpolation with backticks (`Hello, ${name}`)
+
+- [x] Function calls with positional arguments
+
+- [x] Exit script with `exit(0)` or `exit(1)`
+
+- [ ] Support for `var` and `const` declarations
 
 - [ ] Support for for, while, and break
 
