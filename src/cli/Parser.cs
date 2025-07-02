@@ -37,11 +37,12 @@ public class Parser
             }
             else
             {
-              program.Statements.Add(new VariableDeclaration
+              var expression = ParseExpression(value);
+              program.Statements.Add(new VariableDeclarationExpression
               {
                 Name = match.Groups[1].Value,
                 Type = match.Groups[2].Value,
-                Value = value.Trim('"'),
+                Value = expression,
                 IsConst = false
               });
             }
@@ -68,11 +69,12 @@ public class Parser
             }
             else
             {
-              program.Statements.Add(new VariableDeclaration
+              var expression = ParseExpression(value);
+              program.Statements.Add(new VariableDeclarationExpression
               {
                 Name = match.Groups[1].Value,
                 Type = match.Groups[2].Value,
-                Value = value.Trim('"'),
+                Value = expression,
                 IsConst = true
               });
             }
@@ -601,5 +603,314 @@ public class Parser
     }
 
     return null;
+  }
+
+  public Expression ParseExpression(string input)
+  {
+    return ParseTernaryExpression(input.Trim());
+  }
+
+  private Expression ParseTernaryExpression(string input)
+  {
+    // Check for ternary operator (condition ? true : false)
+    var parts = SplitTernary(input);
+    if (parts.Count == 3)
+    {
+      return new TernaryExpression
+      {
+        Condition = ParseLogicalOrExpression(parts[0]),
+        TrueExpression = ParseLogicalOrExpression(parts[1]),
+        FalseExpression = ParseLogicalOrExpression(parts[2])
+      };
+    }
+    return ParseLogicalOrExpression(input);
+  }
+
+  private Expression ParseLogicalOrExpression(string input)
+  {
+    var parts = SplitByOperator(input, "||");
+    if (parts.Count > 1)
+    {
+      var left = ParseLogicalAndExpression(parts[0]);
+      for (int i = 1; i < parts.Count; i++)
+      {
+        left = new BinaryExpression
+        {
+          Left = left,
+          Operator = "||",
+          Right = ParseLogicalAndExpression(parts[i])
+        };
+      }
+      return left;
+    }
+    return ParseLogicalAndExpression(input);
+  }
+
+  private Expression ParseLogicalAndExpression(string input)
+  {
+    var parts = SplitByOperator(input, "&&");
+    if (parts.Count > 1)
+    {
+      var left = ParseEqualityExpression(parts[0]);
+      for (int i = 1; i < parts.Count; i++)
+      {
+        left = new BinaryExpression
+        {
+          Left = left,
+          Operator = "&&",
+          Right = ParseEqualityExpression(parts[i])
+        };
+      }
+      return left;
+    }
+    return ParseEqualityExpression(input);
+  }
+
+  private Expression ParseEqualityExpression(string input)
+  {
+    var operators = new[] { "==", "!=" };
+    foreach (var op in operators)
+    {
+      var parts = SplitByOperator(input, op);
+      if (parts.Count == 2)
+      {
+        return new BinaryExpression
+        {
+          Left = ParseRelationalExpression(parts[0]),
+          Operator = op,
+          Right = ParseRelationalExpression(parts[1])
+        };
+      }
+    }
+    return ParseRelationalExpression(input);
+  }
+
+  private Expression ParseRelationalExpression(string input)
+  {
+    var operators = new[] { "<=", ">=", "<", ">" };
+    foreach (var op in operators)
+    {
+      var parts = SplitByOperator(input, op);
+      if (parts.Count == 2)
+      {
+        return new BinaryExpression
+        {
+          Left = ParseAdditiveExpression(parts[0]),
+          Operator = op,
+          Right = ParseAdditiveExpression(parts[1])
+        };
+      }
+    }
+    return ParseAdditiveExpression(input);
+  }
+
+  private Expression ParseAdditiveExpression(string input)
+  {
+    var parts = SplitByOperator(input, "+", "-");
+    if (parts.Count > 1)
+    {
+      var left = ParseMultiplicativeExpression(parts[0]);
+      for (int i = 1; i < parts.Count; i++)
+      {
+        var op = GetOperatorBetween(input, parts[i - 1], parts[i]);
+        left = new BinaryExpression
+        {
+          Left = left,
+          Operator = op,
+          Right = ParseMultiplicativeExpression(parts[i])
+        };
+      }
+      return left;
+    }
+    return ParseMultiplicativeExpression(input);
+  }
+
+  private Expression ParseMultiplicativeExpression(string input)
+  {
+    var parts = SplitByOperator(input, "*", "/", "%");
+    if (parts.Count > 1)
+    {
+      var left = ParseUnaryExpression(parts[0]);
+      for (int i = 1; i < parts.Count; i++)
+      {
+        var op = GetOperatorBetween(input, parts[i - 1], parts[i]);
+        left = new BinaryExpression
+        {
+          Left = left,
+          Operator = op,
+          Right = ParseUnaryExpression(parts[i])
+        };
+      }
+      return left;
+    }
+    return ParseUnaryExpression(input);
+  }
+
+  private Expression ParseUnaryExpression(string input)
+  {
+    if (input.StartsWith("!"))
+    {
+      return new UnaryExpression
+      {
+        Operator = "!",
+        Operand = ParseUnaryExpression(input.Substring(1).Trim())
+      };
+    }
+    if (input.StartsWith("-"))
+    {
+      return new UnaryExpression
+      {
+        Operator = "-",
+        Operand = ParseUnaryExpression(input.Substring(1).Trim())
+      };
+    }
+    return ParsePrimaryExpression(input);
+  }
+
+  private Expression ParsePrimaryExpression(string input)
+  {
+    input = input.Trim();
+
+    // Parenthesized expression
+    if (input.StartsWith("(") && input.EndsWith(")"))
+    {
+      return new ParenthesizedExpression
+      {
+        Inner = ParseExpression(input.Substring(1, input.Length - 2))
+      };
+    }
+
+    // String literal
+    if (input.StartsWith("\"") && input.EndsWith("\""))
+    {
+      return new LiteralExpression
+      {
+        Value = input.Substring(1, input.Length - 2),
+        Type = "string"
+      };
+    }
+
+    // Number literal
+    if (double.TryParse(input, out _))
+    {
+      return new LiteralExpression
+      {
+        Value = input,
+        Type = "number"
+      };
+    }
+
+    // Boolean literal
+    if (input == "true" || input == "false")
+    {
+      return new LiteralExpression
+      {
+        Value = input,
+        Type = "boolean"
+      };
+    }
+
+    // Variable reference
+    if (Regex.IsMatch(input, @"^\w+$"))
+    {
+      return new VariableExpression
+      {
+        Name = input
+      };
+    }
+
+    // Fallback to literal
+    return new LiteralExpression
+    {
+      Value = input,
+      Type = "unknown"
+    };
+  }
+
+  private List<string> SplitTernary(string input)
+  {
+    var parts = new List<string>();
+    int depth = 0;
+    int questionIndex = -1;
+    int colonIndex = -1;
+
+    for (int i = 0; i < input.Length; i++)
+    {
+      if (input[i] == '(') depth++;
+      else if (input[i] == ')') depth--;
+      else if (depth == 0 && input[i] == '?' && questionIndex == -1)
+      {
+        questionIndex = i;
+      }
+      else if (depth == 0 && input[i] == ':' && questionIndex != -1 && colonIndex == -1)
+      {
+        colonIndex = i;
+      }
+    }
+
+    if (questionIndex != -1 && colonIndex != -1)
+    {
+      parts.Add(input.Substring(0, questionIndex).Trim());
+      parts.Add(input.Substring(questionIndex + 1, colonIndex - questionIndex - 1).Trim());
+      parts.Add(input.Substring(colonIndex + 1).Trim());
+    }
+
+    return parts;
+  }
+
+  private List<string> SplitByOperator(string input, params string[] operators)
+  {
+    var parts = new List<string>();
+    int depth = 0;
+    int start = 0;
+    bool inString = false;
+    char stringChar = '\0';
+
+    for (int i = 0; i < input.Length; i++)
+    {
+      char c = input[i];
+      
+      if (!inString && (c == '"' || c == '\''))
+      {
+        inString = true;
+        stringChar = c;
+      }
+      else if (inString && c == stringChar)
+      {
+        inString = false;
+      }
+      else if (!inString)
+      {
+        if (c == '(') depth++;
+        else if (c == ')') depth--;
+        else if (depth == 0)
+        {
+          foreach (var op in operators)
+          {
+            if (i + op.Length <= input.Length && input.Substring(i, op.Length) == op)
+            {
+              parts.Add(input.Substring(start, i - start).Trim());
+              start = i + op.Length;
+              i += op.Length - 1;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (start < input.Length)
+    {
+      parts.Add(input.Substring(start).Trim());
+    }
+
+    return parts.Count > 1 ? parts : new List<string> { input };
+  }
+
+  private string GetOperatorBetween(string input, string leftPart, string rightPart)
+  {
+    int leftEnd = input.IndexOf(leftPart) + leftPart.Length;
+    int rightStart = input.IndexOf(rightPart, leftEnd);
+    return input.Substring(leftEnd, rightStart - leftEnd).Trim();
   }
 }

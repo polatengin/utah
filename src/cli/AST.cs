@@ -138,3 +138,51 @@ public class EnvDelete : Node
 {
   public string VariableName = string.Empty;
 }
+
+// Expression nodes for complex expressions and operators
+public abstract class Expression : Node { }
+
+public class LiteralExpression : Expression
+{
+  public string Value = string.Empty;
+  public string Type = string.Empty; // "number", "string", "boolean"
+}
+
+public class VariableExpression : Expression
+{
+  public string Name = string.Empty;
+}
+
+public class BinaryExpression : Expression
+{
+  public Expression Left = null!;
+  public Expression Right = null!;
+  public string Operator = string.Empty; // +, -, *, /, %, ==, !=, <, >, <=, >=, &&, ||
+}
+
+public class UnaryExpression : Expression
+{
+  public Expression Operand = null!;
+  public string Operator = string.Empty; // !, -
+}
+
+public class TernaryExpression : Expression
+{
+  public Expression Condition = null!;
+  public Expression TrueExpression = null!;
+  public Expression FalseExpression = null!;
+}
+
+public class ParenthesizedExpression : Expression
+{
+  public Expression Inner = null!;
+}
+
+// Updated VariableDeclaration to support expressions
+public class VariableDeclarationExpression : Node
+{
+  public string Name = string.Empty;
+  public string Type = string.Empty;
+  public Expression Value = null!;
+  public bool IsConst = false; // true for const, false for let
+}

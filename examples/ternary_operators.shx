@@ -1,0 +1,50 @@
+let result: string = (5 > 3) ? "greater" : "lesser";
+console.log(result);
+
+let age: number = 25;
+let status: string = (age >= 18) ? "adult" : "minor";
+console.log(status);
+
+// Test with different data types
+let score: number = 85;
+let grade: string = (score >= 90) ? "A" : (score >= 80) ? "B" : "C";
+console.log(grade);
+
+// Test with boolean values
+let isActive: boolean = true;
+let message: string = isActive ? "System is running" : "System is offline";
+console.log(message);
+
+// Basic ternary with literal comparison
+let basic: string = (5 > 3) ? "five is greater" : "three is greater";
+console.log(basic);
+
+// Ternary with variables
+let age: number = 25;
+let ageCategory: string = (age >= 18) ? "adult" : "minor";
+console.log(ageCategory);
+
+let x: number = 20;
+let y: number = 15;
+let comparison: string = (x > y) ? "x is greater" : "y is greater";
+console.log(comparison);
+
+// Different comparison operators
+let score: number = 85;
+let passStatus: string = (score >= 60) ? "pass" : "fail";
+console.log(passStatus);
+
+let equalTest: string = (score == 85) ? "exactly 85" : "not 85";
+console.log(equalTest);
+
+let notEqualTest: string = (score != 100) ? "not perfect" : "perfect";
+console.log(notEqualTest);
+
+// String comparison
+let username: string = "admin";
+let access: string = (username == "admin") ? "full access" : "limited access";
+console.log(access);
+
+// Boolean literal condition
+let isEnabled: string = true ? "enabled" : "disabled";
+console.log(isEnabled);

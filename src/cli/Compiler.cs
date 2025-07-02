@@ -29,6 +29,18 @@ public class Compiler
         }
         break;
 
+      case VariableDeclarationExpression ve:
+        var expressionValue = CompileExpression(ve.Value);
+        if (ve.IsConst)
+        {
+          lines.Add($"readonly {ve.Name}={expressionValue}");
+        }
+        else
+        {
+          lines.Add($"{ve.Name}={expressionValue}");
+        }
+        break;
+
       case FunctionDeclaration f:
         lines.Add($"{f.Name}() {{");
         for (int j = 0; j < f.Parameters.Count; j++)
@@ -291,5 +303,103 @@ public class Compiler
     }
 
     return lines;
+  }
+
+  private string CompileExpression(Expression expr)
+  {
+    return expr switch
+    {
+      LiteralExpression lit => CompileLiteralExpression(lit),
+      VariableExpression var => CompileVariableExpression(var),
+      BinaryExpression bin => CompileBinaryExpression(bin),
+      UnaryExpression un => CompileUnaryExpression(un),
+      TernaryExpression tern => CompileTernaryExpression(tern),
+      ParenthesizedExpression paren => CompileParenthesizedExpression(paren),
+      _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
+    };
+  }
+
+  private string CompileLiteralExpression(LiteralExpression lit)
+  {
+    return lit.Type switch
+    {
+      "string" => $"\"{lit.Value}\"",
+      "number" => lit.Value,
+      "boolean" => lit.Value,
+      _ => $"\"{lit.Value}\""
+    };
+  }
+
+  private string CompileVariableExpression(VariableExpression var)
+  {
+    return $"${var.Name}";
+  }
+
+  private string CompileBinaryExpression(BinaryExpression bin)
+  {
+    var left = CompileExpression(bin.Left);
+    var right = CompileExpression(bin.Right);
+
+    return bin.Operator switch
+    {
+      "+" when IsStringConcatenation(bin) => $"\"{left}{right}\"".Replace("\"\"", ""),
+      "+" => $"$((${left} + ${right}))",
+      "-" => $"$((${left} - ${right}))",
+      "*" => $"$((${left} * ${right}))",
+      "/" => $"$((${left} / ${right}))",
+      "%" => $"$((${left} % ${right}))",
+      "==" => $"[ {left} = {right} ]",
+      "!=" => $"[ {left} != {right} ]",
+      "<" => $"[ {left} -lt {right} ]",
+      "<=" => $"[ {left} -le {right} ]",
+      ">" => $"[ {left} -gt {right} ]",
+      ">=" => $"[ {left} -ge {right} ]",
+      "&&" => $"{left} && {right}",
+      "||" => $"{left} || {right}",
+      _ => throw new NotSupportedException($"Binary operator {bin.Operator} is not supported")
+    };
+  }
+
+  private string CompileUnaryExpression(UnaryExpression un)
+  {
+    var operand = CompileExpression(un.Operand);
+    return un.Operator switch
+    {
+      "!" => $"! {operand}",
+      "-" => $"$((-${operand}))",
+      _ => throw new NotSupportedException($"Unary operator {un.Operator} is not supported")
+    };
+  }
+
+  private string CompileTernaryExpression(TernaryExpression tern)
+  {
+    var condition = CompileExpression(tern.Condition);
+    var trueExpr = CompileExpression(tern.TrueExpression);
+    var falseExpr = CompileExpression(tern.FalseExpression);
+    
+    // Handle nested ternary by avoiding nested command substitution
+    if (tern.FalseExpression is TernaryExpression)
+    {
+      // Directly compile the nested ternary as a conditional chain
+      var nestedCondition = CompileExpression(((TernaryExpression)tern.FalseExpression).Condition);
+      var nestedTrue = CompileExpression(((TernaryExpression)tern.FalseExpression).TrueExpression);
+      var nestedFalse = CompileExpression(((TernaryExpression)tern.FalseExpression).FalseExpression);
+      
+      return $"$({condition} && echo {trueExpr} || ({nestedCondition} && echo {nestedTrue} || echo {nestedFalse}))";
+    }
+    
+    return $"$({condition} && echo {trueExpr} || echo {falseExpr})";
+  }
+
+  private string CompileParenthesizedExpression(ParenthesizedExpression paren)
+  {
+    return $"({CompileExpression(paren.Inner)})";
+  }
+
+  private bool IsStringConcatenation(BinaryExpression bin)
+  {
+    // Simple heuristic: if either operand is a string literal or we're adding strings
+    return (bin.Left is LiteralExpression leftLit && leftLit.Type == "string") ||
+           (bin.Right is LiteralExpression rightLit && rightLit.Type == "string");
   }
 }
