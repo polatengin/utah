@@ -1,22 +1,63 @@
-if (args.Length != 1 || !args[0].EndsWith(".shx"))
+using OmniSharp.Extensions.LanguageServer.Server;
+using System.Threading.Tasks;
+
+if (args.Length > 0)
 {
-  Console.WriteLine("Usage: typedbashc <file.shx>");
-  return;
+    switch (args[0])
+    {
+        case "lsp":
+            await StartLanguageServer();
+            break;
+        case "compile":
+            if (args.Length != 2 || !args[1].EndsWith(".shx"))
+            {
+                Console.WriteLine("Usage: utah compile <file.shx>");
+                return;
+            }
+            CompileFile(args[1]);
+            break;
+        default:
+            PrintUsage();
+            break;
+    }
+}
+else
+{
+    PrintUsage();
 }
 
-var inputPath = args[0];
-if (!File.Exists(inputPath))
+static async Task StartLanguageServer()
 {
-  Console.WriteLine($"File not found: {inputPath}");
-  return;
+    var server = await LanguageServer.From(options =>
+        options
+            .WithInput(Console.OpenStandardInput())
+            .WithOutput(Console.OpenStandardOutput()));
+    await server.WaitForExit;
 }
 
-var input = File.ReadAllText(inputPath);
-var parser = new Parser(input);
-var ast = parser.Parse();
-var transpiler = new Transpiler();
-var output = transpiler.Transpile(ast);
+static void CompileFile(string inputPath)
+{
+    if (!File.Exists(inputPath))
+    {
+        Console.WriteLine($"File not found: {inputPath}");
+        return;
+    }
 
-var outputPath = Path.ChangeExtension(inputPath, ".sh");
-File.WriteAllText(outputPath, output);
-Console.WriteLine($"✅ Transpiled: {outputPath}");
+    var input = File.ReadAllText(inputPath);
+    var parser = new Parser(input);
+    var ast = parser.Parse();
+    var compiler = new Compiler();
+    var output = compiler.Compile(ast);
+
+    var outputPath = Path.ChangeExtension(inputPath, ".sh");
+    File.WriteAllText(outputPath, output);
+    Console.WriteLine($"✅ Compiled: {outputPath}");
+}
+
+static void PrintUsage()
+{
+    Console.WriteLine("Usage: utah <command>");
+    Console.WriteLine("Commands:");
+    Console.WriteLine("  compile <file.shx>  Compile a .shx file to a .sh file.");
+    Console.WriteLine("  lsp                 Run the language server.");
+}

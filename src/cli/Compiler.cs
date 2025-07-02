@@ -1,18 +1,18 @@
-public class Transpiler
+public class Compiler
 {
-  public string Transpile(ProgramNode program)
+  public string Compile(ProgramNode program)
   {
     var lines = new List<string>();
 
     foreach (var stmt in program.Statements)
     {
-      lines.AddRange(TranspileStatement(stmt));
+      lines.AddRange(CompileStatement(stmt));
     }
 
     return string.Join('\n', lines);
   }
 
-  private List<string> TranspileStatement(Node stmt)
+  private List<string> CompileStatement(Node stmt)
   {
     var lines = new List<string>();
 
@@ -37,7 +37,7 @@ public class Transpiler
           lines.Add($"  local {paramName}=\"${j + 1}\"");
         }
         foreach (var b in f.Body)
-          lines.AddRange(TranspileBlock(b));
+          lines.AddRange(CompileBlock(b));
         lines.Add("}");
         break;
 
@@ -53,10 +53,10 @@ public class Transpiler
       case IfStatement ifs:
         lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
         foreach (var b in ifs.ThenBody)
-          lines.AddRange(TranspileBlock(b));
+          lines.AddRange(CompileBlock(b));
         lines.Add("else");
         foreach (var b in ifs.ElseBody)
-          lines.AddRange(TranspileBlock(b));
+          lines.AddRange(CompileBlock(b));
         lines.Add("fi");
         break;
 
@@ -136,7 +136,7 @@ public class Transpiler
     return lines;
   }
 
-  private List<string> TranspileBlock(Node stmt)
+  private List<string> CompileBlock(Node stmt)
   {
     var lines = new List<string>();
 
