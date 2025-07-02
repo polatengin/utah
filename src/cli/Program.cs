@@ -1,14 +1,14 @@
-﻿if (args.Length != 1 || !args[0].EndsWith(".shx"))
+if (args.Length != 1 || !args[0].EndsWith(".shx"))
 {
-    Console.WriteLine("Usage: typedbashc <file.shx>");
-    return;
+  Console.WriteLine("Usage: typedbashc <file.shx>");
+  return;
 }
 
 string inputPath = args[0];
 if (!File.Exists(inputPath))
 {
-    Console.WriteLine($"File not found: {inputPath}");
-    return;
+  Console.WriteLine($"File not found: {inputPath}");
+  return;
 }
 
 string input = File.ReadAllText(inputPath);
