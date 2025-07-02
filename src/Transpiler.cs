@@ -27,7 +27,7 @@ public class Transpiler
                 for (int j = 0; j < f.Parameters.Count; j++)
                 {
                     var (paramName, _) = f.Parameters[j];
-                    lines.Add($"  local {paramName}=\"${{j + 1}}\"");
+                    lines.Add($"  local {paramName}=\"${j + 1}\"");
                 }
                 foreach (var b in f.Body)
                     lines.AddRange(TranspileBlock(b));
@@ -35,7 +35,8 @@ public class Transpiler
                 break;
 
             case FunctionCall c:
-                lines.Add($"{c.Name} {string.Join(" ", c.Arguments.Select(a => $"\\\"{a}\\\""))}");
+                var bashArgs = c.Arguments.Select(a => a.Contains("\"") ? a : $"\"${a}\"").ToList();
+                lines.Add($"{c.Name} {string.Join(" ", bashArgs)}");
                 break;
 
             case ConsoleLog log:
