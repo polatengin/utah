@@ -19,7 +19,7 @@ public class Parser
 
             if (line.StartsWith("let "))
             {
-                var match = Regex.Match(line, @"let (\\w+): (\\w+) = (.+);");
+                var match = Regex.Match(line, @"let (\w+): (\w+) = (.+);");
                 if (match.Success)
                 {
                     program.Statements.Add(new VariableDeclaration
@@ -32,7 +32,7 @@ public class Parser
             }
             else if (line.StartsWith("function "))
             {
-                var headerMatch = Regex.Match(line, @"function (\\w+)\\(([^)]*)\\): \\w+ \\{");
+                var headerMatch = Regex.Match(line, @"function (\w+)\(([^)]*)\): \w+ \{");
                 var func = new FunctionDeclaration
                 {
                     Name = headerMatch.Groups[1].Value
@@ -52,7 +52,7 @@ public class Parser
 
                     if (inner.StartsWith("let "))
                     {
-                        var match = Regex.Match(inner, @"let (\\w+): (\\w+) = (.+);");
+                        var match = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
                         func.Body.Add(new VariableDeclaration
                         {
                             Name = match.Groups[1].Value,
@@ -62,7 +62,7 @@ public class Parser
                     }
                     else if (inner.StartsWith("console.log"))
                     {
-                        var match = Regex.Match(inner, @"console\\.log\\((.+)\\);");
+                        var match = Regex.Match(inner, @"console\.log\((.+)\);");
                         var raw = match.Groups[1].Value.Trim();
                         string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
                         func.Body.Add(new ConsoleLog { Message = msg });
@@ -85,7 +85,7 @@ public class Parser
             }
             else if (line.StartsWith("if ("))
             {
-                var match = Regex.Match(line, @"if \\((.+)\\) \\{");
+                var match = Regex.Match(line, @"if \((.+)\) \{");
                 var cond = match.Groups[1].Value;
                 var ifStmt = new IfStatement { ConditionCall = cond };
 
@@ -95,14 +95,14 @@ public class Parser
                     string inner = _lines[i].Trim();
                     if (inner.StartsWith("console.log"))
                     {
-                        var m = Regex.Match(inner, @"console\\.log\\((.+)\\);");
+                        var m = Regex.Match(inner, @"console\.log\((.+)\);");
                         var raw = m.Groups[1].Value.Trim();
                         string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
                         ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
                     }
                     else if (inner.StartsWith("let "))
                     {
-                        var m = Regex.Match(inner, @"let (\\w+): (\\w+) = (.+);");
+                        var m = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
                         ifStmt.ThenBody.Add(new VariableDeclaration
                         {
                             Name = m.Groups[1].Value,
@@ -127,7 +127,7 @@ public class Parser
                         string inner = _lines[i].Trim();
                         if (inner.StartsWith("console.log"))
                         {
-                            var m = Regex.Match(inner, @"console\\.log\\((.+)\\);");
+                            var m = Regex.Match(inner, @"console\.log\((.+)\);");
                             var raw = m.Groups[1].Value.Trim();
                             string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
                             ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
@@ -145,7 +145,7 @@ public class Parser
             }
             else if (line.Contains("(") && line.Contains(");"))
             {
-                var match = Regex.Match(line, @"(\\w+)\\(([^)]*)\\);");
+                var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
                 program.Statements.Add(new FunctionCall
                 {
                     Name = match.Groups[1].Value,
@@ -155,7 +155,7 @@ public class Parser
             }
             else if (line.StartsWith("console.log"))
             {
-                var match = Regex.Match(line, @"console\\.log\\((.+)\\);");
+                var match = Regex.Match(line, @"console\.log\((.+)\);");
                 var raw = match.Groups[1].Value.Trim();
                 string msg = raw.StartsWith("`") ? raw[1..^1] : raw.Trim('"');
                 program.Statements.Add(new ConsoleLog { Message = msg });
