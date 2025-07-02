@@ -174,7 +174,9 @@ fi
 
 - [ ] More complex expressions and operators
 
-- [ ] Process Substitution and environment variables
+- [ ] Process Substitution
+
+- [x] Support for managing environment variables
 
 - [ ] Lastpipe operator
 
