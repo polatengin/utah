@@ -68,52 +68,50 @@ fi
 | Comments | 🚧 | Not supported yet
 | Loops (for, while) | 🚧 | Planned
 
-## 🧩 Supported Types
-
-| Type | Bash Mapping
-|------|--------------
-| string | Quoted Bash string
-| number | Quoted number string
-| boolean | true / false (as strings)
-
 ## 🛣 Roadmap
 
-[] Support for for, while, and break
+- [x] string data type
 
-[] Arrays and basic data structures
+- [x] number data type
 
-[] Comment support (`//` and `/* */`)
+- [x] boolean data type
 
-[] import syntax for splitting .shx files
+- [ ] Support for for, while, and break
 
-[] Typed return values and richer type checking
+- [ ] Arrays and basic data structures
 
-[] Error handling: try/catch, trap
+- [ ] Comment support (`//` and `/* */`)
 
-[] More complex expressions and operators
+- [ ] import syntax for splitting .shx files
 
-[] Process Substitution and environment variables
+- [ ] Typed return values and richer type checking
 
-[] Lastpipe operator
+- [ ] Error handling: try/catch, trap
 
-[] Parameter expansion and manipulation
+- [ ] More complex expressions and operators
 
-[] Support for functions with multiple return values
+- [ ] Process Substitution and environment variables
 
-[] Enhanced string manipulation functions
+- [ ] Lastpipe operator
 
-[] File I/O operations (read/write files)
+- [ ] Parameter expansion and manipulation
 
-[] Support for command substitution
+- [ ] Support for functions with multiple return values
 
-[] Improved error messages and debugging support
+- [ ] Enhanced string manipulation functions
 
-[] Support for async/await patterns
+- [ ] File I/O operations (read/write files)
 
-[] Job queueing and parallel execution
+- [ ] Support for command substitution
 
-[] Time and Resource monitoring
+- [ ] Improved error messages and debugging support
 
-[] More built-in functions and utilities
+- [ ] Support for async/await patterns
 
-[] VS Code extension for syntax highlighting
+- [ ] Job queueing and parallel execution
+
+- [ ] Time and Resource monitoring
+
+- [ ] More built-in functions and utilities
+
+- [ ] VS Code extension for syntax highlighting
