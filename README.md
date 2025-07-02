@@ -52,3 +52,19 @@ fi
 ## ✅ Features & Language Support
 
 📦 File Extension: `.shx`
+
+## 🧠 Supported Language Constructs
+
+| Feature | Supported | Notes
+|---------|-----------|-----------------------
+| let declarations | ✅ | With types: string, number, boolean
+| Function definitions | ✅ | With typed params and optional return
+| Return statements | ✅ | return value; for simple values
+| Boolean logic | ✅ | if, else, ==, !=, true, false
+| Console logging | ✅ | console.log("...") and template strings
+| String interpolation | ✅ | Use backticks: `Hello, ${name}`
+| Function calls | ✅ | Arguments passed positionally
+| Exit script | ✅ | exit(1); or exit(0);
+| Comments | 🚧 | Not supported yet
+| Loops (for, while) | 🚧 | Planned
+
