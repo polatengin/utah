@@ -51,7 +51,7 @@ else
 fi
 ```
 
-## 🛣 Roadmap
+## 🚧 Roadmap
 
 - [x] `string` data type
 
