@@ -68,3 +68,10 @@ fi
 | Comments | 🚧 | Not supported yet
 | Loops (for, while) | 🚧 | Planned
 
+## 🧩 Supported Types
+
+| Type | Bash Mapping
+|------|--------------
+| string | Quoted Bash string
+| number | Quoted number string
+| boolean | true / false (as strings)
