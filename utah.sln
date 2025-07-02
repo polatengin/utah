@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utah", "src\utah.csproj", "{A2022A05-6516-0874-6613-CC480C66EAA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utah", "src/cli/utah.csproj", "{A2022A05-6516-0874-6613-CC480C66EAA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
