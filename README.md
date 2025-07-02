@@ -48,3 +48,7 @@ else
   echo "Unknown user"
 fi
 ```
+
+## ✅ Features & Language Support
+
+📦 File Extension: `.shx`
