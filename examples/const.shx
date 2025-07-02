@@ -1,0 +1,14 @@
+const appName: string = "Utah CLI";
+let version: string = "1.0.0";
+
+function showInfo(): void {
+  const buildDate: string = "2025-01-01";
+  let status: string = "active";
+
+  console.log(`App: ${appName}`);
+  console.log(`Version: ${version}`);
+  console.log(`Build Date: ${buildDate}`);
+  console.log(`Status: ${status}`);
+}
+
+showInfo();

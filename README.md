@@ -19,6 +19,7 @@ The generated `.sh` file is saved alongside the original.
 Input (`examples/input_0.shx`):
 
 ```shx
+const appName: string = "MyApp";
 let name: string = "Alice";
 let greetMsg: string = `Hello, ${name}`;
 
@@ -36,6 +37,7 @@ if (name == "Alice") {
 Output (input_0.sh):
 
 ```bash
+readonly appName="MyApp"
 name="Alice"
 greetMsg="Hello, ${name}"
 
@@ -77,7 +79,7 @@ fi
 
 - [x] Exit script with `exit(0)` or `exit(1)`
 
-- [ ] Support for `var` and `const` declarations
+- [x] Support for `const` declarations
 
 - [ ] Support for for, while, and break
 

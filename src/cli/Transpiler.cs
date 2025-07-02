@@ -16,11 +16,14 @@ public class Transpiler
     {
         var lines = new List<string>();
 
-        switch (stmt)
+        if (v.IsConst)
         {
-            case VariableDeclaration v:
-                lines.Add($"{v.Name}=\"{v.Value}\"");
-                break;
+          lines.Add($"readonly {v.Name}=\"{v.Value}\"");
+        }
+        else
+        {
+          lines.Add($"{v.Name}=\"{v.Value}\"");
+        }
 
             case FunctionDeclaration f:
                 lines.Add($"{f.Name}() {{");
@@ -61,20 +64,13 @@ public class Transpiler
     {
         var lines = new List<string>();
 
-        switch (stmt)
+        if (v.IsConst)
         {
-            case VariableDeclaration v:
-                lines.Add($"  local {v.Name}=\"{v.Value}\"");
-                break;
-            case ConsoleLog log:
-                lines.Add($"  echo \"{log.Message}\"");
-                break;
-            case ReturnStatement ret:
-                lines.Add($"  echo \"${ret.Value}\"");
-                break;
-            case ExitStatement e:
-                lines.Add($"  exit {e.ExitCode}");
-                break;
+          lines.Add($"  readonly {v.Name}=\"{v.Value}\"");
+        }
+        else
+        {
+          lines.Add($"  local {v.Name}=\"{v.Value}\"");
         }
 
         return lines;

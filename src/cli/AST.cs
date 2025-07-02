@@ -7,9 +7,7 @@ public class ProgramNode : Node
 
 public class VariableDeclaration : Node
 {
-    public string Name = "";
-    public string Type = "";
-    public string Value = "";
+  public bool IsConst = false; // true for const, false for let
 }
 
 public class FunctionDeclaration : Node
