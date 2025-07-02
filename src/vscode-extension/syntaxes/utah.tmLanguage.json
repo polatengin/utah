@@ -18,6 +18,9 @@
         },
         {
             "include": "#variables"
+        },
+        {
+            "include": "#template-strings"
         }
     ],
     "repository": {
@@ -70,6 +73,33 @@
                 {
                     "name": "variable.other.utah",
                     "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*:)"
+                }
+            ]
+        },
+        "template-strings": {
+            "name": "string.template.utah",
+            "begin": "`",
+            "end": "`",
+            "patterns": [
+                {
+                    "include": "#interpolation"
+                },
+                {
+                    "name": "constant.character.escape.utah",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "interpolation": {
+            "name": "meta.interpolation.utah",
+            "begin": "\\${",
+            "end": "}",
+            "patterns": [
+                {
+                    "include": "#variables"
+                },
+                {
+                    "include": "#functions"
                 }
             ]
         }
