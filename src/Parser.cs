@@ -6,7 +6,7 @@ public class Parser
 
     public Parser(string input)
     {
-        _lines = input.Split('\\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        _lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
     public ProgramNode Parse()
