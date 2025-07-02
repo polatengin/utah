@@ -5,7 +5,7 @@
       "label": "watch",
       "dependsOn": [
         "npm: watch:tsc",
-        "npm: watch:esbuild"
+        "npm: esbuild"
       ],
       "presentation": {
         "reveal": "never"
@@ -17,11 +17,11 @@
     },
     {
       "type": "npm",
-      "script": "watch:esbuild",
+      "script": "esbuild",
       "group": "build",
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
-      "label": "npm: watch:esbuild",
+      "label": "npm: esbuild",
       "path": "src/vscode-extension",
       "presentation": {
         "group": "watch",
