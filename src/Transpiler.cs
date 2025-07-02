@@ -9,7 +9,7 @@ public class Transpiler
             lines.AddRange(TranspileStatement(stmt));
         }
 
-        return string.Join('\\n', lines);
+        return string.Join('\n', lines);
     }
 
     private List<string> TranspileStatement(Node stmt)
@@ -19,7 +19,7 @@ public class Transpiler
         switch (stmt)
         {
             case VariableDeclaration v:
-                lines.Add($"{v.Name}=\\"{ v.Value}\\"");
+                lines.Add($"{v.Name}=\"{ v.Value}\"");
                 break;
 
             case FunctionDeclaration f:
@@ -27,7 +27,7 @@ public class Transpiler
                 for (int j = 0; j < f.Parameters.Count; j++)
                 {
                     var (paramName, _) = f.Parameters[j];
-                    lines.Add($"  local {paramName}=\\"${ j + 1}\\"");
+                    lines.Add($"  local {paramName}=\"${{j + 1}}\"");
         }
         foreach (var b in f.Body)
             lines.AddRange(TranspileBlock(b));
@@ -39,11 +39,11 @@ public class Transpiler
             break;
 
         case ConsoleLog log:
-            lines.Add($"echo \\"{ log.Message}\\"");
+            lines.Add($"echo \"{ log.Message}\"");
             break;
 
         case IfStatement ifs:
-            lines.Add($"if [ \\\"$( {ifs.ConditionCall} )\\\" = \\\"true\\\" ]; then");
+            lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
             foreach (var b in ifs.ThenBody)
                 lines.AddRange(TranspileBlock(b));
             lines.Add("else");
@@ -63,13 +63,13 @@ public class Transpiler
         switch (stmt)
         {
             case VariableDeclaration v:
-                lines.Add($"  local {v.Name}=\\"{ v.Value}\\"");
+                lines.Add($"  local {v.Name}=\"{ v.Value}\"");
                 break;
             case ConsoleLog log:
-                lines.Add($"  echo \\"{ log.Message}\\"");
+                lines.Add($"  echo \"{ log.Message}\"");
                 break;
             case ReturnStatement ret:
-                lines.Add($"  echo \\\"${ret.Value}\\\"");
+                lines.Add($"  echo \"${ret.Value}\"");
                 break;
             case ExitStatement e:
                 lines.Add($"  exit {e.ExitCode}");
