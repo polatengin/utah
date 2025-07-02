@@ -1,0 +1,44 @@
+{
+    "scopeName": "source.utah",
+    "patterns": [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#comments"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.utah",
+                    "match": "\\b(if|else|const|let|exit|function)\\b"
+                },
+                {
+                    "name": "support.function.utah",
+                    "match": "\\b(console.log|length|slice|replace|toUpperCase|toLowerCase|trim|startsWith|endsWith|includes|split)\\b"
+                }
+            ]
+        },
+        "strings": {
+            "name": "string.quoted.double.utah",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.utah",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "comments": {
+            "name": "comment.line.double-slash.utah",
+            "begin": "//",
+            "end": "$\n"
+        }
+    }
+}

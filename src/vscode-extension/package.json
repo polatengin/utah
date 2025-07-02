@@ -9,13 +9,35 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:utah"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "utah.helloWorld",
         "title": "Hello World"
+      }
+    ],
+    "languages": [
+      {
+        "id": "utah",
+        "aliases": [
+          "Utah",
+          "utah"
+        ],
+        "extensions": [
+          ".shx"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "utah",
+        "scopeName": "source.utah",
+        "path": "./syntaxes/utah.tmLanguage.json"
       }
     ]
   },

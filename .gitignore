@@ -1,4 +1,7 @@
 node_modules/
+dist/
+out/
+.vscode-test
 
 bin/
 obj/
