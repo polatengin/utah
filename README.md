@@ -82,7 +82,7 @@ fi
 
 [] Arrays and basic data structures
 
-[] Comment support (// and /* */)
+[] Comment support (`//` and `/* */`)
 
 [] import syntax for splitting .shx files
 
