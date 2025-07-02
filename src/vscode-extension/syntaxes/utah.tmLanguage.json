@@ -12,6 +12,9 @@
         },
         {
             "include": "#types"
+        },
+        {
+            "include": "#functions"
         }
     ],
     "repository": {
@@ -48,6 +51,14 @@
                 {
                     "name": "storage.type.utah",
                     "match": "\\b(string|boolean|number|void)\\b"
+                }
+            ]
+        },
+        "functions": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.utah",
+                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\()"
                 }
             ]
         }
