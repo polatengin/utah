@@ -9,6 +9,9 @@
         },
         {
             "include": "#comments"
+        },
+        {
+            "include": "#types"
         }
     ],
     "repository": {
@@ -39,6 +42,14 @@
             "name": "comment.line.double-slash.utah",
             "begin": "//",
             "end": "$\n"
+        },
+        "types": {
+            "patterns": [
+                {
+                    "name": "storage.type.utah",
+                    "match": "\\b(string|boolean|number|void)\\b"
+                }
+            ]
         }
     }
 }
