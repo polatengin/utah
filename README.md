@@ -200,4 +200,6 @@ fi
 
 - [ ] More built-in functions and utilities
 
-- [ ] VS Code extension for syntax highlighting
+- [x] VS Code extension for syntax highlighting
+
+- [ ] VS Code extension for intellisense and autocompletion
