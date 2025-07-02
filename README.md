@@ -172,7 +172,7 @@ fi
 
 - [ ] Error handling: try/catch, trap
 
-- [ ] More complex expressions and operators
+- [x] More complex expressions and operators
 
 - [ ] Process Substitution
 
