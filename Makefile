@@ -1,11 +1,15 @@
 # Utah Language Development Makefile
 
-.PHONY: help build test compile clean
+.PHONY: help build test compile clean install info
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
 TESTS_DIR := tests
+FIXTURES_DIR := $(TESTS_DIR)/fixtures
+EXPECTED_DIR := $(TESTS_DIR)/expected
+TEMP_DIR := $(TESTS_DIR)/temp
 
+RED := \033[0;31m
 GREEN := \033[0;32m
 YELLOW := \033[1;33m
 BLUE := \033[0;34m
@@ -31,8 +35,59 @@ build: ## Build the CLI
 	@echo "$(GREEN)✅ Build complete$(NC)"
 
 test: build ## Run all regression tests
-	@echo "$(BLUE)🧪 Running tests...$(NC)"
-	@./$(TESTS_DIR)/run_tests.sh
+	@echo "$(BLUE)🧪 Running Utah CLI Regression Tests$(NC)"
+	@echo "====================================="
+	@mkdir -p $(TEMP_DIR)
+	@total=0; passed=0; failed=0; \
+	for fixture in $(FIXTURES_DIR)/*.shx; do \
+		if [ -f "$$fixture" ]; then \
+			test_name=$$(basename "$$fixture" .shx); \
+			expected_file="$(EXPECTED_DIR)/$$test_name.sh"; \
+			actual_file="$(TEMP_DIR)/$$test_name.sh"; \
+			total=$$((total + 1)); \
+			echo -n "🔍 Testing $$test_name... "; \
+			if [ ! -f "$$expected_file" ]; then \
+				printf "$(RED)❌ Expected file not found$(NC)\n"; \
+				failed=$$((failed + 1)); \
+				continue; \
+			fi; \
+			if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
+				printf "$(RED)❌ Compilation failed$(NC)\n"; \
+				failed=$$((failed + 1)); \
+				continue; \
+			fi; \
+			generated_file="$(FIXTURES_DIR)/$$test_name.sh"; \
+			mv "$$generated_file" "$$actual_file"; \
+			if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
+				printf "$(GREEN)✅ PASS$(NC)\n"; \
+				passed=$$((passed + 1)); \
+			else \
+				printf "$(RED)❌ FAIL$(NC)\n"; \
+				printf "$(YELLOW)Expected vs Actual differences:$(NC)\n"; \
+				diff -u "$$expected_file" "$$actual_file" | head -20; \
+				echo; \
+				failed=$$((failed + 1)); \
+			fi; \
+		fi; \
+	done; \
+	echo; \
+	echo "📊 Test Results"; \
+	echo "==============="; \
+	echo "Total tests: $$total"; \
+	printf "$(GREEN)Passed: $$passed$(NC)\n"; \
+	if [ $$failed -gt 0 ]; then \
+		printf "$(RED)Failed: $$failed$(NC)\n"; \
+	else \
+		echo "Failed: $$failed"; \
+	fi; \
+	rm -rf $(TEMP_DIR); \
+	if [ $$failed -eq 0 ]; then \
+		printf "\n$(GREEN)🎉 All tests passed!$(NC)\n"; \
+		exit 0; \
+	else \
+		printf "\n$(RED)💥 Some tests failed!$(NC)\n"; \
+		exit 1; \
+	fi
 
 compile: build ## Compile a .shx file (usage: make compile FILE=path/to/file.shx)
 ifndef FILE
@@ -60,10 +115,6 @@ watch: ## Watch for changes and run tests (requires inotify-tools)
 		make test || true; \
 		echo "$(BLUE)👀 Watching for changes...$(NC)"; \
 	done
-
-# Release targets
-check: build test ## Full check: build + all tests (for CI/CD)
-	@echo "$(GREEN)🎉 All checks passed!$(NC)"
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
