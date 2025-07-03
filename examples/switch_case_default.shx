@@ -1,0 +1,57 @@
+// Comprehensive switch/case/default test
+const OS: string = "linux";
+const VERSION: number = 20;
+let platform: string = "";
+let support: string = "";
+
+// Test with const string
+switch (OS) {
+  case "windows":
+    platform = "Windows Platform";
+    break;
+  case "macos":
+    platform = "macOS Platform";
+    break;
+  case "linux":
+    platform = "Linux Platform";
+    break;
+  default:
+    platform = "Unknown Platform";
+    break;
+}
+
+// Test with const number
+switch (VERSION) {
+  case 18:
+  case 20:
+  case 22:
+    support = "LTS Version";
+    break;
+  case 19:
+  case 21:
+    support = "Current Version";
+    break;
+  default:
+    support = "Unsupported Version";
+    break;
+}
+
+let name: string = "Alice";
+let greeting: string = `Hello, ${name}`;
+let status: string = "";
+
+switch (greeting) {
+  case "Hello, Alice":
+    status = "Found Alice";
+    break;
+  case "Hello, Bob":
+    status = "Found Bob";
+    break;
+  default:
+    status = "Unknown greeting";
+    break;
+}
+
+console.log(platform);
+console.log(support);
+console.log(status);

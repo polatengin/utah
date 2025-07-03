@@ -1,0 +1,43 @@
+// Test switch with numbers
+let score: number = 85;
+let category: string = "";
+
+switch (score) {
+  case 100:
+    category = "Perfect";
+    break;
+  case 90:
+    category = "Excellent";
+    break;
+  case 80:
+    category = "Good";
+    break;
+  default:
+    category = "Needs improvement";
+    break;
+}
+
+console.log(category);
+
+// Test switch without breaks (fall-through)
+let day: string = "Monday";
+let type: string = "";
+
+switch (day) {
+  case "Monday":
+  case "Tuesday":
+  case "Wednesday":
+  case "Thursday":
+  case "Friday":
+    type = "Weekday";
+    break;
+  case "Saturday":
+  case "Sunday":
+    type = "Weekend";
+    break;
+  default:
+    type = "Unknown";
+    break;
+}
+
+console.log(type);

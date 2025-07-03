@@ -130,6 +130,115 @@ for fruit in "${fruits[@]}"; do
 done
 ```
 
+## 🔀 Switch Statements
+
+Utah supports switch/case/default statements for conditional branching with multiple cases, providing a cleaner alternative to long if-else chains.
+
+### Basic Switch Statement
+
+```shx
+let grade: string = "B";
+let message: string = "";
+
+switch (grade) {
+  case "A":
+    message = "Excellent!";
+    break;
+  case "B":
+    message = "Good job!";
+    break;
+  case "C":
+    message = "Not bad";
+    break;
+  default:
+    message = "Try harder";
+    break;
+}
+
+console.log(message);
+```
+
+### Switch with Numbers
+
+```shx
+let score: number = 85;
+let category: string = "";
+
+switch (score) {
+  case 100:
+    category = "Perfect";
+    break;
+  case 90:
+    category = "Excellent";
+    break;
+  case 80:
+    category = "Good";
+    break;
+  default:
+    category = "Needs improvement";
+    break;
+}
+```
+
+### Fall-Through Cases
+
+You can have multiple case labels that execute the same code by omitting the `break` statement:
+
+```shx
+let day: string = "Monday";
+let type: string = "";
+
+switch (day) {
+  case "Monday":
+  case "Tuesday":
+  case "Wednesday":
+  case "Thursday":
+  case "Friday":
+    type = "Weekday";
+    break;
+  case "Saturday":
+  case "Sunday":
+    type = "Weekend";
+    break;
+  default:
+    type = "Unknown";
+    break;
+}
+```
+
+### Generated Bash Code for Switch Statements
+
+```bash
+# Utah switch statement becomes:
+case $grade in
+  A)
+    message="Excellent!"
+    ;;
+  B)
+    message="Good job!"
+    ;;
+  C)
+    message="Not bad"
+    ;;
+  *)
+    message="Try harder"
+    ;;
+esac
+
+# Fall-through cases become:
+case $day in
+  Monday|Tuesday|Wednesday|Thursday|Friday)
+    type="Weekday"
+    ;;
+  Saturday|Sunday)
+    type="Weekend"
+    ;;
+  *)
+    type="Unknown"
+    ;;
+esac
+```
+
 ## 📋 Arrays
 
 Utah supports arrays through the `split()` function, which creates bash arrays that can be used with for-in loops:
@@ -337,6 +446,8 @@ Current tests cover:
 - **environment_variables.shx** - Environment variable operations
 - **ternary_operators.shx** - Ternary conditional operators
 - **mixed_loops.shx** - Mixed loop types in one file
+- **simple_switch.shx** - Basic switch/case/default statements
+- **switch_case.shx** - Complex switch statements with fall-through cases
 
 ### How Tests Work
 
@@ -382,6 +493,8 @@ Current tests cover:
 - [x] Support for `const` declarations
 
 - [x] Support for `for` and `for in` loops
+
+- [x] Support for `switch/case/default` statements
 
 - [ ] Support for `while` and `break`
 

@@ -198,6 +198,38 @@ public class ParenthesizedExpression : Expression
   public Expression Inner = null!;
 }
 
+// Switch/Case/Default nodes
+public class SwitchStatement : Node
+{
+  public Expression SwitchExpression = null!;
+  public List<CaseClause> Cases = new();
+  public DefaultClause? DefaultCase = null;
+}
+
+public class CaseClause : Node
+{
+  public List<Expression> Values = new(); // Support multiple case values for fall-through
+  public List<Node> Body = new();
+  public bool HasBreak = false;
+}
+
+public class DefaultClause : Node
+{
+  public List<Node> Body = new();
+  public bool HasBreak = false;
+}
+
+public class BreakStatement : Node
+{
+}
+
+// Assignment statement (variable = value)
+public class AssignmentStatement : Node
+{
+  public string VariableName = string.Empty;
+  public Expression Value = null!;
+}
+
 // Updated VariableDeclaration to support expressions
 public class VariableDeclarationExpression : Node
 {

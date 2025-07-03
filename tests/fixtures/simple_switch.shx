@@ -1,0 +1,14 @@
+// Simple switch test
+let grade: string = "B";
+
+switch (grade) {
+  case "A":
+    console.log("Excellent");
+    break;
+  case "B":
+    console.log("Good");
+    break;
+  default:
+    console.log("Try harder");
+    break;
+}

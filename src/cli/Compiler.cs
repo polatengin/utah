@@ -223,6 +223,61 @@ public class Compiler
         lines.Add($"unset {ed.VariableName}");
         break;
 
+      case SwitchStatement sw:
+        var switchExpr = CompileExpression(sw.SwitchExpression);
+        lines.Add($"case {switchExpr} in");
+        
+        foreach (var caseClause in sw.Cases)
+        {
+          // Build case pattern - handle multiple values for fall-through
+          var casePatterns = caseClause.Values.Select(v => 
+          {
+            var compiled = CompileExpression(v);
+            // Remove quotes if they exist since case patterns don't need them
+            if (compiled.StartsWith("\"") && compiled.EndsWith("\""))
+            {
+              return compiled[1..^1];
+            }
+            return compiled;
+          }).ToList();
+          
+          var pattern = string.Join("|", casePatterns);
+          lines.Add($"  {pattern})");
+          
+          foreach (var bodyStmt in caseClause.Body)
+          {
+            var bodyLines = CompileStatement(bodyStmt);
+            foreach (var bodyLine in bodyLines)
+            {
+              lines.Add($"    {bodyLine}");
+            }
+          }
+          
+          lines.Add("    ;;");
+        }
+        
+        if (sw.DefaultCase != null)
+        {
+          lines.Add("  *)");
+          foreach (var bodyStmt in sw.DefaultCase.Body)
+          {
+            var bodyLines = CompileStatement(bodyStmt);
+            foreach (var bodyLine in bodyLines)
+            {
+              lines.Add($"    {bodyLine}");
+            }
+          }
+          lines.Add("    ;;");
+        }
+        
+        lines.Add("esac");
+        break;
+
+      case AssignmentStatement assign:
+        var assignValue = CompileExpression(assign.Value);
+        lines.Add($"{assign.VariableName}={assignValue}");
+        break;
+
       case ExitStatement e:
         lines.Add($"exit {e.ExitCode}");
         break;

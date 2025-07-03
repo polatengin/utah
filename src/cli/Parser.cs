@@ -482,6 +482,99 @@ public class Parser
           program.Statements.Add(envNode);
         }
       }
+      else if (line.StartsWith("switch ("))
+      {
+        var match = Regex.Match(line, @"switch \((.+)\) \{");
+        if (match.Success)
+        {
+          var switchExpr = ParseExpression(match.Groups[1].Value);
+          var switchStmt = new SwitchStatement
+          {
+            SwitchExpression = switchExpr
+          };
+
+          i++;
+          CaseClause? currentCase = null;
+          
+          while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+          {
+            var currentLine = _lines[i].Trim();
+            
+            if (currentLine.StartsWith("case "))
+            {
+              // If we have a previous case and it's a fall-through (no break), add this case value to it
+              var caseMatch = Regex.Match(currentLine, @"case (.+):");
+              if (caseMatch.Success)
+              {
+                var caseValue = ParseExpression(caseMatch.Groups[1].Value);
+                
+                // If we have an existing case without a break, add this as a fall-through
+                if (currentCase != null && !currentCase.HasBreak)
+                {
+                  currentCase.Values.Add(caseValue);
+                }
+                else
+                {
+                  // Start a new case
+                  currentCase = new CaseClause();
+                  currentCase.Values.Add(caseValue);
+                  switchStmt.Cases.Add(currentCase);
+                }
+              }
+            }
+            else if (currentLine.StartsWith("default:"))
+            {
+              currentCase = null; // End current case
+              var defaultClause = new DefaultClause();
+              
+              i++;
+              while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+              {
+                var bodyLine = _lines[i].Trim();
+                if (bodyLine == "break;")
+                {
+                  defaultClause.HasBreak = true;
+                  i++;
+                  break;
+                }
+                else if (!string.IsNullOrEmpty(bodyLine))
+                {
+                  var bodyNode = ParseStatement(bodyLine);
+                  if (bodyNode != null)
+                  {
+                    defaultClause.Body.Add(bodyNode);
+                  }
+                }
+                i++;
+              }
+              
+              switchStmt.DefaultCase = defaultClause;
+              i--; // Adjust for the outer loop increment
+            }
+            else if (currentLine == "break;")
+            {
+              if (currentCase != null)
+              {
+                currentCase.HasBreak = true;
+                currentCase = null; // End current case
+              }
+            }
+            else if (!string.IsNullOrEmpty(currentLine) && currentCase != null)
+            {
+              // Add statement to current case body
+              var bodyNode = ParseStatement(currentLine);
+              if (bodyNode != null)
+              {
+                currentCase.Body.Add(bodyNode);
+              }
+            }
+            
+            i++;
+          }
+          
+          program.Statements.Add(switchStmt);
+        }
+      }
       else if (line.Contains("(") && line.Contains(");"))
       {
         var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
@@ -1120,6 +1213,20 @@ public class Parser
       // For nested loops, we need to handle them specially
       // For now, return null to indicate this needs special handling
       return null;
+    }
+    else if (line.Contains(" = ") && line.EndsWith(";"))
+    {
+      // Handle variable assignment (variable = value;)
+      var match = Regex.Match(line, @"(\w+) = (.+);");
+      if (match.Success)
+      {
+        var value = ParseExpression(match.Groups[2].Value);
+        return new AssignmentStatement
+        {
+          VariableName = match.Groups[1].Value,
+          Value = value
+        };
+      }
     }
     else if (line.Contains("(") && line.Contains(");"))
     {
