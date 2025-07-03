@@ -86,7 +86,15 @@ public class Compiler
         if (log.IsExpression && log.Expression != null)
         {
           var compiledExpr = CompileExpression(log.Expression);
-          lines.Add($"echo {compiledExpr}");
+          // If the expression is already quoted (like string concatenation), don't add extra quotes
+          if (compiledExpr.StartsWith("\"") && compiledExpr.EndsWith("\""))
+          {
+            lines.Add($"echo {compiledExpr}");
+          }
+          else
+          {
+            lines.Add($"echo \"{compiledExpr}\"");
+          }
         }
         else
         {
@@ -361,7 +369,15 @@ public class Compiler
         if (log.IsExpression && log.Expression != null)
         {
           var compiledExpr = CompileExpression(log.Expression);
-          lines.Add($"  echo {compiledExpr}");
+          // If the expression is already quoted (like string concatenation), don't add extra quotes
+          if (compiledExpr.StartsWith("\"") && compiledExpr.EndsWith("\""))
+          {
+            lines.Add($"  echo {compiledExpr}");
+          }
+          else
+          {
+            lines.Add($"  echo \"{compiledExpr}\"");
+          }
         }
         else
         {
