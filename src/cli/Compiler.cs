@@ -6,6 +6,9 @@ public class Compiler
   {
     var lines = new List<string>();
 
+    lines.Add("#!/bin/sh");
+    lines.Add(""); // Empty line after shebang
+
     foreach (var stmt in program.Statements)
     {
       lines.AddRange(CompileStatement(stmt));

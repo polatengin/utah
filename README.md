@@ -556,7 +556,7 @@ Current tests cover:
 
 - [ ] import syntax for splitting .shx files
 
-- [ ] Add shebang (`#!/usr/bin/env sh`) to generated scripts
+- [x] Add shebang (`#!/bin/sh`) to generated scripts
 
 - [ ] Typed return values and richer type checking
 
