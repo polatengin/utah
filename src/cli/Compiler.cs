@@ -338,7 +338,15 @@ public class Compiler
         }
         break;
       case ConsoleLog log:
-        lines.Add($"  echo \"{log.Message}\"");
+        if (log.IsExpression && log.Expression != null)
+        {
+          var compiledExpr = CompileExpression(log.Expression);
+          lines.Add($"  echo {compiledExpr}");
+        }
+        else
+        {
+          lines.Add($"  echo \"{log.Message}\"");
+        }
         break;
       case ReturnStatement ret:
         if (ret.Value != null)

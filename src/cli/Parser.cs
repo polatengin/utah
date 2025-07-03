@@ -172,23 +172,14 @@ public class Parser
           {
             var match = Regex.Match(inner, @"console\.log\((.+)\);");
             var raw = match.Groups[1].Value.Trim();
-            string msg;
-            if (raw.StartsWith("`"))
-            {
-              // Template literal
-              msg = raw[1..^1];
-            }
-            else if (raw.StartsWith("\"") && raw.EndsWith("\""))
-            {
-              // String literal
-              msg = raw[1..^1];
-            }
-            else
-            {
-              // Variable reference
-              msg = $"${raw}";
-            }
-            func.Body.Add(new ConsoleLog { Message = msg });
+            
+            // Parse as expression
+            var expression = ParseExpression(raw);
+            func.Body.Add(new ConsoleLog 
+            { 
+              IsExpression = true, 
+              Expression = expression 
+            });
           }
           else if (inner.StartsWith("return "))
           {
