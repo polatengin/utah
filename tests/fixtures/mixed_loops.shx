@@ -1,4 +1,3 @@
-// Mixed for loop and for-in loop test
 let items: string[] = "one,two,three".split(",");
 
 console.log("Using for-in loop:");
