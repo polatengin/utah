@@ -1,0 +1,16 @@
+{
+  "iconDefinitions": {
+    "shx_file": {
+      "fontCharacter": "\\ea92",
+      "fontColor": "#4CAF50",
+      "fontSize": "150%",
+      "fontId": "codicon"
+    }
+  },
+  "fileExtensions": {
+    "shx": "shx_file"
+  },
+  "languageIds": {
+    "utah": "shx_file"
+  }
+}
