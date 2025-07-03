@@ -562,7 +562,7 @@ Current tests cover:
 
 - [ ] Error handling: try/catch, trap
 
-- [ ] Typecasting
+- [ ] Typecasting and type conversion
 
 - [ ] Check for 100% POSIX compliance
 
@@ -593,8 +593,6 @@ Current tests cover:
 - [ ] Job queueing and parallel execution
 
 - [ ] Time and Resource monitoring
-
-- [ ] More built-in functions and utilities
 
 - [x] VS Code extension for syntax highlighting
 
