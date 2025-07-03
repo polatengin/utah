@@ -1,0 +1,13 @@
+function greet(name: string): string {
+  return "Hello, " + name + "!";
+}
+
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+let result: string = greet("Utah");
+console.log(result);
+
+let sum: number = add(5, 3);
+console.log("Sum: " + sum);
