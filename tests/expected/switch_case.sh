@@ -16,7 +16,7 @@ case $score in
     category="Needs improvement"
     ;;
 esac
-echo $category
+echo "$category"
 day="Monday"
 type=""
 case $day in
@@ -30,4 +30,4 @@ case $day in
     type="Unknown"
     ;;
 esac
-echo $type
+echo "$type"
