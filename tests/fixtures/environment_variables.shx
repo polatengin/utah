@@ -1,0 +1,5 @@
+let name: string = env.get("USER", "unknown");
+console.log("Hello " + name);
+env.set("GREETING", "Utah Language");
+let greeting: string = env.get("GREETING", "default");
+console.log(greeting);

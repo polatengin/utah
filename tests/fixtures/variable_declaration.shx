@@ -1,0 +1,2 @@
+let name: string = "Utah";
+console.log("Language: " + name);

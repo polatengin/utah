@@ -1,0 +1,6 @@
+const x: number = 10;
+const result: number = x > 5 ? x * 2 : x / 2;
+console.log("Result: " + result);
+
+let status: string = x >= 10 ? "high" : "low";
+console.log("Status: " + status);

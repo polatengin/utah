@@ -1,0 +1,6 @@
+let text: string = "hello world";
+let length: number = text.length();
+let upper: string = text.toUpper();
+console.log("Text: " + text);
+console.log("Length: " + length);
+console.log("Upper: " + upper);
