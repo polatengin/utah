@@ -341,7 +341,15 @@ public class Compiler
         lines.Add($"  echo \"{log.Message}\"");
         break;
       case ReturnStatement ret:
-        lines.Add($"  echo \"${ret.Value}\"");
+        if (ret.Value != null)
+        {
+          var returnValue = CompileExpression(ret.Value);
+          lines.Add($"  echo {returnValue}");
+        }
+        else
+        {
+          lines.Add($"  echo");
+        }
         break;
       case ExitStatement e:
         lines.Add($"  exit {e.ExitCode}");
@@ -514,6 +522,7 @@ public class Compiler
       ArrayLiteral arr => CompileArrayLiteral(arr),
       ArrayAccess acc => CompileArrayAccess(acc),
       ArrayLength len => CompileArrayLength(len),
+      FunctionCall func => CompileFunctionCallExpression(func),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
   }
@@ -541,12 +550,12 @@ public class Compiler
 
     return bin.Operator switch
     {
-      "+" when IsStringConcatenation(bin) => $"\"{left}{right}\"".Replace("\"\"", ""),
-      "+" => $"$((${left} + ${right}))",
-      "-" => $"$((${left} - ${right}))",
-      "*" => $"$((${left} * ${right}))",
-      "/" => $"$((${left} / ${right}))",
-      "%" => $"$((${left} % ${right}))",
+      "+" when IsStringConcatenation(bin) => $"\"{left.Trim('\"')}{right.Trim('\"')}\"",
+      "+" => $"$(({left.TrimStart('$')} + {right.TrimStart('$')}))",
+      "-" => $"$(({left.TrimStart('$')} - {right.TrimStart('$')}))",
+      "*" => $"$(({left.TrimStart('$')} * {right.TrimStart('$')}))",
+      "/" => $"$(({left.TrimStart('$')} / {right.TrimStart('$')}))",
+      "%" => $"$(({left.TrimStart('$')} % {right.TrimStart('$')}))",
       "==" => $"[ {left} = {right} ]",
       "!=" => $"[ {left} != {right} ]",
       "<" => $"[ {left} -lt {right} ]",
@@ -624,5 +633,38 @@ public class Compiler
 
     // In bash, array length is ${#arrayName[@]}
     return $"\"${{#{arrayName}[@]}}\"";
+  }
+
+  private string CompileFunctionCallExpression(FunctionCall func)
+  {
+    // In bash, function calls in expressions use command substitution
+    var bashArgs = func.Arguments.Select(a =>
+    {
+      var trimmed = a.Trim();
+      if (trimmed.StartsWith("\"") && trimmed.EndsWith("\""))
+      {
+        // String literal - use as-is
+        return trimmed;
+      }
+      else if (double.TryParse(trimmed, out _))
+      {
+        // Number literal - use as-is
+        return trimmed;
+      }
+      else
+      {
+        // Variable reference - add $ prefix
+        return $"\"${trimmed}\"";
+      }
+    }).ToList();
+
+    if (bashArgs.Count > 0)
+    {
+      return $"$({func.Name} {string.Join(" ", bashArgs)})";
+    }
+    else
+    {
+      return $"$({func.Name})";
+    }
   }
 }

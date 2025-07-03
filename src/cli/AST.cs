@@ -20,7 +20,7 @@ public class FunctionDeclaration : Node
   public List<Node> Body = new();
 }
 
-public class FunctionCall : Node
+public class FunctionCall : Expression
 {
   public string Name = string.Empty;
   public List<string> Arguments = new();
@@ -35,7 +35,7 @@ public class ConsoleLog : Node
 
 public class ReturnStatement : Node
 {
-  public string Value = string.Empty;
+  public Expression? Value;
 }
 
 public class IfStatement : Node

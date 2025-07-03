@@ -193,7 +193,7 @@ public class Parser
           else if (inner.StartsWith("return "))
           {
             var val = inner.Substring(7).TrimEnd(';');
-            func.Body.Add(new ReturnStatement { Value = val });
+            func.Body.Add(new ReturnStatement { Value = ParseExpression(val) });
           }
           else if (inner.StartsWith("exit "))
           {
@@ -1134,6 +1134,34 @@ public class Parser
 
       // Handle string methods (existing string function parsing)
       // This will be handled by existing string function parsing
+    }
+
+    // Function call: functionName(arg1, arg2, ...)
+    if (input.Contains("(") && input.EndsWith(")"))
+    {
+      var parenIndex = input.IndexOf('(');
+      var functionName = input.Substring(0, parenIndex).Trim();
+      var argsContent = input.Substring(parenIndex + 1, input.Length - parenIndex - 2).Trim();
+
+      // Make sure it's a simple function name (not a complex expression)
+      if (Regex.IsMatch(functionName, @"^\w+$"))
+      {
+        var functionCall = new FunctionCall
+        {
+          Name = functionName
+        };
+
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          var args = SplitByComma(argsContent);
+          foreach (var arg in args)
+          {
+            functionCall.Arguments.Add(arg.Trim());
+          }
+        }
+
+        return functionCall;
+      }
     }
 
     // Variable reference
