@@ -45,11 +45,20 @@ public class Parser
               }
               else
               {
+                var declaredType = match.Groups[2].Value;
                 var expression = ParseExpression(value);
+                
+                // Validate array type if it's an array declaration
+                if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                {
+                  var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                  ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                }
+                
                 program.Statements.Add(new VariableDeclarationExpression
                 {
                   Name = match.Groups[1].Value,
-                  Type = match.Groups[2].Value,
+                  Type = declaredType,
                   Value = expression,
                   IsConst = false
                 });
@@ -87,11 +96,20 @@ public class Parser
               }
               else
               {
+                var declaredType = match.Groups[2].Value;
                 var expression = ParseExpression(value);
+                
+                // Validate array type if it's an array declaration
+                if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                {
+                  var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                  ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
+                }
+                
                 program.Statements.Add(new VariableDeclarationExpression
                 {
                   Name = varName,
-                  Type = match.Groups[2].Value,
+                  Type = declaredType,
                   Value = expression,
                   IsConst = true
                 });
@@ -1670,5 +1688,30 @@ public class Parser
     }
 
     return null;
+  }
+
+  private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string variableName)
+  {
+    for (int i = 0; i < arrayLiteral.Elements.Count; i++)
+    {
+      var element = arrayLiteral.Elements[i];
+      string actualType = GetExpressionType(element);
+      
+      if (actualType != expectedElementType)
+      {
+        throw new InvalidOperationException($"Error: Array element at index {i} in variable '{variableName}' has type '{actualType}' but expected '{expectedElementType}'. All elements in a {expectedElementType}[] array must be of type {expectedElementType}.");
+      }
+    }
+  }
+
+  private string GetExpressionType(Expression expression)
+  {
+    return expression switch
+    {
+      LiteralExpression literal => literal.Type,
+      VariableExpression _ => "variable", // We could track variable types, but for now assume it's correct
+      BinaryExpression _ => "expression", // Could infer type from operation
+      _ => "unknown"
+    };
   }
 }
