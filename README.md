@@ -488,7 +488,8 @@ Tests are organized in the `tests/` directory:
 
 ```text
 tests/
-├── fixtures/          # Test input files (.shx)
+├── positive_fixtures/ # Test input files (.shx)
+├── negative_fixtures/ # Test input files (.shx)
 └── expected/          # Expected compilation outputs (.sh)
 ```
 

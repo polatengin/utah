@@ -5,8 +5,9 @@
 
 CLI_DIR := src/cli
 TESTS_DIR := tests
-FIXTURES_DIR := $(TESTS_DIR)/fixtures
+FIXTURES_DIR := $(TESTS_DIR)/positive_fixtures
 EXPECTED_DIR := $(TESTS_DIR)/expected
+NEGATIVE_TESTS_DIR := $(TESTS_DIR)/negative_fixtures
 TEMP_DIR := $(TESTS_DIR)/temp
 
 RED := \033[0;31m
@@ -39,6 +40,7 @@ test: build ## Run all regression tests
 	@echo "====================================="
 	@mkdir -p $(TEMP_DIR)
 	@total=0; passed=0; failed=0; \
+	echo "$(BLUE)Running positive tests...$(NC)"; \
 	for fixture in $(FIXTURES_DIR)/*.shx; do \
 		if [ -f "$$fixture" ]; then \
 			test_name=$$(basename "$$fixture" .shx); \
@@ -67,6 +69,22 @@ test: build ## Run all regression tests
 				diff -u "$$expected_file" "$$actual_file" | head -20; \
 				echo; \
 				failed=$$((failed + 1)); \
+			fi; \
+		fi; \
+	done; \
+	echo; \
+	echo "$(BLUE)Running negative tests (should fail compilation)...$(NC)"; \
+	for fixture in $(NEGATIVE_TESTS_DIR)/*.shx; do \
+		if [ -f "$$fixture" ]; then \
+			test_name=$$(basename "$$fixture" .shx); \
+			total=$$((total + 1)); \
+			echo -n "🔍 Testing $$test_name (expect failure)... "; \
+			if dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
+				printf "$(RED)❌ FAIL (should have failed compilation)$(NC)\n"; \
+				failed=$$((failed + 1)); \
+			else \
+				printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
+				passed=$$((passed + 1)); \
 			fi; \
 		fi; \
 	done; \
@@ -102,7 +120,7 @@ clean: ## Clean build artifacts and test files
 	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
 	@cd $(CLI_DIR) && dotnet clean
 	@rm -rf $(TESTS_DIR)/temp
-	@rm -f $(TESTS_DIR)/fixtures/*.sh
+	@rm -f $(TESTS_DIR)/positive_fixtures/*.sh
 	@echo "$(GREEN)✅ Clean complete$(NC)"
 
 # Development workflow targets
@@ -127,7 +145,8 @@ info: ## Show project information
 	@echo "===================================="
 	@echo "CLI Directory: $(CLI_DIR)"
 	@echo "Tests Directory: $(TESTS_DIR)"
-	@echo "Test Fixtures: $$(ls $(TESTS_DIR)/fixtures/*.shx 2>/dev/null | wc -l)"
+	@echo "Positive Fixtures: $$(ls $(TESTS_DIR)/positive_fixtures/*.shx 2>/dev/null | wc -l)"
+	@echo "Negative Fixtures: $$(ls $(TESTS_DIR)/negative_fixtures/*.shx 2>/dev/null | wc -l)"
 	@echo "Expected Outputs: $$(ls $(TESTS_DIR)/expected/*.sh 2>/dev/null | wc -l)"
 	@echo
 	@echo ".NET Version:"

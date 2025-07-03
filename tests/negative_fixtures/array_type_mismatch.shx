@@ -1,0 +1,2 @@
+let flags: boolean[] = [true, false, "Test"];
+console.log(flags);
