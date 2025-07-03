@@ -30,21 +30,29 @@ public class Parser
           }
           else
           {
-            var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-            if (stringFuncNode != null)
+            var osNode = ParseOsFunction(match.Groups[1].Value, value);
+            if (osNode != null)
             {
-              program.Statements.Add(stringFuncNode);
+              program.Statements.Add(osNode);
             }
             else
             {
-              var expression = ParseExpression(value);
-              program.Statements.Add(new VariableDeclarationExpression
+              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              if (stringFuncNode != null)
               {
-                Name = match.Groups[1].Value,
-                Type = match.Groups[2].Value,
-                Value = expression,
-                IsConst = false
-              });
+                program.Statements.Add(stringFuncNode);
+              }
+              else
+              {
+                var expression = ParseExpression(value);
+                program.Statements.Add(new VariableDeclarationExpression
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = expression,
+                  IsConst = false
+                });
+              }
             }
           }
         }
@@ -62,21 +70,29 @@ public class Parser
           }
           else
           {
-            var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-            if (stringFuncNode != null)
+            var osNode = ParseOsFunction(match.Groups[1].Value, value);
+            if (osNode != null)
             {
-              program.Statements.Add(stringFuncNode);
+              program.Statements.Add(osNode);
             }
             else
             {
-              var expression = ParseExpression(value);
-              program.Statements.Add(new VariableDeclarationExpression
+              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              if (stringFuncNode != null)
               {
-                Name = match.Groups[1].Value,
-                Type = match.Groups[2].Value,
-                Value = expression,
-                IsConst = true
-              });
+                program.Statements.Add(stringFuncNode);
+              }
+              else
+              {
+                var expression = ParseExpression(value);
+                program.Statements.Add(new VariableDeclarationExpression
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = expression,
+                  IsConst = true
+                });
+              }
             }
           }
         }
@@ -290,7 +306,8 @@ public class Parser
         }
 
         i++;
-        if (_lines[i].Trim() == "else {")
+        var currentLine = _lines[i].Trim();
+        if (currentLine == "} else {" || currentLine == "else {")
         {
           i++;
           while (!_lines[i].Trim().StartsWith("}"))
@@ -806,6 +823,22 @@ public class Parser
       return new EnvDelete
       {
         VariableName = envDeleteMatch.Groups[1].Value
+      };
+    }
+
+    return null;
+  }
+
+  private Node? ParseOsFunction(string targetVariable, string expression)
+  {
+    // Parse os.isInstalled("app_name") -> OsIsInstalled
+    var osIsInstalledMatch = Regex.Match(expression, @"os\.isInstalled\(""([^""]+)""\)");
+    if (osIsInstalledMatch.Success)
+    {
+      return new OsIsInstalled
+      {
+        AppName = osIsInstalledMatch.Groups[1].Value,
+        AssignTo = targetVariable
       };
     }
 

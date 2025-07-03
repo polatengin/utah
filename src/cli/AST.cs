@@ -180,6 +180,12 @@ public class EnvDelete : Node
   public string VariableName = string.Empty;
 }
 
+public class OsIsInstalled : Node
+{
+  public string AppName = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the boolean result
+}
+
 // Expression nodes for complex expressions and operators
 public abstract class Expression : Node { }
 

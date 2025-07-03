@@ -95,7 +95,17 @@ public class Compiler
         break;
 
       case IfStatement ifs:
-        lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
+        // Check if condition is a simple variable (no parentheses) or a function call
+        if (ifs.ConditionCall.Contains("(") && ifs.ConditionCall.Contains(")"))
+        {
+          // Function call - use command substitution
+          lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
+        }
+        else
+        {
+          // Simple variable - use direct variable reference
+          lines.Add($"if [ \"${{{ifs.ConditionCall}}}\" = \"true\" ]; then");
+        }
         foreach (var b in ifs.ThenBody)
           lines.AddRange(CompileBlock(b));
         lines.Add("else");
@@ -238,6 +248,14 @@ public class Compiler
 
       case EnvDelete ed:
         lines.Add($"unset {ed.VariableName}");
+        break;
+
+      case OsIsInstalled os:
+        lines.Add($"if command -v {os.AppName} &> /dev/null; then");
+        lines.Add($"  {os.AssignTo}=\"true\"");
+        lines.Add("else");
+        lines.Add($"  {os.AssignTo}=\"false\"");
+        lines.Add("fi");
         break;
 
       case SwitchStatement sw:
@@ -415,6 +433,14 @@ public class Compiler
 
       case EnvDelete ed:
         lines.Add($"  unset {ed.VariableName}");
+        break;
+
+      case OsIsInstalled os:
+        lines.Add($"  if command -v {os.AppName} &> /dev/null; then");
+        lines.Add($"    {os.AssignTo}=\"true\"");
+        lines.Add("  else");
+        lines.Add($"    {os.AssignTo}=\"false\"");
+        lines.Add("  fi");
         break;
 
       case ForLoop forLoop:
