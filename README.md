@@ -420,6 +420,47 @@ else
 fi
 ```
 
+## 🖥️ Operating System Utilities
+
+Utah provides utilities for interacting with the operating system and checking system capabilities.
+
+### Available OS Functions
+
+#### System Checks
+
+- `os.isInstalled(appName)` - Check if a command-line application is installed
+
+### OS Utilities Usage
+
+```shx
+// Check if git is installed
+let gitInstalled: boolean = os.isInstalled("git");
+
+if (gitInstalled) {
+  console.log("Git is available");
+} else {
+  console.log("Git is not installed");
+}
+
+// Check multiple tools
+let nodeInstalled: boolean = os.isInstalled("node");
+let dockerInstalled: boolean = os.isInstalled("docker");
+let curlInstalled: boolean = os.isInstalled("curl");
+```
+
+### Generated Bash Code for OS Utilities
+
+The OS utilities transpile to efficient bash commands:
+
+```bash
+# os.isInstalled("git") becomes:
+if command -v git &> /dev/null; then
+  gitInstalled="true"
+else
+  gitInstalled="false"
+fi
+```
+
 ## Development
 
 ### Building
