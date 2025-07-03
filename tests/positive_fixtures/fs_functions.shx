@@ -1,0 +1,16 @@
+console.log("Testing fs.readFile and fs.writeFile");
+
+// Test 1: Write string literal and read it back
+fs.writeFile("test1.txt", "Hello World");
+let content1: string = fs.readFile("test1.txt");
+console.log("Test 1 - String literal:");
+console.log(content1);
+
+// Test 2: Write variable content and read it back
+let message: string = "This is from a variable";
+fs.writeFile("test2.txt", message);
+let content2: string = fs.readFile("test2.txt");
+console.log("Test 2 - Variable content:");
+console.log(content2);
+
+console.log("All tests completed!");

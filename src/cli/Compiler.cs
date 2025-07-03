@@ -316,6 +316,26 @@ public class Compiler
       case ExitStatement e:
         lines.Add($"exit {e.ExitCode}");
         break;
+
+      case FsReadFile fr:
+        // Generate Bash code to read file contents into a variable
+        // Use cat command with command substitution
+        lines.Add($"{fr.AssignTo}=$(cat \"{fr.FilePath}\")");
+        break;
+
+      case FsWriteFile fw:
+        // Generate Bash code to write content to a file
+        if (fw.Content.StartsWith("${") && fw.Content.EndsWith("}"))
+        {
+          // Variable reference - use directly
+          lines.Add($"echo \"{fw.Content}\" > \"{fw.FilePath}\"");
+        }
+        else
+        {
+          // String literal - wrap in quotes
+          lines.Add($"echo \"{fw.Content}\" > \"{fw.FilePath}\"");
+        }
+        break;
     }
 
     return lines;
@@ -511,6 +531,25 @@ public class Compiler
           }
         }
         lines.Add("  done");
+        break;
+
+      case FsReadFile fr:
+        // Generate Bash code to read file contents into a variable (inside function block)
+        lines.Add($"  {fr.AssignTo}=$(cat \"{fr.FilePath}\")");
+        break;
+
+      case FsWriteFile fw:
+        // Generate Bash code to write content to a file (inside function block)
+        if (fw.Content.StartsWith("${") && fw.Content.EndsWith("}"))
+        {
+          // Variable reference - use directly
+          lines.Add($"  echo \"{fw.Content}\" > \"{fw.FilePath}\"");
+        }
+        else
+        {
+          // String literal - wrap in quotes
+          lines.Add($"  echo \"{fw.Content}\" > \"{fw.FilePath}\"");
+        }
         break;
     }
 

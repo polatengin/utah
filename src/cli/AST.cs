@@ -186,6 +186,19 @@ public class OsIsInstalled : Node
   public string AssignTo = string.Empty; // Target variable name for the boolean result
 }
 
+// File system operations
+public class FsReadFile : Node
+{
+  public string FilePath = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the file content
+}
+
+public class FsWriteFile : Node
+{
+  public string FilePath = string.Empty;
+  public string Content = string.Empty;
+}
+
 // Expression nodes for complex expressions and operators
 public abstract class Expression : Node { }
 

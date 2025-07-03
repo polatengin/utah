@@ -622,7 +622,9 @@ Current tests cover:
 
 - [x] Enhanced string manipulation functions
 
-- [ ] File I/O operations (read/write files)
+- [x] File I/O operations (read/write files)
+
+- [ ] File I/O operations (exists, delete, copy, move, rename, permissions, etc.)
 
 - [ ] Support for command substitution
 

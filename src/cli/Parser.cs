@@ -38,30 +38,38 @@ public class Parser
             }
             else
             {
-              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-              if (stringFuncNode != null)
+              var fsNode = ParseFsFunction(match.Groups[1].Value, value);
+              if (fsNode != null)
               {
-                program.Statements.Add(stringFuncNode);
+                program.Statements.Add(fsNode);
               }
               else
               {
-                var declaredType = match.Groups[2].Value;
-                var expression = ParseExpression(value);
-                
-                // Validate array type if it's an array declaration
-                if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+                if (stringFuncNode != null)
                 {
-                  var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                  ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                  program.Statements.Add(stringFuncNode);
                 }
-                
-                program.Statements.Add(new VariableDeclarationExpression
+                else
                 {
-                  Name = match.Groups[1].Value,
-                  Type = declaredType,
-                  Value = expression,
-                  IsConst = false
-                });
+                  var declaredType = match.Groups[2].Value;
+                  var expression = ParseExpression(value);
+
+                  // Validate array type if it's an array declaration
+                  if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                  {
+                    var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                    ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                  }
+
+                  program.Statements.Add(new VariableDeclarationExpression
+                  {
+                    Name = match.Groups[1].Value,
+                    Type = declaredType,
+                    Value = expression,
+                    IsConst = false
+                  });
+                }
               }
             }
           }
@@ -98,14 +106,14 @@ public class Parser
               {
                 var declaredType = match.Groups[2].Value;
                 var expression = ParseExpression(value);
-                
+
                 // Validate array type if it's an array declaration
                 if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
                 {
                   var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
                   ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
                 }
-                
+
                 program.Statements.Add(new VariableDeclarationExpression
                 {
                   Name = varName,
@@ -190,13 +198,13 @@ public class Parser
           {
             var match = Regex.Match(inner, @"console\.log\((.+)\);");
             var raw = match.Groups[1].Value.Trim();
-            
+
             // Parse as expression
             var expression = ParseExpression(raw);
-            func.Body.Add(new ConsoleLog 
-            { 
-              IsExpression = true, 
-              Expression = expression 
+            func.Body.Add(new ConsoleLog
+            {
+              IsExpression = true,
+              Expression = expression
             });
           }
           else if (inner.StartsWith("return "))
@@ -515,6 +523,15 @@ public class Parser
           program.Statements.Add(envNode);
         }
       }
+      else if (line.StartsWith("fs."))
+      {
+        // Parse standalone fs function calls
+        var fsNode = ParseStandaloneFsFunction(line);
+        if (fsNode != null)
+        {
+          program.Statements.Add(fsNode);
+        }
+      }
       else if (line.StartsWith("switch ("))
       {
         var match = Regex.Match(line, @"switch \((.+)\) \{");
@@ -615,13 +632,13 @@ public class Parser
         if (match.Success)
         {
           var variableName = match.Groups[1].Value;
-          
+
           // Check if trying to reassign a const variable
           if (_constVariables.Contains(variableName))
           {
             throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
           }
-          
+
           var value = ParseExpression(match.Groups[2].Value);
           program.Statements.Add(new AssignmentStatement
           {
@@ -874,6 +891,49 @@ public class Parser
       return new OsIsInstalled
       {
         AppName = osIsInstalledMatch.Groups[1].Value,
+        AssignTo = targetVariable
+      };
+    }
+
+    return null;
+  }
+
+  private Node? ParseStandaloneFsFunction(string line)
+  {
+    // Parse fs.writeFile("filepath", "content"); (string literal)
+    var fsWriteStringMatch = Regex.Match(line, @"fs\.writeFile\(""([^""]+)"",\s*""([^""]*)""\);");
+    if (fsWriteStringMatch.Success)
+    {
+      return new FsWriteFile
+      {
+        FilePath = fsWriteStringMatch.Groups[1].Value,
+        Content = fsWriteStringMatch.Groups[2].Value
+      };
+    }
+
+    // Parse fs.writeFile("filepath", variableName); (variable)
+    var fsWriteVarMatch = Regex.Match(line, @"fs\.writeFile\(""([^""]+)"",\s*(\w+)\);");
+    if (fsWriteVarMatch.Success)
+    {
+      return new FsWriteFile
+      {
+        FilePath = fsWriteVarMatch.Groups[1].Value,
+        Content = $"${{{fsWriteVarMatch.Groups[2].Value}}}" // Mark as variable reference
+      };
+    }
+
+    return null;
+  }
+
+  private Node? ParseFsFunction(string targetVariable, string expression)
+  {
+    // Parse fs.readFile("filepath") -> FsReadFile
+    var fsReadMatch = Regex.Match(expression, @"fs\.readFile\(""([^""]+)""\)");
+    if (fsReadMatch.Success)
+    {
+      return new FsReadFile
+      {
+        FilePath = fsReadMatch.Groups[1].Value,
         AssignTo = targetVariable
       };
     }
@@ -1435,13 +1495,13 @@ public class Parser
       if (match.Success)
       {
         var variableName = match.Groups[1].Value;
-        
+
         // Check if trying to reassign a const variable
         if (_constVariables.Contains(variableName))
         {
           throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
         }
-        
+
         var value = ParseExpression(match.Groups[2].Value);
         return new AssignmentStatement
         {
@@ -1696,7 +1756,7 @@ public class Parser
     {
       var element = arrayLiteral.Elements[i];
       string actualType = GetExpressionType(element);
-      
+
       if (actualType != expectedElementType)
       {
         throw new InvalidOperationException($"Error: Array element at index {i} in variable '{variableName}' has type '{actualType}' but expected '{expectedElementType}'. All elements in a {expectedElementType}[] array must be of type {expectedElementType}.");
