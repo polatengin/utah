@@ -556,9 +556,15 @@ Current tests cover:
 
 - [ ] import syntax for splitting .shx files
 
+- [ ] Add shebang (`#!/usr/bin/env sh`) to generated scripts
+
 - [ ] Typed return values and richer type checking
 
 - [ ] Error handling: try/catch, trap
+
+- [ ] Typecasting
+
+- [ ] Check for 100% POSIX compliance
 
 - [x] More complex expressions and operators
 
@@ -581,6 +587,8 @@ Current tests cover:
 - [ ] Improved error messages and debugging support
 
 - [ ] Support for async/await patterns
+
+- [ ] Argument parsing and validation
 
 - [ ] Job queueing and parallel execution
 
