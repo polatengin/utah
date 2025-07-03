@@ -1,0 +1,4 @@
+const greeting: string = "Hello World";
+console.log(greeting);
+greeting = "New Value";
+console.log(greeting);

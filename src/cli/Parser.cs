@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 public class Parser
 {
   private readonly string[] _lines;
+  private readonly HashSet<string> _constVariables = new HashSet<string>();
 
   public Parser(string input)
   {
@@ -62,22 +63,24 @@ public class Parser
         var match = Regex.Match(line, @"const (\w+): ([\w\[\]]+) = (.+);");
         if (match.Success)
         {
+          var varName = match.Groups[1].Value;
+          _constVariables.Add(varName); // Track const variable
           var value = match.Groups[3].Value;
-          var envNode = ParseEnvFunction(match.Groups[1].Value, value);
+          var envNode = ParseEnvFunction(varName, value);
           if (envNode != null)
           {
             program.Statements.Add(envNode);
           }
           else
           {
-            var osNode = ParseOsFunction(match.Groups[1].Value, value);
+            var osNode = ParseOsFunction(varName, value);
             if (osNode != null)
             {
               program.Statements.Add(osNode);
             }
             else
             {
-              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              var stringFuncNode = ParseStringFunction(varName, value);
               if (stringFuncNode != null)
               {
                 program.Statements.Add(stringFuncNode);
@@ -87,7 +90,7 @@ public class Parser
                 var expression = ParseExpression(value);
                 program.Statements.Add(new VariableDeclarationExpression
                 {
-                  Name = match.Groups[1].Value,
+                  Name = varName,
                   Type = match.Groups[2].Value,
                   Value = expression,
                   IsConst = true
@@ -145,8 +148,10 @@ public class Parser
             var match = Regex.Match(inner, @"const (\w+): (\w+) = (.+);");
             if (match.Success)
             {
+              var varName = match.Groups[1].Value;
+              _constVariables.Add(varName); // Track const variable
               var value = match.Groups[3].Value;
-              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+              var stringFuncNode = ParseStringFunction(varName, value);
               if (stringFuncNode != null)
               {
                 func.Body.Add(stringFuncNode);
@@ -155,7 +160,7 @@ public class Parser
               {
                 func.Body.Add(new VariableDeclaration
                 {
-                  Name = match.Groups[1].Value,
+                  Name = varName,
                   Type = match.Groups[2].Value,
                   Value = value.Trim('"'),
                   IsConst = true
@@ -592,6 +597,28 @@ public class Parser
           }
 
           program.Statements.Add(switchStmt);
+        }
+      }
+      else if (line.Contains(" = ") && line.EndsWith(";"))
+      {
+        // Handle variable assignment (variable = value;)
+        var match = Regex.Match(line, @"(\w+) = (.+);");
+        if (match.Success)
+        {
+          var variableName = match.Groups[1].Value;
+          
+          // Check if trying to reassign a const variable
+          if (_constVariables.Contains(variableName))
+          {
+            throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
+          }
+          
+          var value = ParseExpression(match.Groups[2].Value);
+          program.Statements.Add(new AssignmentStatement
+          {
+            VariableName = variableName,
+            Value = value
+          });
         }
       }
       else if (line.Contains("(") && line.Contains(");"))
@@ -1370,10 +1397,18 @@ public class Parser
       var match = Regex.Match(line, @"(\w+) = (.+);");
       if (match.Success)
       {
+        var variableName = match.Groups[1].Value;
+        
+        // Check if trying to reassign a const variable
+        if (_constVariables.Contains(variableName))
+        {
+          throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
+        }
+        
         var value = ParseExpression(match.Groups[2].Value);
         return new AssignmentStatement
         {
-          VariableName = match.Groups[1].Value,
+          VariableName = variableName,
           Value = value
         };
       }

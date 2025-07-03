@@ -43,15 +43,28 @@ static void CompileFile(string inputPath)
     return;
   }
 
-  var input = File.ReadAllText(inputPath);
-  var parser = new Parser(input);
-  var ast = parser.Parse();
-  var compiler = new Compiler();
-  var output = compiler.Compile(ast);
+  try
+  {
+    var input = File.ReadAllText(inputPath);
+    var parser = new Parser(input);
+    var ast = parser.Parse();
+    var compiler = new Compiler();
+    var output = compiler.Compile(ast);
 
-  var outputPath = Path.ChangeExtension(inputPath, ".sh");
-  File.WriteAllText(outputPath, output);
-  Console.WriteLine($"✅ Compiled: {outputPath}");
+    var outputPath = Path.ChangeExtension(inputPath, ".sh");
+    File.WriteAllText(outputPath, output);
+    Console.WriteLine($"✅ Compiled: {outputPath}");
+  }
+  catch (InvalidOperationException ex)
+  {
+    Console.WriteLine($"❌ Compilation failed: {ex.Message}");
+    Environment.Exit(1);
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"❌ Unexpected error: {ex.Message}");
+    Environment.Exit(1);
+  }
 }
 
 static void PrintUsage()
