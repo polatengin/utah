@@ -241,12 +241,58 @@ esac
 
 ## 📋 Arrays
 
-Utah supports arrays through the `split()` function, which creates bash arrays that can be used with for-in loops:
+Utah provides comprehensive support for typed arrays including `string[]`, `number[]`, and `boolean[]`. Arrays can be created using array literals or by splitting strings.
+
+### Array Literals
+
+You can create arrays using familiar TypeScript-like syntax:
+
+```shx
+// Create arrays with literals
+let numbers: number[] = [1, 2, 3, 4, 5];
+let names: string[] = ["Alice", "Bob", "Charlie"];
+let flags: boolean[] = [true, false, true];
+```
+
+### Array Access
+
+Access array elements using bracket notation:
+
+```shx
+let numbers: number[] = [10, 20, 30];
+let first: number = numbers[0];    // Gets 10
+let second: number = numbers[1];   // Gets 20
+```
+
+### Array Properties
+
+Get the length of an array using the `.length` property:
+
+```shx
+let items: string[] = ["apple", "banana", "cherry"];
+let count: number = items.length;  // Gets 3
+```
+
+### Array Iteration
+
+Use for-in loops to iterate over arrays:
+
+```shx
+let colors: string[] = ["red", "green", "blue"];
+
+for (let color: string in colors) {
+  console.log(`Color: ${color}`);
+}
+```
+
+### Arrays from String Split
+
+Create arrays by splitting strings - this integrates with the existing `split()` function:
 
 ```shx
 // Create an array by splitting a string
 let csvData: string = "apple,banana,cherry";
-let fruits: string = csvData.split(",");
+let fruits: string[] = csvData.split(",");
 
 // Iterate over the array
 for (let fruit: string in fruits) {
@@ -259,34 +305,40 @@ The `split()` function works with any delimiter:
 ```shx
 // Split by spaces
 let sentence: string = "hello world utah";
-let words: string = sentence.split(" ");
+let words: string[] = sentence.split(" ");
 
 // Split by custom delimiter
 let path: string = "/usr/local/bin";
-let pathParts: string = path.split("/");
+let pathParts: string[] = path.split("/");
 
 // Split by dots for file extensions
 let filename: string = "document.backup.txt";
-let parts: string = filename.split(".");
+let parts: string[] = filename.split(".");
 ```
 
 ### Generated Array Code
 
-Arrays created with `split()` are implemented using bash's `read -ra` command:
+Arrays are implemented using bash arrays:
 
 ```bash
-# Utah code:
-# let data: string = "a,b,c";
-# let items: string = data.split(",");
+# Array literals become bash arrays:
+numbers=(1 2 3 4 5)
+names=("Alice" "Bob" "Charlie")
 
-# Generated bash:
-data="a,b,c"
-IFS=',' read -ra items <<< "${data}"
+# Array access uses bash array syntax:
+first="${numbers[0]}"
+second="${names[1]}"
 
-# Can then be used in for loops:
-for item in "${items[@]}"; do
-  echo "Item: ${item}"
+# Array length uses bash array length syntax:
+count="${#numbers[@]}"
+
+# Array iteration uses bash array expansion:
+for color in "${colors[@]}"; do
+  echo "Color: ${color}"
 done
+
+# Arrays from split() use bash read command:
+IFS=',' read -ra fruits <<< "${csvData}"
 ```
 
 ## 🔧 String Manipulation Functions
@@ -447,6 +499,7 @@ Current tests cover:
 - **mixed_loops.shx** - Mixed loop types in one file
 - **simple_switch.shx** - Basic switch/case/default statements
 - **switch_case.shx** - Complex switch statements with fall-through cases
+- **array_support.shx** - Array literals, access, length, and iteration
 
 ### How Tests Work
 
@@ -497,7 +550,7 @@ Current tests cover:
 
 - [ ] Support for `while` and `break`
 
-- [ ] Arrays and basic data structures
+- [x] Arrays and basic data structures (`string[]`, `number[]`, `boolean[]`)
 
 - [x] Comment support (`//`)
 

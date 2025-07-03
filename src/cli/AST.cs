@@ -29,6 +29,8 @@ public class FunctionCall : Node
 public class ConsoleLog : Node
 {
   public string Message = string.Empty;
+  public Expression? Expression = null; // For complex expressions like array access
+  public bool IsExpression = false;
 }
 
 public class ReturnStatement : Node
@@ -48,6 +50,25 @@ public class ExitStatement : Node
   public int ExitCode;
 }
 
+// Array-related nodes
+public class ArrayLiteral : Expression
+{
+  public List<Expression> Elements = new();
+  public string ElementType = string.Empty; // "string", "number", "boolean"
+}
+
+public class ArrayAccess : Expression
+{
+  public Expression Array = null!;
+  public Expression Index = null!;
+}
+
+public class ArrayLength : Expression
+{
+  public Expression Array = null!;
+}
+
+// For loops
 public class ForLoop : Node
 {
   public string InitVariable = string.Empty;

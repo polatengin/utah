@@ -19,7 +19,7 @@ public class Parser
 
       if (line.StartsWith("let "))
       {
-        var match = Regex.Match(line, @"let (\w+): (\w+) = (.+);");
+        var match = Regex.Match(line, @"let (\w+): ([\w\[\]]+) = (.+);");
         if (match.Success)
         {
           var value = match.Groups[3].Value;
@@ -51,7 +51,7 @@ public class Parser
       }
       else if (line.StartsWith("const "))
       {
-        var match = Regex.Match(line, @"const (\w+): (\w+) = (.+);");
+        var match = Regex.Match(line, @"const (\w+): ([\w\[\]]+) = (.+);");
         if (match.Success)
         {
           var value = match.Groups[3].Value;
@@ -455,23 +455,25 @@ public class Parser
       {
         var match = Regex.Match(line, @"console\.log\((.+)\);");
         var raw = match.Groups[1].Value.Trim();
-        string msg;
+        
         if (raw.StartsWith("`"))
         {
           // Template literal
-          msg = raw[1..^1];
+          var msg = raw[1..^1];
+          program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
         }
         else if (raw.StartsWith("\"") && raw.EndsWith("\""))
         {
           // String literal
-          msg = raw[1..^1];
+          var msg = raw[1..^1];
+          program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
         }
         else
         {
-          // Variable reference
-          msg = $"${raw}";
+          // Parse as expression
+          var expr = ParseExpression(raw);
+          program.Statements.Add(new ConsoleLog { Expression = expr, IsExpression = true });
         }
-        program.Statements.Add(new ConsoleLog { Message = msg });
       }
       else if (line.StartsWith("env."))
       {
@@ -723,6 +725,19 @@ public class Parser
         TargetVariable = targetVariable,
         SourceString = splitMatch.Groups[1].Value,
         Delimiter = splitMatch.Groups[2].Value,
+        ResultArrayName = targetVariable
+      };
+    }
+
+    // Parse string literal.split("delimiter") -> StringSplit
+    var literalSplitMatch = Regex.Match(expression, @"""([^""]*)""\.split\(""([^""]*)""\)");
+    if (literalSplitMatch.Success)
+    {
+      return new StringSplit
+      {
+        TargetVariable = targetVariable,
+        SourceString = literalSplitMatch.Groups[1].Value,
+        Delimiter = literalSplitMatch.Groups[2].Value,
         ResultArrayName = targetVariable
       };
     }
@@ -1002,6 +1017,65 @@ public class Parser
       };
     }
 
+    // Array literal: [1, 2, 3] or ["a", "b", "c"]
+    if (input.StartsWith("[") && input.EndsWith("]"))
+    {
+      var content = input.Substring(1, input.Length - 2).Trim();
+      var arrayLiteral = new ArrayLiteral();
+      
+      if (!string.IsNullOrEmpty(content))
+      {
+        var elements = SplitByComma(content);
+        foreach (var element in elements)
+        {
+          var elementExpr = ParseExpression(element.Trim());
+          arrayLiteral.Elements.Add(elementExpr);
+          
+          // Determine element type from first element
+          if (arrayLiteral.ElementType == string.Empty && elementExpr is LiteralExpression literal)
+          {
+            arrayLiteral.ElementType = literal.Type;
+          }
+        }
+      }
+      
+      return arrayLiteral;
+    }
+
+    // Array access: arrayName[index]
+    if (input.Contains("[") && input.EndsWith("]"))
+    {
+      var bracketIndex = input.IndexOf('[');
+      var arrayName = input.Substring(0, bracketIndex).Trim();
+      var indexContent = input.Substring(bracketIndex + 1, input.Length - bracketIndex - 2).Trim();
+      
+      return new ArrayAccess
+      {
+        Array = new VariableExpression { Name = arrayName },
+        Index = ParseExpression(indexContent)
+      };
+    }
+
+    // Array/String methods: arrayName.length, arrayName.method()
+    if (input.Contains("."))
+    {
+      var dotIndex = input.IndexOf('.');
+      var objectName = input.Substring(0, dotIndex).Trim();
+      var methodPart = input.Substring(dotIndex + 1).Trim();
+      
+      // Handle .length property
+      if (methodPart == "length")
+      {
+        return new ArrayLength
+        {
+          Array = new VariableExpression { Name = objectName }
+        };
+      }
+      
+      // Handle string methods (existing string function parsing)
+      // This will be handled by existing string function parsing
+    }
+
     // Variable reference
     if (Regex.IsMatch(input, @"^\w+$"))
     {
@@ -1047,6 +1121,49 @@ public class Parser
       parts.Add(input.Substring(colonIndex + 1).Trim());
     }
 
+    return parts;
+  }
+
+  private List<string> SplitByComma(string input)
+  {
+    var parts = new List<string>();
+    var current = "";
+    var depth = 0;
+    var inQuotes = false;
+    
+    for (int i = 0; i < input.Length; i++)
+    {
+      var ch = input[i];
+      
+      if (ch == '"' && (i == 0 || input[i - 1] != '\\'))
+      {
+        inQuotes = !inQuotes;
+      }
+      
+      if (!inQuotes)
+      {
+        if (ch == '(' || ch == '[')
+          depth++;
+        else if (ch == ')' || ch == ']')
+          depth--;
+      }
+      
+      if (ch == ',' && depth == 0 && !inQuotes)
+      {
+        parts.Add(current.Trim());
+        current = "";
+      }
+      else
+      {
+        current += ch;
+      }
+    }
+    
+    if (!string.IsNullOrEmpty(current))
+    {
+      parts.Add(current.Trim());
+    }
+    
     return parts;
   }
 

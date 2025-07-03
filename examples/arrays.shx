@@ -1,0 +1,28 @@
+// Test array type support
+let numbers: number[] = [1, 2, 3, 4, 5];
+let names: string[] = ["Alice", "Bob", "Charlie"];
+let flags: boolean[] = [true, false, true];
+
+// Test array access
+let firstNumber: number = numbers[0];
+let secondName: string = names[1];
+
+// Test array methods
+let length: number = numbers.length;
+
+// Test array iteration
+for (let num: number in numbers) {
+  console.log(num);
+}
+
+for (let name: string in names) {
+  console.log(name);
+}
+
+// Test array from split
+let csvData: string = "one,two,three";
+let items: string[] = csvData.split(",");
+
+for (let item: string in items) {
+  console.log(item);
+}

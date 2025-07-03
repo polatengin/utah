@@ -2,10 +2,11 @@ let items: string[] = "one,two,three".split(",");
 
 console.log("Using for-in loop:");
 for (let item: string in items) {
-  console.log("Item: " + item);
+  console.log(`Item: ${item}`);
 }
 
 console.log("Using traditional for loop:");
 for (let i: number = 0; i < 3; i++) {
-  console.log("Index " + i + ": " + items[i]);
+  console.log(`Index ${i}: ${items[i]}`);
+}
 }

@@ -1,0 +1,37 @@
+// Array support test cases
+let numbers: number[] = [1, 2, 3, 4, 5];
+let names: string[] = ["Alice", "Bob", "Charlie"];
+
+// Test array access
+let first: number = numbers[0];
+let second: string = names[1];
+
+// Test array length
+let count: number = numbers.length;
+
+console.log("First number:");
+console.log(first);
+console.log("Second name:");
+console.log(second);
+console.log("Array length:");
+console.log(count);
+
+// Test iteration
+console.log("Numbers:");
+for (let num: number in numbers) {
+  console.log(num);
+}
+
+console.log("Names:");
+for (let name: string in names) {
+  console.log(name);
+}
+
+// Test array from split
+let data: string = "red,green,blue";
+let colors: string[] = data.split(",");
+
+console.log("Colors:");
+for (let color: string in colors) {
+  console.log(color);
+}

@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 public class Compiler
 {
   public string Compile(ProgramNode program)
@@ -78,7 +80,15 @@ public class Compiler
         break;
 
       case ConsoleLog log:
-        lines.Add($"echo \"{log.Message}\"");
+        if (log.IsExpression && log.Expression != null)
+        {
+          var compiledExpr = CompileExpression(log.Expression);
+          lines.Add($"echo {compiledExpr}");
+        }
+        else
+        {
+          lines.Add($"echo \"{log.Message}\"");
+        }
         break;
 
       case IfStatement ifs:
@@ -200,7 +210,11 @@ public class Compiler
         break;
 
       case StringSplit sp:
-        lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< \"${{{sp.SourceString}}}\"");
+        // Check if SourceString looks like a variable name or a string literal
+        var sourceValue = Regex.IsMatch(sp.SourceString, @"^\w+$") 
+          ? $"\"${{{sp.SourceString}}}\"" 
+          : $"\"{sp.SourceString}\"";
+        lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< {sourceValue}");
         break;
 
       case EnvGet eg:
@@ -468,6 +482,9 @@ public class Compiler
       UnaryExpression un => CompileUnaryExpression(un),
       TernaryExpression tern => CompileTernaryExpression(tern),
       ParenthesizedExpression paren => CompileParenthesizedExpression(paren),
+      ArrayLiteral arr => CompileArrayLiteral(arr),
+      ArrayAccess acc => CompileArrayAccess(acc),
+      ArrayLength len => CompileArrayLength(len),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
   }
@@ -554,5 +571,29 @@ public class Compiler
     // Simple heuristic: if either operand is a string literal or we're adding strings
     return (bin.Left is LiteralExpression leftLit && leftLit.Type == "string") ||
            (bin.Right is LiteralExpression rightLit && rightLit.Type == "string");
+  }
+
+  private string CompileArrayLiteral(ArrayLiteral arr)
+  {
+    // Bash arrays are declared and initialized like: arr=("item1" "item2" "item3")
+    var elements = arr.Elements.Select(CompileExpression).ToList();
+    return $"({string.Join(" ", elements)})";
+  }
+
+  private string CompileArrayAccess(ArrayAccess acc)
+  {
+    var arrayName = CompileExpression(acc.Array).TrimStart('$'); // Remove $ prefix if present
+    var index = CompileExpression(acc.Index);
+    
+    // In bash, array access is ${arrayName[index]}
+    return $"\"${{{arrayName}[{index.TrimStart('$')}]}}\"";
+  }
+
+  private string CompileArrayLength(ArrayLength len)
+  {
+    var arrayName = CompileExpression(len.Array).TrimStart('$'); // Remove $ prefix if present
+    
+    // In bash, array length is ${#arrayName[@]}
+    return $"\"${{#{arrayName}[@]}}\"";
   }
 }
