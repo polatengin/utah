@@ -1,0 +1,52 @@
+// Utah For Loops - Complete Demo with Arrays
+
+console.log("=== Traditional For Loops ===");
+
+// Basic increment
+for (let i: number = 1; i <= 3; i++) {
+  console.log(`Count: ${i}`);
+}
+
+// Custom increment
+for (let j: number = 0; j < 15; j += 5) {
+  console.log(`Step by 5: ${j}`);
+}
+
+// Decrement
+for (let k: number = 10; k >= 0; k -= 2) {
+  console.log(`Countdown: ${k}`);
+}
+
+console.log("=== For-In Loops with Arrays ===");
+
+// Split comma-separated values
+let groceries: string = "milk,bread,eggs,cheese,butter";
+let groceryList: string = groceries.split(",");
+
+for (let item: string in groceryList) {
+  console.log(`Need to buy: ${item}`);
+}
+
+// Split space-separated values
+let tools: string = "hammer screwdriver wrench pliers";
+let toolbox: string = tools.split(" ");
+
+for (let tool: string in toolbox) {
+  console.log(`Tool: ${tool}`);
+}
+
+// Split with custom delimiter
+let scores: string = "95|87|92|78|88|91";
+let scoreArray: string = scores.split("|");
+
+for (let score: string in scoreArray) {
+  console.log(`Score: ${score}`);
+}
+
+// Split file extensions
+let files: string = "document.pdf|image.jpg|script.sh|data.csv";
+let fileList: string = files.split("|");
+
+for (let file: string in fileList) {
+  console.log(`Processing: ${file}`);
+}

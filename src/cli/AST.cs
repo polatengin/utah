@@ -48,6 +48,26 @@ public class ExitStatement : Node
   public int ExitCode;
 }
 
+public class ForLoop : Node
+{
+  public string InitVariable = string.Empty;
+  public string InitType = string.Empty;
+  public Expression InitValue = null!;
+  public Expression Condition = null!;
+  public string UpdateVariable = string.Empty;
+  public string UpdateOperator = string.Empty; // "++", "--", "+=", "-="
+  public Expression? UpdateValue = null; // For += and -= operations
+  public List<Node> Body = new();
+}
+
+public class ForInLoop : Node
+{
+  public string Variable = string.Empty;
+  public string VariableType = string.Empty;
+  public string Iterable = string.Empty; // Variable name or array
+  public List<Node> Body = new();
+}
+
 public abstract class StringFunction : Node
 {
   public string TargetVariable = string.Empty;

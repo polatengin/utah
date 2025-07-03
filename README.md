@@ -16,7 +16,7 @@ The generated `.sh` file is saved alongside the original.
 
 ## 🧪 Example
 
-Input (`examples/input_0.shx`):
+Input (`examples/input.shx`):
 
 ```shx
 const appName: string = "MyApp";
@@ -34,7 +34,7 @@ if (name == "Alice") {
 }
 ```
 
-Output (input_0.sh):
+Output (`examples/input.sh`):
 
 ```bash
 readonly appName="MyApp"
@@ -51,6 +51,133 @@ if [ "$name" == "Alice" ]; then
 else
   echo "Unknown user"
 fi
+```
+
+## 🔄 For Loops
+
+Utah supports both traditional C-style for loops and for-in loops for iterating over space-separated values.
+
+### Traditional For Loops
+
+```shx
+// Basic increment
+for (let i: number = 0; i < 5; i++) {
+  console.log(`Count: ${i}`);
+}
+
+// Decrement
+for (let j: number = 10; j > 0; j--) {
+  console.log(`Countdown: ${j}`);
+}
+
+// Custom increment/decrement
+for (let k: number = 0; k < 20; k += 3) {
+  console.log(`Step by 3: ${k}`);
+}
+
+for (let m: number = 15; m >= 0; m -= 5) {
+  console.log(`Step down by 5: ${m}`);
+}
+```
+
+### For-In Loops
+
+For-in loops iterate over arrays created using the `split()` function:
+
+```shx
+// Split a comma-separated string
+let fruitString: string = "apple,banana,cherry";
+let fruits: string = fruitString.split(",");
+
+for (let fruit: string in fruits) {
+  console.log(`Fruit: ${fruit}`);
+}
+
+// Split by spaces
+let words: string = "hello world utah";
+let wordArray: string = words.split(" ");
+
+for (let word: string in wordArray) {
+  console.log(`Word: ${word}`);
+}
+
+// Split by custom delimiter
+let data: string = "one|two|three|four";
+let items: string = data.split("|");
+
+for (let item: string in items) {
+  console.log(`Item: ${item}`);
+}
+```
+
+### Generated Bash Code
+
+For loops are transpiled to efficient bash while loops and for loops:
+
+```bash
+# Traditional for loop becomes:
+i=0
+while [ $i -lt 5 ]; do
+  echo "Count: ${i}"
+  i=$((i + 1))
+done
+
+# For-in loop with split() becomes:
+fruitString="apple,banana,cherry"
+IFS=',' read -ra fruits <<< "${fruitString}"
+for fruit in "${fruits[@]}"; do
+  echo "Fruit: ${fruit}"
+done
+```
+
+## 📋 Arrays
+
+Utah supports arrays through the `split()` function, which creates bash arrays that can be used with for-in loops:
+
+```shx
+// Create an array by splitting a string
+let csvData: string = "apple,banana,cherry";
+let fruits: string = csvData.split(",");
+
+// Iterate over the array
+for (let fruit: string in fruits) {
+  console.log(`Processing: ${fruit}`);
+}
+```
+
+The `split()` function works with any delimiter:
+
+```shx
+// Split by spaces
+let sentence: string = "hello world utah";
+let words: string = sentence.split(" ");
+
+// Split by custom delimiter
+let path: string = "/usr/local/bin";
+let pathParts: string = path.split("/");
+
+// Split by dots for file extensions
+let filename: string = "document.backup.txt";
+let parts: string = filename.split(".");
+```
+
+### Generated Array Code
+
+Arrays created with `split()` are implemented using bash's `read -ra` command:
+
+```bash
+# Utah code:
+# let data: string = "a,b,c";
+# let items: string = data.split(",");
+
+# Generated bash:
+data="a,b,c"
+IFS=',' read -ra items <<< "${data}"
+
+# Can then be used in for loops:
+for item in "${items[@]}"; do
+  echo "Item: ${item}"
+done
 ```
 
 ## 🔧 String Manipulation Functions
@@ -160,7 +287,9 @@ fi
 
 - [x] Support for `const` declarations
 
-- [ ] Support for for, while, and break
+- [x] Support for `for` and `for in` loops
+
+- [ ] Support for `while` and `break`
 
 - [ ] Arrays and basic data structures
 

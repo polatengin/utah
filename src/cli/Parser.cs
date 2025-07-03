@@ -338,6 +338,174 @@ public class Parser
 
         program.Statements.Add(ifStmt);
       }
+      else if (line.StartsWith("for ("))
+      {
+        // Check if it's a for-in loop: for (let item in array) {
+        var forInMatch = Regex.Match(line, @"for \((let|const) (\w+): (\w+) in (\w+)\) \{");
+        if (forInMatch.Success)
+        {
+          var forInLoop = new ForInLoop
+          {
+            Variable = forInMatch.Groups[2].Value,
+            VariableType = forInMatch.Groups[3].Value,
+            Iterable = forInMatch.Groups[4].Value
+          };
+
+          i++;
+          while (!_lines[i].Trim().StartsWith("}"))
+          {
+            string inner = _lines[i].Trim();
+            if (inner.StartsWith("console.log"))
+            {
+              var m = Regex.Match(inner, @"console\.log\((.+)\);");
+              var raw = m.Groups[1].Value.Trim();
+              string msg;
+              if (raw.StartsWith("`"))
+              {
+                msg = raw[1..^1];
+              }
+              else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+              {
+                msg = raw[1..^1];
+              }
+              else
+              {
+                msg = $"${raw}";
+              }
+              forInLoop.Body.Add(new ConsoleLog { Message = msg });
+            }
+            else if (inner.StartsWith("let "))
+            {
+              var m = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
+              if (m.Success)
+              {
+                var value = m.Groups[3].Value;
+                var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
+                if (stringFuncNode != null)
+                {
+                  forInLoop.Body.Add(stringFuncNode);
+                }
+                else
+                {
+                  forInLoop.Body.Add(new VariableDeclaration
+                  {
+                    Name = m.Groups[1].Value,
+                    Type = m.Groups[2].Value,
+                    Value = value.Trim('"'),
+                    IsConst = false
+                  });
+                }
+              }
+            }
+            i++;
+          }
+
+          program.Statements.Add(forInLoop);
+        }
+        else
+        {
+          // Traditional for loop: for (let i: number = 0; i < 10; i++) {
+          var forMatch = Regex.Match(line, @"for \((let|const) (\w+): (\w+) = (.+); (.+); (.+)\) \{");
+          if (forMatch.Success)
+          {
+            var initValue = ParseExpression(forMatch.Groups[4].Value);
+            var condition = ParseExpression(forMatch.Groups[5].Value);
+
+            var updateExpr = forMatch.Groups[6].Value.Trim();
+            string updateOp;
+            Expression? updateValue = null;
+            string updateVar = forMatch.Groups[2].Value;
+
+            if (updateExpr.EndsWith("++"))
+            {
+              updateOp = "++";
+            }
+            else if (updateExpr.EndsWith("--"))
+            {
+              updateOp = "--";
+            }
+            else if (updateExpr.Contains("+="))
+            {
+              updateOp = "+=";
+              var valueStr = updateExpr.Split("+=")[1].Trim();
+              updateValue = ParseExpression(valueStr);
+            }
+            else if (updateExpr.Contains("-="))
+            {
+              updateOp = "-=";
+              var valueStr = updateExpr.Split("-=")[1].Trim();
+              updateValue = ParseExpression(valueStr);
+            }
+            else
+            {
+              updateOp = "++";
+            }
+
+            var forLoop = new ForLoop
+            {
+              InitVariable = forMatch.Groups[2].Value,
+              InitType = forMatch.Groups[3].Value,
+              InitValue = initValue,
+              Condition = condition,
+              UpdateVariable = updateVar,
+              UpdateOperator = updateOp,
+              UpdateValue = updateValue
+            };
+
+            i++;
+            while (!_lines[i].Trim().StartsWith("}"))
+            {
+              string inner = _lines[i].Trim();
+              if (inner.StartsWith("console.log"))
+              {
+                var m = Regex.Match(inner, @"console\.log\((.+)\);");
+                var raw = m.Groups[1].Value.Trim();
+                string msg;
+                if (raw.StartsWith("`"))
+                {
+                  msg = raw[1..^1];
+                }
+                else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+                {
+                  msg = raw[1..^1];
+                }
+                else
+                {
+                  msg = $"${raw}";
+                }
+                forLoop.Body.Add(new ConsoleLog { Message = msg });
+              }
+              else if (inner.StartsWith("let "))
+              {
+                var m = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
+                if (m.Success)
+                {
+                  var value = m.Groups[3].Value;
+                  var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
+                  if (stringFuncNode != null)
+                  {
+                    forLoop.Body.Add(stringFuncNode);
+                  }
+                  else
+                  {
+                    var expression = ParseExpression(value);
+                    forLoop.Body.Add(new VariableDeclarationExpression
+                    {
+                      Name = m.Groups[1].Value,
+                      Type = m.Groups[2].Value,
+                      Value = expression,
+                      IsConst = false
+                    });
+                  }
+                }
+              }
+              i++;
+            }
+
+            program.Statements.Add(forLoop);
+          }
+        }
+      }
       else if (line.StartsWith("exit "))
       {
         int code = int.Parse(line.Substring(5).TrimEnd(';'));
@@ -869,7 +1037,7 @@ public class Parser
     for (int i = 0; i < input.Length; i++)
     {
       char c = input[i];
-      
+
       if (!inString && (c == '"' || c == '\''))
       {
         inString = true;

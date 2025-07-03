@@ -54,7 +54,7 @@ public class Compiler
         break;
 
       case FunctionCall c:
-        var bashArgs = c.Arguments.Select(a => 
+        var bashArgs = c.Arguments.Select(a =>
         {
           if (a.StartsWith("\"") && a.EndsWith("\""))
           {
@@ -89,6 +89,50 @@ public class Compiler
         foreach (var b in ifs.ElseBody)
           lines.AddRange(CompileBlock(b));
         lines.Add("fi");
+        break;
+
+      case ForLoop forLoop:
+        var initValue = CompileExpression(forLoop.InitValue);
+        lines.Add($"{forLoop.InitVariable}={initValue}");
+
+        var condition = CompileExpression(forLoop.Condition);
+        if (condition.StartsWith("[ ") && condition.EndsWith(" ]"))
+        {
+          condition = condition.Substring(2, condition.Length - 4);
+        }
+        lines.Add($"while [ {condition} ]; do");
+
+        foreach (var bodyStmt in forLoop.Body)
+          lines.AddRange(CompileBlock(bodyStmt));
+
+        switch (forLoop.UpdateOperator)
+        {
+          case "++":
+            lines.Add($"  {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} + 1))");
+            break;
+          case "--":
+            lines.Add($"  {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} - 1))");
+            break;
+          case "+=":
+            var addValue = CompileExpression(forLoop.UpdateValue!);
+            lines.Add($"  {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} + {addValue}))");
+            break;
+          case "-=":
+            var subValue = CompileExpression(forLoop.UpdateValue!);
+            lines.Add($"  {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} - {subValue}))");
+            break;
+        }
+
+        lines.Add("done");
+        break;
+
+      case ForInLoop forInLoop:
+        lines.Add($"for {forInLoop.Variable} in \"${{{forInLoop.Iterable}[@]}}\"; do");
+
+        foreach (var bodyStmt in forInLoop.Body)
+          lines.AddRange(CompileBlock(bodyStmt));
+
+        lines.Add("done");
         break;
 
       case StringLength sl:
@@ -376,7 +420,7 @@ public class Compiler
     var condition = CompileExpression(tern.Condition);
     var trueExpr = CompileExpression(tern.TrueExpression);
     var falseExpr = CompileExpression(tern.FalseExpression);
-    
+
     // Handle nested ternary by avoiding nested command substitution
     if (tern.FalseExpression is TernaryExpression)
     {
@@ -384,10 +428,10 @@ public class Compiler
       var nestedCondition = CompileExpression(((TernaryExpression)tern.FalseExpression).Condition);
       var nestedTrue = CompileExpression(((TernaryExpression)tern.FalseExpression).TrueExpression);
       var nestedFalse = CompileExpression(((TernaryExpression)tern.FalseExpression).FalseExpression);
-      
+
       return $"$({condition} && echo {trueExpr} || ({nestedCondition} && echo {nestedTrue} || echo {nestedFalse}))";
     }
-    
+
     return $"$({condition} && echo {trueExpr} || echo {falseExpr})";
   }
 
