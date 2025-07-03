@@ -1,2 +1,2 @@
 name="Utah"
-echo "$"Language: " + name"
+echo Language: "$name"

@@ -11,7 +11,7 @@ public class Compiler
       lines.AddRange(CompileStatement(stmt));
     }
 
-    return string.Join('\n', lines);
+    return string.Join('\n', lines) + '\n';
   }
 
   private List<string> CompileStatement(Node stmt)

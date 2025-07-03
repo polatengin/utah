@@ -1,5 +1,5 @@
 name="${USER:-unknown}"
-echo "$"Hello " + name"
+echo Hello "$name"
 export GREETING="Utah Language"
 greeting="${GREETING:-default}"
-echo "$greeting"
+echo $greeting
