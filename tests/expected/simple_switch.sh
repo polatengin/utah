@@ -1,3 +1,5 @@
+#!/bin/sh
+
 grade="B"
 case $grade in
   A)

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 text="hello world"
 length="${#text}"
 upper="text.toUpper()"

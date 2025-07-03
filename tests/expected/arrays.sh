@@ -1,3 +1,5 @@
+#!/bin/sh
+
 numbers=(1 2 3 4 5)
 names=("Alice" "Bob" "Charlie")
 first="${numbers[0]}"

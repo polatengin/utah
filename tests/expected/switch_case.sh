@@ -1,3 +1,5 @@
+#!/bin/sh
+
 score=85
 category=""
 case $score in

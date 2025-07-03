@@ -1,3 +1,5 @@
+#!/bin/sh
+
 IFS=',' read -ra items <<< "one,two,three"
 echo "Using for-in loop:"
 for item in "${items[@]}"; do
