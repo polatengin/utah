@@ -344,6 +344,60 @@ public class Compiler
       case EnvDelete ed:
         lines.Add($"  unset {ed.VariableName}");
         break;
+
+      case ForLoop forLoop:
+        var initValue = CompileExpression(forLoop.InitValue);
+        lines.Add($"  {forLoop.InitVariable}={initValue}");
+
+        var condition = CompileExpression(forLoop.Condition);
+        if (condition.StartsWith("[ ") && condition.EndsWith(" ]"))
+        {
+          condition = condition.Substring(2, condition.Length - 4);
+        }
+        lines.Add($"  while [ {condition} ]; do");
+
+        foreach (var bodyStmt in forLoop.Body)
+        {
+          var innerLines = CompileBlock(bodyStmt);
+          foreach (var line in innerLines)
+          {
+            lines.Add($"  {line}"); // Add extra indentation for nested content
+          }
+        }
+
+        switch (forLoop.UpdateOperator)
+        {
+          case "++":
+            lines.Add($"    {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} + 1))");
+            break;
+          case "--":
+            lines.Add($"    {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} - 1))");
+            break;
+          case "+=":
+            var addValue = CompileExpression(forLoop.UpdateValue!);
+            lines.Add($"    {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} + {addValue}))");
+            break;
+          case "-=":
+            var subValue = CompileExpression(forLoop.UpdateValue!);
+            lines.Add($"    {forLoop.UpdateVariable}=$(({forLoop.UpdateVariable} - {subValue}))");
+            break;
+        }
+
+        lines.Add("  done");
+        break;
+
+      case ForInLoop forInLoop:
+        lines.Add($"  for {forInLoop.Variable} in \"${{{forInLoop.Iterable}[@]}}\"; do");
+        foreach (var bodyStmt in forInLoop.Body)
+        {
+          var innerLines = CompileBlock(bodyStmt);
+          foreach (var line in innerLines)
+          {
+            lines.Add($"  {line}"); // Add extra indentation for nested content
+          }
+        }
+        lines.Add("  done");
+        break;
     }
 
     return lines;

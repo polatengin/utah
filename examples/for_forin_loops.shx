@@ -50,3 +50,10 @@ let fileList: string = files.split("|");
 for (let file: string in fileList) {
   console.log(`Processing: ${file}`);
 }
+
+// Nested loops
+for (let x: number = 1; x <= 2; x++) {
+  for (let y: number = 1; y <= 2; y++) {
+    console.log(`Position: ${x},${y}`);
+  }
+}
