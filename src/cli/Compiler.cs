@@ -344,6 +344,28 @@ public class Compiler
           lines.Add($"echo \"{fw.Content}\" > \"{fw.FilePath}\"");
         }
         break;
+
+      case FsDirname fd:
+        // Generate Bash code to get directory name (dirname command)
+        lines.Add($"{fd.AssignTo}=$(dirname \"{fd.FilePath}\")");
+        break;
+
+      case FsParentDirName fpd:
+        // Generate Bash code to get parent directory name (basename of dirname)
+        lines.Add($"{fpd.AssignTo}=$(basename $(dirname \"{fpd.FilePath}\"))");
+        break;
+
+      case FsExtension fe:
+        // Generate Bash code to get file extension
+        // Use a temporary variable to store the path, then extract extension
+        lines.Add($"_temp_path=\"{fe.FilePath}\"");
+        lines.Add($"{fe.AssignTo}=\"${{_temp_path##*.}}\"");
+        break;
+
+      case FsFileName fn:
+        // Generate Bash code to get file name (basename command)
+        lines.Add($"{fn.AssignTo}=$(basename \"{fn.FilePath}\")");
+        break;
     }
 
     return lines;
@@ -566,6 +588,28 @@ public class Compiler
           // String literal - wrap in quotes
           lines.Add($"  echo \"{fw.Content}\" > \"{fw.FilePath}\"");
         }
+        break;
+
+      case FsDirname fd:
+        // Generate Bash code to get directory name (inside function block)
+        lines.Add($"  {fd.AssignTo}=$(dirname \"{fd.FilePath}\")");
+        break;
+
+      case FsParentDirName fpd:
+        // Generate Bash code to get parent directory name (inside function block)
+        lines.Add($"  {fpd.AssignTo}=$(basename $(dirname \"{fpd.FilePath}\"))");
+        break;
+
+      case FsExtension fe:
+        // Generate Bash code to get file extension (inside function block)
+        // Use a temporary variable to store the path, then extract extension
+        lines.Add($"  _temp_path=\"{fe.FilePath}\"");
+        lines.Add($"  {fe.AssignTo}=\"${{_temp_path##*.}}\"");
+        break;
+
+      case FsFileName fn:
+        // Generate Bash code to get file name (inside function block)
+        lines.Add($"  {fn.AssignTo}=$(basename \"{fn.FilePath}\")");
         break;
     }
 

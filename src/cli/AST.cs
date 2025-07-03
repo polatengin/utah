@@ -199,6 +199,30 @@ public class FsWriteFile : Node
   public string Content = string.Empty;
 }
 
+public class FsDirname : Node
+{
+  public string FilePath = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the directory path
+}
+
+public class FsParentDirName : Node
+{
+  public string FilePath = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the parent directory name
+}
+
+public class FsExtension : Node
+{
+  public string FilePath = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the file extension
+}
+
+public class FsFileName : Node
+{
+  public string FilePath = string.Empty;
+  public string AssignTo = string.Empty; // Target variable name for the file name
+}
+
 // Expression nodes for complex expressions and operators
 public abstract class Expression : Node { }
 

@@ -1,0 +1,4 @@
+// Test fs.extension() function
+let fileExt: string = fs.extension("document.pdf");
+console.log("File extension:");
+console.log(fileExt);

@@ -938,6 +938,50 @@ public class Parser
       };
     }
 
+    // Parse fs.dirname("filepath") -> FsDirname
+    var fsDirnameMatch = Regex.Match(expression, @"fs\.dirname\(""([^""]+)""\)");
+    if (fsDirnameMatch.Success)
+    {
+      return new FsDirname
+      {
+        FilePath = fsDirnameMatch.Groups[1].Value,
+        AssignTo = targetVariable
+      };
+    }
+
+    // Parse fs.parentDirName("filepath") -> FsParentDirName
+    var fsParentDirNameMatch = Regex.Match(expression, @"fs\.parentDirName\(""([^""]+)""\)");
+    if (fsParentDirNameMatch.Success)
+    {
+      return new FsParentDirName
+      {
+        FilePath = fsParentDirNameMatch.Groups[1].Value,
+        AssignTo = targetVariable
+      };
+    }
+
+    // Parse fs.extension("filepath") -> FsExtension
+    var fsExtensionMatch = Regex.Match(expression, @"fs\.extension\(""([^""]+)""\)");
+    if (fsExtensionMatch.Success)
+    {
+      return new FsExtension
+      {
+        FilePath = fsExtensionMatch.Groups[1].Value,
+        AssignTo = targetVariable
+      };
+    }
+
+    // Parse fs.fileName("filepath") -> FsFileName
+    var fsFileNameMatch = Regex.Match(expression, @"fs\.fileName\(""([^""]+)""\)");
+    if (fsFileNameMatch.Success)
+    {
+      return new FsFileName
+      {
+        FilePath = fsFileNameMatch.Groups[1].Value,
+        AssignTo = targetVariable
+      };
+    }
+
     return null;
   }
 

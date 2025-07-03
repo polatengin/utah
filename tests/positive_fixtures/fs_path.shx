@@ -1,0 +1,21 @@
+// Test fs path manipulation functions
+
+// Test fs.dirname()
+let dir: string = fs.dirname("/home/user/documents/file.txt");
+console.log("Directory:");
+console.log(dir);
+
+// Test fs.parentDirName()
+let parentDir: string = fs.parentDirName("/home/user/documents/file.txt");
+console.log("Parent directory name:");
+console.log(parentDir);
+
+// Test fs.extension()
+let ext: string = fs.extension("/home/user/documents/file.txt");
+console.log("File extension:");
+console.log(ext);
+
+// Test fs.fileName()
+let fileName: string = fs.fileName("/home/user/documents/file.txt");
+console.log("File name:");
+console.log(fileName);

@@ -420,7 +420,96 @@ else
 fi
 ```
 
-## 🖥️ Operating System Utilities
+## � File System Functions
+
+Utah provides a comprehensive set of file system functions for reading, writing, and manipulating file paths. These functions are designed to be familiar to Node.js developers while transpiling to efficient bash commands.
+
+### Available File System Functions
+
+#### File I/O Operations
+
+- `fs.readFile(filepath)` - Read the contents of a file into a string
+- `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
+
+#### Path Manipulation Functions
+
+- `fs.dirname(filepath)` - Get the directory path of a file
+- `fs.parentDirName(filepath)` - Get the name of the parent directory
+- `fs.extension(filepath)` - Get the file extension (without the dot)
+- `fs.fileName(filepath)` - Get the filename with extension
+
+### File I/O Usage
+
+```shx
+// Write content to a file
+fs.writeFile("config.txt", "debug=true");
+
+// Read content from a file
+let config: string = fs.readFile("config.txt");
+console.log("Config:", config);
+
+// Write variable content to file
+let logMessage: string = "Application started";
+fs.writeFile("app.log", logMessage);
+
+// Read and process file content
+let logContent: string = fs.readFile("app.log");
+console.log("Log:", logContent);
+```
+
+### Path Manipulation Usage
+
+```shx
+let filePath: string = "/home/user/documents/project/readme.txt";
+
+// Get directory path
+let directory: string = fs.dirname(filePath);
+console.log("Directory:", directory); // "/home/user/documents/project"
+
+// Get parent directory name
+let parentName: string = fs.parentDirName(filePath);
+console.log("Parent dir:", parentName); // "project"
+
+// Get file extension
+let extension: string = fs.extension(filePath);
+console.log("Extension:", extension); // "txt"
+
+// Get filename
+let filename: string = fs.fileName(filePath);
+console.log("Filename:", filename); // "readme.txt"
+```
+
+### Generated Bash Code for File System Functions
+
+The file system functions transpile to efficient bash commands:
+
+```bash
+# File I/O operations:
+echo "debug=true" > "config.txt"
+config=$(cat "config.txt")
+echo "Config: $config"
+
+logMessage="Application started"
+echo "$logMessage" > "app.log"
+logContent=$(cat "app.log")
+echo "Log: $logContent"
+
+# Path manipulation:
+directory=$(dirname "/home/user/documents/project/readme.txt")
+echo "Directory: $directory"
+
+parentName=$(basename $(dirname "/home/user/documents/project/readme.txt"))
+echo "Parent dir: $parentName"
+
+_temp_path="/home/user/documents/project/readme.txt"
+extension="${_temp_path##*.}"
+echo "Extension: $extension"
+
+filename=$(basename "/home/user/documents/project/readme.txt")
+echo "Filename: $filename"
+```
+
+## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
 
@@ -623,6 +712,8 @@ Current tests cover:
 - [x] Enhanced string manipulation functions
 
 - [x] File I/O operations (read/write files)
+
+- [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
 - [ ] File I/O operations (exists, delete, copy, move, rename, permissions, etc.)
 

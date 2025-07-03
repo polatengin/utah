@@ -1,0 +1,4 @@
+// Test fs.fileName() function
+let name: string = fs.fileName("/downloads/archive.zip");
+console.log("File name:");
+console.log(name);

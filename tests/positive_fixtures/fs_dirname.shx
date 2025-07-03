@@ -1,0 +1,4 @@
+// Test fs.dirname() function
+let dir: string = fs.dirname("/path/to/my/file.txt");
+console.log("Directory path:");
+console.log(dir);

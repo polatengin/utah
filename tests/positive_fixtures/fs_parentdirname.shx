@@ -1,0 +1,4 @@
+// Test fs.parentDirName() function
+let parentName: string = fs.parentDirName("/usr/local/bin/myapp");
+console.log("Parent directory name:");
+console.log(parentName);
