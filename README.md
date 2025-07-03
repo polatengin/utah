@@ -259,6 +259,100 @@ else
 fi
 ```
 
+## Development
+
+### Building
+
+To build the Utah CLI:
+
+```bash
+make build
+```
+
+Or using dotnet directly:
+
+```bash
+cd src/cli
+dotnet build
+```
+
+### Testing
+
+Utah includes a comprehensive regression test suite to ensure that changes don't break existing functionality.
+
+#### Test Structure
+
+Tests are organized in the `tests/` directory:
+
+```text
+tests/
+├── fixtures/          # Test input files (.shx)
+├── expected/          # Expected compilation outputs (.sh)
+└── run_tests.sh       # Main test runner
+```
+
+The test framework automatically:
+
+- Builds the CLI
+- Compiles all test fixtures
+- Compares outputs with expected results
+- Reports any differences
+
+This ensures that new features don't break existing functionality and that the compiler produces consistent output.
+
+### Development Helper
+
+The Makefile provides convenient commands for development:
+
+```bash
+make help              # Show available commands
+make build             # Build the CLI
+make test              # Run all tests
+make compile FILE=<file>  # Compile a specific file
+make clean             # Clean build artifacts
+make dev               # Full development cycle (build + test)
+make info              # Show project information
+```
+
+Use `make help` to see all available targets with descriptions.
+
+### Running Tests
+
+Run all tests with detailed output:
+
+```bash
+make test              # Full test output
+```
+
+### Test Coverage
+
+Current tests cover:
+
+- **simple_console.shx** - Basic console.log functionality
+- **variable_declaration.shx** - Variable declarations and usage
+- **simple_for_loop.shx** - Traditional for loops
+- **for_in_loop.shx** - For-in loops with arrays
+- **nested_for_loop.shx** - Nested for loops
+- **string_functions.shx** - String manipulation functions
+- **environment_variables.shx** - Environment variable operations
+- **ternary_operators.shx** - Ternary conditional operators
+- **mixed_loops.shx** - Mixed loop types in one file
+
+### How Tests Work
+
+1. **Build** - The test runner builds the Utah CLI using `dotnet build`
+2. **Compile** - Each `.shx` file in `fixtures/` is compiled to `.sh`
+3. **Compare** - The generated output is compared with the corresponding file in `expected/`
+4. **Report** - Any differences are reported with diff output
+
+### Test Philosophy
+
+- **Regression Testing** - Ensure existing functionality never breaks
+- **Deterministic** - Same input should always produce same output
+- **Fast** - Tests should run quickly for rapid development feedback
+- **Comprehensive** - Cover all major language features
+- **Maintainable** - Easy to add new tests and update expectations
+
 ## 🚧 Roadmap
 
 - [x] `string` data type
@@ -332,101 +426,3 @@ fi
 - [x] VS Code extension for syntax highlighting
 
 - [ ] VS Code extension for intellisense and autocompletion
-
-## Development
-
-### Building
-
-To build the Utah CLI:
-
-```bash
-make build
-```
-
-Or using dotnet directly:
-
-```bash
-cd src/cli
-dotnet build
-```
-
-### Testing
-
-Utah includes a comprehensive regression test suite to ensure that changes don't break existing functionality.
-
-#### Running Tests
-
-Run all tests with detailed output:
-```bash
-make test
-```
-
-#### Test Structure
-
-Tests are organized in the `tests/` directory:
-
-```
-tests/
-├── fixtures/          # Test input files (.shx)
-├── expected/          # Expected compilation outputs (.sh)
-└── run_tests.sh       # Main test runner
-```
-
-The test framework automatically:
-- Builds the CLI
-- Compiles all test fixtures
-- Compares outputs with expected results
-- Reports any differences
-
-This ensures that new features don't break existing functionality and that the compiler produces consistent output.
-
-### Development Helper
-
-The Makefile provides convenient commands for development:
-
-```bash
-make help           # Show available commands
-make build          # Build the CLI
-make test           # Run all tests
-make compile FILE=<file>  # Compile a specific file
-make clean          # Clean build artifacts
-make dev            # Full development cycle (build + test)
-make info           # Show project information
-```
-
-Use `make help` to see all available targets with descriptions.
-
-### Running Tests
-
-```bash
-make test        # Full test output
-```
-
-### Test Coverage
-
-Current tests cover:
-
-- **simple_console.shx** - Basic console.log functionality
-- **variable_declaration.shx** - Variable declarations and usage
-- **simple_for_loop.shx** - Traditional for loops
-- **for_in_loop.shx** - For-in loops with arrays
-- **nested_for_loop.shx** - Nested for loops
-- **string_functions.shx** - String manipulation functions
-- **environment_variables.shx** - Environment variable operations
-- **ternary_operators.shx** - Ternary conditional operators
-- **mixed_loops.shx** - Mixed loop types in one file
-
-### How Tests Work
-
-1. **Build** - The test runner builds the Utah CLI using `dotnet build`
-2. **Compile** - Each `.shx` file in `fixtures/` is compiled to `.sh`
-3. **Compare** - The generated output is compared with the corresponding file in `expected/`
-4. **Report** - Any differences are reported with diff output
-
-### Test Philosophy
-
-- **Regression Testing** - Ensure existing functionality never breaks
-- **Deterministic** - Same input should always produce same output
-- **Fast** - Tests should run quickly for rapid development feedback
-- **Comprehensive** - Cover all major language features
-- **Maintainable** - Easy to add new tests and update expectations
