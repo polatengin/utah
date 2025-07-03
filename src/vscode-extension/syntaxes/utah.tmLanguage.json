@@ -28,7 +28,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.utah",
-                    "match": "\\b(if|else|const|let|exit|function|for|in)\\b"
+                    "match": "\\b(if|else|const|let|exit|function|for|in|switch|case|default|break)\\b"
                 },
                 {
                     "name": "support.function.utah",
@@ -59,7 +59,7 @@
             "patterns": [
                 {
                     "name": "storage.type.utah",
-                    "match": "\\b(string|boolean|number|void)\\b"
+                    "match": "\\b(string|boolean|number|void|string\\[\\]|number\\[\\]|boolean\\[\\])\\b"
                 }
             ]
         },
