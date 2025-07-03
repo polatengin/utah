@@ -211,8 +211,8 @@ public class Compiler
 
       case StringSplit sp:
         // Check if SourceString looks like a variable name or a string literal
-        var sourceValue = Regex.IsMatch(sp.SourceString, @"^\w+$") 
-          ? $"\"${{{sp.SourceString}}}\"" 
+        var sourceValue = Regex.IsMatch(sp.SourceString, @"^\w+$")
+          ? $"\"${{{sp.SourceString}}}\""
           : $"\"{sp.SourceString}\"";
         lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< {sourceValue}");
         break;
@@ -240,11 +240,11 @@ public class Compiler
       case SwitchStatement sw:
         var switchExpr = CompileExpression(sw.SwitchExpression);
         lines.Add($"case {switchExpr} in");
-        
+
         foreach (var caseClause in sw.Cases)
         {
           // Build case pattern - handle multiple values for fall-through
-          var casePatterns = caseClause.Values.Select(v => 
+          var casePatterns = caseClause.Values.Select(v =>
           {
             var compiled = CompileExpression(v);
             // Remove quotes if they exist since case patterns don't need them
@@ -254,10 +254,10 @@ public class Compiler
             }
             return compiled;
           }).ToList();
-          
+
           var pattern = string.Join("|", casePatterns);
           lines.Add($"  {pattern})");
-          
+
           foreach (var bodyStmt in caseClause.Body)
           {
             var bodyLines = CompileStatement(bodyStmt);
@@ -266,10 +266,10 @@ public class Compiler
               lines.Add($"    {bodyLine}");
             }
           }
-          
+
           lines.Add("    ;;");
         }
-        
+
         if (sw.DefaultCase != null)
         {
           lines.Add("  *)");
@@ -283,7 +283,7 @@ public class Compiler
           }
           lines.Add("    ;;");
         }
-        
+
         lines.Add("esac");
         break;
 
@@ -584,7 +584,7 @@ public class Compiler
   {
     var arrayName = CompileExpression(acc.Array).TrimStart('$'); // Remove $ prefix if present
     var index = CompileExpression(acc.Index);
-    
+
     // In bash, array access is ${arrayName[index]}
     return $"\"${{{arrayName}[{index.TrimStart('$')}]}}\"";
   }
@@ -592,7 +592,7 @@ public class Compiler
   private string CompileArrayLength(ArrayLength len)
   {
     var arrayName = CompileExpression(len.Array).TrimStart('$'); // Remove $ prefix if present
-    
+
     // In bash, array length is ${#arrayName[@]}
     return $"\"${{#{arrayName}[@]}}\"";
   }

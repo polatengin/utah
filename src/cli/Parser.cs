@@ -455,7 +455,7 @@ public class Parser
       {
         var match = Regex.Match(line, @"console\.log\((.+)\);");
         var raw = match.Groups[1].Value.Trim();
-        
+
         if (raw.StartsWith("`"))
         {
           // Template literal
@@ -497,11 +497,11 @@ public class Parser
 
           i++;
           CaseClause? currentCase = null;
-          
+
           while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
           {
             var currentLine = _lines[i].Trim();
-            
+
             if (currentLine.StartsWith("case "))
             {
               // If we have a previous case and it's a fall-through (no break), add this case value to it
@@ -509,7 +509,7 @@ public class Parser
               if (caseMatch.Success)
               {
                 var caseValue = ParseExpression(caseMatch.Groups[1].Value);
-                
+
                 // If we have an existing case without a break, add this as a fall-through
                 if (currentCase != null && !currentCase.HasBreak)
                 {
@@ -528,7 +528,7 @@ public class Parser
             {
               currentCase = null; // End current case
               var defaultClause = new DefaultClause();
-              
+
               i++;
               while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
               {
@@ -549,7 +549,7 @@ public class Parser
                 }
                 i++;
               }
-              
+
               switchStmt.DefaultCase = defaultClause;
               i--; // Adjust for the outer loop increment
             }
@@ -570,10 +570,10 @@ public class Parser
                 currentCase.Body.Add(bodyNode);
               }
             }
-            
+
             i++;
           }
-          
+
           program.Statements.Add(switchStmt);
         }
       }
@@ -1022,7 +1022,7 @@ public class Parser
     {
       var content = input.Substring(1, input.Length - 2).Trim();
       var arrayLiteral = new ArrayLiteral();
-      
+
       if (!string.IsNullOrEmpty(content))
       {
         var elements = SplitByComma(content);
@@ -1030,7 +1030,7 @@ public class Parser
         {
           var elementExpr = ParseExpression(element.Trim());
           arrayLiteral.Elements.Add(elementExpr);
-          
+
           // Determine element type from first element
           if (arrayLiteral.ElementType == string.Empty && elementExpr is LiteralExpression literal)
           {
@@ -1038,7 +1038,7 @@ public class Parser
           }
         }
       }
-      
+
       return arrayLiteral;
     }
 
@@ -1048,7 +1048,7 @@ public class Parser
       var bracketIndex = input.IndexOf('[');
       var arrayName = input.Substring(0, bracketIndex).Trim();
       var indexContent = input.Substring(bracketIndex + 1, input.Length - bracketIndex - 2).Trim();
-      
+
       return new ArrayAccess
       {
         Array = new VariableExpression { Name = arrayName },
@@ -1062,7 +1062,7 @@ public class Parser
       var dotIndex = input.IndexOf('.');
       var objectName = input.Substring(0, dotIndex).Trim();
       var methodPart = input.Substring(dotIndex + 1).Trim();
-      
+
       // Handle .length property
       if (methodPart == "length")
       {
@@ -1071,7 +1071,7 @@ public class Parser
           Array = new VariableExpression { Name = objectName }
         };
       }
-      
+
       // Handle string methods (existing string function parsing)
       // This will be handled by existing string function parsing
     }
@@ -1130,16 +1130,16 @@ public class Parser
     var current = "";
     var depth = 0;
     var inQuotes = false;
-    
+
     for (int i = 0; i < input.Length; i++)
     {
       var ch = input[i];
-      
+
       if (ch == '"' && (i == 0 || input[i - 1] != '\\'))
       {
         inQuotes = !inQuotes;
       }
-      
+
       if (!inQuotes)
       {
         if (ch == '(' || ch == '[')
@@ -1147,7 +1147,7 @@ public class Parser
         else if (ch == ')' || ch == ']')
           depth--;
       }
-      
+
       if (ch == ',' && depth == 0 && !inQuotes)
       {
         parts.Add(current.Trim());
@@ -1158,12 +1158,12 @@ public class Parser
         current += ch;
       }
     }
-    
+
     if (!string.IsNullOrEmpty(current))
     {
       parts.Add(current.Trim());
     }
-    
+
     return parts;
   }
 
@@ -1563,7 +1563,7 @@ public class Parser
               lineIndex++;
             }
           }
-          
+
           // Skip over the closing brace
           lineIndex++;
 
