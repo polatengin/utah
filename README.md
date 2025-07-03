@@ -346,7 +346,7 @@ let endsWithExclamation: boolean = message.endsWith("!"); // true
 let containsWorld: boolean = message.includes("World"); // true
 ```
 
-### Generated Bash Code
+### Generated Bash Code for String Functions
 
 The string functions transpile to efficient bash parameter expansion and built-in commands:
 
@@ -396,8 +396,7 @@ Tests are organized in the `tests/` directory:
 ```text
 tests/
 ├── fixtures/          # Test input files (.shx)
-├── expected/          # Expected compilation outputs (.sh)
-└── run_tests.sh       # Main test runner
+└── expected/          # Expected compilation outputs (.sh)
 ```
 
 The test framework automatically:
