@@ -23,7 +23,8 @@
         "GitHub.copilot-chat",
         "ms-dotnettools.csharp",
         "ms-dotnettools.csdevkit",
-        "ms-vscode.extension-test-runner"
+        "ms-vscode.extension-test-runner",
+        "ms-vscode.makefile-tools"
       ]
     }
   }
