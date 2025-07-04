@@ -47,6 +47,12 @@ public class Compiler
         }
         break;
 
+      case ConsoleIsSudoExpression sudo:
+        // This case is for when console.isSudo() is a statement, which is not valid.
+        // However, to be robust, we can throw an error or handle it gracefully.
+        // For now, we'll assume it's part of an expression and handled by CompileExpression.
+        break;
+
       case FunctionDeclaration f:
         lines.Add($"{f.Name}() {{");
         for (int j = 0; j < f.Parameters.Count; j++)
@@ -743,8 +749,14 @@ public class Compiler
       ArrayAccess acc => CompileArrayAccess(acc),
       ArrayLength len => CompileArrayLength(len),
       FunctionCall func => CompileFunctionCallExpression(func),
+      ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
+  }
+
+  private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)
+  {
+    return "$([ \"$(id -u)\" -eq 0 ] && echo \"true\" || echo \"false\")";
   }
 
   private string CompileLiteralExpression(LiteralExpression lit)
@@ -770,7 +782,7 @@ public class Compiler
 
     return bin.Operator switch
     {
-      "+" when IsStringConcatenation(bin) => $"\"{left.Trim('\"')}{right.Trim('\"')}\"",
+      "+" when IsStringConcatenation(bin) => CompileStringConcatenation(left, right),
       "+" => $"$(({left.TrimStart('$')} + {right.TrimStart('$')}))",
       "-" => $"$(({left.TrimStart('$')} - {right.TrimStart('$')}))",
       "*" => $"$(({left.TrimStart('$')} * {right.TrimStart('$')}))",
@@ -822,6 +834,30 @@ public class Compiler
   private string CompileParenthesizedExpression(ParenthesizedExpression paren)
   {
     return $"({CompileExpression(paren.Inner)})";
+  }
+
+  private string CompileStringConcatenation(string left, string right)
+  {
+    // Remove quotes from string literals
+    var leftPart = left.StartsWith("\"") && left.EndsWith("\"") ? left[1..^1] : left;
+    
+    // Handle variable expressions - if right starts with $, we need to use ${var} format
+    string rightPart;
+    if (right.StartsWith("$"))
+    {
+      var varName = right.TrimStart('$');
+      rightPart = $"${{{varName}}}";
+    }
+    else if (right.StartsWith("\"") && right.EndsWith("\""))
+    {
+      rightPart = right[1..^1];
+    }
+    else
+    {
+      rightPart = right;
+    }
+    
+    return $"\"{leftPart}{rightPart}\"";
   }
 
   private bool IsStringConcatenation(BinaryExpression bin)

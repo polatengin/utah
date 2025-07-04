@@ -29,9 +29,11 @@ public class FunctionCall : Expression
 public class ConsoleLog : Node
 {
   public string Message = string.Empty;
-  public Expression? Expression = null; // For complex expressions like array access
-  public bool IsExpression = false;
+  public bool IsExpression;
+  public Expression? Expression;
 }
+
+public class ConsoleIsSudoExpression : Expression { } // Represents console.isSudo()
 
 public class ReturnStatement : Node
 {

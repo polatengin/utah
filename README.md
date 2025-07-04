@@ -838,6 +838,112 @@ fi
 console.log("Linux version: ${version}")
 ```
 
+## 🔐 Console System Functions
+
+Utah provides console system functions for checking system privileges and performing system-level operations within your scripts.
+
+### Available Console System Functions
+
+#### Privilege Checking
+
+- `console.isSudo()` - Check if the script is running with root/sudo privileges
+
+### Console System Functions Usage
+
+```typescript
+// Check if running with sudo privileges
+let isSudo: boolean = console.isSudo();
+
+if (isSudo) {
+  console.log("Running with elevated privileges");
+  // Perform admin operations
+} else {
+  console.log("Running with normal user privileges");
+  // Prompt for sudo or exit
+}
+
+// Use in conditional operations
+if (console.isSudo()) {
+  console.log("Installing system packages...");
+} else {
+  console.log("Please run with sudo for system operations");
+}
+
+// Store result for multiple checks
+let hasRootAccess: boolean = console.isSudo();
+console.log(`Root access: ${hasRootAccess}`);
+```
+
+### Security and Admin Operations Example
+
+```typescript
+// Script that requires elevated privileges
+let isRoot: boolean = console.isSudo();
+
+if (!isRoot) {
+  console.log("Error: This script requires sudo privileges");
+  console.log("Please run: sudo utah compile script.shx && sudo ./script.sh");
+  exit(1);
+}
+
+console.log("Verified: Running with administrator privileges");
+console.log("Proceeding with system configuration...");
+
+// Safe to perform admin operations here
+console.log("Configuring system settings...");
+console.log("Installation complete!");
+```
+
+### Generated Bash Code for Console System Functions
+
+The console system functions transpile to efficient bash commands:
+
+```bash
+# console.isSudo() becomes:
+isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
+
+# Complete example:
+isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
+
+if [ "${isSudo}" = "true" ]; then
+  echo "Running with elevated privileges"
+else
+  echo "Running with normal user privileges"
+fi
+
+# Conditional usage:
+if [ "$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")" = "true" ]; then
+  echo "Installing system packages..."
+else
+  echo "Please run with sudo for system operations"
+fi
+```
+
+### Console System Functions Use Cases
+
+- **Privilege Verification**: Ensure scripts have necessary permissions before execution
+- **Security Checks**: Validate user permissions for sensitive operations
+- **Admin Scripts**: Build installation and configuration scripts that require root access
+- **Conditional Logic**: Execute different code paths based on privilege level
+- **Error Prevention**: Fail gracefully when insufficient privileges are detected
+- **User Guidance**: Provide helpful messages about required permissions
+
+### Security Best Practices
+
+- **Always check privileges** before performing system-level operations
+- **Fail early** if required privileges are not available
+- **Provide clear error messages** when privilege checks fail
+- **Use `console.isSudo()`** instead of assuming user permissions
+- **Document privilege requirements** in script comments and usage instructions
+
+### Technical Notes
+
+- Uses the standard Unix `id -u` command to check effective user ID
+- Returns `true` when effective user ID is 0 (root)
+- Returns `false` for all non-root users
+- Works consistently across all Unix-like systems (Linux, macOS, BSD)
+- Lightweight check with minimal performance impact
+
 ## Development
 
 ### Building
@@ -919,6 +1025,7 @@ Current tests cover:
 - **simple_switch.shx** - Basic switch/case/default statements
 - **switch_case.shx** - Complex switch statements with fall-through cases
 - **array_support.shx** - Array literals, access, length, and iteration
+- **is_sudo.shx** - Console system functions and privilege checking
 
 ### How Tests Work
 
@@ -954,6 +1061,8 @@ Current tests cover:
 - [x] `else` statements
 
 - [x] `console.log` for output
+
+- [x] Console system functions (`console.isSudo()`)
 
 - [x] String interpolation with backticks (`Hello, ${name}`)
 

@@ -1309,6 +1309,12 @@ public class Parser
       var functionName = input.Substring(0, parenIndex).Trim();
       var argsContent = input.Substring(parenIndex + 1, input.Length - parenIndex - 2).Trim();
 
+      // Special handling for console.isSudo()
+      if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ConsoleIsSudoExpression();
+      }
+
       // Make sure it's a simple function name or a timer function (not a complex expression)
       if (Regex.IsMatch(functionName, @"^\w+$") || functionName == "timer.stop")
       {
@@ -1486,20 +1492,25 @@ public class Parser
     {
       var match = Regex.Match(line, @"console\.log\((.+)\);");
       var raw = match.Groups[1].Value.Trim();
-      string msg;
+      
       if (raw.StartsWith("`"))
       {
-        msg = raw[1..^1];
+        // Template literal - use the old way
+        var msg = raw[1..^1];
+        return new ConsoleLog { Message = msg };
       }
-      else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+      else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
       {
-        msg = raw[1..^1];
+        // Simple string literal - use the old way
+        var msg = raw[1..^1];
+        return new ConsoleLog { Message = msg };
       }
       else
       {
-        msg = $"${raw}";
+        // Expression - parse it properly
+        var expression = ParseExpression(raw);
+        return new ConsoleLog { IsExpression = true, Expression = expression };
       }
-      return new ConsoleLog { Message = msg };
     }
     else if (line.StartsWith("let "))
     {
@@ -1644,11 +1655,15 @@ public class Parser
       var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
       if (match.Success)
       {
-        return new FunctionCall
+        return (match.Groups[1].Value, match.Groups[2].Value) switch
         {
-          Name = match.Groups[1].Value,
-          Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(a => a.Trim()).ToList()
+          ("console", "isSudo") => new ConsoleIsSudoExpression(),
+          _ => new FunctionCall
+          {
+            Name = match.Groups[1].Value,
+            Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                  .Select(a => a.Trim()).ToList()
+          }
         };
       }
     }
