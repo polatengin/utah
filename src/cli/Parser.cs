@@ -278,23 +278,25 @@ public class Parser
           {
             var m = Regex.Match(inner, @"console\.log\((.+)\);");
             var raw = m.Groups[1].Value.Trim();
-            string msg;
+            
             if (raw.StartsWith("`"))
             {
-              // Template literal
-              msg = raw[1..^1];
+              // Template literal - use the old way
+              var msg = raw[1..^1];
+              ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
             }
-            else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+            else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
             {
-              // String literal
-              msg = raw[1..^1];
+              // Simple string literal - use the old way
+              var msg = raw[1..^1];
+              ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
             }
             else
             {
-              // Variable reference
-              msg = $"${raw}";
+              // Expression - parse it properly
+              var expression = ParseExpression(raw);
+              ifStmt.ThenBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
             }
-            ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
           }
           else if (inner.StartsWith("let "))
           {
@@ -359,7 +361,7 @@ public class Parser
           i++;
         }
 
-        i++;
+        // Check if we have an else clause
         var currentLine = _lines[i].Trim();
         if (currentLine == "} else {" || currentLine == "else {")
         {
@@ -371,23 +373,25 @@ public class Parser
             {
               var m = Regex.Match(inner, @"console\.log\((.+)\);");
               var raw = m.Groups[1].Value.Trim();
-              string msg;
+              
               if (raw.StartsWith("`"))
               {
-                // Template literal
-                msg = raw[1..^1];
+                // Template literal - use the old way
+                var msg = raw[1..^1];
+                ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
               }
-              else if (raw.StartsWith("\"") && raw.EndsWith("\""))
+              else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
               {
-                // String literal
-                msg = raw[1..^1];
+                // Simple string literal - use the old way
+                var msg = raw[1..^1];
+                ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
               }
               else
               {
-                // Variable reference
-                msg = $"${raw}";
+                // Expression - parse it properly
+                var expression = ParseExpression(raw);
+                ifStmt.ElseBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
               }
-              ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
             }
             else if (inner.StartsWith("exit "))
             {
@@ -1313,6 +1317,18 @@ public class Parser
       if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
       {
         return new ConsoleIsSudoExpression();
+      }
+
+      // Special handling for console.promptYesNo()
+      if (functionName == "console.promptYesNo" && !string.IsNullOrEmpty(argsContent))
+      {
+        // Extract the prompt text from the argument (should be a string literal)
+        var promptText = argsContent.Trim();
+        if (promptText.StartsWith("\"") && promptText.EndsWith("\""))
+        {
+          promptText = promptText[1..^1]; // Remove quotes
+        }
+        return new ConsolePromptYesNoExpression { PromptText = promptText };
       }
 
       // Make sure it's a simple function name or a timer function (not a complex expression)

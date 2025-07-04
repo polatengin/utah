@@ -35,6 +35,11 @@ public class ConsoleLog : Node
 
 public class ConsoleIsSudoExpression : Expression { } // Represents console.isSudo()
 
+public class ConsolePromptYesNoExpression : Expression 
+{ 
+  public string PromptText = string.Empty; // The text to display to the user
+}
+
 public class ReturnStatement : Node
 {
   public Expression? Value;

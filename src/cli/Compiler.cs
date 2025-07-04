@@ -124,9 +124,15 @@ public class Compiler
         }
         foreach (var b in ifs.ThenBody)
           lines.AddRange(CompileBlock(b));
-        lines.Add("else");
-        foreach (var b in ifs.ElseBody)
-          lines.AddRange(CompileBlock(b));
+        
+        // Only add else clause if there are statements in the else body
+        if (ifs.ElseBody.Count > 0)
+        {
+          lines.Add("else");
+          foreach (var b in ifs.ElseBody)
+            lines.AddRange(CompileBlock(b));
+        }
+        
         lines.Add("fi");
         break;
 
@@ -750,6 +756,7 @@ public class Compiler
       ArrayLength len => CompileArrayLength(len),
       FunctionCall func => CompileFunctionCallExpression(func),
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
+      ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
   }
@@ -757,6 +764,12 @@ public class Compiler
   private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)
   {
     return "$([ \"$(id -u)\" -eq 0 ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileConsolePromptYesNoExpression(ConsolePromptYesNoExpression prompt)
+  {
+    // Generate bash code that prompts the user and returns true/false based on yes/no response
+    return $"$(while true; do read -p \"{prompt.PromptText} (y/n): \" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
   }
 
   private string CompileLiteralExpression(LiteralExpression lit)

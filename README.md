@@ -848,6 +848,10 @@ Utah provides console system functions for checking system privileges and perfor
 
 - `console.isSudo()` - Check if the script is running with root/sudo privileges
 
+#### User Interaction
+
+- `console.promptYesNo("prompt text")` - Display a yes/no prompt and return user's choice as boolean
+
 ### Console System Functions Usage
 
 ```typescript
@@ -862,11 +866,29 @@ if (isSudo) {
   // Prompt for sudo or exit
 }
 
+// Prompt user for yes/no confirmation
+let proceed: boolean = console.promptYesNo("Do you want to continue?");
+
+if (proceed) {
+  console.log("User chose to continue");
+  // Continue with operation
+} else {
+  console.log("User chose to cancel");
+  // Cancel operation or exit
+}
+
 // Use in conditional operations
 if (console.isSudo()) {
   console.log("Installing system packages...");
 } else {
   console.log("Please run with sudo for system operations");
+}
+
+// Chain prompts for user interaction
+let confirmInstall: boolean = console.promptYesNo("Install new packages?");
+if (confirmInstall) {
+  let confirmRestart: boolean = console.promptYesNo("Restart system after install?");
+  console.log(`Install: ${confirmInstall}, Restart: ${confirmRestart}`);
 }
 
 // Store result for multiple checks
@@ -877,7 +899,7 @@ console.log(`Root access: ${hasRootAccess}`);
 ### Security and Admin Operations Example
 
 ```typescript
-// Script that requires elevated privileges
+// Script that requires elevated privileges and user confirmation
 let isRoot: boolean = console.isSudo();
 
 if (!isRoot) {
@@ -887,10 +909,25 @@ if (!isRoot) {
 }
 
 console.log("Verified: Running with administrator privileges");
+
+// Confirm dangerous operation with user
+let confirmAction: boolean = console.promptYesNo("This will modify system files. Continue?");
+
+if (!confirmAction) {
+  console.log("Operation cancelled by user");
+  exit(0);
+}
+
 console.log("Proceeding with system configuration...");
 
-// Safe to perform admin operations here
-console.log("Configuring system settings...");
+// Additional confirmation for destructive actions
+let confirmDelete: boolean = console.promptYesNo("Delete existing configuration files?");
+if (confirmDelete) {
+  console.log("Removing old configuration...");
+} else {
+  console.log("Keeping existing configuration...");
+}
+
 console.log("Installation complete!");
 ```
 
@@ -902,6 +939,9 @@ The console system functions transpile to efficient bash commands:
 # console.isSudo() becomes:
 isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
 
+# console.promptYesNo("prompt text") becomes:
+proceed=$(while true; do read -p "Do you want to continue? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
+
 # Complete example:
 isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
 
@@ -909,6 +949,14 @@ if [ "${isSudo}" = "true" ]; then
   echo "Running with elevated privileges"
 else
   echo "Running with normal user privileges"
+fi
+
+proceed=$(while true; do read -p "Do you want to continue? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
+
+if [ "${proceed}" = "true" ]; then
+  echo "User chose to continue"
+else
+  echo "User chose to cancel"
 fi
 
 # Conditional usage:
