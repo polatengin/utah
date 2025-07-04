@@ -1,0 +1,92 @@
+name: Release Utah CLI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Get next version
+        id: version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let nextVersion;
+            try {
+              const { data: latestRelease } = await github.rest.repos.getLatestRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              let [major, minor, patch] = latestRelease.tag_name.replace('v', '').split('.').map(Number);
+              patch++;
+              nextVersion = `${major}.${minor}.${patch}`;
+            } catch (error) {
+              if (error.status === 404) {
+                console.log("No releases found, starting with version 0.1.0");
+                nextVersion = '0.1.0';
+              } else {
+                throw error;
+              }
+            }
+            console.log(`New version: ${nextVersion}`);
+            core.setOutput('version', nextVersion);
+            core.setOutput('new_version_tag', `v${nextVersion}`);
+
+      - name: Update project version
+        run: |
+          sed -i 's|<Version>.*</Version>|<Version>${{ steps.version.outputs.version }}</Version>|' src/cli/utah.csproj
+
+      - name: Build
+        run: dotnet build src/cli/utah.csproj --configuration Release
+
+      - name: Test
+        run: make test
+
+      - name: Publish
+        run: |
+          dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r linux-x64 -o ./publish/linux-x64
+          dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-x64 -o ./publish/osx-x64
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.new_version_tag }}
+          release_name: Release ${{ steps.version.outputs.new_version_tag }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/linux-x64/utah
+          asset_name: utah-linux-x64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/osx-x64/utah
+          asset_name: utah-osx-x64
+          asset_content_type: application/octet-stream
