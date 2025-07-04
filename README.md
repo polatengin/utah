@@ -420,7 +420,7 @@ else
 fi
 ```
 
-## � File System Functions
+## 📂 File System Functions
 
 Utah provides a comprehensive set of file system functions for reading, writing, and manipulating file paths. These functions are designed to be familiar to Node.js developers while transpiling to efficient bash commands.
 
