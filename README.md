@@ -509,6 +509,101 @@ filename=$(basename "/home/user/documents/project/readme.txt")
 echo "Filename: $filename"
 ```
 
+## ⏱️ Timer Functions
+
+Utah provides timer functions for measuring execution time in your scripts. These functions are useful for performance testing, benchmarking, and monitoring script execution duration.
+
+### Available Timer Functions
+
+#### Time Measurement
+
+- `timer.start()` - Start a timer (resets any previous timer)
+- `timer.stop()` - Stop the timer and return elapsed time in milliseconds
+
+### Timer Usage
+
+```shx
+// Basic timer usage
+timer.start();
+console.log("Starting some work...");
+
+// Simulate some work
+for (let i: number = 0; i < 1000000; i++) {
+  // Some computation
+}
+
+const elapsed: number = timer.stop();
+console.log(`Work completed in ${elapsed} ms`);
+
+// Timer can be restarted
+timer.start();
+console.log("Starting more work...");
+
+// More work
+for (let j: number = 0; j < 500000; j++) {
+  // More computation
+}
+
+const elapsed2: number = timer.stop();
+console.log(`Second task took ${elapsed2} ms`);
+```
+
+### Timer with Conditionals
+
+```shx
+timer.start();
+
+let processCount: number = 1000;
+if (processCount > 500) {
+  console.log("Processing large dataset...");
+  for (let i: number = 0; i < processCount; i++) {
+    // Process data
+  }
+} else {
+  console.log("Processing small dataset...");
+  for (let i: number = 0; i < processCount; i++) {
+    // Process data
+  }
+}
+
+const duration: number = timer.stop();
+console.log(`Processing ${processCount} items took ${duration} ms`);
+```
+
+### Generated Bash Code for Timer Functions
+
+The timer functions transpile to efficient bash commands using date:
+
+```bash
+# timer.start() becomes:
+_utah_timer_start=$(date +%s%3N)
+
+# timer.stop() becomes:
+_utah_timer_end=$(date +%s%3N)
+elapsed=$((_utah_timer_end - _utah_timer_start))
+
+# Complete example:
+_utah_timer_start=$(date +%s%3N)
+echo "Starting some work..."
+
+i=0
+while [ $i -lt 1000000 ]; do
+  i=$((i + 1))
+done
+
+_utah_timer_end=$(date +%s%3N)
+elapsed=$((_utah_timer_end - _utah_timer_start))
+echo "Work completed in ${elapsed} ms"
+```
+
+### Timer Best Practices
+
+- **Use for performance testing**: Measure how long different parts of your script take
+- **Benchmark optimizations**: Compare execution times before and after code changes  
+- **Monitor long-running tasks**: Track progress of time-intensive operations
+- **Restart timer as needed**: Call `timer.start()` multiple times to measure different sections
+- **Millisecond precision**: Timer provides millisecond accuracy for fine-grained measurements
+
 ## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.

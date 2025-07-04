@@ -52,23 +52,31 @@ public class Parser
                 }
                 else
                 {
-                  var declaredType = match.Groups[2].Value;
-                  var expression = ParseExpression(value);
-
-                  // Validate array type if it's an array declaration
-                  if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                  var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+                  if (timerNode != null)
                   {
-                    var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                    ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                    program.Statements.Add(timerNode);
                   }
-
-                  program.Statements.Add(new VariableDeclarationExpression
+                  else
                   {
-                    Name = match.Groups[1].Value,
-                    Type = declaredType,
-                    Value = expression,
-                    IsConst = false
-                  });
+                    var declaredType = match.Groups[2].Value;
+                    var expression = ParseExpression(value);
+
+                    // Validate array type if it's an array declaration
+                    if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                    {
+                      var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                      ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                    }
+
+                    program.Statements.Add(new VariableDeclarationExpression
+                    {
+                      Name = match.Groups[1].Value,
+                      Type = declaredType,
+                      Value = expression,
+                      IsConst = false
+                    });
+                  }
                 }
               }
             }
@@ -104,23 +112,31 @@ public class Parser
               }
               else
               {
-                var declaredType = match.Groups[2].Value;
-                var expression = ParseExpression(value);
-
-                // Validate array type if it's an array declaration
-                if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                var timerNode = ParseTimerFunction(varName, value);
+                if (timerNode != null)
                 {
-                  var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                  ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
+                  program.Statements.Add(timerNode);
                 }
-
-                program.Statements.Add(new VariableDeclarationExpression
+                else
                 {
-                  Name = varName,
-                  Type = declaredType,
-                  Value = expression,
-                  IsConst = true
-                });
+                  var declaredType = match.Groups[2].Value;
+                  var expression = ParseExpression(value);
+
+                  // Validate array type if it's an array declaration
+                  if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                  {
+                    var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                    ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
+                  }
+
+                  program.Statements.Add(new VariableDeclarationExpression
+                  {
+                    Name = varName,
+                    Type = declaredType,
+                    Value = expression,
+                    IsConst = true
+                  });
+                }
               }
             }
           }
@@ -530,6 +546,15 @@ public class Parser
         if (fsNode != null)
         {
           program.Statements.Add(fsNode);
+        }
+      }
+      else if (line.StartsWith("timer."))
+      {
+        // Parse standalone timer function calls
+        var timerNode = ParseStandaloneTimerFunction(line);
+        if (timerNode != null)
+        {
+          program.Statements.Add(timerNode);
         }
       }
       else if (line.StartsWith("switch ("))
@@ -1256,8 +1281,8 @@ public class Parser
       var functionName = input.Substring(0, parenIndex).Trim();
       var argsContent = input.Substring(parenIndex + 1, input.Length - parenIndex - 2).Trim();
 
-      // Make sure it's a simple function name (not a complex expression)
-      if (Regex.IsMatch(functionName, @"^\w+$"))
+      // Make sure it's a simple function name or a timer function (not a complex expression)
+      if (Regex.IsMatch(functionName, @"^\w+$") || functionName == "timer.stop")
       {
         var functionCall = new FunctionCall
         {
@@ -1468,14 +1493,22 @@ public class Parser
           }
           else
           {
-            var expression = ParseExpression(value);
-            return new VariableDeclarationExpression
+            var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+            if (timerNode != null)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = expression,
-              IsConst = false
-            };
+              return timerNode;
+            }
+            else
+            {
+              var expression = ParseExpression(value);
+              return new VariableDeclarationExpression
+              {
+                Name = match.Groups[1].Value,
+                Type = match.Groups[2].Value,
+                Value = expression,
+                IsConst = false
+              };
+            }
           }
         }
       }
@@ -1500,14 +1533,22 @@ public class Parser
           }
           else
           {
-            var expression = ParseExpression(value);
-            return new VariableDeclarationExpression
+            var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+            if (timerNode != null)
             {
-              Name = match.Groups[1].Value,
-              Type = match.Groups[2].Value,
-              Value = expression,
-              IsConst = true
-            };
+              return timerNode;
+            }
+            else
+            {
+              var expression = ParseExpression(value);
+              return new VariableDeclarationExpression
+              {
+                Name = match.Groups[1].Value,
+                Type = match.Groups[2].Value,
+                Value = expression,
+                IsConst = true
+              };
+            }
           }
         }
       }
@@ -1817,5 +1858,31 @@ public class Parser
       BinaryExpression _ => "expression", // Could infer type from operation
       _ => "unknown"
     };
+  }
+
+  // Timer function parsing methods
+  private Node? ParseStandaloneTimerFunction(string line)
+  {
+    line = line.Trim();
+
+    if (line == "timer.start();")
+    {
+      return new TimerStart();
+    }
+
+    return null;
+  }
+
+  private Node? ParseTimerFunction(string assignTo, string value)
+  {
+    value = value.Trim();
+
+    // Parse timer.stop() -> TimerStop  
+    if (value == "timer.stop()")
+    {
+      return new TimerStop { AssignTo = assignTo };
+    }
+
+    return null;
   }
 }

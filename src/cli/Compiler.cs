@@ -366,6 +366,17 @@ public class Compiler
         // Generate Bash code to get file name (basename command)
         lines.Add($"{fn.AssignTo}=$(basename \"{fn.FilePath}\")");
         break;
+
+      case TimerStart ts:
+        // Record the start time in milliseconds
+        lines.Add("_utah_timer_start=$(date +%s%3N)");
+        break;
+
+      case TimerStop ts:
+        // Calculate elapsed time and assign to variable
+        lines.Add("_utah_timer_end=$(date +%s%3N)");
+        lines.Add($"{ts.AssignTo}=$((_utah_timer_end - _utah_timer_start))");
+        break;
     }
 
     return lines;

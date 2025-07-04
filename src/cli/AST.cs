@@ -223,6 +223,16 @@ public class FsFileName : Node
   public string AssignTo = string.Empty; // Target variable name for the file name
 }
 
+public class TimerStart : Node
+{
+  // No properties needed - just starts the timer
+}
+
+public class TimerStop : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the elapsed time in milliseconds
+}
+
 // Expression nodes for complex expressions and operators
 public abstract class Expression : Node { }
 
