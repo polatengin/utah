@@ -15,4 +15,4 @@ case $_uname_os_get_os in
     currentOS="unknown"
     ;;
 esac
-echo "Current OS: $currentOS"
+echo "Current OS: ${currentOS}"

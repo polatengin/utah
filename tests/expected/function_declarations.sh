@@ -2,7 +2,7 @@
 
 greet() {
   local name="$1"
-  echo "Hello, $name!"
+  echo "Hello, ${name}!"
 }
 add() {
   local a="$1"
@@ -12,4 +12,4 @@ add() {
 result=$(greet "Utah")
 echo "$result"
 sum=$(add 5 3)
-echo "Sum: $sum"
+echo "Sum: ${sum}"
