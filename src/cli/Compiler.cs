@@ -239,26 +239,6 @@ public class Compiler
         lines.Add($"IFS='{sp.Delimiter}' read -ra {sp.ResultArrayName} <<< {sourceValue}");
         break;
 
-      case EnvGet eg:
-        lines.Add($"{eg.AssignTo}=\"${{{eg.VariableName}:-{eg.DefaultValue}}}\"");
-        break;
-
-      case EnvSet es:
-        lines.Add($"export {es.VariableName}=\"{es.Value}\"");
-        break;
-
-      case EnvLoad el:
-        lines.Add($"if [ -f \"{el.FilePath}\" ]; then");
-        lines.Add($"  set -a");
-        lines.Add($"  source \"{el.FilePath}\"");
-        lines.Add($"  set +a");
-        lines.Add($"fi");
-        break;
-
-      case EnvDelete ed:
-        lines.Add($"unset {ed.VariableName}");
-        break;
-
       case OsIsInstalled os:
         lines.Add($"if command -v {os.AppName} &> /dev/null; then");
         lines.Add($"  {os.AssignTo}=\"true\"");
@@ -407,6 +387,51 @@ public class Compiler
       case ProcessStatus pstat:
         // Get process status using ps command
         lines.Add($"{pstat.AssignTo}=$(ps -o stat= -p $$)");
+        break;
+
+      case OsGetOS ogo:
+        lines.Add($"_uname_os_get_os=$(uname | tr '[:upper:]' '[:lower:]')");
+        lines.Add($"case $_uname_os_get_os in");
+        lines.Add($"  linux*)");
+        lines.Add($"    {ogo.AssignTo}=\"linux\"");
+        lines.Add($"    ;;");
+        lines.Add($"  darwin*)");
+        lines.Add($"    {ogo.AssignTo}=\"mac\"");
+        lines.Add($"    ;;");
+        lines.Add($"  msys* | cygwin* | mingw* | nt | win*)");
+        lines.Add($"    {ogo.AssignTo}=\"windows\"");
+        lines.Add($"    ;;");
+        lines.Add($"  *)");
+        lines.Add($"    {ogo.AssignTo}=\"unknown\"");
+        lines.Add($"    ;;");
+        lines.Add($"esac");
+        break;
+
+      case EnvGet eg:
+        if (string.IsNullOrEmpty(eg.DefaultValue))
+        {
+          lines.Add($"{eg.AssignTo}=\"${{{eg.VariableName}}}\"");
+        }
+        else
+        {
+          lines.Add($"{eg.AssignTo}=\"${{{eg.VariableName}:-{eg.DefaultValue}}}\"");
+        }
+        break;
+
+      case EnvSet es:
+        lines.Add($"export {es.VariableName}=\"{es.Value}\"");
+        break;
+
+      case EnvLoad el:
+        lines.Add($"if [ -f \"{el.FilePath}\" ]; then");
+        lines.Add($"  set -a");
+        lines.Add($"  source \"{el.FilePath}\"");
+        lines.Add($"  set +a");
+        lines.Add($"fi");
+        break;
+
+      case EnvDelete ed:
+        lines.Add($"unset {ed.VariableName}");
         break;
     }
 

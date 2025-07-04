@@ -936,6 +936,12 @@ public class Parser
       };
     }
 
+    // Parse os.getOS() -> OsGetOS
+    if (expression.Trim() == "os.getOS()")
+    {
+      return new OsGetOS { AssignTo = targetVariable };
+    }
+
     return null;
   }
 

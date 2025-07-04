@@ -613,6 +613,7 @@ Utah provides utilities for interacting with the operating system and checking s
 #### System Checks
 
 - `os.isInstalled(appName)` - Check if a command-line application is installed
+- `os.getOS()` - Get the current operating system (linux, mac, windows, or unknown)
 
 ### OS Utilities Usage
 
@@ -630,6 +631,18 @@ if (gitInstalled) {
 let nodeInstalled: boolean = os.isInstalled("node");
 let dockerInstalled: boolean = os.isInstalled("docker");
 let curlInstalled: boolean = os.isInstalled("curl");
+
+// Get the current OS
+let currentOS: string = os.getOS();
+console.log(`Current OS: ${currentOS}`);
+
+if (currentOS == "linux") {
+  console.log("Running on Linux");
+} else if (currentOS == "mac") {
+  console.log("Running on macOS");
+} else {
+  console.log("Running on another OS");
+}
 ```
 
 ### Generated Bash Code for OS Utilities
@@ -642,6 +655,31 @@ if command -v git &> /dev/null; then
   gitInstalled="true"
 else
   gitInstalled="false"
+fi
+
+# os.getOS() becomes:
+case "$(uname -s)" in
+  Linux*)
+    currentOS="linux"
+    ;;
+  Darwin*)
+    currentOS="mac"
+    ;;
+  CYGWIN*|MINGW*|MSYS*)
+    currentOS="windows"
+    ;;
+  *)
+    currentOS="unknown"
+    ;;
+esac
+echo "Current OS: ${currentOS}"
+
+if [ "${currentOS}" == "linux" ]; then
+  echo "Running on Linux"
+elif [ "${currentOS}" == "mac" ]; then
+  echo "Running on macOS"
+else
+  echo "Running on another OS"
 fi
 ```
 

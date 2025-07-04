@@ -183,7 +183,12 @@ public class EnvDelete : Node
 public class OsIsInstalled : Node
 {
   public string AppName = string.Empty;
-  public string AssignTo = string.Empty; // Target variable name for the boolean result
+  public string AssignTo = string.Empty; // Target variable name
+}
+
+public class OsGetOS : Node
+{
+  public string AssignTo = string.Empty; // Target variable name
 }
 
 // File system operations
