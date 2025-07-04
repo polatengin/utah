@@ -1915,7 +1915,7 @@ public class Parser
   {
     value = value.Trim();
 
-    // Parse timer.stop() -> TimerStop  
+    // Parse timer.stop() -> TimerStop
     if (value == "timer.stop()")
     {
       return new TimerStop { AssignTo = assignTo };

@@ -599,7 +599,7 @@ echo "Work completed in ${elapsed} ms"
 ### Timer Best Practices
 
 - **Use for performance testing**: Measure how long different parts of your script take
-- **Benchmark optimizations**: Compare execution times before and after code changes  
+- **Benchmark optimizations**: Compare execution times before and after code changes
 - **Monitor long-running tasks**: Track progress of time-intensive operations
 - **Restart timer as needed**: Call `timer.start()` multiple times to measure different sections
 - **Millisecond precision**: Timer provides millisecond accuracy for fine-grained measurements
@@ -875,7 +875,7 @@ Utah provides process information functions for monitoring and inspecting the cu
 #### Process Information
 
 - `process.id()` - Get the current process ID (PID)
-- `process.cpu()` - Get the current CPU usage percentage of the process  
+- `process.cpu()` - Get the current CPU usage percentage of the process
 - `process.memory()` - Get the current memory usage percentage of the process
 - `process.elapsedTime()` - Get the elapsed time since the process started
 - `process.command()` - Get the command line that started the process
