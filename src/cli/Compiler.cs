@@ -4,10 +4,11 @@ public class Compiler
 {
   public string Compile(ProgramNode program)
   {
-    var lines = new List<string>();
-
-    lines.Add("#!/bin/sh");
-    lines.Add(""); // Empty line after shebang
+    var lines = new List<string>
+    {
+      "#!/bin/sh",
+      "" // Empty line after shebang
+    };
 
     foreach (var stmt in program.Statements)
     {
