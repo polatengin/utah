@@ -18,7 +18,7 @@ The generated `.sh` file is saved alongside the original.
 
 Input (`examples/input.shx`):
 
-```shx
+```typescript
 const appName: string = "MyApp";
 let name: string = "Alice";
 let greetMsg: string = `Hello, ${name}`;
@@ -59,7 +59,7 @@ Utah supports both traditional C-style for loops and for-in loops for iterating 
 
 ### Traditional For Loops
 
-```shx
+```typescript
 // Basic increment
 for (let i: number = 0; i < 5; i++) {
   console.log(`Count: ${i}`);
@@ -84,7 +84,7 @@ for (let m: number = 15; m >= 0; m -= 5) {
 
 For-in loops iterate over arrays created using the `split()` function:
 
-```shx
+```typescript
 // Split a comma-separated string
 let fruitString: string = "apple,banana,cherry";
 let fruits: string = fruitString.split(",");
@@ -136,7 +136,7 @@ Utah supports switch/case/default statements for conditional branching with mult
 
 ### Basic Switch Statement
 
-```shx
+```typescript
 let grade: string = "B";
 let message: string = "";
 
@@ -160,7 +160,7 @@ console.log(message);
 
 ### Switch with Numbers
 
-```shx
+```typescript
 let score: number = 85;
 let category: string = "";
 
@@ -184,7 +184,7 @@ switch (score) {
 
 You can have multiple case labels that execute the same code by omitting the `break` statement:
 
-```shx
+```typescript
 let day: string = "Monday";
 let type: string = "";
 
@@ -247,7 +247,7 @@ Utah provides comprehensive support for typed arrays including `string[]`, `numb
 
 You can create arrays using familiar TypeScript-like syntax:
 
-```shx
+```typescript
 // Create arrays with literals
 let numbers: number[] = [1, 2, 3, 4, 5];
 let names: string[] = ["Alice", "Bob", "Charlie"];
@@ -258,7 +258,7 @@ let flags: boolean[] = [true, false, true];
 
 Access array elements using bracket notation:
 
-```shx
+```typescript
 let numbers: number[] = [10, 20, 30];
 let first: number = numbers[0];    // Gets 10
 let second: number = numbers[1];   // Gets 20
@@ -268,7 +268,7 @@ let second: number = numbers[1];   // Gets 20
 
 Get the length of an array using the `.length` property:
 
-```shx
+```typescript
 let items: string[] = ["apple", "banana", "cherry"];
 let count: number = items.length;  // Gets 3
 ```
@@ -277,7 +277,7 @@ let count: number = items.length;  // Gets 3
 
 Use for-in loops to iterate over arrays:
 
-```shx
+```typescript
 let colors: string[] = ["red", "green", "blue"];
 
 for (let color: string in colors) {
@@ -289,7 +289,7 @@ for (let color: string in colors) {
 
 Create arrays by splitting strings - this integrates with the existing `split()` function:
 
-```shx
+```typescript
 // Create an array by splitting a string
 let csvData: string = "apple,banana,cherry";
 let fruits: string[] = csvData.split(",");
@@ -302,7 +302,7 @@ for (let fruit: string in fruits) {
 
 The `split()` function works with any delimiter:
 
-```shx
+```typescript
 // Split by spaces
 let sentence: string = "hello world utah";
 let words: string[] = sentence.split(" ");
@@ -372,7 +372,7 @@ Utah supports a comprehensive set of string manipulation functions that are fami
 
 ### Example Usage
 
-```shx
+```typescript
 const message: string = "Hello, World!";
 const email: string = "  user@example.com  ";
 
@@ -440,7 +440,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 
 ### File I/O Usage
 
-```shx
+```typescript
 // Write content to a file
 fs.writeFile("config.txt", "debug=true");
 
@@ -459,7 +459,7 @@ console.log("Log:", logContent);
 
 ### Path Manipulation Usage
 
-```shx
+```typescript
 let filePath: string = "/home/user/documents/project/readme.txt";
 
 // Get directory path
@@ -522,7 +522,7 @@ Utah provides timer functions for measuring execution time in your scripts. Thes
 
 ### Timer Usage
 
-```shx
+```typescript
 // Basic timer usage
 timer.start();
 console.log("Starting some work...");
@@ -550,7 +550,7 @@ console.log(`Second task took ${elapsed2} ms`);
 
 ### Timer with Conditionals
 
-```shx
+```typescript
 timer.start();
 
 let processCount: number = 1000;
@@ -604,6 +604,136 @@ echo "Work completed in ${elapsed} ms"
 - **Restart timer as needed**: Call `timer.start()` multiple times to measure different sections
 - **Millisecond precision**: Timer provides millisecond accuracy for fine-grained measurements
 
+## 📊 Process Information Functions
+
+Utah provides process information functions for monitoring and inspecting the current script's process. These functions are useful for debugging, monitoring, and system administration tasks.
+
+### Available Process Functions
+
+#### Process Information
+
+- `process.id()` - Get the current process ID (PID)
+- `process.cpu()` - Get the current CPU usage percentage of the process
+- `process.memory()` - Get the current memory usage percentage of the process
+- `process.elapsedTime()` - Get the elapsed time since the process started
+- `process.command()` - Get the command line that started the process
+- `process.status()` - Get the current process status/state
+
+### Process Functions Usage
+
+```typescript
+// Get basic process information
+let pid: number = process.id();
+let cpuUsage: number = process.cpu();
+let memoryUsage: number = process.memory();
+
+// Get process timing and command info
+let elapsed: string = process.elapsedTime();
+let command: string = process.command();
+let status: string = process.status();
+
+// Use in conditionals for monitoring
+if (cpuUsage > 80.0) {
+  console.log("High CPU usage detected");
+}
+
+// Log process information
+console.log(`Process ${pid} using ${memoryUsage}% memory`);
+```
+
+### Process Monitoring Example
+
+```typescript
+// Process monitoring script
+let processId: number = process.id();
+let startCommand: string = process.command();
+
+console.log(`Monitoring process ${processId}`);
+console.log(`Started with: ${startCommand}`);
+
+// Check resource usage
+let cpu: number = process.cpu();
+let memory: number = process.memory();
+let runtime: string = process.elapsedTime();
+
+console.log(`Runtime: ${runtime}`);
+console.log(`CPU: ${cpu}%, Memory: ${memory}%`);
+
+// Check if process is running efficiently
+if (cpu > 90.0) {
+  console.log("Warning: High CPU usage!");
+}
+
+if (memory > 75.0) {
+  console.log("Warning: High memory usage!");
+}
+```
+
+### Generated Bash Code for Process Functions
+
+The process functions transpile to efficient `ps` commands:
+
+```bash
+# process.id() becomes:
+pid=$(ps -o pid -p $$ --no-headers | tr -d ' ')
+
+# process.cpu() becomes:
+cpuUsage=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
+
+# process.memory() becomes:
+memoryUsage=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
+
+# process.elapsedTime() becomes:
+elapsed=$(ps -o etime -p $$ --no-headers | tr -d ' ')
+
+# process.command() becomes:
+command=$(ps -o cmd= -p $$)
+
+# process.status() becomes:
+status=$(ps -o stat= -p $$)
+
+# Complete example:
+processId=$(ps -o pid -p $$ --no-headers | tr -d ' ')
+startCommand=$(ps -o cmd= -p $$)
+
+echo "Monitoring process ${processId}"
+echo "Started with: ${startCommand}"
+
+cpu=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
+memory=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
+runtime=$(ps -o etime -p $$ --no-headers | tr -d ' ')
+
+echo "Runtime: ${runtime}"
+echo "CPU: ${cpu}%, Memory: ${memory}%"
+```
+
+### Process Functions Use Cases
+
+- **System Monitoring**: Track resource usage of your scripts
+- **Performance Analysis**: Monitor CPU and memory consumption over time
+- **Debugging**: Identify process information for troubleshooting
+- **Logging**: Include process details in log files
+- **Alerting**: Set up thresholds for resource usage warnings
+- **Process Management**: Gather information for process control decisions
+
+### Process Status Values
+
+The `process.status()` function returns standard Unix process state codes:
+
+- **R** - Running or runnable (on run queue)
+- **S** - Interruptible sleep (waiting for an event to complete)
+- **D** - Uninterruptible sleep (usually I/O)
+- **Z** - Zombie (terminated but not reaped by parent)
+- **T** - Stopped (on a signal or by job control)
+- **W** - Paging (not valid since Linux 2.6.xx)
+
+### Performance Notes
+
+- Process functions use standard `ps` commands available on all Unix-like systems
+- Commands are optimized with `--no-headers` and `tr -d ' '` for clean output
+- CPU and memory percentages are relative to system totals
+- Elapsed time format is `[DD-]HH:MM:SS` or `MM:SS` for shorter durations
+
 ## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
@@ -618,7 +748,7 @@ Utah provides utilities for interacting with the operating system and checking s
 
 ### OS Utilities Usage
 
-```shx
+```typescript
 // Check if git is installed
 let gitInstalled: boolean = os.isInstalled("git");
 
@@ -882,133 +1012,3 @@ Current tests cover:
 - [x] VS Code extension for syntax highlighting
 
 - [ ] VS Code extension for intellisense and autocompletion
-
-## 📊 Process Information Functions
-
-Utah provides process information functions for monitoring and inspecting the current script's process. These functions are useful for debugging, monitoring, and system administration tasks.
-
-### Available Process Functions
-
-#### Process Information
-
-- `process.id()` - Get the current process ID (PID)
-- `process.cpu()` - Get the current CPU usage percentage of the process
-- `process.memory()` - Get the current memory usage percentage of the process
-- `process.elapsedTime()` - Get the elapsed time since the process started
-- `process.command()` - Get the command line that started the process
-- `process.status()` - Get the current process status/state
-
-### Process Functions Usage
-
-```shx
-// Get basic process information
-let pid: number = process.id();
-let cpuUsage: number = process.cpu();
-let memoryUsage: number = process.memory();
-
-// Get process timing and command info
-let elapsed: string = process.elapsedTime();
-let command: string = process.command();
-let status: string = process.status();
-
-// Use in conditionals for monitoring
-if (cpuUsage > 80.0) {
-  console.log("High CPU usage detected");
-}
-
-// Log process information
-console.log(`Process ${pid} using ${memoryUsage}% memory`);
-```
-
-### Process Monitoring Example
-
-```shx
-// Process monitoring script
-let processId: number = process.id();
-let startCommand: string = process.command();
-
-console.log(`Monitoring process ${processId}`);
-console.log(`Started with: ${startCommand}`);
-
-// Check resource usage
-let cpu: number = process.cpu();
-let memory: number = process.memory();
-let runtime: string = process.elapsedTime();
-
-console.log(`Runtime: ${runtime}`);
-console.log(`CPU: ${cpu}%, Memory: ${memory}%`);
-
-// Check if process is running efficiently
-if (cpu > 90.0) {
-  console.log("Warning: High CPU usage!");
-}
-
-if (memory > 75.0) {
-  console.log("Warning: High memory usage!");
-}
-```
-
-### Generated Bash Code for Process Functions
-
-The process functions transpile to efficient `ps` commands:
-
-```bash
-# process.id() becomes:
-pid=$(ps -o pid -p $$ --no-headers | tr -d ' ')
-
-# process.cpu() becomes:
-cpuUsage=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
-
-# process.memory() becomes:
-memoryUsage=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
-
-# process.elapsedTime() becomes:
-elapsed=$(ps -o etime -p $$ --no-headers | tr -d ' ')
-
-# process.command() becomes:
-command=$(ps -o cmd= -p $$)
-
-# process.status() becomes:
-status=$(ps -o stat= -p $$)
-
-# Complete example:
-processId=$(ps -o pid -p $$ --no-headers | tr -d ' ')
-startCommand=$(ps -o cmd= -p $$)
-
-echo "Monitoring process ${processId}"
-echo "Started with: ${startCommand}"
-
-cpu=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
-memory=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
-runtime=$(ps -o etime -p $$ --no-headers | tr -d ' ')
-
-echo "Runtime: ${runtime}"
-echo "CPU: ${cpu}%, Memory: ${memory}%"
-```
-
-### Process Functions Use Cases
-
-- **System Monitoring**: Track resource usage of your scripts
-- **Performance Analysis**: Monitor CPU and memory consumption over time
-- **Debugging**: Identify process information for troubleshooting
-- **Logging**: Include process details in log files
-- **Alerting**: Set up thresholds for resource usage warnings
-- **Process Management**: Gather information for process control decisions
-
-### Process Status Values
-
-The `process.status()` function returns standard Unix process state codes:
-
-- **R** - Running or runnable (on run queue)
-- **S** - Interruptible sleep (waiting for an event to complete)
-- **D** - Uninterruptible sleep (usually I/O)
-- **Z** - Zombie (terminated but not reaped by parent)
-- **T** - Stopped (on a signal or by job control)
-- **W** - Paging (not valid since Linux 2.6.xx)
-
-### Performance Notes
-
-- Process functions use standard `ps` commands available on all Unix-like systems
-- Commands are optimized with `--no-headers` and `tr -d ' '` for clean output
-- CPU and memory percentages are relative to system totals
-- Elapsed time format is `[DD-]HH:MM:SS` or `MM:SS` for shorter durations
