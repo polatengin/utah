@@ -99,7 +99,8 @@ public class Compiler
         }
         else
         {
-          lines.Add($"echo \"{log.Message}\"");
+          var message = log.Message.Replace("\"", "\\\"").Replace("`", "\\`");
+          lines.Add($"echo \"{message}\"");
         }
         break;
 
@@ -108,7 +109,7 @@ public class Compiler
         if (ifs.ConditionCall.Contains("(") && ifs.ConditionCall.Contains(")"))
         {
           // Function call - use command substitution
-          lines.Add($"if [ \"$( {ifs.ConditionCall} )\" = \"true\" ]; then");
+          lines.Add($"if [ \"$({ifs.ConditionCall})\" = \"true\" ]; then");
         }
         else
         {
@@ -484,7 +485,8 @@ public class Compiler
         }
         else
         {
-          lines.Add($"  echo \"{log.Message}\"");
+          var message = log.Message.Replace("\"", "\\\"").Replace("`", "\\`");
+          lines.Add($"  echo \"{message}\"");
         }
         break;
       case ReturnStatement ret:
