@@ -28,7 +28,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.utah",
-                    "match": "\\b(if|else|const|let|exit|function|for|in|switch|case|default|break)\\b"
+                    "match": "\\b(if|else|const|let|exit|function|for|in|switch|case|default|break|os|fs|process|timer|env)\\b"
                 },
                 {
                     "name": "support.function.utah",
