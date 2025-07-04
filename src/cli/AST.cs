@@ -191,6 +191,11 @@ public class OsGetOS : Node
   public string AssignTo = string.Empty; // Target variable name
 }
 
+public class OsGetLinuxVersion : Node
+{
+  public string AssignTo = string.Empty; // Target variable name
+}
+
 // File system operations
 public class FsReadFile : Node
 {

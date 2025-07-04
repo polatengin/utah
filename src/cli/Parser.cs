@@ -942,6 +942,12 @@ public class Parser
       return new OsGetOS { AssignTo = targetVariable };
     }
 
+    // Parse os.getLinuxVersion() -> OsGetLinuxVersion
+    if (expression.Trim() == "os.getLinuxVersion()")
+    {
+      return new OsGetLinuxVersion { AssignTo = targetVariable };
+    }
+
     return null;
   }
 

@@ -614,6 +614,7 @@ Utah provides utilities for interacting with the operating system and checking s
 
 - `os.isInstalled(appName)` - Check if a command-line application is installed
 - `os.getOS()` - Get the current operating system (linux, mac, windows, or unknown)
+- `os.getLinuxVersion()` - Get the Linux distribution version
 
 ### OS Utilities Usage
 
@@ -638,6 +639,8 @@ console.log(`Current OS: ${currentOS}`);
 
 if (currentOS == "linux") {
   console.log("Running on Linux");
+  let linuxVersion: string = os.getLinuxVersion();
+  console.log(`Linux version: ${linuxVersion}`);
 } else if (currentOS == "mac") {
   console.log("Running on macOS");
 } else {
@@ -681,6 +684,20 @@ elif [ "${currentOS}" == "mac" ]; then
 else
   echo "Running on another OS"
 fi
+
+# os.getLinuxVersion() becomes:
+if [[ -f /etc/os-release ]]; then
+  source /etc/os-release
+  version="${VERSION_ID}"
+elif type lsb_release >/dev/null 2>&1; then
+  version=$(lsb_release -sr)
+elif [[ -f /etc/lsb-release ]]; then
+  source /etc/lsb-release
+  version="${DISTRIB_RELEASE}"
+else
+  version="unknown"
+fi
+console.log("Linux version: ${version}")
 ```
 
 ## Development

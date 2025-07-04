@@ -407,6 +407,20 @@ public class Compiler
         lines.Add($"esac");
         break;
 
+      case OsGetLinuxVersion oglv:
+        lines.Add($"if [[ -f /etc/os-release ]]; then");
+        lines.Add($"  source /etc/os-release");
+        lines.Add($"  {oglv.AssignTo}=\"${{VERSION_ID}}\"");
+        lines.Add($"elif type lsb_release >/dev/null 2>&1; then");
+        lines.Add($"  {oglv.AssignTo}=$(lsb_release -sr)");
+        lines.Add($"elif [[ -f /etc/lsb-release ]]; then");
+        lines.Add($"  source /etc/lsb-release");
+        lines.Add($"  {oglv.AssignTo}=\"${{DISTRIB_RELEASE}}\"");
+        lines.Add($"else");
+        lines.Add($"  {oglv.AssignTo}=\"unknown\"");
+        lines.Add($"fi");
+        break;
+
       case EnvGet eg:
         if (string.IsNullOrEmpty(eg.DefaultValue))
         {
