@@ -8,4 +8,5 @@ fi
 if [ "${gitInstalled}" = "true" ]; then
   echo "Git is installed"
 else
+  echo "Git is not installed"
 fi
