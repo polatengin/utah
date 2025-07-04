@@ -233,6 +233,37 @@ public class TimerStop : Node
   public string AssignTo = string.Empty; // Target variable name for the elapsed time in milliseconds
 }
 
+// Process information operations
+public class ProcessId : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the process ID
+}
+
+public class ProcessCpu : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the CPU usage percentage
+}
+
+public class ProcessMemory : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the memory usage percentage
+}
+
+public class ProcessElapsedTime : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the elapsed time
+}
+
+public class ProcessCommand : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the command line
+}
+
+public class ProcessStatus : Node
+{
+  public string AssignTo = string.Empty; // Target variable name for the process status
+}
+
 // Expression nodes for complex expressions and operators
 public abstract class Expression : Node { }
 

@@ -1,0 +1,28 @@
+// Test process information functions
+console.log("Process Information Test");
+
+// Get process ID
+let pid: number = process.id();
+console.log(`Process ID: ${pid}`);
+
+// Get CPU usage
+let cpuUsage: number = process.cpu();
+console.log(`CPU Usage: ${cpuUsage}%`);
+
+// Get memory usage
+let memUsage: number = process.memory();
+console.log(`Memory Usage: ${memUsage}%`);
+
+// Get elapsed time
+let elapsedTime: string = process.elapsedTime();
+console.log(`Elapsed Time: ${elapsedTime}`);
+
+// Get command line
+let command: string = process.command();
+console.log(`Command: ${command}`);
+
+// Get process status
+let status: string = process.status();
+console.log(`Status: ${status}`);
+
+console.log("Process info test completed");

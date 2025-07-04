@@ -377,6 +377,36 @@ public class Compiler
         lines.Add("_utah_timer_end=$(date +%s%3N)");
         lines.Add($"{ts.AssignTo}=$((_utah_timer_end - _utah_timer_start))");
         break;
+
+      case ProcessId pi:
+        // Get process ID using ps command
+        lines.Add($"{pi.AssignTo}=$(ps -o pid -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessCpu pc:
+        // Get CPU usage percentage using ps command
+        lines.Add($"{pc.AssignTo}=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessMemory pm:
+        // Get memory usage percentage using ps command
+        lines.Add($"{pm.AssignTo}=$(ps -o pmem -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessElapsedTime pet:
+        // Get elapsed time using ps command
+        lines.Add($"{pet.AssignTo}=$(ps -o etime -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessCommand pcmd:
+        // Get command line using ps command
+        lines.Add($"{pcmd.AssignTo}=$(ps -o cmd= -p $$)");
+        break;
+
+      case ProcessStatus pstat:
+        // Get process status using ps command
+        lines.Add($"{pstat.AssignTo}=$(ps -o stat= -p $$)");
+        break;
     }
 
     return lines;
@@ -621,6 +651,36 @@ public class Compiler
       case FsFileName fn:
         // Generate Bash code to get file name (inside function block)
         lines.Add($"  {fn.AssignTo}=$(basename \"{fn.FilePath}\")");
+        break;
+
+      case ProcessId pi:
+        // Get process ID using ps command (inside function block)
+        lines.Add($"  {pi.AssignTo}=$(ps -o pid -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessCpu pc:
+        // Get CPU usage percentage using ps command (inside function block)
+        lines.Add($"  {pc.AssignTo}=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessMemory pm:
+        // Get memory usage percentage using ps command (inside function block)
+        lines.Add($"  {pm.AssignTo}=$(ps -o pmem -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessElapsedTime pet:
+        // Get elapsed time using ps command (inside function block)
+        lines.Add($"  {pet.AssignTo}=$(ps -o etime -p $$ --no-headers | tr -d ' ')");
+        break;
+
+      case ProcessCommand pcmd:
+        // Get command line using ps command (inside function block)
+        lines.Add($"  {pcmd.AssignTo}=$(ps -o cmd= -p $$)");
+        break;
+
+      case ProcessStatus pstat:
+        // Get process status using ps command (inside function block)
+        lines.Add($"  {pstat.AssignTo}=$(ps -o stat= -p $$)");
         break;
     }
 

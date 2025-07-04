@@ -827,3 +827,133 @@ Current tests cover:
 - [x] VS Code extension for syntax highlighting
 
 - [ ] VS Code extension for intellisense and autocompletion
+
+## 📊 Process Information Functions
+
+Utah provides process information functions for monitoring and inspecting the current script's process. These functions are useful for debugging, monitoring, and system administration tasks.
+
+### Available Process Functions
+
+#### Process Information
+
+- `process.id()` - Get the current process ID (PID)
+- `process.cpu()` - Get the current CPU usage percentage of the process  
+- `process.memory()` - Get the current memory usage percentage of the process
+- `process.elapsedTime()` - Get the elapsed time since the process started
+- `process.command()` - Get the command line that started the process
+- `process.status()` - Get the current process status/state
+
+### Process Functions Usage
+
+```shx
+// Get basic process information
+let pid: number = process.id();
+let cpuUsage: number = process.cpu();
+let memoryUsage: number = process.memory();
+
+// Get process timing and command info
+let elapsed: string = process.elapsedTime();
+let command: string = process.command();
+let status: string = process.status();
+
+// Use in conditionals for monitoring
+if (cpuUsage > 80.0) {
+  console.log("High CPU usage detected");
+}
+
+// Log process information
+console.log(`Process ${pid} using ${memoryUsage}% memory`);
+```
+
+### Process Monitoring Example
+
+```shx
+// Process monitoring script
+let processId: number = process.id();
+let startCommand: string = process.command();
+
+console.log(`Monitoring process ${processId}`);
+console.log(`Started with: ${startCommand}`);
+
+// Check resource usage
+let cpu: number = process.cpu();
+let memory: number = process.memory();
+let runtime: string = process.elapsedTime();
+
+console.log(`Runtime: ${runtime}`);
+console.log(`CPU: ${cpu}%, Memory: ${memory}%`);
+
+// Check if process is running efficiently
+if (cpu > 90.0) {
+  console.log("Warning: High CPU usage!");
+}
+
+if (memory > 75.0) {
+  console.log("Warning: High memory usage!");
+}
+```
+
+### Generated Bash Code for Process Functions
+
+The process functions transpile to efficient `ps` commands:
+
+```bash
+# process.id() becomes:
+pid=$(ps -o pid -p $$ --no-headers | tr -d ' ')
+
+# process.cpu() becomes:
+cpuUsage=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
+
+# process.memory() becomes:
+memoryUsage=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
+
+# process.elapsedTime() becomes:
+elapsed=$(ps -o etime -p $$ --no-headers | tr -d ' ')
+
+# process.command() becomes:
+command=$(ps -o cmd= -p $$)
+
+# process.status() becomes:
+status=$(ps -o stat= -p $$)
+
+# Complete example:
+processId=$(ps -o pid -p $$ --no-headers | tr -d ' ')
+startCommand=$(ps -o cmd= -p $$)
+
+echo "Monitoring process ${processId}"
+echo "Started with: ${startCommand}"
+
+cpu=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
+memory=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
+runtime=$(ps -o etime -p $$ --no-headers | tr -d ' ')
+
+echo "Runtime: ${runtime}"
+echo "CPU: ${cpu}%, Memory: ${memory}%"
+```
+
+### Process Functions Use Cases
+
+- **System Monitoring**: Track resource usage of your scripts
+- **Performance Analysis**: Monitor CPU and memory consumption over time
+- **Debugging**: Identify process information for troubleshooting
+- **Logging**: Include process details in log files
+- **Alerting**: Set up thresholds for resource usage warnings
+- **Process Management**: Gather information for process control decisions
+
+### Process Status Values
+
+The `process.status()` function returns standard Unix process state codes:
+
+- **R** - Running or runnable (on run queue)
+- **S** - Interruptible sleep (waiting for an event to complete)
+- **D** - Uninterruptible sleep (usually I/O)
+- **Z** - Zombie (terminated but not reaped by parent)
+- **T** - Stopped (on a signal or by job control)
+- **W** - Paging (not valid since Linux 2.6.xx)
+
+### Performance Notes
+
+- Process functions use standard `ps` commands available on all Unix-like systems
+- Commands are optimized with `--no-headers` and `tr -d ' '` for clean output
+- CPU and memory percentages are relative to system totals
+- Elapsed time format is `[DD-]HH:MM:SS` or `MM:SS` for shorter durations
