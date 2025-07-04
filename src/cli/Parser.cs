@@ -52,30 +52,38 @@ public class Parser
                 }
                 else
                 {
-                  var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
-                  if (timerNode != null)
+                  var processNode = ParseProcessFunction(match.Groups[1].Value, value);
+                  if (processNode != null)
                   {
-                    program.Statements.Add(timerNode);
+                    program.Statements.Add(processNode);
                   }
                   else
                   {
-                    var declaredType = match.Groups[2].Value;
-                    var expression = ParseExpression(value);
-
-                    // Validate array type if it's an array declaration
-                    if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                    var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+                    if (timerNode != null)
                     {
-                      var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                      ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                      program.Statements.Add(timerNode);
                     }
-
-                    program.Statements.Add(new VariableDeclarationExpression
+                    else
                     {
-                      Name = match.Groups[1].Value,
-                      Type = declaredType,
-                      Value = expression,
-                      IsConst = false
-                    });
+                      var declaredType = match.Groups[2].Value;
+                      var expression = ParseExpression(value);
+
+                      // Validate array type if it's an array declaration
+                      if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                      {
+                        var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                        ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                      }
+
+                      program.Statements.Add(new VariableDeclarationExpression
+                      {
+                        Name = match.Groups[1].Value,
+                        Type = declaredType,
+                        Value = expression,
+                        IsConst = false
+                      });
+                    }
                   }
                 }
               }
@@ -112,30 +120,38 @@ public class Parser
               }
               else
               {
-                var timerNode = ParseTimerFunction(varName, value);
-                if (timerNode != null)
+                var processNode = ParseProcessFunction(varName, value);
+                if (processNode != null)
                 {
-                  program.Statements.Add(timerNode);
+                  program.Statements.Add(processNode);
                 }
                 else
                 {
-                  var declaredType = match.Groups[2].Value;
-                  var expression = ParseExpression(value);
-
-                  // Validate array type if it's an array declaration
-                  if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                  var timerNode = ParseTimerFunction(varName, value);
+                  if (timerNode != null)
                   {
-                    var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                    ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
+                    program.Statements.Add(timerNode);
                   }
-
-                  program.Statements.Add(new VariableDeclarationExpression
+                  else
                   {
-                    Name = varName,
-                    Type = declaredType,
-                    Value = expression,
-                    IsConst = true
-                  });
+                    var declaredType = match.Groups[2].Value;
+                    var expression = ParseExpression(value);
+
+                    // Validate array type if it's an array declaration
+                    if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
+                    {
+                      var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
+                      ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
+                    }
+
+                    program.Statements.Add(new VariableDeclarationExpression
+                    {
+                      Name = varName,
+                      Type = declaredType,
+                      Value = expression,
+                      IsConst = true
+                    });
+                  }
                 }
               }
             }
@@ -1500,14 +1516,22 @@ public class Parser
             }
             else
             {
-              var expression = ParseExpression(value);
-              return new VariableDeclarationExpression
+              var processNode = ParseProcessFunction(match.Groups[1].Value, value);
+              if (processNode != null)
               {
-                Name = match.Groups[1].Value,
-                Type = match.Groups[2].Value,
-                Value = expression,
-                IsConst = false
-              };
+                return processNode;
+              }
+              else
+              {
+                var expression = ParseExpression(value);
+                return new VariableDeclarationExpression
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = expression,
+                  IsConst = false
+                };
+              }
             }
           }
         }
@@ -1533,21 +1557,29 @@ public class Parser
           }
           else
           {
-            var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
-            if (timerNode != null)
+            var processNode = ParseProcessFunction(match.Groups[1].Value, value);
+            if (processNode != null)
             {
-              return timerNode;
+              return processNode;
             }
             else
             {
-              var expression = ParseExpression(value);
-              return new VariableDeclarationExpression
+              var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+              if (timerNode != null)
               {
-                Name = match.Groups[1].Value,
-                Type = match.Groups[2].Value,
-                Value = expression,
-                IsConst = true
-              };
+                return timerNode;
+              }
+              else
+              {
+                var expression = ParseExpression(value);
+                return new VariableDeclarationExpression
+                {
+                  Name = match.Groups[1].Value,
+                  Type = match.Groups[2].Value,
+                  Value = expression,
+                  IsConst = true
+                };
+              }
             }
           }
         }
@@ -1881,6 +1913,43 @@ public class Parser
     if (value == "timer.stop()")
     {
       return new TimerStop { AssignTo = assignTo };
+    }
+
+    return null;
+  }
+
+  private Node? ParseProcessFunction(string assignTo, string value)
+  {
+    value = value.Trim();
+
+    if (value == "process.id()")
+    {
+      return new ProcessId { AssignTo = assignTo };
+    }
+
+    if (value == "process.cpu()")
+    {
+      return new ProcessCpu { AssignTo = assignTo };
+    }
+
+    if (value == "process.memory()")
+    {
+      return new ProcessMemory { AssignTo = assignTo };
+    }
+
+    if (value == "process.elapsedTime()")
+    {
+      return new ProcessElapsedTime { AssignTo = assignTo };
+    }
+
+    if (value == "process.command()")
+    {
+      return new ProcessCommand { AssignTo = assignTo };
+    }
+
+    if (value == "process.status()")
+    {
+      return new ProcessStatus { AssignTo = assignTo };
     }
 
     return null;
