@@ -4,6 +4,14 @@
 
 📦 File Extension: `.shx`
 
+## 🚀 Installation
+
+You can install the latest version of the `utah` CLI with this one-liner:
+
+```bash
+cURL -sL https://github.com/polatengin/utah/releases/latest/download/utah -o utah && chmod +x utah && sudo mv utah /usr/local/bin/utah
+```
+
 ## 🚀 How It Works
 
 Write code in `.shx` using modern, friendly typescript-like syntax.
@@ -966,6 +974,8 @@ Current tests cover:
 - [x] Comment support (`//`)
 
 - [ ] import syntax for splitting .shx files
+
+- [ ] `array.*` functions (`length()`, `contains()`, `isEmpty()`, `join()`, `reverse()`, `sort()`, `merge()`)
 
 - [x] Add shebang (`#!/bin/sh`) to generated scripts
 
