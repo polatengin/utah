@@ -70,6 +70,7 @@ jobs:
           release_name: Release ${{ steps.version.outputs.new_version_tag }}
           draft: false
           prerelease: false
+          make_latest: true
 
       - name: Upload Release Assets
         uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
