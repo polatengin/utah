@@ -11,4 +11,4 @@ elif [[ -f /etc/lsb-release ]]; then
 else
   version="unknown"
 fi
-echo "$version"
+echo "${version}"

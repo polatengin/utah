@@ -10,6 +10,6 @@ add() {
   echo $((a + b))
 }
 result=$(greet "Utah")
-echo "$result"
+echo "${result}"
 sum=$(add 5 3)
 echo "Sum: ${sum}"

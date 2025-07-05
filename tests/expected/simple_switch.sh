@@ -1,7 +1,7 @@
 #!/bin/sh
 
 grade="B"
-case $grade in
+case ${grade} in
   A)
     echo "Excellent"
     ;;

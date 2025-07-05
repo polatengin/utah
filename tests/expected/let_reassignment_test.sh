@@ -1,6 +1,6 @@
 #!/bin/sh
 
 greeting="Hello World"
-echo "$greeting"
+echo "${greeting}"
 greeting="New Value"
-echo "$greeting"
+echo "${greeting}"

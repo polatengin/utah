@@ -785,7 +785,7 @@ public class Compiler
 
   private string CompileVariableExpression(VariableExpression var)
   {
-    return $"${var.Name}";
+    return $"${{{var.Name}}}";
   }
 
   private string CompileBinaryExpression(BinaryExpression bin)
@@ -796,11 +796,11 @@ public class Compiler
     return bin.Operator switch
     {
       "+" when IsStringConcatenation(bin) => CompileStringConcatenation(left, right),
-      "+" => $"$(({left.TrimStart('$')} + {right.TrimStart('$')}))",
-      "-" => $"$(({left.TrimStart('$')} - {right.TrimStart('$')}))",
-      "*" => $"$(({left.TrimStart('$')} * {right.TrimStart('$')}))",
-      "/" => $"$(({left.TrimStart('$')} / {right.TrimStart('$')}))",
-      "%" => $"$(({left.TrimStart('$')} % {right.TrimStart('$')}))",
+      "+" => $"$(({ExtractVariableName(left)} + {ExtractVariableName(right)}))",
+      "-" => $"$(({ExtractVariableName(left)} - {ExtractVariableName(right)}))",
+      "*" => $"$(({ExtractVariableName(left)} * {ExtractVariableName(right)}))",
+      "/" => $"$(({ExtractVariableName(left)} / {ExtractVariableName(right)}))",
+      "%" => $"$(({ExtractVariableName(left)} % {ExtractVariableName(right)}))",
       "==" => $"[ {left} = {right} ]",
       "!=" => $"[ {left} != {right} ]",
       "<" => $"[ {left} -lt {right} ]",
@@ -854,10 +854,16 @@ public class Compiler
     // Remove quotes from string literals
     var leftPart = left.StartsWith("\"") && left.EndsWith("\"") ? left[1..^1] : left;
     
-    // Handle variable expressions - if right starts with $, we need to use ${var} format
+    // Handle variable expressions - extract and format properly
     string rightPart;
-    if (right.StartsWith("$"))
+    if (right.StartsWith("${") && right.EndsWith("}"))
     {
+      // Already in ${var} format, use as is
+      rightPart = right;
+    }
+    else if (right.StartsWith("$"))
+    {
+      // Old $var format, convert to ${var}
       var varName = right.TrimStart('$');
       rightPart = $"${{{varName}}}";
     }
@@ -889,16 +895,16 @@ public class Compiler
 
   private string CompileArrayAccess(ArrayAccess acc)
   {
-    var arrayName = CompileExpression(acc.Array).TrimStart('$'); // Remove $ prefix if present
+    var arrayName = ExtractVariableName(CompileExpression(acc.Array));
     var index = CompileExpression(acc.Index);
 
     // In bash, array access is ${arrayName[index]}
-    return $"\"${{{arrayName}[{index.TrimStart('$')}]}}\"";
+    return $"\"${{{arrayName}[{ExtractVariableName(index)}]}}\"";
   }
 
   private string CompileArrayLength(ArrayLength len)
   {
-    var arrayName = CompileExpression(len.Array).TrimStart('$'); // Remove $ prefix if present
+    var arrayName = ExtractVariableName(CompileExpression(len.Array));
 
     // In bash, array length is ${#arrayName[@]}
     return $"\"${{#{arrayName}[@]}}\"";
@@ -935,5 +941,19 @@ public class Compiler
     {
       return $"$({func.Name})";
     }
+  }
+
+  private string ExtractVariableName(string varExpr)
+  {
+    // Handle both $var and ${var} formats
+    if (varExpr.StartsWith("${") && varExpr.EndsWith("}"))
+    {
+      return varExpr[2..^1]; // Remove ${ and }
+    }
+    else if (varExpr.StartsWith("$"))
+    {
+      return varExpr[1..]; // Remove $
+    }
+    return varExpr;
   }
 }

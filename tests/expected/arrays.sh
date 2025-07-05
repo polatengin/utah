@@ -6,22 +6,22 @@ first="${numbers[0]}"
 second="${names[1]}"
 count="${#numbers[@]}"
 echo "First number:"
-echo "$first"
+echo "${first}"
 echo "Second name:"
-echo "$second"
+echo "${second}"
 echo "Array length:"
-echo "$count"
+echo "${count}"
 echo "Numbers:"
 for num in "${numbers[@]}"; do
-  echo "$num"
+  echo "${num}"
 done
 echo "Names:"
 for name in "${names[@]}"; do
-  echo "$name"
+  echo "${name}"
 done
 data="red,green,blue"
 IFS=',' read -ra colors <<< "${data}"
 echo "Colors:"
 for color in "${colors[@]}"; do
-  echo "$color"
+  echo "${color}"
 done

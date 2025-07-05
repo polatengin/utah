@@ -7,7 +7,7 @@ for item in "${items[@]}"; do
 done
 echo "Using traditional for loop:"
 i=0
-while [ $i -lt 3 ]; do
+while [ ${i} -lt 3 ]; do
   echo "Index ${i}: ${items[i]}"
   i=$((i + 1))
 done

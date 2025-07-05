@@ -3,4 +3,4 @@
 _temp_path="document.pdf"
 fileExt="${_temp_path##*.}"
 echo "File extension:"
-echo "$fileExt"
+echo "${fileExt}"

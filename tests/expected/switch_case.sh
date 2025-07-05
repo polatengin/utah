@@ -2,7 +2,7 @@
 
 score=85
 category=""
-case $score in
+case ${score} in
   100)
     category="Perfect"
     ;;
@@ -16,10 +16,10 @@ case $score in
     category="Needs improvement"
     ;;
 esac
-echo "$category"
+echo "${category}"
 day="Monday"
 type=""
-case $day in
+case ${day} in
   Monday|Tuesday|Wednesday|Thursday|Friday)
     type="Weekday"
     ;;
@@ -30,4 +30,4 @@ case $day in
     type="Unknown"
     ;;
 esac
-echo "$type"
+echo "${type}"
