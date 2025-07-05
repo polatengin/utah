@@ -278,7 +278,7 @@ public class Parser
           {
             var m = Regex.Match(inner, @"console\.log\((.+)\);");
             var raw = m.Groups[1].Value.Trim();
-            
+
             if (raw.StartsWith("`"))
             {
               // Template literal - use the old way
@@ -373,7 +373,7 @@ public class Parser
             {
               var m = Regex.Match(inner, @"console\.log\((.+)\);");
               var raw = m.Groups[1].Value.Trim();
-              
+
               if (raw.StartsWith("`"))
               {
                 // Template literal - use the old way
@@ -1508,7 +1508,7 @@ public class Parser
     {
       var match = Regex.Match(line, @"console\.log\((.+)\);");
       var raw = match.Groups[1].Value.Trim();
-      
+
       if (raw.StartsWith("`"))
       {
         // Template literal - use the old way

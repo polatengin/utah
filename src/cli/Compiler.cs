@@ -124,7 +124,7 @@ public class Compiler
         }
         foreach (var b in ifs.ThenBody)
           lines.AddRange(CompileBlock(b));
-        
+
         // Only add else clause if there are statements in the else body
         if (ifs.ElseBody.Count > 0)
         {
@@ -132,7 +132,7 @@ public class Compiler
           foreach (var b in ifs.ElseBody)
             lines.AddRange(CompileBlock(b));
         }
-        
+
         lines.Add("fi");
         break;
 
@@ -853,7 +853,7 @@ public class Compiler
   {
     // Remove quotes from string literals
     var leftPart = left.StartsWith("\"") && left.EndsWith("\"") ? left[1..^1] : left;
-    
+
     // Handle variable expressions - extract and format properly
     string rightPart;
     if (right.StartsWith("${") && right.EndsWith("}"))
@@ -875,7 +875,7 @@ public class Compiler
     {
       rightPart = right;
     }
-    
+
     return $"\"{leftPart}{rightPart}\"";
   }
 
