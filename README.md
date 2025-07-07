@@ -1138,6 +1138,20 @@ Current tests cover:
 
 - [ ] Typed return values and richer type checking
 
+- [ ] `utility.*` functions (`extract()`, `random()`, `generateUUID()`)
+
+- [ ] `script.*` functions (`enableDebug()`, `disableGlobbing()`)
+
+- [ ] `args.*` functions (`get()`, `has()`, `all()`)
+
+- [ ] `web.*` functions (`get()`, `put()`, `speedtest()`)
+
+- [ ] `console.*` functions (`clear()`, `drawWindow()`, `optionList()`)
+
+- [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
+
+- [ ] `@decorator()` syntax for decorators for validation (`@notNullable()`, `@notEmpty()`, `@greaterThan()`, `@ipv4()`, `@numberOnly()`, `@alphaNumeric()`, `@email()`)
+
 - [ ] Error handling: try/catch, trap
 
 - [ ] Typecasting and type conversion
