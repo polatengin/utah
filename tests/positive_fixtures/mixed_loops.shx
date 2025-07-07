@@ -9,4 +9,3 @@ console.log("Using traditional for loop:");
 for (let i: number = 0; i < 3; i++) {
   console.log(`Index ${i}: ${items[i]}`);
 }
-}

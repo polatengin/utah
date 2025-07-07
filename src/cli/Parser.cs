@@ -7,7 +7,16 @@ public class Parser
 
   public Parser(string input)
   {
-    _lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    // Pre-process to remove comments
+    var blockCommentRegex = new Regex("/\\*.*?\\*/", RegexOptions.Singleline);
+    var lineCommentRegex = new Regex("//.*");
+    var bashCommentRegex = new Regex("#.*");
+
+    var noBlockComments = blockCommentRegex.Replace(input, "");
+    var noLineComments = lineCommentRegex.Replace(noBlockComments, "");
+    var noBashComments = bashCommentRegex.Replace(noLineComments, "");
+
+    _lines = noBashComments.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
   }
 
   public ProgramNode Parse()
@@ -701,6 +710,11 @@ public class Parser
           Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(a => a.Trim()).ToList()
         });
+      }
+      else
+      {
+        // If no other syntax matches, treat it as a raw line of shell script
+        program.Statements.Add(new RawStatement { Content = line });
       }
     }
 

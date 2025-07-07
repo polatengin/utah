@@ -360,3 +360,8 @@ public class VariableDeclarationExpression : Node
   public Expression Value = null!;
   public bool IsConst = false; // true for const, false for let
 }
+
+public class RawStatement : Node
+{
+  public string Content { get; set; } = string.Empty;
+}

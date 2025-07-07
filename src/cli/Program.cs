@@ -9,12 +9,14 @@ if (args.Length > 0)
       await StartLanguageServer();
       break;
     case "compile":
-      if (args.Length != 2 || !args[1].EndsWith(".shx"))
+      if (args.Length < 2 || !args[1].EndsWith(".shx"))
       {
-        Console.WriteLine("Usage: utah compile <file.shx>");
+        Console.WriteLine("Usage: utah compile <file.shx> [-o <output.sh>]");
         return;
       }
-      CompileFile(args[1]);
+      var inputPath = args[1];
+      var outputPath = GetOutputPath(args);
+      CompileFile(inputPath, outputPath);
       break;
     case "run":
       if (args.Length != 2 || !args[1].EndsWith(".shx"))
@@ -43,7 +45,19 @@ static async Task StartLanguageServer()
   await server.WaitForExit;
 }
 
-static void CompileFile(string inputPath)
+static string? GetOutputPath(string[] args)
+{
+  for (int i = 0; i < args.Length - 1; i++)
+  {
+    if (args[i] == "-o")
+    {
+      return args[i + 1];
+    }
+  }
+  return null;
+}
+
+static void CompileFile(string inputPath, string? outputPath = null)
 {
   if (!File.Exists(inputPath))
   {
@@ -59,9 +73,9 @@ static void CompileFile(string inputPath)
     var compiler = new Compiler();
     var output = compiler.Compile(ast);
 
-    var outputPath = Path.ChangeExtension(inputPath, ".sh");
-    File.WriteAllText(outputPath, output);
-    Console.WriteLine($"✅ Compiled: {outputPath}");
+    var finalOutputPath = outputPath ?? Path.ChangeExtension(inputPath, ".sh");
+    File.WriteAllText(finalOutputPath, output);
+    Console.WriteLine($"✅ Compiled: {finalOutputPath}");
   }
   catch (InvalidOperationException ex)
   {

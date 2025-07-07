@@ -24,6 +24,10 @@ public class Compiler
 
     switch (stmt)
     {
+      case RawStatement raw:
+        lines.Add(raw.Content);
+        break;
+
       case VariableDeclaration v:
         if (v.IsConst)
         {

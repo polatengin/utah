@@ -1,0 +1,57 @@
+// Utah variable declarations
+let name: string = "Utah";
+let count: number = 5;
+let isActive: boolean = true;
+
+// Utah console.log
+console.log("Starting mixed syntax test");
+console.log("Name: " + name);
+
+// Raw bash echo (should be ignored by parser)
+echo "This is raw bash echo"
+
+// Utah if statement with boolean variable
+if (isActive) {
+  console.log("System is active");
+}
+
+// Raw bash if statement (should be ignored)
+if [ "$count" -lt 10 ]; then
+  echo "Count is less than 10 (bash syntax)"
+fi
+
+// Utah for loop
+for (let i: number = 1; i <= 3; i++) {
+  console.log("Utah loop iteration: " + i);
+}
+
+// Raw bash while loop (should be ignored)
+counter=1
+while [ $counter -le 2 ]; do
+  echo "Bash loop iteration: $counter"
+  counter=$((counter + 1))
+done
+
+// Utah function
+function greet(person: string): string {
+  return "Hello " + person;
+}
+
+// Raw bash function (should be ignored)
+bash_greet() {
+  echo "Bash says hello to $1"
+}
+
+// Call Utah function
+let greeting: string = greet(name);
+console.log(greeting);
+
+// Bash comment (should be ignored)
+# This is a bash comment
+
+// Raw bash function call (should be ignored)
+bash_greet "World"
+
+// Utah variable assignment
+let result: string = "Test completed";
+console.log(result);
