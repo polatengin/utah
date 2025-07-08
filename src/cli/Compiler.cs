@@ -997,7 +997,7 @@ public class Compiler
   private List<string> CompileUtilityRandomDeclaration(string variableName, UtilityRandomExpression rand, bool isConst)
   {
     var lines = new List<string>();
-    
+
     // Generate unique variable names to avoid conflicts
     _randomCounter++;
     var minVar = $"_utah_random_min_{_randomCounter}";
@@ -1053,7 +1053,7 @@ public class Compiler
     lines.Add($"  echo \"Error: min value (${minVar}) cannot be greater than max value (${maxVar}) in utility.random()\" >&2");
     lines.Add($"  exit 100");
     lines.Add($"fi");
-    
+
     // Generate the assignment
     if (isConst)
     {
@@ -1063,7 +1063,7 @@ public class Compiler
     {
       lines.Add($"{variableName}=$((RANDOM * ({maxVar} - {minVar} + 1) / 32768 + {minVar}))");
     }
-    
+
     return lines;
   }
 
