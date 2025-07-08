@@ -942,6 +942,113 @@ The `process.status()` function returns standard Unix process state codes:
 - CPU and memory percentages are relative to system totals
 - Elapsed time format is `[DD-]HH:MM:SS` or `MM:SS` for shorter durations
 
+## 🔨 Utility Functions
+
+Utah provides utility functions for common operations like generating random numbers and other general-purpose tasks.
+
+### Available Utility Functions
+
+#### Random Number Generation
+
+- `utility.random(min?, max?)` - Generate a random number within a specified range
+
+### Utility Functions Usage
+
+```typescript
+// Generate random number between 0 and 32767 (default range)
+let randomDefault: number = utility.random();
+console.log(`Random (default): ${randomDefault}`);
+
+// Generate random number between 0 and max
+let randomMax: number = utility.random(100);
+console.log(`Random 0-100: ${randomMax}`);
+
+// Generate random number between min and max
+let randomRange: number = utility.random(50, 150);
+console.log(`Random 50-150: ${randomRange}`);
+
+// Use in conditional logic
+let dice: number = utility.random(1, 6);
+if (dice == 6) {
+  console.log("Lucky six!");
+} else {
+  console.log(`Rolled: ${dice}`);
+}
+
+// Generate multiple random numbers
+for (let i: number = 0; i < 5; i++) {
+  let num: number = utility.random(1, 10);
+  console.log(`Random ${i + 1}: ${num}`);
+}
+```
+
+### Random Number Examples
+
+```typescript
+// Simulate coin flip (0 or 1)
+let coinFlip: number = utility.random(0, 1);
+let result: string = coinFlip == 0 ? "heads" : "tails";
+console.log(`Coin flip: ${result}`);
+
+// Generate random percentage
+let percentage: number = utility.random(0, 100);
+console.log(`Random percentage: ${percentage}%`);
+
+// Random delay simulation
+let delay: number = utility.random(1000, 5000);
+console.log(`Simulating ${delay}ms delay...`);
+
+// Random selection from range
+let temperature: number = utility.random(-10, 35);
+console.log(`Random temperature: ${temperature}°C`);
+```
+
+### Generated Bash Code for Utility Functions
+
+The utility functions transpile to efficient bash parameter expansion:
+
+```bash
+# utility.random() - no parameters (0 to 32767)
+_utah_random_min_1=0
+_utah_random_max_1=32767
+randomDefault=$(((RANDOM * (_utah_random_max_1 - _utah_random_min_1 + 1) / 32768) + _utah_random_min_1))
+
+# utility.random(100) - max only (0 to 100)
+_utah_random_min_2=0
+_utah_random_max_2=100
+randomMax=$(((RANDOM * (_utah_random_max_2 - _utah_random_min_2 + 1) / 32768) + _utah_random_min_2))
+
+# utility.random(50, 150) - min and max (50 to 150)
+_utah_random_min_3=50
+_utah_random_max_3=150
+randomRange=$(((RANDOM * (_utah_random_max_3 - _utah_random_min_3 + 1) / 32768) + _utah_random_min_3))
+
+# Multiple calls use unique variable names to avoid conflicts
+for i in $(seq 1 5); do
+  _utah_random_min_4=1
+  _utah_random_max_4=10
+  num=$(((RANDOM * (_utah_random_max_4 - _utah_random_min_4 + 1) / 32768) + _utah_random_min_4))
+  echo "Random ${i}: ${num}"
+done
+```
+
+### Random Function Parameters
+
+- **No parameters**: `utility.random()` returns 0-32767
+- **One parameter**: `utility.random(max)` returns 0-max
+- **Two parameters**: `utility.random(min, max)` returns min-max
+- **Range inclusive**: Both min and max values are included in possible results
+- **Unique variables**: Each call generates unique internal variables to prevent conflicts
+
+### Use Cases for Random Numbers
+
+- **Testing and Simulation**: Generate test data with random values
+- **Game Development**: Dice rolls, random events, procedural generation
+- **Load Testing**: Random delays and intervals
+- **Sampling**: Random selection from ranges
+- **Security**: Random timeouts and delays (not cryptographically secure)
+- **User Experience**: Random tips, messages, or content selection
+
 ## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
@@ -1363,7 +1470,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] Typed return values and richer type checking
 
-- [ ] `utility.*` functions (`extract()`, `random()`, `generateUUID()`)
+- [x] `utility.*` functions (`random()` with min/max parameters)
 
 - [ ] `script.*` functions (`enableDebug()`, `disableGlobbing()`)
 

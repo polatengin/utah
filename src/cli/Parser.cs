@@ -1398,7 +1398,41 @@ public class Parser
         return new ConsolePromptYesNoExpression { PromptText = promptText };
       }
 
-      // Make sure it's a simple function name or a timer function (not a complex expression)
+      // Special handling for utility.random()
+      if (functionName == "utility.random")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          // No arguments: utility.random()
+          return new UtilityRandomExpression();
+        }
+        else
+        {
+          // Parse arguments
+          var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(arg => arg.Trim())
+                                .ToList();
+          if (args.Count == 1)
+          {
+            // One argument: utility.random(max)
+            var maxExpr = ParseExpression(args[0]);
+            return new UtilityRandomExpression { MinValue = maxExpr };
+          }
+          else if (args.Count == 2)
+          {
+            // Two arguments: utility.random(min, max)
+            var minExpr = ParseExpression(args[0]);
+            var maxExpr = ParseExpression(args[1]);
+            return new UtilityRandomExpression { MinValue = minExpr, MaxValue = maxExpr };
+          }
+          else
+          {
+            throw new InvalidOperationException($"utility.random() accepts 0, 1, or 2 arguments, got {args.Count}");
+          }
+        }
+      }
+
+      // Regular function call (not special built-in)
       if (Regex.IsMatch(functionName, @"^\w+$") || functionName == "timer.stop")
       {
         var functionCall = new FunctionCall

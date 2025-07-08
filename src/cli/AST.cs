@@ -40,6 +40,12 @@ public class ConsolePromptYesNoExpression : Expression
   public string PromptText = string.Empty; // The text to display to the user
 }
 
+public class UtilityRandomExpression : Expression
+{
+  public Expression? MinValue = null; // Optional minimum value
+  public Expression? MaxValue = null; // Optional maximum value
+}
+
 public class ReturnStatement : Node
 {
   public Expression? Value;

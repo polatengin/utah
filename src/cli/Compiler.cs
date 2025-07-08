@@ -848,6 +848,7 @@ public class Compiler
       FunctionCall func => CompileFunctionCallExpression(func),
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
+      UtilityRandomExpression rand => CompileUtilityRandomExpression(rand),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
   }
@@ -861,6 +862,63 @@ public class Compiler
   {
     // Generate bash code that prompts the user and returns true/false based on yes/no response
     return $"$(while true; do read -p \"{prompt.PromptText} (y/n): \" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
+  }
+
+  private static int _randomCounter = 0;
+  
+  private string CompileUtilityRandomExpression(UtilityRandomExpression rand)
+  {
+    // Generate unique variable names to avoid conflicts
+    _randomCounter++;
+    var minVar = $"_utah_random_min_{_randomCounter}";
+    var maxVar = $"_utah_random_max_{_randomCounter}";
+    
+    var minValue = "0";
+    var maxValue = "32767";
+    
+    // Handle parameters
+    if (rand.MinValue != null && rand.MaxValue != null)
+    {
+      // Both min and max provided: utility.random(min, max)
+      minValue = CompileExpression(rand.MinValue);
+      maxValue = CompileExpression(rand.MaxValue);
+    }
+    else if (rand.MinValue != null)
+    {
+      // Only one parameter provided: utility.random(max)
+      minValue = "0";
+      maxValue = CompileExpression(rand.MinValue);
+    }
+    // If no parameters, use defaults (0, 32767)
+    
+    // Remove quotes from numeric values if present
+    minValue = minValue.Trim('"');
+    maxValue = maxValue.Trim('"');
+    
+    // For variable references, we need to use the actual variable values
+    // If the value starts with ${, it's a variable reference
+    if (minValue.StartsWith("${") && minValue.EndsWith("}"))
+    {
+      // Already in correct format ${varName}
+    }
+    else if (!int.TryParse(minValue, out _))
+    {
+      // It's a variable name without ${}, add $ prefix
+      minValue = $"${minValue}";
+    }
+    
+    if (maxValue.StartsWith("${") && maxValue.EndsWith("}"))
+    {
+      // Already in correct format ${varName}
+    }
+    else if (!int.TryParse(maxValue, out _))
+    {
+      // It's a variable name without ${}, add $ prefix
+      maxValue = $"${maxValue}";
+    }
+    
+    // Return the bash command substitution that generates the random number
+    return $"$({minVar}={minValue}; {maxVar}={maxValue}; (({maxVar}>{minVar})) && echo $((RANDOM % ({maxVar} - {minVar} + 1) + {minVar})))";
   }
 
   private string CompileLiteralExpression(LiteralExpression lit)

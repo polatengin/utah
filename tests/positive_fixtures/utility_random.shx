@@ -1,0 +1,14 @@
+// Test utility.random() function only
+let randomDefault: number = utility.random();
+console.log(`Random default: ${randomDefault}`);
+
+let randomMax: number = utility.random(100);
+console.log(`Random 0-100: ${randomMax}`);
+
+let randomRange: number = utility.random(50, 150);
+console.log(`Random 50-150: ${randomRange}`);
+
+let minVal: number = 10;
+let maxVal: number = 20;
+let randomVar: number = utility.random(minVal, maxVal);
+console.log(`Random with vars: ${randomVar}`);
