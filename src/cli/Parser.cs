@@ -29,65 +29,66 @@ public class Parser
 
       if (line.StartsWith("let "))
       {
-        var match = Regex.Match(line, @"let (\w+): ([\w\[\]]+) = (.+);");
-        if (match.Success)
+        // Try typed let first: let variable: type = value;
+        var typedMatch = Regex.Match(line, @"let (\w+): ([\w\[\]]+) = (.+);");
+        if (typedMatch.Success)
         {
-          var value = match.Groups[3].Value;
-          var envNode = ParseEnvFunction(match.Groups[1].Value, value);
+          var value = typedMatch.Groups[3].Value;
+          var envNode = ParseEnvFunction(typedMatch.Groups[1].Value, value);
           if (envNode != null)
           {
             program.Statements.Add(envNode);
           }
           else
           {
-            var osNode = ParseOsFunction(match.Groups[1].Value, value);
+            var osNode = ParseOsFunction(typedMatch.Groups[1].Value, value);
             if (osNode != null)
             {
               program.Statements.Add(osNode);
             }
             else
             {
-              var fsNode = ParseFsFunction(match.Groups[1].Value, value);
+              var fsNode = ParseFsFunction(typedMatch.Groups[1].Value, value);
               if (fsNode != null)
               {
                 program.Statements.Add(fsNode);
               }
               else
               {
-                var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+                var stringFuncNode = ParseStringFunction(typedMatch.Groups[1].Value, value);
                 if (stringFuncNode != null)
                 {
                   program.Statements.Add(stringFuncNode);
                 }
                 else
                 {
-                  var processNode = ParseProcessFunction(match.Groups[1].Value, value);
+                  var processNode = ParseProcessFunction(typedMatch.Groups[1].Value, value);
                   if (processNode != null)
                   {
                     program.Statements.Add(processNode);
                   }
                   else
                   {
-                    var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+                    var timerNode = ParseTimerFunction(typedMatch.Groups[1].Value, value);
                     if (timerNode != null)
                     {
                       program.Statements.Add(timerNode);
                     }
                     else
                     {
-                      var declaredType = match.Groups[2].Value;
+                      var declaredType = typedMatch.Groups[2].Value;
                       var expression = ParseExpression(value);
 
                       // Validate array type if it's an array declaration
                       if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
                       {
                         var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                        ValidateArrayElementTypes(arrayLiteral, expectedElementType, match.Groups[1].Value);
+                        ValidateArrayElementTypes(arrayLiteral, expectedElementType, typedMatch.Groups[1].Value);
                       }
 
                       program.Statements.Add(new VariableDeclarationExpression
                       {
-                        Name = match.Groups[1].Value,
+                        Name = typedMatch.Groups[1].Value,
                         Type = declaredType,
                         Value = expression,
                         IsConst = false
@@ -97,6 +98,23 @@ public class Parser
                 }
               }
             }
+          }
+        }
+        else
+        {
+          // Try untyped let: let variable = value;
+          var untypedMatch = Regex.Match(line, @"let (\w+) = (.+);");
+          if (untypedMatch.Success)
+          {
+            var value = untypedMatch.Groups[2].Value;
+            var expression = ParseExpression(value);
+            program.Statements.Add(new VariableDeclarationExpression
+            {
+              Name = untypedMatch.Groups[1].Value,
+              Type = "number", // Default type inference
+              Value = expression,
+              IsConst = false
+            });
           }
         }
       }
@@ -277,7 +295,7 @@ public class Parser
       {
         var match = Regex.Match(line, @"if \((.+)\) \{");
         var cond = match.Groups[1].Value;
-        var ifStmt = new IfStatement { ConditionCall = cond };
+        var ifStmt = new IfStatement { Condition = ParseExpression(cond) };
 
         i++;
         while (!_lines[i].Trim().StartsWith("}"))
@@ -519,6 +537,41 @@ public class Parser
 
             program.Statements.Add(forLoop);
           }
+        }
+      }
+      else if (line.StartsWith("while ("))
+      {
+        var match = Regex.Match(line, @"while \((.+)\) \{");
+        if (match.Success)
+        {
+          var whileStmt = new WhileStatement
+          {
+            Condition = ParseExpression(match.Groups[1].Value)
+          };
+
+          i++;
+          while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+          {
+            var inner = _lines[i].Trim();
+            if (inner == "break;")
+            {
+              whileStmt.Body.Add(new BreakStatement());
+              i++;
+            }
+            else
+            {
+              var statement = ParseStatementOrBlock(inner, ref i);
+              if (statement != null)
+              {
+                whileStmt.Body.Add(statement);
+              }
+              else
+              {
+                i++;
+              }
+            }
+          }
+          program.Statements.Add(whileStmt);
         }
       }
       else if (line.StartsWith("exit "))
@@ -1544,32 +1597,33 @@ public class Parser
     }
     else if (line.StartsWith("let "))
     {
-      var match = Regex.Match(line, @"let (\w+): (\w+) = (.+);");
-      if (match.Success)
+      // Try typed let first: let variable: type = value;
+      var typedMatch = Regex.Match(line, @"let (\w+): (\w+) = (.+);");
+      if (typedMatch.Success)
       {
-        var value = match.Groups[3].Value;
-        var envNode = ParseEnvFunction(match.Groups[1].Value, value);
+        var value = typedMatch.Groups[3].Value;
+        var envNode = ParseEnvFunction(typedMatch.Groups[1].Value, value);
         if (envNode != null)
         {
           return envNode;
         }
         else
         {
-          var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
+          var stringFuncNode = ParseStringFunction(typedMatch.Groups[1].Value, value);
           if (stringFuncNode != null)
           {
             return stringFuncNode;
           }
           else
           {
-            var timerNode = ParseTimerFunction(match.Groups[1].Value, value);
+            var timerNode = ParseTimerFunction(typedMatch.Groups[1].Value, value);
             if (timerNode != null)
             {
               return timerNode;
             }
             else
             {
-              var processNode = ParseProcessFunction(match.Groups[1].Value, value);
+              var processNode = ParseProcessFunction(typedMatch.Groups[1].Value, value);
               if (processNode != null)
               {
                 return processNode;
@@ -1579,14 +1633,31 @@ public class Parser
                 var expression = ParseExpression(value);
                 return new VariableDeclarationExpression
                 {
-                  Name = match.Groups[1].Value,
-                  Type = match.Groups[2].Value,
+                  Name = typedMatch.Groups[1].Value,
+                  Type = typedMatch.Groups[2].Value,
                   Value = expression,
                   IsConst = false
                 };
               }
             }
           }
+        }
+      }
+      else
+      {
+        // Try untyped let: let variable = value;
+        var untypedMatch = Regex.Match(line, @"let (\w+) = (.+);");
+        if (untypedMatch.Success)
+        {
+          var value = untypedMatch.Groups[2].Value;
+          var expression = ParseExpression(value);
+          return new VariableDeclarationExpression
+          {
+            Name = untypedMatch.Groups[1].Value,
+            Type = "number", // Default type inference
+            Value = expression,
+            IsConst = false
+          };
         }
       }
     }
@@ -1652,10 +1723,20 @@ public class Parser
         return new ExitStatement { ExitCode = code };
       }
     }
+    else if (line.StartsWith("if ("))
+    {
+      // For nested if statements, we need to handle them specially
+      return null;
+    }
     else if (line.StartsWith("for ("))
     {
       // For nested loops, we need to handle them specially
       // For now, return null to indicate this needs special handling
+      return null;
+    }
+    else if (line.StartsWith("while ("))
+    {
+      // For nested while loops, we need to handle them specially
       return null;
     }
     else if (line.Contains(" = ") && line.EndsWith(";"))
@@ -1679,6 +1760,10 @@ public class Parser
           Value = value
         };
       }
+    }
+    else if (line == "break;")
+    {
+      return new BreakStatement();
     }
     else if (line.Contains("(") && line.Contains(");"))
     {
@@ -1908,6 +1993,76 @@ public class Parser
 
           return forLoop;
         }
+      }
+    }
+    else if (line.StartsWith("while ("))
+    {
+      var match = Regex.Match(line, @"while \((.+)\) \{");
+      if (match.Success)
+      {
+        var whileStmt = new WhileStatement
+        {
+          Condition = ParseExpression(match.Groups[1].Value)
+        };
+
+        lineIndex++;
+        while (lineIndex < _lines.Length && !_lines[lineIndex].Trim().StartsWith("}"))
+        {
+          var inner = _lines[lineIndex].Trim();
+          if (inner == "break;")
+          {
+            whileStmt.Body.Add(new BreakStatement());
+            lineIndex++;
+          }
+          else
+          {
+            var statement = ParseStatementOrBlock(inner, ref lineIndex);
+            if (statement != null)
+            {
+              whileStmt.Body.Add(statement);
+            }
+            else
+            {
+              lineIndex++;
+            }
+          }
+        }
+
+        // Skip over the closing brace
+        lineIndex++;
+
+        return whileStmt;
+      }
+    }
+    else if (line.StartsWith("if ("))
+    {
+      var match = Regex.Match(line, @"if \((.+)\) \{");
+      if (match.Success)
+      {
+        var ifStmt = new IfStatement
+        {
+          Condition = ParseExpression(match.Groups[1].Value)
+        };
+
+        lineIndex++;
+        while (lineIndex < _lines.Length && !_lines[lineIndex].Trim().StartsWith("}"))
+        {
+          var inner = _lines[lineIndex].Trim();
+          var statement = ParseStatementOrBlock(inner, ref lineIndex);
+          if (statement != null)
+          {
+            ifStmt.ThenBody.Add(statement);
+          }
+          else
+          {
+            lineIndex++;
+          }
+        }
+
+        // Skip over the closing brace
+        lineIndex++;
+
+        return ifStmt;
       }
     }
     else

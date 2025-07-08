@@ -115,17 +115,20 @@ public class Compiler
         break;
 
       case IfStatement ifs:
-        // Check if condition is a simple variable (no parentheses) or a function call
-        if (ifs.ConditionCall.Contains("(") && ifs.ConditionCall.Contains(")"))
+        var ifCondition = CompileExpression(ifs.Condition);
+
+        // Handle boolean variable conditions
+        if (ifs.Condition is VariableExpression varExpr)
         {
-          // Function call - use command substitution
-          lines.Add($"if [ \"$({ifs.ConditionCall})\" = \"true\" ]; then");
+          // For boolean variables, check if they equal "true"
+          ifCondition = $"\"${{{varExpr.Name}}}\" = \"true\"";
         }
-        else
+        else if (ifCondition.StartsWith("[ ") && ifCondition.EndsWith(" ]"))
         {
-          // Simple variable - use direct variable reference
-          lines.Add($"if [ \"${{{ifs.ConditionCall}}}\" = \"true\" ]; then");
+          ifCondition = ifCondition.Substring(2, ifCondition.Length - 4);
         }
+
+        lines.Add($"if [ {ifCondition} ]; then");
         foreach (var b in ifs.ThenBody)
           lines.AddRange(CompileBlock(b));
 
@@ -173,6 +176,24 @@ public class Compiler
         }
 
         lines.Add("done");
+        break;
+
+      case WhileStatement whileStmt:
+        var whileCondition = CompileExpression(whileStmt.Condition);
+        if (whileCondition.StartsWith("[ ") && whileCondition.EndsWith(" ]"))
+        {
+          whileCondition = whileCondition.Substring(2, whileCondition.Length - 4);
+        }
+        lines.Add($"while [ {whileCondition} ]; do");
+        foreach (var bodyStmt in whileStmt.Body)
+        {
+          lines.AddRange(CompileBlock(bodyStmt));
+        }
+        lines.Add("done");
+        break;
+
+      case BreakStatement breakStmt:
+        lines.Add("break");
         break;
 
       case ForInLoop forInLoop:
@@ -275,7 +296,7 @@ public class Compiler
           {
             var compiled = CompileExpression(v);
             // Remove quotes if they exist since case patterns don't need them
-            if (compiled.StartsWith("\"") && compiled.EndsWith("\""))
+            if (compiled.StartsWith('\"') && compiled.EndsWith('\"'))
             {
               return compiled[1..^1];
             }
@@ -657,6 +678,28 @@ public class Compiler
         lines.Add("  done");
         break;
 
+      case WhileStatement whileStmt:
+        var whileCondition = CompileExpression(whileStmt.Condition);
+        if (whileCondition.StartsWith("[ ") && whileCondition.EndsWith(" ]"))
+        {
+          whileCondition = whileCondition.Substring(2, whileCondition.Length - 4);
+        }
+        lines.Add($"  while [ {whileCondition} ]; do");
+        foreach (var bodyStmt in whileStmt.Body)
+        {
+          var innerLines = CompileBlock(bodyStmt);
+          foreach (var line in innerLines)
+          {
+            lines.Add($"    {line}");
+          }
+        }
+        lines.Add("  done");
+        break;
+
+      case BreakStatement breakStmt:
+        lines.Add("  break");
+        break;
+
       case ForInLoop forInLoop:
         lines.Add($"  for {forInLoop.Variable} in \"${{{forInLoop.Iterable}[@]}}\"; do");
         foreach (var bodyStmt in forInLoop.Body)
@@ -740,6 +783,50 @@ public class Compiler
         // Get process status using ps command (inside function block)
         lines.Add($"  {pstat.AssignTo}=$(ps -o stat= -p $$)");
         break;
+
+      case IfStatement ifs:
+        var ifCondition = CompileExpression(ifs.Condition);
+
+        // Handle boolean variable conditions
+        if (ifs.Condition is VariableExpression varExpr)
+        {
+          // For boolean variables, check if they equal "true"
+          ifCondition = $"\"${{{varExpr.Name}}}\" = \"true\"";
+        }
+        else if (ifCondition.StartsWith("[ ") && ifCondition.EndsWith(" ]"))
+        {
+          ifCondition = ifCondition.Substring(2, ifCondition.Length - 4);
+        }
+
+        lines.Add($"  if [ {ifCondition} ]; then");
+        foreach (var b in ifs.ThenBody)
+        {
+          var innerLines = CompileBlock(b);
+          foreach (var line in innerLines)
+          {
+            lines.Add($"  {line}");
+          }
+        }
+
+        if (ifs.ElseBody.Count > 0)
+        {
+          lines.Add("  else");
+          foreach (var b in ifs.ElseBody)
+          {
+            var innerLines = CompileBlock(b);
+            foreach (var line in innerLines)
+            {
+              lines.Add($"  {line}");
+            }
+          }
+        }
+        lines.Add("  fi");
+        break;
+
+      case AssignmentStatement assign:
+        var assignValue = CompileExpression(assign.Value);
+        lines.Add($"  {assign.VariableName}={assignValue}");
+        break;
     }
 
     return lines;
@@ -805,7 +892,7 @@ public class Compiler
       "*" => $"$(({ExtractVariableName(left)} * {ExtractVariableName(right)}))",
       "/" => $"$(({ExtractVariableName(left)} / {ExtractVariableName(right)}))",
       "%" => $"$(({ExtractVariableName(left)} % {ExtractVariableName(right)}))",
-      "==" => $"[ {left} = {right} ]",
+      "==" => IsNumericLiteral(bin.Right) ? $"[ {left} -eq {right} ]" : $"[ {left} = {right} ]",
       "!=" => $"[ {left} != {right} ]",
       "<" => $"[ {left} -lt {right} ]",
       "<=" => $"[ {left} -le {right} ]",
@@ -960,4 +1047,10 @@ public class Compiler
     }
     return varExpr;
   }
+
+  private bool IsNumericLiteral(Expression expr)
+  {
+    return expr is LiteralExpression lit && lit.Type == "number";
+  }
+
 }

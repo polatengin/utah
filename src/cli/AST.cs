@@ -15,7 +15,7 @@ public class VariableDeclaration : Node
 
 public class FunctionDeclaration : Node
 {
-  public string Name = string.Empty;
+  public string Name { get; set; } = string.Empty;
   public List<(string Name, string Type)> Parameters = new();
   public List<Node> Body = new();
 }
@@ -47,7 +47,7 @@ public class ReturnStatement : Node
 
 public class IfStatement : Node
 {
-  public string ConditionCall = string.Empty;
+  public Expression Condition { get; set; } = null!;
   public List<Node> ThenBody = new();
   public List<Node> ElseBody = new();
 }
@@ -90,11 +90,19 @@ public class ForLoop : Node
 
 public class ForInLoop : Node
 {
-  public string Variable = string.Empty;
-  public string VariableType = string.Empty;
-  public string Iterable = string.Empty; // Variable name or array
-  public List<Node> Body = new();
+  public string Variable { get; set; } = string.Empty;
+  public string VariableType { get; set; } = string.Empty;
+  public string Iterable { get; set; } = string.Empty; // Variable name or array
+  public List<Node> Body { get; set; } = new List<Node>();
 }
+
+public class WhileStatement : Node
+{
+  public Expression Condition { get; set; } = null!;
+  public List<Node> Body { get; set; } = new List<Node>();
+}
+
+public class BreakStatement : Node { }
 
 public abstract class StringFunction : Node
 {
@@ -339,10 +347,6 @@ public class DefaultClause : Node
 {
   public List<Node> Body = new();
   public bool HasBreak = false;
-}
-
-public class BreakStatement : Node
-{
 }
 
 // Assignment statement (variable = value)

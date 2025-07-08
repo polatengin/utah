@@ -247,6 +247,206 @@ case $day in
 esac
 ```
 
+## ➿ While Loops and Break Statements
+
+Utah supports while loops for conditional iteration and break statements for early loop termination. These provide flexible control flow for loops that need to continue until a specific condition is met.
+
+### Basic While Loop
+
+```typescript
+let i: number = 0;
+while (i < 5) {
+  console.log(`Count: ${i}`);
+  i = i + 1;
+}
+```
+
+### While Loop with Break Statement
+
+Use `break` to exit a loop early when a certain condition is met:
+
+```typescript
+let i: number = 0;
+while (i < 10) {
+  console.log(`Processing item ${i}`);
+
+  if (i == 5) {
+    console.log("Reached target, stopping early");
+    break;
+  }
+
+  i = i + 1;
+}
+console.log("Loop completed");
+```
+
+### While Loop with Complex Conditions
+
+```typescript
+let count: number = 0;
+let found: boolean = false;
+
+while (count < 100 && !found) {
+  console.log(`Searching... attempt ${count}`);
+
+  // Simulate finding something
+  if (count == 42) {
+    found = true;
+    console.log("Found the answer!");
+    break;
+  }
+
+  count = count + 1;
+}
+
+if (found) {
+  console.log(`Success! Found after ${count} attempts`);
+} else {
+  console.log("Search completed without finding target");
+}
+```
+
+### Nested While Loops with Break
+
+Break statements only exit the innermost loop:
+
+```typescript
+let outer: number = 0;
+while (outer < 3) {
+  console.log(`Outer loop: ${outer}`);
+
+  let inner: number = 0;
+  while (inner < 5) {
+    console.log(`  Inner loop: ${inner}`);
+
+    if (inner == 2) {
+      console.log("  Breaking inner loop");
+      break;  // Only exits the inner while loop
+    }
+
+    inner = inner + 1;
+  }
+
+  outer = outer + 1;
+}
+```
+
+### User Input Processing
+
+While loops are perfect for input validation and menu systems:
+
+```typescript
+let userChoice: string = "";
+let validInput: boolean = false;
+
+while (!validInput) {
+  // In a real script, you would get user input here
+  // For this example, we'll simulate it
+  console.log("Enter your choice (a, b, or c):");
+
+  // Simulate user input
+  userChoice = "b";  // This would be actual input in practice
+
+  if (userChoice == "a" || userChoice == "b" || userChoice == "c") {
+    validInput = true;
+    console.log(`Valid choice: ${userChoice}`);
+  } else {
+    console.log("Invalid choice, please try again");
+  }
+
+  // For this example, break to avoid infinite loop
+  break;
+}
+```
+
+### Generated Bash Code for While Loops
+
+Utah while loops transpile to efficient bash while loops:
+
+```bash
+# Basic while loop becomes:
+i=0
+while [ ${i} -lt 5 ]; do
+  echo "Count: ${i}"
+  i=$((i + 1))
+done
+
+# While loop with break becomes:
+i=0
+while [ ${i} -lt 10 ]; do
+  echo "Processing item ${i}"
+
+  if [ ${i} -eq 5 ]; then
+    echo "Reached target, stopping early"
+    break
+  fi
+
+  i=$((i + 1))
+done
+echo "Loop completed"
+
+# Complex condition becomes:
+count=0
+found="false"
+while [ ${count} -lt 100 ] && [ "${found}" != "true" ]; do
+  echo "Searching... attempt ${count}"
+
+  if [ ${count} -eq 42 ]; then
+    found="true"
+    echo "Found the answer!"
+    break
+  fi
+
+  count=$((count + 1))
+done
+```
+
+### While Loop Best Practices
+
+- **Always modify loop variables**: Ensure the loop condition will eventually become false
+- **Use break for early termination**: Exit loops when the desired condition is met
+- **Guard against infinite loops**: Include safeguards or maximum iteration counts
+- **Combine with conditionals**: Use if statements inside while loops for complex logic
+- **Prefer for loops for counting**: Use while loops when the iteration count is unknown
+
+### Common While Loop Patterns
+
+#### Counter with Condition
+
+```typescript
+let attempt: number = 0;
+let maxAttempts: number = 5;
+
+while (attempt < maxAttempts) {
+  console.log(`Attempt ${attempt + 1} of ${maxAttempts}`);
+
+  // Simulate some operation that might succeed
+  if (attempt == 3) {
+    console.log("Operation successful!");
+    break;
+  }
+
+  attempt = attempt + 1;
+}
+```
+
+#### Flag-based Loop
+
+```typescript
+let processing: boolean = true;
+let itemCount: number = 0;
+
+while (processing) {
+  console.log(`Processing item ${itemCount}`);
+  itemCount = itemCount + 1;
+
+  // Stop processing after 10 items
+  if (itemCount >= 10) {
+    processing = false;
+  }
+}
+```
+
 ## 📋 Arrays
 
 Utah provides comprehensive support for typed arrays including `string[]`, `number[]`, and `boolean[]`. Arrays can be created using array literals or by splitting strings.
@@ -1070,6 +1270,7 @@ Current tests cover:
 - **environment_variables.shx** - Environment variable operations
 - **ternary_operators.shx** - Ternary conditional operators
 - **mixed_loops.shx** - Mixed loop types in one file
+- **while_loop.shx** - While loops with break statements and conditional logic
 - **simple_switch.shx** - Basic switch/case/default statements
 - **switch_case.shx** - Complex switch statements with fall-through cases
 - **array_support.shx** - Array literals, access, length, and iteration
@@ -1124,7 +1325,7 @@ Current tests cover:
 
 - [x] Support for `switch/case/default` statements
 
-- [ ] Support for `while` and `break`
+- [x] Support for `while` loops and `break` statements
 
 - [x] Arrays and basic data structures (`string[]`, `number[]`, `boolean[]`)
 
