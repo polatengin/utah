@@ -78,26 +78,6 @@ jobs:
           echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
           echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
 
-      - name: Create Test Badge
-        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
-        with:
-          auth: ${{ secrets.GITHUB_TOKEN }}
-          gistID: ${{ secrets.BADGE_GIST_ID }}
-          filename: utah-tests.json
-          label: Tests
-          message: ${{ steps.test-badge.outputs.PASSED_TESTS }}/${{ steps.test-badge.outputs.TOTAL_TESTS }} passing
-          color: ${{ steps.test-badge.outputs.COLOR }}
-
-      - name: Create Coverage Badge
-        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
-        with:
-          auth: ${{ secrets.GITHUB_TOKEN }}
-          gistID: ${{ secrets.BADGE_GIST_ID }}
-          filename: utah-coverage.json
-          label: Coverage
-          message: ${{ steps.test-badge.outputs.TOTAL_TESTS }} tests
-          color: blue
-
       - name: Run Tests
         id: test
         run: |
