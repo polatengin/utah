@@ -11,7 +11,7 @@
 You can install the latest version of the `utah` CLI with this one-liner:
 
 ```bash
-cURL -sL https://github.com/polatengin/utah/releases/latest/download/utah -o utah && chmod +x utah && sudo mv utah /usr/local/bin/utah
+curl -sL https://github.com/polatengin/utah/releases/latest/download/utah -o utah && chmod +x utah && sudo mv utah /usr/local/bin/utah
 ```
 
 ## 🚀 How It Works
