@@ -1445,7 +1445,7 @@ public class Parser
       }
 
       // Regular function call (not special built-in)
-      if (Regex.IsMatch(functionName, @"^\w+$") || functionName == "timer.stop")
+      if (Regex.IsMatch(functionName, @"^[\w\.]+$"))
       {
         var functionCall = new FunctionCall
         {

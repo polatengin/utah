@@ -808,7 +808,7 @@ public class Compiler
         break;
 
       case ProcessCpu pc:
-        // Get CPU usage percentage using ps command (inside function block)
+        // Get CPU usage percentage using ps command (inside function
         lines.Add($"  {pc.AssignTo}=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')");
         break;
 
@@ -957,12 +957,12 @@ public class Compiler
 
     if (maxValue.StartsWith("${") && maxValue.EndsWith("}"))
     {
-      // Already in correct format ${varName}
+      // It's a variable, use it directly
     }
     else if (!int.TryParse(maxValue, out _))
     {
-      // It's a variable name without ${}, add $ prefix
-      maxValue = $"${maxValue}";
+      // It's not a valid integer, maybe it's a variable name without ${}
+      maxValue = $"${{{maxValue}}}";
     }
 
     // Return the bash command substitution that generates the random number
@@ -971,6 +971,7 @@ public class Compiler
 
   private string CompileLiteralExpression(LiteralExpression lit)
   {
+    // For string literals, ensure they are quoted
     return lit.Type switch
     {
       "string" => $"\"{lit.Value}\"",
@@ -1023,20 +1024,57 @@ public class Compiler
 
   private string CompileTernaryExpression(TernaryExpression tern)
   {
-    var condition = CompileExpression(tern.Condition);
-    var trueExpr = CompileExpression(tern.TrueExpression);
-    var falseExpr = CompileExpression(tern.FalseExpression);
+    // Helper to compile the condition part of a ternary
+    string CompileTernaryCondition(Expression expr)
+    {
+      if (expr is FunctionCall fc && fc.Name == "env.get" && fc.Arguments.Count == 1)
+      {
+        var varName = fc.Arguments[0].Trim('"');
+        return $"[ -n \"${{{varName}}}\" ]";
+      }
+      if (expr is VariableExpression varExpr)
+      {
+        return $"[ \"${{{varExpr.Name}}}\" = \"true\" ]";
+      }
+      
+      // For other expressions, compile them and if they don't start with '[', wrap them
+      var compiledExpr = CompileExpression(expr);
+      
+      if (compiledExpr.StartsWith("[ ") && compiledExpr.EndsWith(" ]"))
+      {
+        return compiledExpr;
+      }
+      else
+      {
+        // Assume it's a truthy check
+        return $"[ -n {compiledExpr} ]";
+      }
+    }
+
+    // Helper to compile the value part of a ternary
+    string CompileTernaryValue(Expression expr)
+    {
+      if (expr is FunctionCall fc && fc.Name == "env.get" && fc.Arguments.Count == 1)
+      {
+        var varName = fc.Arguments[0].Trim('"');
+        return $"\"${{{varName}}}\"";
+      }
+      return CompileExpression(expr);
+    }
+
+    var condition = CompileTernaryCondition(tern.Condition);
+    var trueExpr = CompileTernaryValue(tern.TrueExpression);
 
     // Handle nested ternary by avoiding nested command substitution
-    if (tern.FalseExpression is TernaryExpression)
+    if (tern.FalseExpression is TernaryExpression nestedTern)
     {
-      // Directly compile the nested ternary as a conditional chain
-      var nestedCondition = CompileExpression(((TernaryExpression)tern.FalseExpression).Condition);
-      var nestedTrue = CompileExpression(((TernaryExpression)tern.FalseExpression).TrueExpression);
-      var nestedFalse = CompileExpression(((TernaryExpression)tern.FalseExpression).FalseExpression);
-
-      return $"$({condition} && echo {trueExpr} || ({nestedCondition} && echo {nestedTrue} || echo {nestedFalse}))";
+      // Recursively build the chain, removing the outer `$()` from the nested compilation
+      var nestedTernaryStr = CompileTernaryExpression(nestedTern);
+      var nestedChain = nestedTernaryStr.Substring(2, nestedTernaryStr.Length - 3);
+      return $"$({condition} && echo {trueExpr} || {nestedChain})";
     }
+
+    var falseExpr = CompileTernaryValue(tern.FalseExpression);
 
     return $"$({condition} && echo {trueExpr} || echo {falseExpr})";
   }
@@ -1109,6 +1147,13 @@ public class Compiler
 
   private string CompileFunctionCallExpression(FunctionCall func)
   {
+    // Special handling for env.get() function calls
+    if (func.Name == "env.get" && func.Arguments.Count == 1)
+    {
+      var varName = func.Arguments[0].Trim('"');
+      return $"\"${{{varName}}}\"";
+    }
+
     // In bash, function calls in expressions use command substitution
     var bashArgs = func.Arguments.Select(a =>
     {
