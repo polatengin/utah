@@ -1,8 +1,10 @@
 #!/bin/sh
 
-text="hello world"
+text="Hello World"
 length="${#text}"
-upper="text.toUpper()"
+upper="${text^^}"
+lower="${text,,}"
 echo "Text: ${text}"
 echo "Length: ${length}"
 echo "Upper: ${upper}"
+echo "Lower: ${lower}"

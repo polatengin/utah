@@ -1,6 +1,8 @@
-let text: string = "hello world";
+let text: string = "Hello World";
 let length: number = text.length();
-let upper: string = text.toUpper();
+let upper: string = text.toUpperCase();
+let lower: string = text.toLowerCase();
 console.log("Text: " + text);
 console.log("Length: " + length);
 console.log("Upper: " + upper);
+console.log("Lower: " + lower);
