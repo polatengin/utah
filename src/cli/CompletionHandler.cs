@@ -135,6 +135,50 @@ public class CompletionHandler : ICompletionHandler
           Documentation = "Exit the program"
         },
         
+        // Script methods
+        new CompletionItem
+        {
+          Label = "enableDebug",
+          Kind = CompletionItemKind.Method,
+          Detail = "enableDebug()",
+          Documentation = "Enable shell debugging (set -x)"
+        },
+        new CompletionItem
+        {
+          Label = "disableDebug",
+          Kind = CompletionItemKind.Method,
+          Detail = "disableDebug()",
+          Documentation = "Disable shell debugging (set +x)"
+        },
+        new CompletionItem
+        {
+          Label = "disableGlobbing",
+          Kind = CompletionItemKind.Method,
+          Detail = "disableGlobbing()",
+          Documentation = "Disable filename globbing (set -f)"
+        },
+        new CompletionItem
+        {
+          Label = "enableGlobbing",
+          Kind = CompletionItemKind.Method,
+          Detail = "enableGlobbing()",
+          Documentation = "Enable filename globbing (set +f)"
+        },
+        new CompletionItem
+        {
+          Label = "exitOnError",
+          Kind = CompletionItemKind.Method,
+          Detail = "exitOnError()",
+          Documentation = "Exit script on any command failure (set -e)"
+        },
+        new CompletionItem
+        {
+          Label = "continueOnError",
+          Kind = CompletionItemKind.Method,
+          Detail = "continueOnError()",
+          Documentation = "Continue script execution on command failure (set +e)"
+        },
+        
         // Array methods
         new CompletionItem
         {
@@ -313,6 +357,13 @@ public class CompletionHandler : ICompletionHandler
           Kind = CompletionItemKind.Module,
           Detail = "math",
           Documentation = "Math operations namespace"
+        },
+        new CompletionItem
+        {
+          Label = "script",
+          Kind = CompletionItemKind.Module,
+          Detail = "script",
+          Documentation = "Script control operations namespace"
         },
         new CompletionItem
         {

@@ -1,0 +1,4 @@
+script.exitOnError();
+console.log("Exit on error enabled");
+let test: string = "hello";
+console.log("Test variable: " + test);

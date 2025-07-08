@@ -1,0 +1,4 @@
+script.enableDebug();
+console.log("Debug mode enabled");
+let test: string = "hello";
+console.log("Test variable: " + test);

@@ -40,6 +40,18 @@ public class ConsolePromptYesNoExpression : Expression
   public string PromptText = string.Empty; // The text to display to the user
 }
 
+public class ScriptEnableDebugStatement : Node { } // Represents script.enableDebug()
+
+public class ScriptDisableDebugStatement : Node { } // Represents script.disableDebug()
+
+public class ScriptDisableGlobbingStatement : Node { } // Represents script.disableGlobbing()
+
+public class ScriptEnableGlobbingStatement : Node { } // Represents script.enableGlobbing()
+
+public class ScriptExitOnErrorStatement : Node { } // Represents script.exitOnError()
+
+public class ScriptContinueOnErrorStatement : Node { } // Represents script.continueOnError()
+
 public class UtilityRandomExpression : Expression
 {
   public Expression? MinValue = null; // Optional minimum value

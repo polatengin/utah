@@ -1,0 +1,4 @@
+script.disableGlobbing();
+console.log("Globbing disabled");
+let pattern: string = "*.txt";
+console.log("Pattern: " + pattern);

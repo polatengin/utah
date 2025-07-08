@@ -1,0 +1,4 @@
+script.enableGlobbing();
+console.log("Globbing enabled");
+let pattern: string = "*.txt";
+console.log("Pattern: " + pattern);

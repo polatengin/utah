@@ -754,15 +754,27 @@ public class Parser
           });
         }
       }
+      else if (line.StartsWith("script."))
+      {
+        // Handle script control functions
+        var scriptStatement = ParseStatement(line);
+        if (scriptStatement != null)
+        {
+          program.Statements.Add(scriptStatement);
+        }
+      }
       else if (line.Contains("(") && line.Contains(");"))
       {
-        var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
-        program.Statements.Add(new FunctionCall
+        var match = Regex.Match(line, @"([\w\.]+)\(([^)]*)\);");
+        if (match.Success)
         {
-          Name = match.Groups[1].Value,
-          Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(a => a.Trim()).ToList()
-        });
+          program.Statements.Add(new FunctionCall
+          {
+            Name = match.Groups[1].Value,
+            Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                  .Select(a => a.Trim()).ToList()
+          });
+        }
       }
       else
       {
@@ -1799,14 +1811,42 @@ public class Parser
     {
       return new BreakStatement();
     }
+    else if (line.StartsWith("script."))
+    {
+      // Parse script function calls
+      if (line == "script.enableDebug();")
+      {
+        return new ScriptEnableDebugStatement();
+      }
+      else if (line == "script.disableDebug();")
+      {
+        return new ScriptDisableDebugStatement();
+      }
+      else if (line == "script.disableGlobbing();")
+      {
+        return new ScriptDisableGlobbingStatement();
+      }
+      else if (line == "script.enableGlobbing();")
+      {
+        return new ScriptEnableGlobbingStatement();
+      }
+      else if (line == "script.exitOnError();")
+      {
+        return new ScriptExitOnErrorStatement();
+      }
+      else if (line == "script.continueOnError();")
+      {
+        return new ScriptContinueOnErrorStatement();
+      }
+    }
     else if (line.Contains("(") && line.Contains(");"))
     {
-      var match = Regex.Match(line, @"(\w+)\(([^)]*)\);");
+      var match = Regex.Match(line, @"([\w\.]+)\(([^)]*)\);");
       if (match.Success)
       {
         return (match.Groups[1].Value, match.Groups[2].Value) switch
         {
-          ("console", "isSudo") => new ConsoleIsSudoExpression(),
+          ("console.isSudo", "") => new ConsoleIsSudoExpression(),
           _ => new FunctionCall
           {
             Name = match.Groups[1].Value,

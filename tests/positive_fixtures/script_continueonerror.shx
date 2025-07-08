@@ -1,0 +1,4 @@
+script.continueOnError();
+console.log("Continue on error enabled");
+let test: string = "hello";
+console.log("Test variable: " + test);

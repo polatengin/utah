@@ -1299,6 +1299,172 @@ fi
 - Works consistently across all Unix-like systems (Linux, macOS, BSD)
 - Lightweight check with minimal performance impact
 
+## 🎛️ Script Control Functions
+
+Utah provides script control functions for managing shell behavior and debugging options during script execution. These functions compile to standard shell `set` commands and allow you to control various aspects of script execution.
+
+### Available Script Control Functions
+
+#### Debug Control
+
+- `script.enableDebug()` - Enable shell debugging and command tracing (set -x)
+- `script.disableDebug()` - Disable shell debugging and command tracing (set +x)
+
+#### Globbing Control
+
+- `script.disableGlobbing()` - Disable filename globbing/expansion (set -f)
+- `script.enableGlobbing()` - Enable filename globbing/expansion (set +f)
+
+#### Error Handling Control
+
+- `script.exitOnError()` - Exit script immediately when any command fails (set -e)
+- `script.continueOnError()` - Continue script execution even when commands fail (set +e)
+
+### Script Control Functions Usage
+
+```typescript
+// Enable debug mode to trace command execution
+script.enableDebug();
+console.log("Debug mode is now enabled");
+
+// Disable globbing for literal file pattern matching
+script.disableGlobbing();
+let pattern: string = "*.txt";
+console.log(`Looking for files matching: ${pattern}`);
+
+// Enable strict error handling
+script.exitOnError();
+console.log("Script will exit on any command failure");
+
+// Disable debug mode
+script.disableDebug();
+console.log("Debug mode is now disabled");
+
+// Re-enable globbing
+script.enableGlobbing();
+console.log("Globbing is now enabled");
+
+// Allow script to continue on errors
+script.continueOnError();
+console.log("Script will continue even if commands fail");
+```
+
+### Debug Control Example
+
+```typescript
+// Start with debug mode for troubleshooting
+script.enableDebug();
+console.log("Starting application setup...");
+
+// Perform some operations with debug output
+let appName: string = "MyApp";
+console.log(`Setting up ${appName}`);
+
+// Disable debug mode for cleaner output
+script.disableDebug();
+console.log("Setup complete - debug mode disabled");
+```
+
+### Error Handling Example
+
+```typescript
+// Enable strict error handling for critical operations
+script.exitOnError();
+console.log("Starting critical deployment process...");
+
+// These commands will cause script to exit if they fail
+console.log("Validating configuration...");
+console.log("Deploying application...");
+
+// Switch to permissive mode for cleanup operations
+script.continueOnError();
+console.log("Performing cleanup (errors allowed)...");
+```
+
+### Globbing Control Example
+
+```typescript
+// Disable globbing when working with literal patterns
+script.disableGlobbing();
+let searchPattern: string = "*.backup";
+console.log(`Searching for files with pattern: ${searchPattern}`);
+
+// Process files without shell expansion
+console.log("Processing files literally...");
+
+// Re-enable globbing for normal file operations
+script.enableGlobbing();
+console.log("Globbing re-enabled for file operations");
+```
+
+### Generated Bash Code for Script Control Functions
+
+The script control functions transpile to standard bash `set` commands:
+
+```bash
+# script.enableDebug() becomes:
+set -x
+echo "Debug mode is now enabled"
+
+# script.disableGlobbing() becomes:
+set -f
+pattern="*.txt"
+echo "Looking for files matching: ${pattern}"
+
+# script.exitOnError() becomes:
+set -e
+echo "Script will exit on any command failure"
+
+# script.disableDebug() becomes:
+set +x
+echo "Debug mode is now disabled"
+
+# script.enableGlobbing() becomes:
+set +f
+echo "Globbing is now enabled"
+
+# script.continueOnError() becomes:
+set +e
+echo "Script will continue even if commands fail"
+```
+
+### Script Control Functions Use Cases
+
+- **Debugging**: Enable/disable command tracing to troubleshoot script issues
+- **Error Handling**: Control whether scripts exit on command failures
+- **File Operations**: Control glob expansion for literal vs. pattern matching
+- **Development**: Use debug mode during development, disable for production
+- **Conditional Control**: Enable strict error handling for critical sections
+- **Legacy Compatibility**: Manage shell behavior for compatibility with different systems
+
+### Best Practices
+
+- **Use debug mode sparingly**: Enable only when needed to avoid verbose output
+- **Exit on error for critical operations**: Use `script.exitOnError()` for deployment scripts
+- **Disable globbing for literal patterns**: Prevent unexpected expansion when working with patterns as strings
+- **Document behavior changes**: Comment when changing script control settings
+- **Reset after use**: Consider resetting options after specific operations
+- **Test both modes**: Test scripts with both strict and permissive error handling
+
+### Shell Option Reference
+
+| Utah Function | Bash Command | Description |
+|---------------|--------------|-------------|
+| `script.enableDebug()` | `set -x` | Print commands and their arguments as they are executed |
+| `script.disableDebug()` | `set +x` | Disable command tracing |
+| `script.disableGlobbing()` | `set -f` | Disable filename expansion (globbing) |
+| `script.enableGlobbing()` | `set +f` | Enable filename expansion (globbing) |
+| `script.exitOnError()` | `set -e` | Exit immediately if a command exits with a non-zero status |
+| `script.continueOnError()` | `set +e` | Do not exit on command failures (default behavior) |
+
+### Script Control Technical Notes
+
+- Script control functions can be called multiple times throughout a script
+- Settings persist until explicitly changed or the script terminates
+- Functions can be used in conditional blocks and loops
+- All functions compile to standard POSIX shell `set` commands
+- No performance impact - these are shell built-in commands
+
 ## Development
 
 ### Building
@@ -1472,7 +1638,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `utility.*` functions (`random()` with min/max parameters)
 
-- [ ] `script.*` functions (`enableDebug()`, `disableGlobbing()`)
+- [x] `script.*` functions (`enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
 
 - [ ] `args.*` functions (`get()`, `has()`, `all()`)
 

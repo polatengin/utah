@@ -196,6 +196,30 @@ public class Compiler
         lines.Add("break");
         break;
 
+      case ScriptEnableDebugStatement:
+        lines.Add("set -x");
+        break;
+
+      case ScriptDisableDebugStatement:
+        lines.Add("set +x");
+        break;
+
+      case ScriptDisableGlobbingStatement:
+        lines.Add("set -f");
+        break;
+
+      case ScriptEnableGlobbingStatement:
+        lines.Add("set +f");
+        break;
+
+      case ScriptExitOnErrorStatement:
+        lines.Add("set -e");
+        break;
+
+      case ScriptContinueOnErrorStatement:
+        lines.Add("set +e");
+        break;
+
       case ForInLoop forInLoop:
         lines.Add($"for {forInLoop.Variable} in \"${{{forInLoop.Iterable}[@]}}\"; do");
 
@@ -698,6 +722,30 @@ public class Compiler
 
       case BreakStatement breakStmt:
         lines.Add("  break");
+        break;
+
+      case ScriptEnableDebugStatement:
+        lines.Add("  set -x");
+        break;
+
+      case ScriptDisableDebugStatement:
+        lines.Add("  set +x");
+        break;
+
+      case ScriptDisableGlobbingStatement:
+        lines.Add("  set -f");
+        break;
+
+      case ScriptEnableGlobbingStatement:
+        lines.Add("  set +f");
+        break;
+
+      case ScriptExitOnErrorStatement:
+        lines.Add("  set -e");
+        break;
+
+      case ScriptContinueOnErrorStatement:
+        lines.Add("  set +e");
         break;
 
       case ForInLoop forInLoop:
