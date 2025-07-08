@@ -55,6 +55,200 @@ jobs:
       - name: Test
         run: make test
 
+      - name: Run Tests for Badge
+        id: test-badge
+        run: |
+          # Run tests and capture results
+          if make test > badge_test_output.log 2>&1; then
+            TEST_STATUS="passing"
+            COLOR="brightgreen"
+          else
+            TEST_STATUS="failing"
+            COLOR="red"
+          fi
+
+          # Extract test statistics
+          TOTAL_TESTS=$(grep -o "Total tests: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
+          PASSED_TESTS=$(grep -o "Passed: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
+          FAILED_TESTS=$(grep -o "Failed: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
+
+          echo "TEST_STATUS=$TEST_STATUS" >> $GITHUB_OUTPUT
+          echo "COLOR=$COLOR" >> $GITHUB_OUTPUT
+          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
+
+      - name: Create Test Badge
+        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: utah-tests.json
+          label: Tests
+          message: ${{ steps.test-badge.outputs.PASSED_TESTS }}/${{ steps.test-badge.outputs.TOTAL_TESTS }} passing
+          color: ${{ steps.test-badge.outputs.COLOR }}
+
+      - name: Create Coverage Badge
+        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: ${{ secrets.BADGE_GIST_ID }}
+          filename: utah-coverage.json
+          label: Coverage
+          message: ${{ steps.test-badge.outputs.TOTAL_TESTS }} tests
+          color: blue
+
+      - name: Run Tests
+        id: test
+        run: |
+          echo "🧪 Running Utah CLI Tests..."
+
+          # Set up test result tracking
+          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
+
+          # Run tests and capture output with color codes preserved
+          if make test 2>&1 | tee test_output.log; then
+            echo "TEST_STATUS=success" >> $GITHUB_ENV
+            echo "All tests passed! ✅" >> $GITHUB_ENV
+          else
+            echo "TEST_STATUS=failure" >> $GITHUB_ENV
+            echo "Some tests failed! ❌" >> $GITHUB_ENV
+          fi
+
+          # Extract test statistics
+          TOTAL_TESTS=$(grep -o "Total tests: [0-9]*" test_output.log | grep -o "[0-9]*" || echo "0")
+          PASSED_TESTS=$(grep -o "Passed: [0-9]*" test_output.log | grep -o "[0-9]*" || echo "0")
+          FAILED_TESTS=$(grep -o "Failed: [0-9]*" test_output.log | grep -o "[0-9]*" || echo "0")
+
+          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_ENV
+          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_ENV
+          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_ENV
+
+          # Create detailed test results
+          echo "## 🧪 Test Results" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "| Metric | Value |" >> $GITHUB_ENV
+          echo "|--------|-------|" >> $GITHUB_ENV
+          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_ENV
+          echo "| Passed | $PASSED_TESTS ✅ |" >> $GITHUB_ENV
+          echo "| Failed | $FAILED_TESTS ❌ |" >> $GITHUB_ENV
+          echo "| Success Rate | $(( PASSED_TESTS * 100 / TOTAL_TESTS ))% |" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+
+          # Add individual test results
+          echo "### Individual Test Results" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "\`\`\`" >> $GITHUB_ENV
+          # Extract test results from log
+          grep "🔍 Testing" test_output.log >> $GITHUB_ENV || echo "No test details found" >> $GITHUB_ENV
+          echo "\`\`\`" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test_output.log
+            tests/temp/
+          retention-days: 30
+
+      - name: Create Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Utah CLI Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status:** ${{ env.TEST_STATUS == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Tests | ${{ env.TOTAL_TESTS }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | ${{ env.PASSED_TESTS }} ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ${{ env.FAILED_TESTS }} ❌ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Success Rate | $(( ${{ env.PASSED_TESTS }} * 100 / ${{ env.TOTAL_TESTS }} ))% |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ env.TEST_STATUS }}" = "success" ]; then
+            echo "🎉 All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some tests failed. Check the logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "The test suite covers all major Utah language features:" >> $GITHUB_STEP_SUMMARY
+          echo "- Variable declarations and assignments" >> $GITHUB_STEP_SUMMARY
+          echo "- Function definitions and calls" >> $GITHUB_STEP_SUMMARY
+          echo "- Control flow (if/else, loops, switch)" >> $GITHUB_STEP_SUMMARY
+          echo "- Built-in functions (console, fs, os, process, timer, utility, script)" >> $GITHUB_STEP_SUMMARY
+          echo "- String manipulation and arrays" >> $GITHUB_STEP_SUMMARY
+          echo "- Error handling and edge cases" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with Test Results
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const testStatus = '${{ env.TEST_STATUS }}';
+            const totalTests = '${{ env.TOTAL_TESTS }}';
+            const passedTests = '${{ env.PASSED_TESTS }}';
+            const failedTests = '${{ env.FAILED_TESTS }}';
+            const successRate = Math.round((passedTests * 100) / totalTests);
+
+            const statusIcon = testStatus === 'success' ? '✅' : '❌';
+            const statusText = testStatus === 'success' ? 'All tests passed!' : 'Some tests failed!';
+
+            const body = `## 🧪 Test Results ${statusIcon}
+
+            **Status:** ${statusText}
+
+            | Metric | Value |
+            |--------|-------|
+            | Total Tests | ${totalTests} |
+            | Passed | ${passedTests} ✅ |
+            | Failed | ${failedTests} ❌ |
+            | Success Rate | ${successRate}% |
+
+            ${testStatus === 'failure' ? '⚠️ **Please check the failed tests and fix them before merging.**' : '🎉 **Great work! All tests are passing.**'}
+
+            You can view the detailed test results in the [Actions tab](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).`;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('🧪 Test Results')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Fail if tests failed
+        if: env.TEST_STATUS == 'failure'
+        run: |
+          echo "❌ Tests failed!"
+          exit 1
+
       - name: Publish
         run: |
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r linux-x64 -o ./publish/linux-x64
