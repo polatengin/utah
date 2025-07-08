@@ -1360,6 +1360,10 @@ Utah provides console system functions for checking system privileges and perfor
 
 ### Available Console System Functions
 
+#### Screen Control
+
+- `console.clear()` - Clear the terminal screen
+
 #### Privilege Checking
 
 - `console.isSudo()` - Check if the script is running with root/sudo privileges
@@ -1371,6 +1375,26 @@ Utah provides console system functions for checking system privileges and perfor
 ### Console System Functions Usage
 
 ```typescript
+// Clear the terminal screen
+console.clear();
+console.log("Screen has been cleared - this is the first visible line");
+
+// Use console.clear() in conditional logic
+let shouldClear: boolean = true;
+if (shouldClear) {
+  console.log("About to clear the screen...");
+  console.clear();
+  console.log("Screen cleared!");
+}
+
+// Clear screen in functions
+function resetDisplay(): void {
+  console.clear();
+  console.log("Display reset");
+}
+
+resetDisplay();
+
 // Check if running with sudo privileges
 let isSudo: boolean = console.isSudo();
 
@@ -1816,7 +1840,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `else` statements
 
-- [x] `console.log` for output
+- [x] `console.log()` for output
 
 - [x] Console system functions (`console.isSudo()`)
 
@@ -1862,7 +1886,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `web.*` functions (`get()` implemented - `put()`, `speedtest()` coming soon)
 
-- [ ] `console.*` functions (`clear()`, `drawWindow()`, `optionList()`)
+- [ ] `console.*` functions (`clear()` implemented, `drawWindow()`, `optionList()` coming soon)
 
 - [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
 

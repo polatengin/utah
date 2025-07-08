@@ -339,6 +339,10 @@ public class Parser
               Expression = expression
             });
           }
+          else if (inner == "console.clear();")
+          {
+            func.Body.Add(new ConsoleClearStatement());
+          }
           else if (inner.StartsWith("return "))
           {
             var val = inner.Substring(7).TrimEnd(';');
@@ -397,6 +401,10 @@ public class Parser
               var expression = ParseExpression(raw);
               ifStmt.ThenBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
             }
+          }
+          else if (inner == "console.clear();")
+          {
+            ifStmt.ThenBody.Add(new ConsoleClearStatement());
           }
           else if (inner.StartsWith("let "))
           {
@@ -492,6 +500,10 @@ public class Parser
                 var expression = ParseExpression(raw);
                 ifStmt.ElseBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
               }
+            }
+            else if (inner == "console.clear();")
+            {
+              ifStmt.ElseBody.Add(new ConsoleClearStatement());
             }
             else if (inner.StartsWith("exit "))
             {
@@ -694,6 +706,11 @@ public class Parser
           var expr = ParseExpression(raw);
           program.Statements.Add(new ConsoleLog { Expression = expr, IsExpression = true });
         }
+      }
+      else if (line == "console.clear();")
+      {
+        // Parse console.clear() statement
+        program.Statements.Add(new ConsoleClearStatement());
       }
       else if (line.StartsWith("env."))
       {
@@ -1774,6 +1791,10 @@ public class Parser
         var expression = ParseExpression(raw);
         return new ConsoleLog { IsExpression = true, Expression = expression };
       }
+    }
+    else if (line == "console.clear();")
+    {
+      return new ConsoleClearStatement();
     }
     else if (line.StartsWith("let "))
     {

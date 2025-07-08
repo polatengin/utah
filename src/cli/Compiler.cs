@@ -220,6 +220,10 @@ public class Compiler
         lines.Add("break");
         break;
 
+      case ConsoleClearStatement:
+        lines.Add("clear");
+        break;
+
       case ScriptEnableDebugStatement:
         lines.Add("set -x");
         break;
@@ -746,6 +750,10 @@ public class Compiler
 
       case BreakStatement breakStmt:
         lines.Add("  break");
+        break;
+
+      case ConsoleClearStatement:
+        lines.Add("  clear");
         break;
 
       case ScriptEnableDebugStatement:

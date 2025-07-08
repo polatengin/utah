@@ -40,6 +40,8 @@ public class ConsolePromptYesNoExpression : Expression
   public string PromptText = string.Empty; // The text to display to the user
 }
 
+public class ConsoleClearStatement : Node { } // Represents console.clear()
+
 public class ScriptEnableDebugStatement : Node { } // Represents script.enableDebug()
 
 public class ScriptDisableDebugStatement : Node { } // Represents script.disableDebug()

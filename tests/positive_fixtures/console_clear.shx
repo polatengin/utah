@@ -1,0 +1,28 @@
+// Test console.clear() function
+console.log("Before clear - this should be visible initially");
+console.log("Another line before clear");
+
+// Clear the console
+console.clear();
+
+console.log("After clear - this should be the first visible line");
+console.log("This line should also be visible after clear");
+
+// Test console.clear() in conditionals
+let shouldClear: boolean = true;
+if (shouldClear) {
+  console.log("Clearing console from within if statement");
+  console.clear();
+  console.log("Console cleared from if statement");
+}
+
+// Test console.clear() in functions
+function clearScreen(): void {
+  console.log("About to clear from function");
+  console.clear();
+  console.log("Console cleared from function");
+}
+
+clearScreen();
+
+console.log("Test completed");
