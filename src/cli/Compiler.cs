@@ -130,7 +130,7 @@ public class Compiler
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
-        else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" && 
+        else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
                  (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
