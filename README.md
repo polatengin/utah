@@ -24,6 +24,20 @@ It then transpiles the AST into valid bash code.
 
 The generated `.sh` file is saved alongside the original.
 
+## 🧪 Testing
+
+To run the entire test suite, use the `make test` command. This will build the CLI and run all positive and negative regression tests.
+
+```bash
+make test
+```
+
+You can also run a specific test file by providing the `FILE` variable:
+
+```bash
+make test FILE=a_test_file
+```
+
 ## 🧪 Example
 
 Input (`examples/input.shx`):
