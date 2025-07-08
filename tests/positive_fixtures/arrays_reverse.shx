@@ -1,0 +1,39 @@
+// Array reverse() method test
+let numbers: number[] = [1, 2, 3, 4, 5];
+let names: string[] = ["Alice", "Bob", "Charlie"];
+
+// Test reverse() method
+let reversedNumbers: number[] = numbers.reverse();
+let reversedNames: string[] = names.reverse();
+
+console.log("Original numbers:");
+for (let num: number in numbers) {
+  console.log(num);
+}
+
+console.log("Reversed numbers:");
+for (let num: number in reversedNumbers) {
+  console.log(num);
+}
+
+console.log("Original names:");
+for (let name: string in names) {
+  console.log(name);
+}
+
+console.log("Reversed names:");
+for (let name: string in reversedNames) {
+  console.log(name);
+}
+
+// Test with empty array
+let empty: string[] = [];
+let reversedEmpty: string[] = empty.reverse();
+
+console.log("Empty array reversed length:");
+console.log(reversedEmpty.length);
+
+// Test reverse in assignment and condition
+let first: number = reversedNumbers[0];
+console.log("First element of reversed numbers:");
+console.log(first);

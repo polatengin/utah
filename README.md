@@ -516,6 +516,24 @@ if (!filledArray.isEmpty()) {
 }
 ```
 
+Reverse an array using the `.reverse()` method:
+
+```typescript
+let numbers: number[] = [1, 2, 3, 4, 5];
+let reversed: number[] = numbers.reverse();  // Gets [5, 4, 3, 2, 1]
+
+let fruits: string[] = ["apple", "banana", "cherry"];
+let reversedFruits: string[] = fruits.reverse();  // Gets ["cherry", "banana", "apple"]
+
+// Use in assignments and conditionals
+let emptyArray: string[] = [];
+let reversedEmpty: string[] = emptyArray.reverse();  // Gets []
+
+if (!numbers.reverse().isEmpty()) {
+  console.log("Reversed array is not empty");
+}
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -582,6 +600,12 @@ emptyCheck=$([ ${#emptyArray[@]} -eq 0 ] && echo "true" || echo "false")
 if [ "$([ ${#emptyArray[@]} -eq 0 ] && echo "true" || echo "false")" = "true" ]; then
   echo "The array is empty"
 fi
+
+# Array reverse() uses bash array and command substitution:
+reversed=($(for ((i=${#numbers[@]}-1; i>=0; i--)); do echo "${numbers[i]}"; done))
+
+# Array reverse() with empty arrays:
+reversedEmpty=($(for ((i=${#emptyArray[@]}-1; i>=0; i--)); do echo "${emptyArray[i]}"; done))
 
 # Array iteration uses bash array expansion:
 for color in "${colors[@]}"; do
@@ -1674,11 +1698,13 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] import syntax for splitting .shx files
 
-- [x] `array.length` property (`array.length`)
+- [x] `array.length` property
 
-- [x] `array.isEmpty()` function (`array.isEmpty()`)
+- [x] `array.isEmpty()` function
 
-- [ ] `array.*` functions (`contains()`, `join()`, `reverse()`, `sort()`, `merge()`)
+- [x] `array.reverse()` function
+
+- [ ] `array.*` functions (`contains()`, `join()`, `sort()`, `merge()`)
 
 - [x] Add shebang (`#!/bin/sh`) to generated scripts
 

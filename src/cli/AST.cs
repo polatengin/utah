@@ -98,6 +98,11 @@ public class ArrayIsEmpty : Expression
   public Expression Array = null!;
 }
 
+public class ArrayReverse : Expression
+{
+  public Expression Array = null!;
+}
+
 // For loops
 public class ForLoop : Node
 {

@@ -908,6 +908,7 @@ public class Compiler
       ArrayAccess acc => CompileArrayAccess(acc),
       ArrayLength len => CompileArrayLength(len),
       ArrayIsEmpty isEmpty => CompileArrayIsEmpty(isEmpty),
+      ArrayReverse reverse => CompileArrayReverse(reverse),
       FunctionCall func => CompileFunctionCallExpression(func),
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
@@ -1166,6 +1167,15 @@ public class Compiler
 
     // In bash, check if array length is zero: [ ${#arrayName[@]} -eq 0 ]
     return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileArrayReverse(ArrayReverse reverse)
+  {
+    var arrayName = ExtractVariableName(CompileExpression(reverse.Array));
+
+    // In bash, reverse an array by creating a new array with elements in reverse order
+    // We use readarray to convert the output into an array
+    return $"($(for ((i=${{#{arrayName}[@]}}-1; i>=0; i--)); do echo \"${{{arrayName}[i]}}\"; done))";
   }
 
   private string CompileFunctionCallExpression(FunctionCall func)

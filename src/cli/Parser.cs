@@ -1390,6 +1390,15 @@ public class Parser
         };
       }
 
+      // Handle .reverse() method
+      if (methodPart == "reverse()")
+      {
+        return new ArrayReverse
+        {
+          Array = new VariableExpression { Name = objectName }
+        };
+      }
+
       // Handle string methods (existing string function parsing)
       // This will be handled by existing string function parsing
     }
