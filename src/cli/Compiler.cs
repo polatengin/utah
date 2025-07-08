@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text;
 
 public class Compiler
 {
@@ -913,6 +914,7 @@ public class Compiler
       UnaryExpression un => CompileUnaryExpression(un),
       TernaryExpression tern => CompileTernaryExpression(tern),
       ParenthesizedExpression paren => CompileParenthesizedExpression(paren),
+      TemplateLiteralExpression template => CompileTemplateLiteralExpression(template),
       ArrayLiteral arr => CompileArrayLiteral(arr),
       ArrayAccess acc => CompileArrayAccess(acc),
       ArrayLength len => CompileArrayLength(len),
@@ -922,6 +924,7 @@ public class Compiler
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
       UtilityRandomExpression rand => CompileUtilityRandomExpression(rand),
+      WebGetExpression webGet => CompileWebGetExpression(webGet),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
     };
   }
@@ -1317,6 +1320,89 @@ public class Compiler
   private bool IsNumericLiteral(Expression expr)
   {
     return expr is LiteralExpression lit && lit.Type == "number";
+  }
+
+  private string CompileWebGetExpression(WebGetExpression webGet)
+  {
+    var url = CompileExpression(webGet.Url);
+
+    // Handle different types of URL expressions
+    string curlUrl;
+    if (url.StartsWith("${") && url.EndsWith("}"))
+    {
+      // It's a variable reference like ${varName}
+      curlUrl = url;
+    }
+    else if (url.StartsWith("\"") && url.EndsWith("\""))
+    {
+      // It's a string literal like "http://example.com"
+      curlUrl = url; // Keep the quotes for curl
+    }
+    else
+    {
+      // It's a variable name without ${}, add $ prefix for bash
+      curlUrl = $"${{{url}}}";
+    }
+
+    // Return a bash command substitution that uses curl to make the GET request
+    return $"$(curl -s {curlUrl} 2>/dev/null || echo \"\")";
+  }
+
+  private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)
+  {
+    var content = template.Template;
+
+    // Process ${...} expressions in the template
+    var result = new StringBuilder();
+    var i = 0;
+
+    while (i < content.Length)
+    {
+      if (i < content.Length - 1 && content[i] == '$' && content[i + 1] == '{')
+      {
+        // Find the closing brace
+        var braceCount = 1;
+        var j = i + 2;
+        while (j < content.Length && braceCount > 0)
+        {
+          if (content[j] == '{') braceCount++;
+          else if (content[j] == '}') braceCount--;
+          j++;
+        }
+
+        if (braceCount == 0)
+        {
+          // Extract and compile the expression
+          var exprContent = content.Substring(i + 2, j - i - 3);
+
+          // Special handling for .length() method on strings
+          if (exprContent.Contains(".length()"))
+          {
+            var varName = exprContent.Split('.')[0];
+            result.Append($"${{#{varName}}}");
+          }
+          else
+          {
+            // For other expressions, use variable substitution
+            result.Append($"${{{exprContent}}}");
+          }
+
+          i = j;
+        }
+        else
+        {
+          result.Append(content[i]);
+          i++;
+        }
+      }
+      else
+      {
+        result.Append(content[i]);
+        i++;
+      }
+    }
+
+    return $"\"{result}\"";
   }
 
 }

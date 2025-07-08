@@ -356,6 +356,11 @@ public class ParenthesizedExpression : Expression
   public Expression Inner = null!;
 }
 
+public class TemplateLiteralExpression : Expression
+{
+  public string Template = string.Empty;
+}
+
 // Switch/Case/Default nodes
 public class SwitchStatement : Node
 {
@@ -396,4 +401,9 @@ public class VariableDeclarationExpression : Node
 public class RawStatement : Node
 {
   public string Content { get; set; } = string.Empty;
+}
+
+public class WebGetExpression : Expression
+{
+  public Expression Url { get; set; } = null!; // The URL to make GET request to
 }

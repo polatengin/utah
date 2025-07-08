@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Text;
 
 public class Parser
 {
@@ -7,16 +8,87 @@ public class Parser
 
   public Parser(string input)
   {
-    // Pre-process to remove comments
-    var blockCommentRegex = new Regex("/\\*.*?\\*/", RegexOptions.Singleline);
-    var lineCommentRegex = new Regex("//.*");
-    var bashCommentRegex = new Regex("#.*");
+    // Pre-process to remove comments, but preserve strings
+    var processed = RemoveComments(input);
+    _lines = processed.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+  }
 
-    var noBlockComments = blockCommentRegex.Replace(input, "");
-    var noLineComments = lineCommentRegex.Replace(noBlockComments, "");
-    var noBashComments = bashCommentRegex.Replace(noLineComments, "");
+  private string RemoveComments(string input)
+  {
+    var result = new StringBuilder();
+    bool inString = false;
+    char stringChar = '\0';
 
-    _lines = noBashComments.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    for (int i = 0; i < input.Length; i++)
+    {
+      char current = input[i];
+
+      // Handle string literals
+      if (!inString && (current == '"' || current == '\''))
+      {
+        inString = true;
+        stringChar = current;
+        result.Append(current);
+      }
+      else if (inString && current == stringChar)
+      {
+        // Check if it's escaped
+        int backslashCount = 0;
+        for (int j = i - 1; j >= 0 && input[j] == '\\'; j--)
+          backslashCount++;
+
+        if (backslashCount % 2 == 0) // Even number of backslashes means not escaped
+        {
+          inString = false;
+        }
+        result.Append(current);
+      }
+      else if (inString)
+      {
+        result.Append(current);
+      }
+      else
+      {
+        // Not in string - check for comments
+        if (current == '/' && i + 1 < input.Length)
+        {
+          if (input[i + 1] == '/') // Line comment
+          {
+            // Skip to end of line
+            while (i < input.Length && input[i] != '\n')
+              i++;
+            if (i < input.Length)
+              result.Append(input[i]); // Include the newline
+          }
+          else if (input[i + 1] == '*') // Block comment
+          {
+            i += 2; // Skip /*
+            while (i + 1 < input.Length && !(input[i] == '*' && input[i + 1] == '/'))
+              i++;
+            if (i + 1 < input.Length)
+              i++; // Skip */
+          }
+          else
+          {
+            result.Append(current);
+          }
+        }
+        else if (current == '#') // Bash comment
+        {
+          // Skip to end of line
+          while (i < input.Length && input[i] != '\n')
+            i++;
+          if (i < input.Length)
+            result.Append(input[i]); // Include the newline
+        }
+        else
+        {
+          result.Append(current);
+        }
+      }
+    }
+
+    return result.ToString();
   }
 
   public ProgramNode Parse()
@@ -34,6 +106,7 @@ public class Parser
         if (typedMatch.Success)
         {
           var value = typedMatch.Groups[3].Value;
+
           var envNode = ParseEnvFunction(typedMatch.Groups[1].Value, value);
           if (envNode != null)
           {
@@ -90,7 +163,7 @@ public class Parser
                       {
                         Name = typedMatch.Groups[1].Value,
                         Type = declaredType,
-                        Value = expression,
+                        Value = expression ?? new LiteralExpression { Value = "", Type = "string" },
                         IsConst = false
                       });
                     }
@@ -595,9 +668,19 @@ public class Parser
 
         if (raw.StartsWith("`"))
         {
-          // Template literal
+          // Template literal - check if it contains expressions
           var msg = raw[1..^1];
-          program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
+          if (msg.Contains("${"))
+          {
+            // Parse as template literal since it contains template expressions
+            var expr = ParseTemplateLiteral(raw);
+            program.Statements.Add(new ConsoleLog { Expression = expr, IsExpression = true });
+          }
+          else
+          {
+            // Simple template literal without expressions
+            program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
+          }
         }
         else if (raw.StartsWith("\"") && raw.EndsWith("\""))
         {
@@ -1306,6 +1389,12 @@ public class Parser
       };
     }
 
+    // Template literal
+    if (input.StartsWith("`") && input.EndsWith("`"))
+    {
+      return ParseTemplateLiteral(input);
+    }
+
     // Number literal
     if (double.TryParse(input, out _))
     {
@@ -1371,6 +1460,33 @@ public class Parser
       var dotIndex = input.IndexOf('.');
       var objectName = input.Substring(0, dotIndex).Trim();
       var methodPart = input.Substring(dotIndex + 1).Trim();
+
+      // Special case for web.get() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("get(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(4, methodPart.Length - 5).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.get() requires a URL argument");
+        }
+        else
+        {
+          // Parse the URL argument
+          var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(arg => arg.Trim())
+                                .ToList();
+          if (args.Count == 1)
+          {
+            // One argument: web.get(url)
+            var urlExpr = ParseExpression(args[0]);
+            return new WebGetExpression { Url = urlExpr };
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.get() accepts exactly 1 argument (URL), got {args.Count}");
+          }
+        }
+      }
 
       // Handle .length property
       if (methodPart == "length")
@@ -2257,5 +2373,27 @@ public class Parser
     }
 
     return null;
+  }
+
+  private Expression ParseTemplateLiteral(string input)
+  {
+    // Remove the backticks
+    var content = input.Substring(1, input.Length - 2);
+
+    // If no expressions, return a simple string literal
+    if (!content.Contains("${"))
+    {
+      return new LiteralExpression
+      {
+        Value = content,
+        Type = "string"
+      };
+    }
+
+    // Parse template literal with expressions
+    return new TemplateLiteralExpression
+    {
+      Template = content
+    };
   }
 }

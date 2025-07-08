@@ -1155,6 +1155,109 @@ let result: number = utility.random(min, max); // Will exit with code 100
 - **Security**: Random timeouts and delays (not cryptographically secure)
 - **User Experience**: Random tips, messages, or content selection
 
+## 🌐 Web Functions
+
+Utah provides web functions for making HTTP requests and interacting with web APIs and resources.
+
+### Available Web Functions
+
+#### HTTP Requests
+
+- `web.get(url)` - Perform an HTTP GET request to the specified URL
+
+### Web Functions Usage
+
+```typescript
+// Make a simple GET request to a URL
+let response: string = web.get("https://api.github.com/users/octocat");
+console.log(`Response: ${response}`);
+
+// Use with variables
+let apiUrl: string = "https://httpbin.org/get";
+let data: string = web.get(apiUrl);
+console.log(`API response: ${data}`);
+
+// Check response and handle with conditionals
+let healthCheck: string = web.get("https://httpbin.org/status/200");
+if (healthCheck != "") {
+  console.log("Service is available");
+} else {
+  console.log("Service might be down");
+}
+
+// Use in loops for multiple endpoints
+let endpoints: string[] = ["https://httpbin.org/get", "https://httpbin.org/uuid"];
+for (let endpoint: string in endpoints) {
+  let result: string = web.get(endpoint);
+  console.log(`Endpoint ${endpoint}: ${result}`);
+}
+```
+
+### Web Function Examples
+
+```typescript
+// Fetch JSON data from an API
+let userApi: string = "https://jsonplaceholder.typicode.com/users/1";
+let userData: string = web.get(userApi);
+console.log(`User data: ${userData}`);
+
+// Download content from a URL
+let textUrl: string = "https://httpbin.org/robots.txt";
+let robotsTxt: string = web.get(textUrl);
+console.log(`Robots.txt content: ${robotsTxt}`);
+
+// Health check endpoints
+let status200: string = web.get("https://httpbin.org/status/200");
+let status404: string = web.get("https://httpbin.org/status/404");
+
+if (status200 != "") {
+  console.log("200 endpoint is working");
+}
+
+// Use with string interpolation
+let baseUrl: string = "https://httpbin.org";
+let endpoint: string = "json";
+let fullUrl: string = `${baseUrl}/${endpoint}`;
+let response: string = web.get(fullUrl);
+console.log(`Response from ${fullUrl}: ${response}`);
+```
+
+### Generated Bash Code for Web Functions
+
+The web functions transpile to efficient bash commands using `curl`:
+
+```bash
+# web.get("https://api.github.com/users/octocat")
+response=$(curl -s "https://api.github.com/users/octocat")
+
+# web.get() with variables
+apiUrl="https://httpbin.org/get"
+data=$(curl -s "${apiUrl}")
+
+# Multiple requests in a loop
+for endpoint in "https://httpbin.org/get" "https://httpbin.org/uuid"; do
+  result=$(curl -s "${endpoint}")
+  echo "Endpoint ${endpoint}: ${result}"
+done
+```
+
+### Web Function Features
+
+- **Silent operation**: Uses `curl -s` to suppress progress output
+- **Variable support**: Works with both string literals and variables
+- **String interpolation**: Compatible with template literals and variable substitution
+- **Error handling**: Failed requests return empty strings that can be checked
+- **Cross-platform**: Uses `curl` which is available on most Unix-like systems
+
+### Use Cases for Web Functions
+
+- **API Integration**: Fetch data from REST APIs and web services
+- **Health Monitoring**: Check if web services and endpoints are responding
+- **Content Fetching**: Download text content, configuration files, or data
+- **Automation**: Integrate web requests into deployment and maintenance scripts
+- **Testing**: Verify API responses and web service functionality
+- **Data Collection**: Gather information from multiple web sources
+
 ## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
@@ -1757,7 +1860,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `args.*` functions (`get()`, `has()`, `all()`)
 
-- [ ] `web.*` functions (`get()`, `put()`, `speedtest()`)
+- [x] `web.*` functions (`get()` implemented - `put()`, `speedtest()` coming soon)
 
 - [ ] `console.*` functions (`clear()`, `drawWindow()`, `optionList()`)
 
