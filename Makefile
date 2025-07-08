@@ -1,9 +1,10 @@
 # Utah Language Development Makefile
 
-.PHONY: help build test compile clean install info
+.PHONY: help build build-extension test compile clean install info dev watch
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
+VSCODE_DIR := src/vscode-extension
 TESTS_DIR := tests
 FIXTURES_DIR := $(TESTS_DIR)/positive_fixtures
 EXPECTED_DIR := $(TESTS_DIR)/expected
@@ -121,9 +122,25 @@ clean: ## Clean build artifacts and test files
 	@cd $(CLI_DIR) && dotnet clean
 	@rm -rf $(TESTS_DIR)/temp
 	@rm -f $(TESTS_DIR)/positive_fixtures/*.sh
+	@rm -f $(TESTS_DIR)/negative_fixtures/*.sh
+	@rm -rf $(VSCODE_DIR)/server
+	@rm -rf $(VSCODE_DIR)/dist
 	@echo "$(GREEN)✅ Clean complete$(NC)"
 
 # Development workflow targets
+build-extension: build ## Build both CLI and VS Code extension
+	@echo "$(BLUE)🔨 Building VS Code extension...$(NC)"
+	@cd $(VSCODE_DIR) && npm run compile
+	@echo "$(BLUE)📦 Copying CLI output to VS Code extension dist/server...$(NC)"
+	@mkdir -p $(VSCODE_DIR)/dist/server
+	@cp $(CLI_DIR)/bin/Debug/net9.0/utah $(VSCODE_DIR)/dist/server/
+	@cp $(CLI_DIR)/bin/Debug/net9.0/utah.dll $(VSCODE_DIR)/dist/server/
+	@cp $(CLI_DIR)/bin/Debug/net9.0/utah.runtimeconfig.json $(VSCODE_DIR)/dist/server/
+	@cp $(CLI_DIR)/bin/Debug/net9.0/utah.deps.json $(VSCODE_DIR)/dist/server/
+	@cp $(CLI_DIR)/bin/Debug/net9.0/*.dll $(VSCODE_DIR)/dist/server/ 2>/dev/null || true
+	@chmod +x $(VSCODE_DIR)/dist/server/utah
+	@echo "$(GREEN)✅ Extension build complete$(NC)"
+
 dev: build test ## Full development cycle: build + test
 
 watch: ## Watch for changes and run tests (requires inotify-tools)
