@@ -29,6 +29,7 @@ help:
 	@echo "Examples:"
 	@echo "  make build"
 	@echo "  make test"
+	@echo "  make test FILE=env_get_ternary"
 	@echo "  make compile FILE=examples/hello.shx"
 
 build: ## Build the CLI
@@ -36,59 +37,109 @@ build: ## Build the CLI
 	@cd $(CLI_DIR) && dotnet build
 	@echo "$(GREEN)✅ Build complete$(NC)"
 
-test: build ## Run all regression tests
+test: build ## Run all regression tests (or specific test with FILE=testname)
 	@echo "$(BLUE)🧪 Running Utah CLI Regression Tests$(NC)"
 	@echo "====================================="
 	@mkdir -p $(TEMP_DIR)
 	@total=0; passed=0; failed=0; \
-	echo "$(BLUE)Running positive tests...$(NC)"; \
-	for fixture in $(FIXTURES_DIR)/*.shx; do \
-		if [ -f "$$fixture" ]; then \
-			test_name=$$(basename "$$fixture" .shx); \
-			expected_file="$(EXPECTED_DIR)/$$test_name.sh"; \
-			actual_file="$(TEMP_DIR)/$$test_name.sh"; \
-			total=$$((total + 1)); \
-			echo -n "🔍 Testing $$test_name... "; \
-			if [ ! -f "$$expected_file" ]; then \
-				printf "$(RED)❌ Expected file not found$(NC)\n"; \
-				failed=$$((failed + 1)); \
-				continue; \
+	if [ -n "$(FILE)" ]; then \
+		echo "$(BLUE)Running specific test: $(FILE)$(NC)"; \
+		fixture="$(FIXTURES_DIR)/$(FILE).shx"; \
+		if [ ! -f "$$fixture" ]; then \
+			fixture="$(NEGATIVE_TESTS_DIR)/$(FILE).shx"; \
+			if [ ! -f "$$fixture" ]; then \
+				echo "$(RED)❌ Test file $(FILE).shx not found in positive_fixtures or negative_fixtures$(NC)"; \
+				exit 1; \
 			fi; \
-			if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
-				printf "$(RED)❌ Compilation failed$(NC)\n"; \
-				failed=$$((failed + 1)); \
-				continue; \
-			fi; \
-			generated_file="$(FIXTURES_DIR)/$$test_name.sh"; \
-			mv "$$generated_file" "$$actual_file"; \
-			if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
-				printf "$(GREEN)✅ PASS$(NC)\n"; \
-				passed=$$((passed + 1)); \
-			else \
-				printf "$(RED)❌ FAIL$(NC)\n"; \
-				printf "$(YELLOW)Expected vs Actual differences:$(NC)\n"; \
-				diff -u "$$expected_file" "$$actual_file" | head -20; \
-				echo; \
-				failed=$$((failed + 1)); \
-			fi; \
-		fi; \
-	done; \
-	echo; \
-	echo "$(BLUE)Running negative tests (should fail compilation)...$(NC)"; \
-	for fixture in $(NEGATIVE_TESTS_DIR)/*.shx; do \
-		if [ -f "$$fixture" ]; then \
-			test_name=$$(basename "$$fixture" .shx); \
-			total=$$((total + 1)); \
+			echo "$(BLUE)Running negative test (should fail compilation)...$(NC)"; \
+			test_name="$(FILE)"; \
+			total=1; \
 			echo -n "🔍 Testing $$test_name (expect failure)... "; \
 			if dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
 				printf "$(RED)❌ FAIL (should have failed compilation)$(NC)\n"; \
-				failed=$$((failed + 1)); \
+				failed=1; \
 			else \
 				printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
-				passed=$$((passed + 1)); \
+				passed=1; \
+			fi; \
+		else \
+			echo "$(BLUE)Running positive test...$(NC)"; \
+			test_name="$(FILE)"; \
+			expected_file="$(EXPECTED_DIR)/$$test_name.sh"; \
+			actual_file="$(TEMP_DIR)/$$test_name.sh"; \
+			total=1; \
+			echo -n "🔍 Testing $$test_name... "; \
+			if [ ! -f "$$expected_file" ]; then \
+				printf "$(RED)❌ Expected file not found$(NC)\n"; \
+				failed=1; \
+			elif ! dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
+				printf "$(RED)❌ Compilation failed$(NC)\n"; \
+				failed=1; \
+			else \
+				generated_file="$(FIXTURES_DIR)/$$test_name.sh"; \
+				mv "$$generated_file" "$$actual_file"; \
+				if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
+					printf "$(GREEN)✅ PASS$(NC)\n"; \
+					passed=1; \
+				else \
+					printf "$(RED)❌ FAIL$(NC)\n"; \
+					printf "$(YELLOW)Expected vs Actual differences:$(NC)\n"; \
+					diff -u "$$expected_file" "$$actual_file"; \
+					echo; \
+					failed=1; \
+				fi; \
 			fi; \
 		fi; \
-	done; \
+	else \
+		echo "$(BLUE)Running positive tests...$(NC)"; \
+		for fixture in $(FIXTURES_DIR)/*.shx; do \
+			if [ -f "$$fixture" ]; then \
+				test_name=$$(basename "$$fixture" .shx); \
+				expected_file="$(EXPECTED_DIR)/$$test_name.sh"; \
+				actual_file="$(TEMP_DIR)/$$test_name.sh"; \
+				total=$$((total + 1)); \
+				echo -n "🔍 Testing $$test_name... "; \
+				if [ ! -f "$$expected_file" ]; then \
+					printf "$(RED)❌ Expected file not found$(NC)\n"; \
+					failed=$$((failed + 1)); \
+					continue; \
+				fi; \
+				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
+					printf "$(RED)❌ Compilation failed$(NC)\n"; \
+					failed=$$((failed + 1)); \
+					continue; \
+				fi; \
+				generated_file="$(FIXTURES_DIR)/$$test_name.sh"; \
+				mv "$$generated_file" "$$actual_file"; \
+				if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
+					printf "$(GREEN)✅ PASS$(NC)\n"; \
+					passed=$$((passed + 1)); \
+				else \
+					printf "$(RED)❌ FAIL$(NC)\n"; \
+					printf "$(YELLOW)Expected vs Actual differences:$(NC)\n"; \
+					diff -u "$$expected_file" "$$actual_file" | head -20; \
+					echo; \
+					failed=$$((failed + 1)); \
+				fi; \
+			fi; \
+		done; \
+		echo; \
+		echo "$(BLUE)Running negative tests (should fail compilation)...$(NC)"; \
+		for fixture in $(NEGATIVE_TESTS_DIR)/*.shx; do \
+			if [ -f "$$fixture" ]; then \
+				test_name=$$(basename "$$fixture" .shx); \
+				total=$$((total + 1)); \
+				echo -n "🔍 Testing $$test_name (expect failure)... "; \
+				if dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
+					printf "$(RED)❌ FAIL (should have failed compilation)$(NC)\n"; \
+					failed=$$((failed + 1)); \
+				else \
+					printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
+					passed=$$((passed + 1)); \
+				fi; \
+			fi; \
+		done; \
+	fi; \
 	echo; \
 	echo "📊 Test Results"; \
 	echo "==============="; \
