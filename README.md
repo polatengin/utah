@@ -1292,6 +1292,14 @@ Current tests cover:
 - **variable_declaration.shx** - Variable declarations and usage
 - **while_loop.shx** - While loops with break statements and conditional logic
 
+### Negative Test Coverage
+
+The negative test fixtures ensure that the compiler correctly handles and reports errors for invalid code:
+
+- **array_type_mismatch.shx** - Boolean array with mixed types (string in boolean array)
+- **const_reassignment_test.shx** - Attempt to reassign a const variable after declaration
+- **number_array_with_string.shx** - Number array with string element type mismatch
+
 ### How Tests Work
 
 1. **Build** - The test runner builds the Utah CLI using `dotnet build`
