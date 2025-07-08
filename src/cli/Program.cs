@@ -41,7 +41,8 @@ static async Task StartLanguageServer()
   var server = await LanguageServer.From(options =>
       options
         .WithInput(Console.OpenStandardInput())
-        .WithOutput(Console.OpenStandardOutput()));
+        .WithOutput(Console.OpenStandardOutput())
+        .AddHandler<CompletionHandler>());
   await server.WaitForExit;
 }
 
