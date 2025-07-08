@@ -1720,13 +1720,13 @@ This ensures that new features don't break existing functionality and that the c
 The Makefile provides convenient commands for development:
 
 ```bash
-make help              # Show available commands
-make build             # Build the CLI
-make test              # Run all tests
+make help                 # Show available commands
+make build                # Build the CLI
+make test                 # Run all tests
 make compile FILE=<file>  # Compile a specific file
-make clean             # Clean build artifacts
-make dev               # Full development cycle (build + test)
-make info              # Show project information
+make clean                # Clean build artifacts
+make dev                  # Full development cycle (build + test)
+make info                 # Show project information
 ```
 
 Use `make help` to see all available targets with descriptions.
