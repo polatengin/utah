@@ -1036,10 +1036,10 @@ public class Compiler
       {
         return $"[ \"${{{varExpr.Name}}}\" = \"true\" ]";
       }
-      
+
       // For other expressions, compile them and if they don't start with '[', wrap them
       var compiledExpr = CompileExpression(expr);
-      
+
       if (compiledExpr.StartsWith("[ ") && compiledExpr.EndsWith(" ]"))
       {
         return compiledExpr;
