@@ -23,14 +23,14 @@ public class CompletionHandler : ICompletionHandler
   public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
   {
     await Console.Error.WriteLineAsync($"[LSP] Completion request received for {request.TextDocument.Uri}");
-    
+
     var completionItems = new List<CompletionItem>();
-    
+
     // Check if this was triggered by a dot
     bool isDotTriggered = request.Context?.TriggerCharacter == ".";
-    
+
     await Console.Error.WriteLineAsync($"[LSP] Completion triggered by dot: {isDotTriggered}");
-    
+
     if (isDotTriggered)
     {
       // Show only methods and properties when triggered by dot
