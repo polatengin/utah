@@ -1261,20 +1261,36 @@ make test              # Full test output
 
 Current tests cover:
 
-- **simple_console.shx** - Basic console.log functionality
-- **variable_declaration.shx** - Variable declarations and usage
-- **simple_for_loop.shx** - Traditional for loops
-- **for_in_loop.shx** - For-in loops with arrays
-- **nested_for_loop.shx** - Nested for loops
-- **string_functions.shx** - String manipulation functions
+- **arrays.shx** - Array literals, access, length, and iteration
+- **console_issudo.shx** - Console system functions and privilege checking
+- **console_prompt_yesno.shx** - User interaction with yes/no prompts
+- **const_valid_assignment.shx** - Const variable declarations and immutability
 - **environment_variables.shx** - Environment variable operations
-- **ternary_operators.shx** - Ternary conditional operators
+- **for_in_loop.shx** - For-in loops with arrays
+- **fs_dirname.shx** - File system dirname function
+- **fs_extension.shx** - File system extension extraction
+- **fs_filename.shx** - File system filename extraction
+- **fs_functions.shx** - File system read/write operations
+- **fs_parentdirname.shx** - File system parent directory name extraction
+- **fs_path.shx** - File system path manipulation
+- **function_declarations.shx** - Function definitions with typed parameters and return values
+- **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
-- **while_loop.shx** - While loops with break statements and conditional logic
+- **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
+- **nested_for_loop.shx** - Nested for loops
+- **os_getlinuxversion.shx** - Operating system Linux version detection
+- **os_getos.shx** - Operating system detection
+- **os_isinstalled.shx** - Command/application installation checking
+- **process_info.shx** - Process information functions (ID, CPU, memory, etc.)
+- **simple_console.shx** - Basic console.log functionality
+- **simple_for_loop.shx** - Traditional for loops
 - **simple_switch.shx** - Basic switch/case/default statements
+- **string_functions.shx** - String manipulation functions
 - **switch_case.shx** - Complex switch statements with fall-through cases
-- **array_support.shx** - Array literals, access, length, and iteration
-- **is_sudo.shx** - Console system functions and privilege checking
+- **ternary_operators.shx** - Ternary conditional operators
+- **timer_start_stop.shx** - Timer functions for performance measurement
+- **variable_declaration.shx** - Variable declarations and usage
+- **while_loop.shx** - While loops with break statements and conditional logic
 
 ### How Tests Work
 
