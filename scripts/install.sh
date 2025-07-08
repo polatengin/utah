@@ -15,6 +15,13 @@ binary_arch=""
 version=""
 
 main() {
+  # Check if utah already exists in /usr/local/bin/
+  if [ -f "/usr/local/bin/utah" ]; then
+    echo "⚠️  Utah binary already exists: /usr/local/bin/utah"
+    echo "❌ Installation cancelled. Please remove the existing binary first! (sudo rm /usr/local/bin/utah)"
+    return 1
+  fi
+
   detect_system
   map_architecture
   map_os
@@ -124,22 +131,6 @@ download_latest_utah() {
 
 move_to_usr_local_bin() {
     echo "📦 Moving binary to /usr/local/bin..."
-
-    # Check if utah already exists in /usr/local/bin/
-    if [ -f "/usr/local/bin/utah" ]; then
-        echo "⚠️  Utah binary already exists in /usr/local/bin/"
-        printf "Do you want to replace it? (y/n): "
-        read -r response
-        case "$response" in
-            [Yy]|[Yy][Ee][Ss])
-                echo "🔄 Replacing existing binary..."
-                ;;
-            *)
-                echo "❌ Installation cancelled by user"
-                return 1
-                ;;
-        esac
-    fi
 
     if sudo mv "utah" "/usr/local/bin/"; then
         echo "✅ Successfully moved to /usr/local/bin/"
