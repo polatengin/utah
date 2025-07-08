@@ -1072,22 +1072,35 @@ console.log(`Random temperature: ${temperature}°C`);
 
 ### Generated Bash Code for Utility Functions
 
-The utility functions transpile to efficient bash parameter expansion:
+The utility functions transpile to efficient bash commands with built-in validation:
 
 ```bash
 # utility.random() - no parameters (0 to 32767)
 _utah_random_min_1=0
 _utah_random_max_1=32767
-randomDefault=$(((RANDOM * (_utah_random_max_1 - _utah_random_min_1 + 1) / 32768) + _utah_random_min_1))
+if [ $_utah_random_min_1 -gt $_utah_random_max_1 ]; then
+  echo "Error: min value ($_utah_random_min_1) cannot be greater than max value ($_utah_random_max_1) in utility.random()" >&2
+  exit 100
+fi
+randomDefault=$((RANDOM * (_utah_random_max_1 - _utah_random_min_1 + 1) / 32768 + _utah_random_min_1))
 
 # utility.random(100) - max only (0 to 100)
 _utah_random_min_2=0
 _utah_random_max_2=100
-randomMax=$(((RANDOM * (_utah_random_max_2 - _utah_random_min_2 + 1) / 32768) + _utah_random_min_2))
+if [ $_utah_random_min_2 -gt $_utah_random_max_2 ]; then
+  echo "Error: min value ($_utah_random_min_2) cannot be greater than max value ($_utah_random_max_2) in utility.random()" >&2
+  exit 100
+fi
+randomMax=$((RANDOM * (_utah_random_max_2 - _utah_random_min_2 + 1) / 32768 + _utah_random_min_2))
 
 # utility.random(50, 150) - min and max (50 to 150)
 _utah_random_min_3=50
 _utah_random_max_3=150
+if [ $_utah_random_min_3 -gt $_utah_random_max_3 ]; then
+  echo "Error: min value ($_utah_random_min_3) cannot be greater than max value ($_utah_random_max_3) in utility.random()" >&2
+  exit 100
+fi
+randomRange=$((RANDOM * (_utah_random_max_3 - _utah_random_min_3 + 1) / 32768 + _utah_random_min_3))
 randomRange=$(((RANDOM * (_utah_random_max_3 - _utah_random_min_3 + 1) / 32768) + _utah_random_min_3))
 
 # Multiple calls use unique variable names to avoid conflicts
@@ -1106,6 +1119,32 @@ done
 - **Two parameters**: `utility.random(min, max)` returns min-max
 - **Range inclusive**: Both min and max values are included in possible results
 - **Unique variables**: Each call generates unique internal variables to prevent conflicts
+- **Range validation**: If min > max, the script exits with code 100 and displays an error message
+
+### Range Validation
+
+Utah automatically validates that the minimum value is not greater than the maximum value:
+
+```typescript
+// Valid ranges - these work correctly
+let valid1: number = utility.random(1, 10);    // OK: 1 ≤ 10
+let valid2: number = utility.random(0, 100);   // OK: 0 ≤ 100
+let valid3: number = utility.random(-5, 5);    // OK: -5 ≤ 5
+
+// Invalid range - this will exit with code 100
+let invalid: number = utility.random(150, 50); // Error: 150 > 50
+
+// The script exits immediately with this error message:
+// Error: min value (150) cannot be greater than max value (50) in utility.random()
+```
+
+The validation also works with variables:
+
+```typescript
+let min: number = 100;
+let max: number = 50;
+let result: number = utility.random(min, max); // Will exit with code 100
+```
 
 ### Use Cases for Random Numbers
 
@@ -1712,7 +1751,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `utility.*` functions (`random()` with min/max parameters)
 
-- [ ] Throw error if `min` is greater than max in `utility.random(<min>, <max>)` function
+- [x] Throw error if `min` is greater than max in `utility.random(<min>, <max>)` function
 
 - [x] `script.*` functions (`enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
 

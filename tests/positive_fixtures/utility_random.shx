@@ -12,3 +12,6 @@ let minVal: number = 10;
 let maxVal: number = 20;
 let randomVar: number = utility.random(minVal, maxVal);
 console.log(`Random with vars: ${randomVar}`);
+
+// Test utility.random() with min > max (should exit with code 100 at runtime)
+let invalid: number = utility.random(150, 50);
