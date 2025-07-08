@@ -123,6 +123,20 @@ public class Compiler
           // For boolean variables, check if they equal "true"
           ifCondition = $"\"${{{varExpr.Name}}}\" = \"true\"";
         }
+        // Handle boolean function calls (ArrayIsEmpty, ConsoleIsSudo, etc.)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression)
+        {
+          // For boolean functions, check if the result equals "true"
+          ifCondition = $"\"{ifCondition}\" = \"true\"";
+        }
+        // Handle unary expressions with boolean functions
+        else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" && 
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression))
+        {
+          var operandCondition = CompileExpression(unary.Operand);
+          // For negated boolean functions, check if the result equals "false"
+          ifCondition = $"\"{operandCondition}\" = \"false\"";
+        }
         else if (ifCondition.StartsWith("[ ") && ifCondition.EndsWith(" ]"))
         {
           ifCondition = ifCondition.Substring(2, ifCondition.Length - 4);
@@ -893,6 +907,7 @@ public class Compiler
       ArrayLiteral arr => CompileArrayLiteral(arr),
       ArrayAccess acc => CompileArrayAccess(acc),
       ArrayLength len => CompileArrayLength(len),
+      ArrayIsEmpty isEmpty => CompileArrayIsEmpty(isEmpty),
       FunctionCall func => CompileFunctionCallExpression(func),
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
@@ -1143,6 +1158,14 @@ public class Compiler
 
     // In bash, array length is ${#arrayName[@]}
     return $"\"${{#{arrayName}[@]}}\"";
+  }
+
+  private string CompileArrayIsEmpty(ArrayIsEmpty isEmpty)
+  {
+    var arrayName = ExtractVariableName(CompileExpression(isEmpty.Array));
+
+    // In bash, check if array length is zero: [ ${#arrayName[@]} -eq 0 ]
+    return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
   }
 
   private string CompileFunctionCallExpression(FunctionCall func)

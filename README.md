@@ -497,6 +497,25 @@ let items: string[] = ["apple", "banana", "cherry"];
 let count: number = items.length;  // Gets 3
 ```
 
+Check if an array is empty using the `.isEmpty()` method:
+
+```typescript
+let emptyArray: string[] = [];
+let filledArray: string[] = ["apple", "banana", "cherry"];
+
+let emptyCheck: boolean = emptyArray.isEmpty();  // Gets true
+let filledCheck: boolean = filledArray.isEmpty(); // Gets false
+
+// Use in conditionals
+if (emptyArray.isEmpty()) {
+  console.log("The array is empty");
+}
+
+if (!filledArray.isEmpty()) {
+  console.log("The array has items");
+}
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -555,6 +574,14 @@ second="${names[1]}"
 
 # Array length uses bash array length syntax:
 count="${#numbers[@]}"
+
+# Array isEmpty() uses bash array length check:
+emptyCheck=$([ ${#emptyArray[@]} -eq 0 ] && echo "true" || echo "false")
+
+# Array isEmpty() in conditionals:
+if [ "$([ ${#emptyArray[@]} -eq 0 ] && echo "true" || echo "false")" = "true" ]; then
+  echo "The array is empty"
+fi
 
 # Array iteration uses bash array expansion:
 for color in "${colors[@]}"; do
@@ -1551,6 +1578,7 @@ make test              # Full test output
 Current tests cover:
 
 - **arrays.shx** - Array literals, access, length, and iteration
+- **arrays_isempty.shx** - Array isEmpty() method for checking empty arrays
 - **console_issudo.shx** - Console system functions and privilege checking
 - **console_prompt_yesno.shx** - User interaction with yes/no prompts
 - **const_valid_assignment.shx** - Const variable declarations and immutability
@@ -1646,7 +1674,11 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] import syntax for splitting .shx files
 
-- [ ] `array.*` functions (`length()`, `contains()`, `isEmpty()`, `join()`, `reverse()`, `sort()`, `merge()`)
+- [x] `array.length` property (`array.length`)
+
+- [x] `array.isEmpty()` function (`array.isEmpty()`)
+
+- [ ] `array.*` functions (`contains()`, `join()`, `reverse()`, `sort()`, `merge()`)
 
 - [x] Add shebang (`#!/bin/sh`) to generated scripts
 

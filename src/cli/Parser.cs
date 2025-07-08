@@ -1381,6 +1381,15 @@ public class Parser
         };
       }
 
+      // Handle .isEmpty() method
+      if (methodPart == "isEmpty()")
+      {
+        return new ArrayIsEmpty
+        {
+          Array = new VariableExpression { Name = objectName }
+        };
+      }
+
       // Handle string methods (existing string function parsing)
       // This will be handled by existing string function parsing
     }

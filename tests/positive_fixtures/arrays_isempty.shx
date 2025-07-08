@@ -1,0 +1,16 @@
+let emptyArray: string[] = [];
+let filledArray: string[] = ["apple", "banana", "cherry"];
+
+let emptyCheck: boolean = emptyArray.isEmpty();
+let filledCheck: boolean = filledArray.isEmpty();
+
+console.log("Empty array is empty: " + emptyCheck);
+console.log("Filled array is empty: " + filledCheck);
+
+if (emptyArray.isEmpty()) {
+  console.log("The empty array is indeed empty");
+}
+
+if (!filledArray.isEmpty()) {
+  console.log("The filled array is not empty");
+}
