@@ -438,7 +438,7 @@ public partial class Parser
     for (int i = 0; i < input.Length; i++)
     {
       var ch = input[i];
-      
+
       // Handle quotes
       if (!inQuotes && (ch == '"' || ch == '\'' || ch == '`'))
       {
