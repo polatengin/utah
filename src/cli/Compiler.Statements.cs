@@ -116,15 +116,21 @@ public partial class Compiler
           // For boolean variables, check if they equal "true"
           ifCondition = $"\"${{{varExpr.Name}}}\" = \"true\"";
         }
+        // Handle negated boolean variable conditions
+        else if (ifs.Condition is UnaryExpression unary1 && unary1.Operator == "!" && unary1.Operand is VariableExpression negVarExpr)
+        {
+          // For negated boolean variables, check if they equal "false"
+          ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
+        }
         // Handle boolean function calls (ArrayIsEmpty, ConsoleIsSudo, etc.)
-        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression)
         {
           // For boolean functions, check if the result equals "true"
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
         else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
-                 (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression))
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
           // For negated boolean functions, check if the result equals "false"

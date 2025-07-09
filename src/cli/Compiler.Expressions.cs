@@ -46,13 +46,13 @@ public partial class Compiler
     // Generate bash code that checks if a command exists and returns true/false
     // AppName could be a variable reference like "app" or a string literal like "docker"
     var appReference = osInstalled.AppName;
-    
+
     // If it's a variable reference (no quotes), wrap it in ${}
     if (!appReference.StartsWith("\"") && !appReference.StartsWith("'"))
     {
       appReference = $"${{{appReference}}}";
     }
-    
+
     return $"$(command -v {appReference} &> /dev/null && echo \"true\" || echo \"false\")";
   }
 

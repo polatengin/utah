@@ -357,6 +357,25 @@ public partial class Compiler
           // For boolean variables, check if they equal "true"
           ifCondition = $"\"${{{varExpr.Name}}}\" = \"true\"";
         }
+        // Handle negated boolean variable conditions
+        else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" && unary.Operand is VariableExpression negVarExpr)
+        {
+          // For negated boolean variables, check if they equal "false"
+          ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
+        }
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression)
+        {
+          // For boolean functions, check if the result equals "true"
+          ifCondition = $"\"{ifCondition}\" = \"true\"";
+        }
+        // Handle unary expressions with boolean functions
+        else if (ifs.Condition is UnaryExpression unary2 && unary2.Operator == "!" &&
+                 (unary2.Operand is ArrayIsEmpty || unary2.Operand is ConsoleIsSudoExpression || unary2.Operand is ConsolePromptYesNoExpression || unary2.Operand is OsIsInstalledExpression))
+        {
+          var operandCondition = CompileExpression(unary2.Operand);
+          // For negated boolean functions, check if the result equals "false"
+          ifCondition = $"\"{operandCondition}\" = \"false\"";
+        }
         else if (ifCondition.StartsWith("[ ") && ifCondition.EndsWith(" ]"))
         {
           ifCondition = ifCondition.Substring(2, ifCondition.Length - 4);
