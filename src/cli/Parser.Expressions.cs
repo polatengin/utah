@@ -342,6 +342,18 @@ public partial class Parser
         return new ConsolePromptYesNoExpression { PromptText = promptText };
       }
 
+      // Special handling for os.isInstalled()
+      if (functionName == "os.isInstalled" && !string.IsNullOrEmpty(argsContent))
+      {
+        // Extract the app name from the argument (should be a string literal)
+        var appName = argsContent.Trim();
+        if (appName.StartsWith("\"") && appName.EndsWith("\""))
+        {
+          appName = appName[1..^1]; // Remove quotes
+        }
+        return new OsIsInstalledExpression { AppName = appName };
+      }
+
       // Special handling for utility.random()
       if (functionName == "utility.random")
       {

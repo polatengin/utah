@@ -405,6 +405,11 @@ public class RawStatement : Node
   public string Content { get; set; } = string.Empty;
 }
 
+public class OsIsInstalledExpression : Expression
+{
+  public string AppName { get; set; } = string.Empty;
+}
+
 public class WebGetExpression : Expression
 {
   public Expression Url { get; set; } = null!; // The URL to make GET request to

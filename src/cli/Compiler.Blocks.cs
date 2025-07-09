@@ -16,6 +16,32 @@ public partial class Compiler
           lines.Add($"  local {v.Name}=\"{v.Value}\"");
         }
         break;
+
+      case VariableDeclarationExpression ve:
+        // Handle special cases that need validation before assignment
+        if (ve.Value is UtilityRandomExpression randomExpr)
+        {
+          // Generate validation and assignment for utility.random()
+          var randomLines = CompileUtilityRandomDeclaration(ve.Name, randomExpr, ve.IsConst);
+          foreach (var line in randomLines)
+          {
+            lines.Add($"  {line}");
+          }
+        }
+        else
+        {
+          var expressionValue = CompileExpression(ve.Value);
+          if (ve.IsConst)
+          {
+            lines.Add($"  readonly {ve.Name}={expressionValue}");
+          }
+          else
+          {
+            lines.Add($"  {ve.Name}={expressionValue}");
+          }
+        }
+        break;
+
       case ConsoleLog log:
         if (log.IsExpression && log.Expression != null)
         {
