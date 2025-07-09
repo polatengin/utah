@@ -200,7 +200,7 @@ public partial class Parser
       if (match.Success)
       {
         var leftSide = match.Groups[1].Value;
-        
+
         // Extract variable name for const checking
         var variableName = leftSide.Contains('[') ? leftSide.Substring(0, leftSide.IndexOf('[')) : leftSide;
 

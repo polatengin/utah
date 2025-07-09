@@ -119,19 +119,17 @@ if (currentMemory > memoryThreshold) {
 if (currentCPU > cpuThreshold) {
   let cpuAction: string = "";
 
-  switch (true) {
-    case currentCPU > 95:
-      cpuAction = "EMERGENCY_SHUTDOWN";
-      alertLevel = "CRITICAL";
-      break;
-    case currentCPU > 85:
-      cpuAction = "THROTTLE_SERVICES";
-      alertLevel = "WARNING";
-      break;
-    default:
-      cpuAction = "MONITOR_CLOSELY";
-      alertLevel = "INFO";
-      break;
+  if (currentCPU > 95) {
+    cpuAction = "EMERGENCY_SHUTDOWN";
+    alertLevel = "CRITICAL";
+  }
+  else if (currentCPU > 85) {
+    cpuAction = "THROTTLE_SERVICES";
+    alertLevel = "WARNING";
+  }
+  else {
+    cpuAction = "MONITOR_CLOSELY";
+    alertLevel = "INFO";
   }
 
   console.log(`⚠️  HIGH CPU USAGE: ${currentCPU}% (threshold: ${cpuThreshold}%) - Action: ${cpuAction}`);
