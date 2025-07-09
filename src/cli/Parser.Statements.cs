@@ -181,7 +181,23 @@ public partial class Parser
     }
     else if (line.Contains(" = ") && line.EndsWith(";"))
     {
-      // Handle variable assignment (variable = value;)
+      // Check for array assignment first (arrayName[index] = value;)
+      var arrayMatch = Regex.Match(line, @"(\w+)\[(.+)\] = (.+);");
+      if (arrayMatch.Success)
+      {
+        var arrayName = arrayMatch.Groups[1].Value;
+        var indexExpr = ParseExpression(arrayMatch.Groups[2].Value);
+        var valueExpr = ParseExpression(arrayMatch.Groups[3].Value);
+        
+        return new ArrayAssignment
+        {
+          ArrayName = arrayName,
+          Index = indexExpr,
+          Value = valueExpr
+        };
+      }
+
+      // Handle regular variable assignment (variable = value;)
       var match = Regex.Match(line, @"(\w+) = (.+);");
       if (match.Success)
       {

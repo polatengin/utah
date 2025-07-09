@@ -410,6 +410,13 @@ public partial class Compiler
         var assignValue = CompileExpression(assign.Value);
         lines.Add($"  {assign.VariableName}={assignValue}");
         break;
+
+      case ArrayAssignment arrayAssign:
+        var arrayIndex = CompileExpression(arrayAssign.Index);
+        var arrayValue = CompileExpression(arrayAssign.Value);
+        // In bash, array assignment syntax is: arrayName[index]=value
+        lines.Add($"  {arrayAssign.ArrayName}[{arrayIndex}]={arrayValue}");
+        break;
     }
 
     return lines;

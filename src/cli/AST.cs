@@ -391,6 +391,14 @@ public class AssignmentStatement : Node
   public Expression Value = null!;
 }
 
+// Array assignment statement (array[index] = value)
+public class ArrayAssignment : Node
+{
+  public string ArrayName = string.Empty;
+  public Expression Index = null!;
+  public Expression Value = null!;
+}
+
 // Updated VariableDeclaration to support expressions
 public class VariableDeclarationExpression : Node
 {
