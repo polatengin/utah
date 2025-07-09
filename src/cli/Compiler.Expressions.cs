@@ -798,7 +798,7 @@ public partial class Compiler
       else if (part is Expression expr)
       {
         var compiledExpression = CompileExpression(expr);
-        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength)
+        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression)
         {
           result.Append(compiledExpression);
         }

@@ -340,6 +340,14 @@ public partial class Parser
         }
         break;
       }
+      else if (innerLine.StartsWith("} else if (") || innerLine.StartsWith("else if ("))
+      {
+        // Handle else if as a nested if statement
+        var elseIfLine = innerLine.StartsWith("} else if (") ? innerLine.Substring(2) : innerLine; // Remove "} " prefix if present
+        var elseIfStatement = ParseIfStatement(elseIfLine, ref i);
+        elseBody.Add(elseIfStatement);
+        break;
+      }
       if (!string.IsNullOrEmpty(innerLine))
       {
         var statement = ParseStatement(innerLine, ref i);

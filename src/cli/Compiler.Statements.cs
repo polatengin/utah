@@ -239,8 +239,50 @@ public partial class Compiler
         foreach (var b in ifs.ThenBody)
           lines.AddRange(CompileStatement(b).Select(l => "  " + l));
 
-        // Only add else clause if there are statements in the else body
-        if (ifs.ElseBody.Count > 0)
+        // Handle else if (elif) cases
+        if (ifs.ElseBody.Count == 1 && ifs.ElseBody[0] is IfStatement elseIf)
+        {
+          // This is an else if - generate elif
+          var elifCondition = CompileExpression(elseIf.Condition);
+
+          // Handle boolean variable conditions for elif
+          if (elseIf.Condition is VariableExpression elifVarExpr)
+          {
+            elifCondition = $"\"${{{elifVarExpr.Name}}}\" = \"true\"";
+          }
+          else if (elseIf.Condition is UnaryExpression elifUnary && elifUnary.Operator == "!" && elifUnary.Operand is VariableExpression elifNegVarExpr)
+          {
+            elifCondition = $"\"${{{elifNegVarExpr.Name}}}\" = \"false\"";
+          }
+          else if (elseIf.Condition is ArrayIsEmpty || elseIf.Condition is ConsoleIsSudoExpression || elseIf.Condition is ConsolePromptYesNoExpression || elseIf.Condition is OsIsInstalledExpression)
+          {
+            elifCondition = $"\"{elifCondition}\" = \"true\"";
+          }
+          else if (elseIf.Condition is UnaryExpression elifUnary2 && elifUnary2.Operator == "!" &&
+                   (elifUnary2.Operand is ArrayIsEmpty || elifUnary2.Operand is ConsoleIsSudoExpression || elifUnary2.Operand is ConsolePromptYesNoExpression || elifUnary2.Operand is OsIsInstalledExpression))
+          {
+            var operandCondition = CompileExpression(elifUnary2.Operand);
+            elifCondition = $"\"{operandCondition}\" = \"false\"";
+          }
+          else if (elifCondition.StartsWith("[ ") && elifCondition.EndsWith(" ]"))
+          {
+            elifCondition = elifCondition.Substring(2, elifCondition.Length - 4);
+          }
+
+          lines.Add($"elif [ {elifCondition} ]; then");
+          foreach (var b in elseIf.ThenBody)
+            lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+
+          // Handle nested else if or final else
+          if (elseIf.ElseBody.Count > 0)
+          {
+            lines.Add("else");
+            foreach (var b in elseIf.ElseBody)
+              lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+          }
+        }
+        // Only add else clause if there are statements in the else body and it's not an else if
+        else if (ifs.ElseBody.Count > 0)
         {
           lines.Add("else");
           foreach (var b in ifs.ElseBody)
