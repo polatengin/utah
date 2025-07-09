@@ -1,7 +1,7 @@
 #!/bin/sh
 
 text="Hello World"
-length="${#text}"
+length=${#text}
 upper="${text^^}"
 lower="${text,,}"
 echo "Text: ${text}"

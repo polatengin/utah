@@ -1,3 +1,10 @@
 let name: string = "Utah";
 
 console.log("Language: " + name);
+
+let timestamp: string = process.elapsedTime();
+let value: number = 80;
+let logEntry: string = `[${timestamp}] MEMORY: ${value}%`;
+
+let i: number = 1;
+let result: boolean = i <= 3;

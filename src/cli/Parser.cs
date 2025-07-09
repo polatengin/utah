@@ -93,818 +93,514 @@ public partial class Parser
 
   public ProgramNode Parse()
   {
-    var program = new ProgramNode();
+    var statements = new List<Statement>();
 
     for (int i = 0; i < _lines.Length; i++)
     {
       var line = _lines[i].Trim();
+      if (string.IsNullOrEmpty(line)) continue;
 
-      if (line.StartsWith("let "))
+      var statement = ParseStatement(line, ref i);
+      if (statement != null)
       {
-        // Try typed let first: let variable: type = value;
-        var typedMatch = Regex.Match(line, @"let (\w+): ([\w\[\]]+) = (.+);");
-        if (typedMatch.Success)
-        {
-          var value = typedMatch.Groups[3].Value;
-
-          var envNode = ParseEnvFunction(typedMatch.Groups[1].Value, value);
-          if (envNode != null)
-          {
-            program.Statements.Add(envNode);
-          }
-          else
-          {
-            var osNode = ParseOsFunction(typedMatch.Groups[1].Value, value);
-            if (osNode != null)
-            {
-              program.Statements.Add(osNode);
-            }
-            else
-            {
-              var fsNode = ParseFsFunction(typedMatch.Groups[1].Value, value);
-              if (fsNode != null)
-              {
-                program.Statements.Add(fsNode);
-              }
-              else
-              {
-                var stringFuncNode = ParseStringFunction(typedMatch.Groups[1].Value, value);
-                if (stringFuncNode != null)
-                {
-                  program.Statements.Add(stringFuncNode);
-                }
-                else
-                {
-                  var processNode = ParseProcessFunction(typedMatch.Groups[1].Value, value);
-                  if (processNode != null)
-                  {
-                    program.Statements.Add(processNode);
-                  }
-                  else
-                  {
-                    var timerNode = ParseTimerFunction(typedMatch.Groups[1].Value, value);
-                    if (timerNode != null)
-                    {
-                      program.Statements.Add(timerNode);
-                    }
-                    else
-                    {
-                      var declaredType = typedMatch.Groups[2].Value;
-                      var expression = ParseExpression(value);
-
-                      // Validate array type if it's an array declaration
-                      if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
-                      {
-                        var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                        ValidateArrayElementTypes(arrayLiteral, expectedElementType, typedMatch.Groups[1].Value);
-                      }
-
-                      program.Statements.Add(new VariableDeclarationExpression
-                      {
-                        Name = typedMatch.Groups[1].Value,
-                        Type = declaredType,
-                        Value = expression ?? new LiteralExpression { Value = "", Type = "string" },
-                        IsConst = false
-                      });
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        else
-        {
-          // Try untyped let: let variable = value;
-          var untypedMatch = Regex.Match(line, @"let (\w+) = (.+);");
-          if (untypedMatch.Success)
-          {
-            var value = untypedMatch.Groups[2].Value;
-            var expression = ParseExpression(value);
-            program.Statements.Add(new VariableDeclarationExpression
-            {
-              Name = untypedMatch.Groups[1].Value,
-              Type = "number", // Default type inference
-              Value = expression,
-              IsConst = false
-            });
-          }
-        }
-      }
-      else if (line.StartsWith("const "))
-      {
-        var match = Regex.Match(line, @"const (\w+): ([\w\[\]]+) = (.+);");
-        if (match.Success)
-        {
-          var varName = match.Groups[1].Value;
-          _constVariables.Add(varName); // Track const variable
-          var value = match.Groups[3].Value;
-          var envNode = ParseEnvFunction(varName, value);
-          if (envNode != null)
-          {
-            program.Statements.Add(envNode);
-          }
-          else
-          {
-            var osNode = ParseOsFunction(varName, value);
-            if (osNode != null)
-            {
-              program.Statements.Add(osNode);
-            }
-            else
-            {
-              var stringFuncNode = ParseStringFunction(varName, value);
-              if (stringFuncNode != null)
-              {
-                program.Statements.Add(stringFuncNode);
-              }
-              else
-              {
-                var processNode = ParseProcessFunction(varName, value);
-                if (processNode != null)
-                {
-                  program.Statements.Add(processNode);
-                }
-                else
-                {
-                  var timerNode = ParseTimerFunction(varName, value);
-                  if (timerNode != null)
-                  {
-                    program.Statements.Add(timerNode);
-                  }
-                  else
-                  {
-                    var declaredType = match.Groups[2].Value;
-                    var expression = ParseExpression(value);
-
-                    // Validate array type if it's an array declaration
-                    if (declaredType.EndsWith("[]") && expression is ArrayLiteral arrayLiteral)
-                    {
-                      var expectedElementType = declaredType.Substring(0, declaredType.Length - 2);
-                      ValidateArrayElementTypes(arrayLiteral, expectedElementType, varName);
-                    }
-
-                    program.Statements.Add(new VariableDeclarationExpression
-                    {
-                      Name = varName,
-                      Type = declaredType,
-                      Value = expression,
-                      IsConst = true
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      else if (line.StartsWith("function "))
-      {
-        var headerMatch = Regex.Match(line, @"function (\w+)\(([^)]*)\): \w+ \{");
-        var func = new FunctionDeclaration
-        {
-          Name = headerMatch.Groups[1].Value
-        };
-
-        var paramList = headerMatch.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var p in paramList)
-        {
-          var parts = p.Trim().Split(':');
-          func.Parameters.Add((parts[0].Trim(), parts[1].Trim()));
-        }
-
-        i++;
-        while (!_lines[i].Trim().StartsWith("}"))
-        {
-          string inner = _lines[i].Trim();
-
-          if (inner.StartsWith("let "))
-          {
-            var match = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
-            if (match.Success)
-            {
-              var value = match.Groups[3].Value;
-              var stringFuncNode = ParseStringFunction(match.Groups[1].Value, value);
-              if (stringFuncNode != null)
-              {
-                func.Body.Add(stringFuncNode);
-              }
-              else
-              {
-                func.Body.Add(new VariableDeclaration
-                {
-                  Name = match.Groups[1].Value,
-                  Type = match.Groups[2].Value,
-                  Value = value.Trim('"'),
-                  IsConst = false
-                });
-              }
-            }
-          }
-          else if (inner.StartsWith("const "))
-          {
-            var match = Regex.Match(inner, @"const (\w+): (\w+) = (.+);");
-            if (match.Success)
-            {
-              var varName = match.Groups[1].Value;
-              _constVariables.Add(varName); // Track const variable
-              var value = match.Groups[3].Value;
-              var stringFuncNode = ParseStringFunction(varName, value);
-              if (stringFuncNode != null)
-              {
-                func.Body.Add(stringFuncNode);
-              }
-              else
-              {
-                func.Body.Add(new VariableDeclaration
-                {
-                  Name = varName,
-                  Type = match.Groups[2].Value,
-                  Value = value.Trim('"'),
-                  IsConst = true
-                });
-              }
-            }
-          }
-          else if (inner.StartsWith("console.log"))
-          {
-            var match = Regex.Match(inner, @"console\.log\((.+)\);");
-            var raw = match.Groups[1].Value.Trim();
-
-            // Parse as expression
-            var expression = ParseExpression(raw);
-            func.Body.Add(new ConsoleLog
-            {
-              IsExpression = true,
-              Expression = expression
-            });
-          }
-          else if (inner == "console.clear();")
-          {
-            func.Body.Add(new ConsoleClearStatement());
-          }
-          else if (inner.StartsWith("return "))
-          {
-            var val = inner.Substring(7).TrimEnd(';');
-            func.Body.Add(new ReturnStatement { Value = ParseExpression(val) });
-          }
-          else if (inner.StartsWith("exit "))
-          {
-            int code = int.Parse(inner.Substring(5).TrimEnd(';'));
-            func.Body.Add(new ExitStatement { ExitCode = code });
-          }
-          else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
-          {
-            var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
-            if (exitMatch.Success)
-            {
-              int code = int.Parse(exitMatch.Groups[1].Value);
-              func.Body.Add(new ExitStatement { ExitCode = code });
-            }
-          }
-
-          i++;
-        }
-
-        program.Statements.Add(func);
-      }
-      else if (line.StartsWith("if ("))
-      {
-        var match = Regex.Match(line, @"if \((.+)\) \{");
-        var cond = match.Groups[1].Value;
-        var ifStmt = new IfStatement { Condition = ParseExpression(cond) };
-
-        i++;
-        while (!_lines[i].Trim().StartsWith("}"))
-        {
-          string inner = _lines[i].Trim();
-          if (inner.StartsWith("console.log"))
-          {
-            var m = Regex.Match(inner, @"console\.log\((.+)\);");
-            var raw = m.Groups[1].Value.Trim();
-
-            if (raw.StartsWith("`"))
-            {
-              // Template literal - use the old way
-              var msg = raw[1..^1];
-              ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
-            }
-            else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
-            {
-              // Simple string literal - use the old way
-              var msg = raw[1..^1];
-              ifStmt.ThenBody.Add(new ConsoleLog { Message = msg });
-            }
-            else
-            {
-              // Expression - parse it properly
-              var expression = ParseExpression(raw);
-              ifStmt.ThenBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
-            }
-          }
-          else if (inner == "console.clear();")
-          {
-            ifStmt.ThenBody.Add(new ConsoleClearStatement());
-          }
-          else if (inner.StartsWith("let "))
-          {
-            var m = Regex.Match(inner, @"let (\w+): (\w+) = (.+);");
-            if (m.Success)
-            {
-              var value = m.Groups[3].Value;
-              var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
-              if (stringFuncNode != null)
-              {
-                ifStmt.ThenBody.Add(stringFuncNode);
-              }
-              else
-              {
-                var processNode = ParseProcessFunction(m.Groups[1].Value, value);
-                if (processNode != null)
-                {
-                  ifStmt.ThenBody.Add(processNode);
-                }
-                else
-                {
-                  var expression = ParseExpression(value);
-                  ifStmt.ThenBody.Add(new VariableDeclarationExpression
-                  {
-                    Name = m.Groups[1].Value,
-                    Type = m.Groups[2].Value,
-                    Value = expression,
-                    IsConst = false
-                  });
-                }
-              }
-            }
-          }
-          else if (inner.StartsWith("const "))
-          {
-            var m = Regex.Match(inner, @"const (\w+): (\w+) = (.+);");
-            if (m.Success)
-            {
-              var value = m.Groups[3].Value;
-              var stringFuncNode = ParseStringFunction(m.Groups[1].Value, value);
-              if (stringFuncNode != null)
-              {
-                ifStmt.ThenBody.Add(stringFuncNode);
-              }
-              else
-              {
-                var processNode = ParseProcessFunction(m.Groups[1].Value, value);
-                if (processNode != null)
-                {
-                  ifStmt.ThenBody.Add(processNode);
-                }
-                else
-                {
-                  var expression = ParseExpression(value);
-                  ifStmt.ThenBody.Add(new VariableDeclarationExpression
-                  {
-                    Name = m.Groups[1].Value,
-                    Type = m.Groups[2].Value,
-                    Value = expression,
-                    IsConst = true
-                  });
-                }
-              }
-            }
-          }
-          else if (inner.StartsWith("exit "))
-          {
-            int code = int.Parse(inner.Substring(5).TrimEnd(';'));
-            ifStmt.ThenBody.Add(new ExitStatement { ExitCode = code });
-          }
-          else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
-          {
-            var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
-            if (exitMatch.Success)
-            {
-              int code = int.Parse(exitMatch.Groups[1].Value);
-              ifStmt.ThenBody.Add(new ExitStatement { ExitCode = code });
-            }
-          }
-          i++;
-        }
-
-        // Check if we have an else clause
-        var currentLine = _lines[i].Trim();
-        if (currentLine == "} else {" || currentLine == "else {")
-        {
-          i++;
-          while (!_lines[i].Trim().StartsWith("}"))
-          {
-            string inner = _lines[i].Trim();
-            if (inner.StartsWith("console.log"))
-            {
-              var m = Regex.Match(inner, @"console\.log\((.+)\);");
-              var raw = m.Groups[1].Value.Trim();
-
-              if (raw.StartsWith("`"))
-              {
-                // Template literal - use the old way
-                var msg = raw[1..^1];
-                ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
-              }
-              else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
-              {
-                // Simple string literal - use the old way
-                var msg = raw[1..^1];
-                ifStmt.ElseBody.Add(new ConsoleLog { Message = msg });
-              }
-              else
-              {
-                // Expression - parse it properly
-                var expression = ParseExpression(raw);
-                ifStmt.ElseBody.Add(new ConsoleLog { IsExpression = true, Expression = expression });
-              }
-            }
-            else if (inner == "console.clear();")
-            {
-              ifStmt.ElseBody.Add(new ConsoleClearStatement());
-            }
-            else if (inner.StartsWith("exit "))
-            {
-              int code = int.Parse(inner.Substring(5).TrimEnd(';'));
-              ifStmt.ElseBody.Add(new ExitStatement { ExitCode = code });
-            }
-            else if (inner.StartsWith("exit(") && inner.EndsWith(");"))
-            {
-              var exitMatch = Regex.Match(inner, @"exit\((\d+)\);");
-              if (exitMatch.Success)
-              {
-                int code = int.Parse(exitMatch.Groups[1].Value);
-                ifStmt.ElseBody.Add(new ExitStatement { ExitCode = code });
-              }
-            }
-            i++;
-          }
-        }
-
-        program.Statements.Add(ifStmt);
-      }
-      else if (line.StartsWith("for ("))
-      {
-        // Check if it's a for-in loop: for (let item in array) {
-        var forInMatch = Regex.Match(line, @"for \((let|const) (\w+): (\w+) in (\w+)\) \{");
-        if (forInMatch.Success)
-        {
-          var forInLoop = new ForInLoop
-          {
-            Variable = forInMatch.Groups[2].Value,
-            VariableType = forInMatch.Groups[3].Value,
-            Iterable = forInMatch.Groups[4].Value
-          };
-
-          i++;
-          while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
-          {
-            string inner = _lines[i].Trim();
-            var statement = ParseStatementOrBlock(inner, ref i);
-            if (statement != null)
-            {
-              forInLoop.Body.Add(statement);
-            }
-            else
-            {
-              i++;
-            }
-          }
-
-          program.Statements.Add(forInLoop);
-        }
-        else
-        {
-          // Traditional for loop: for (let i: number = 0; i < 10; i++) {
-          var forMatch = Regex.Match(line, @"for \((let|const) (\w+): (\w+) = (.+); (.+); (.+)\) \{");
-          if (forMatch.Success)
-          {
-            var initValue = ParseExpression(forMatch.Groups[4].Value);
-            var condition = ParseExpression(forMatch.Groups[5].Value);
-
-            var updateExpr = forMatch.Groups[6].Value.Trim();
-            string updateOp;
-            Expression? updateValue = null;
-            string updateVar = forMatch.Groups[2].Value;
-
-            if (updateExpr.EndsWith("++"))
-            {
-              updateOp = "++";
-            }
-            else if (updateExpr.EndsWith("--"))
-            {
-              updateOp = "--";
-            }
-            else if (updateExpr.Contains("+="))
-            {
-              updateOp = "+=";
-              var valueStr = updateExpr.Split("+=")[1].Trim();
-              updateValue = ParseExpression(valueStr);
-            }
-            else if (updateExpr.Contains("-="))
-            {
-              updateOp = "-=";
-              var valueStr = updateExpr.Split("-=")[1].Trim();
-              updateValue = ParseExpression(valueStr);
-            }
-            else
-            {
-              updateOp = "++";
-            }
-
-            var forLoop = new ForLoop
-            {
-              InitVariable = forMatch.Groups[2].Value,
-              InitType = forMatch.Groups[3].Value,
-              InitValue = initValue,
-              Condition = condition,
-              UpdateVariable = updateVar,
-              UpdateOperator = updateOp,
-              UpdateValue = updateValue
-            };
-
-            i++;
-            while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
-            {
-              string inner = _lines[i].Trim();
-              var statement = ParseStatementOrBlock(inner, ref i);
-              if (statement != null)
-              {
-                forLoop.Body.Add(statement);
-              }
-              else
-              {
-                i++;
-              }
-            }
-
-            program.Statements.Add(forLoop);
-          }
-        }
-      }
-      else if (line.StartsWith("while ("))
-      {
-        var match = Regex.Match(line, @"while \((.+)\) \{");
-        if (match.Success)
-        {
-          var whileStmt = new WhileStatement
-          {
-            Condition = ParseExpression(match.Groups[1].Value)
-          };
-
-          i++;
-          while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
-          {
-            var inner = _lines[i].Trim();
-            if (inner == "break;")
-            {
-              whileStmt.Body.Add(new BreakStatement());
-              i++;
-            }
-            else
-            {
-              var statement = ParseStatementOrBlock(inner, ref i);
-              if (statement != null)
-              {
-                whileStmt.Body.Add(statement);
-              }
-              else
-              {
-                i++;
-              }
-            }
-          }
-          program.Statements.Add(whileStmt);
-        }
-      }
-      else if (line.StartsWith("exit "))
-      {
-        int code = int.Parse(line.Substring(5).TrimEnd(';'));
-        program.Statements.Add(new ExitStatement { ExitCode = code });
-      }
-      else if (line.StartsWith("exit(") && line.EndsWith(");"))
-      {
-        var exitMatch = Regex.Match(line, @"exit\((\d+)\);");
-        if (exitMatch.Success)
-        {
-          int code = int.Parse(exitMatch.Groups[1].Value);
-          program.Statements.Add(new ExitStatement { ExitCode = code });
-        }
-      }
-      else if (line.StartsWith("console.log"))
-      {
-        var match = Regex.Match(line, @"console\.log\((.+)\);");
-        var raw = match.Groups[1].Value.Trim();
-
-        if (raw.StartsWith("`"))
-        {
-          // Template literal - check if it contains expressions
-          var msg = raw[1..^1];
-          if (msg.Contains("${"))
-          {
-            // Parse as template literal since it contains template expressions
-            var expr = ParseTemplateLiteral(raw);
-            program.Statements.Add(new ConsoleLog { Expression = expr, IsExpression = true });
-          }
-          else
-          {
-            // Simple template literal without expressions
-            program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
-          }
-        }
-        else if (raw.StartsWith("\"") && raw.EndsWith("\""))
-        {
-          // String literal
-          var msg = raw[1..^1];
-          program.Statements.Add(new ConsoleLog { Message = msg, IsExpression = false });
-        }
-        else
-        {
-          // Parse as expression
-          var expr = ParseExpression(raw);
-          program.Statements.Add(new ConsoleLog { Expression = expr, IsExpression = true });
-        }
-      }
-      else if (line == "console.clear();")
-      {
-        // Parse console.clear() statement
-        program.Statements.Add(new ConsoleClearStatement());
-      }
-      else if (line.StartsWith("env."))
-      {
-        // Parse standalone env function calls
-        var envNode = ParseStandaloneEnvFunction(line);
-        if (envNode != null)
-        {
-          program.Statements.Add(envNode);
-        }
-      }
-      else if (line.StartsWith("fs."))
-      {
-        // Parse standalone fs function calls
-        var fsNode = ParseStandaloneFsFunction(line);
-        if (fsNode != null)
-        {
-          program.Statements.Add(fsNode);
-        }
-      }
-      else if (line.StartsWith("timer."))
-      {
-        // Parse standalone timer function calls
-        var timerNode = ParseStandaloneTimerFunction(line);
-        if (timerNode != null)
-        {
-          program.Statements.Add(timerNode);
-        }
-      }
-      else if (line.StartsWith("switch ("))
-      {
-        var match = Regex.Match(line, @"switch \((.+)\) \{");
-        if (match.Success)
-        {
-          var switchExpr = ParseExpression(match.Groups[1].Value);
-          var switchStmt = new SwitchStatement
-          {
-            SwitchExpression = switchExpr
-          };
-
-          i++;
-          CaseClause? currentCase = null;
-
-          while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
-          {
-            var currentLine = _lines[i].Trim();
-
-            if (currentLine.StartsWith("case "))
-            {
-              // If we have a previous case and it's a fall-through (no break), add this case value to it
-              var caseMatch = Regex.Match(currentLine, @"case (.+):");
-              if (caseMatch.Success)
-              {
-                var caseValue = ParseExpression(caseMatch.Groups[1].Value);
-
-                // If we have an existing case without a break, add this as a fall-through
-                if (currentCase != null && !currentCase.HasBreak)
-                {
-                  currentCase.Values.Add(caseValue);
-                }
-                else
-                {
-                  // Start a new case
-                  currentCase = new CaseClause();
-                  currentCase.Values.Add(caseValue);
-                  switchStmt.Cases.Add(currentCase);
-                }
-              }
-            }
-            else if (currentLine.StartsWith("default:"))
-            {
-              currentCase = null; // End current case
-              var defaultClause = new DefaultClause();
-
-              i++;
-              while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
-              {
-                var bodyLine = _lines[i].Trim();
-                if (bodyLine == "break;")
-                {
-                  defaultClause.HasBreak = true;
-                  i++;
-                  break;
-                }
-                else if (!string.IsNullOrEmpty(bodyLine))
-                {
-                  var bodyNode = ParseStatement(bodyLine);
-                  if (bodyNode != null)
-                  {
-                    defaultClause.Body.Add(bodyNode);
-                  }
-                }
-                i++;
-              }
-
-              switchStmt.DefaultCase = defaultClause;
-              i--; // Adjust for the outer loop increment
-            }
-            else if (currentLine == "break;")
-            {
-              if (currentCase != null)
-              {
-                currentCase.HasBreak = true;
-                currentCase = null; // End current case
-              }
-            }
-            else if (!string.IsNullOrEmpty(currentLine) && currentCase != null)
-            {
-              // Add statement to current case body
-              var bodyNode = ParseStatement(currentLine);
-              if (bodyNode != null)
-              {
-                currentCase.Body.Add(bodyNode);
-              }
-            }
-
-            i++;
-          }
-
-          program.Statements.Add(switchStmt);
-        }
-      }
-      else if (line.Contains(" = ") && line.EndsWith(";"))
-      {
-        // Handle variable assignment (variable = value;)
-        var match = Regex.Match(line, @"(\w+) = (.+);");
-        if (match.Success)
-        {
-          var variableName = match.Groups[1].Value;
-
-          // Check if trying to reassign a const variable
-          if (_constVariables.Contains(variableName))
-          {
-            throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
-          }
-
-          var value = ParseExpression(match.Groups[2].Value);
-          program.Statements.Add(new AssignmentStatement
-          {
-            VariableName = variableName,
-            Value = value
-          });
-        }
-      }
-      else if (line.StartsWith("script."))
-      {
-        // Handle script control functions
-        var scriptStatement = ParseStatement(line);
-        if (scriptStatement != null)
-        {
-          program.Statements.Add(scriptStatement);
-        }
-      }
-      else if (line.Contains("(") && line.Contains(");"))
-      {
-        var match = Regex.Match(line, @"([\w\.]+)\(([^)]*)\);");
-        if (match.Success)
-        {
-          program.Statements.Add(new FunctionCall
-          {
-            Name = match.Groups[1].Value,
-            Arguments = match.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                  .Select(a => a.Trim()).ToList()
-          });
-        }
-      }
-      else
-      {
-        // If no other syntax matches, treat it as a raw line of shell script
-        program.Statements.Add(new RawStatement { Content = line });
+        statements.Add(statement);
       }
     }
 
-    return program;
+    return new ProgramNode(statements);
   }
 
-  // Function parsing methods have been moved to Parser.Functions.cs
-  // Utility methods have been moved to Parser.Utilities.cs
+  private Statement? ParseStatement(string line, ref int i)
+  {
+    if (line.StartsWith("let ") || line.StartsWith("const "))
+    {
+      return ParseVariableDeclaration(line);
+    }
+    if (line.StartsWith("function "))
+    {
+      return ParseFunctionDeclaration(line, ref i);
+    }
+    if (line.StartsWith("if ("))
+    {
+      return ParseIfStatement(line, ref i);
+    }
+    if (line.StartsWith("for ("))
+    {
+      // Disambiguate between for and for-in loops
+      var forInMatch = Regex.Match(line, @"for \((let|const) (\w+)(?::\s*(\w+))? in (.+)\) \{");
+      if (forInMatch.Success)
+      {
+        return ParseForInLoop(line, ref i);
+      }
+      return ParseForLoop(line, ref i);
+    }
+    if (line.StartsWith("while ("))
+    {
+      return ParseWhileStatement(line, ref i);
+    }
+    if (line.StartsWith("switch ("))
+    {
+      return ParseSwitchStatement(line, ref i);
+    }
+    if (line.StartsWith("return "))
+    {
+      var valueStr = line.Substring(7).TrimEnd(';');
+      var value = string.IsNullOrEmpty(valueStr) ? null : ParseExpression(valueStr);
+      return new ReturnStatement(value);
+    }
+    if (line.StartsWith("exit "))
+    {
+      var codeStr = line.Substring(5).TrimEnd(';');
+      return new ExitStatement(ParseExpression(codeStr));
+    }
+    if (line.StartsWith("exit(") && line.EndsWith(");"))
+    {
+      var codeStr = line.Substring(5, line.Length - 7);
+      return new ExitStatement(ParseExpression(codeStr));
+    }
+    if (line == "break;")
+    {
+      return new BreakStatement();
+    }
+    if (line == "continue;")
+    {
+      return new ContinueStatement();
+    }
+    if (line == "console.clear();")
+    {
+      return new ConsoleClearStatement();
+    }
+    if (line.StartsWith("console.log"))
+    {
+      var match = Regex.Match(line, @"console\.log\((.+)\);");
+      if (match.Success)
+      {
+        var raw = match.Groups[1].Value.Trim();
+        return new ConsoleLog(ParseExpression(raw));
+      }
+    }
+    if (line == "timer.start();")
+    {
+      return new TimerStartStatement();
+    }
+    if (line.StartsWith("script."))
+    {
+      return ParseScriptControlStatement(line);
+    }
 
+    // Check for assignment statements
+    if (line.Contains(" = ") && line.EndsWith(";") && !line.StartsWith("let ") && !line.StartsWith("const "))
+    {
+      var match = Regex.Match(line, @"(\w+)\s*=\s*(.+);");
+      if (match.Success)
+      {
+        var variableName = match.Groups[1].Value;
+        
+        // Check if trying to reassign a const variable
+        if (_constVariables.Contains(variableName))
+        {
+          throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
+        }
+        
+        // Parse as regular assignment expression
+        var expression = ParseExpression(line.TrimEnd(';'));
+        return new ExpressionStatement(expression);
+      }
+    }
+
+    // Check for raw bash patterns that should not be parsed as Utah syntax
+    if (IsRawBashStatement(line))
+    {
+      return new RawStatement(line);
+    }
+
+    // Fallback to expression statement
+    try
+    {
+      var expression = ParseExpression(line.TrimEnd(';'));
+      // Check if the expression is a placeholder that should be a statement
+      if (expression is FsWriteFileExpressionPlaceholder placeholder)
+      {
+        return new FsWriteFileStatement(placeholder.FilePath, placeholder.Content);
+      }
+      return new ExpressionStatement(expression);
+    }
+    catch
+    {
+      // If it's not a valid expression, it might be a raw statement or an error
+      // For now, we'll treat it as a raw statement if it doesn't look like an incomplete expression
+      if (!line.EndsWith(";") && !line.EndsWith("{"))
+      {
+        return new RawStatement(line);
+      }
+    }
+
+
+    return null;
+  }
+
+  private VariableDeclaration ParseVariableDeclaration(string line)
+  {
+    var isConst = line.StartsWith("const ");
+    var match = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+    if (match.Success)
+    {
+      var name = match.Groups[2].Value;
+      var type = match.Groups[3].Value;
+      var valueStr = match.Groups[4].Value;
+
+      if (isConst)
+      {
+        _constVariables.Add(name);
+      }
+
+      var value = ParseExpression(valueStr);
+      
+      // Validate array element types if this is an array type
+      if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
+      {
+        var elementType = type.Substring(0, type.Length - 2); // Remove []
+        ValidateArrayElementTypes(arrayLiteral, elementType, name);
+      }
+      
+      return new VariableDeclaration(name, type, value, isConst);
+    }
+    throw new Exception($"Invalid variable declaration: {line}");
+  }
+
+  private FunctionDeclaration ParseFunctionDeclaration(string line, ref int i)
+  {
+    var headerMatch = Regex.Match(line, @"function (\w+)\(([^)]*)\)(?::\s*(\w+))?\s*\{");
+    if (!headerMatch.Success) throw new Exception("Invalid function declaration");
+
+    var name = headerMatch.Groups[1].Value;
+    var returnType = headerMatch.Groups[3].Value;
+    var parameters = new List<(string Name, string Type)>();
+    var paramList = headerMatch.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    foreach (var p in paramList)
+    {
+      var parts = p.Trim().Split(':');
+      parameters.Add((parts[0].Trim(), parts[1].Trim()));
+    }
+
+    var body = new List<Statement>();
+    i++;
+    while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+    {
+      var innerLine = _lines[i].Trim();
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          body.Add(statement);
+        }
+      }
+      i++;
+    }
+    return new FunctionDeclaration(name, parameters, body, returnType);
+  }
+
+  private IfStatement ParseIfStatement(string line, ref int i)
+  {
+    var match = Regex.Match(line, @"if \((.+)\) \{");
+    if (!match.Success) throw new Exception("Invalid if statement");
+
+    var condition = ParseExpression(match.Groups[1].Value);
+    var thenBody = new List<Statement>();
+    var elseBody = new List<Statement>();
+
+    i++;
+    while (i < _lines.Length && _lines[i].Trim() != "}")
+    {
+      var innerLine = _lines[i].Trim();
+      if (innerLine == "} else {" || innerLine == "else {")
+      {
+        i++;
+        while (i < _lines.Length && _lines[i].Trim() != "}")
+        {
+          var elseLine = _lines[i].Trim();
+          if (!string.IsNullOrEmpty(elseLine))
+          {
+            var statement = ParseStatement(elseLine, ref i);
+            if (statement != null)
+            {
+              elseBody.Add(statement);
+            }
+          }
+          i++;
+        }
+        break;
+      }
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          thenBody.Add(statement);
+        }
+      }
+      i++;
+    }
+    return new IfStatement(condition, thenBody, elseBody);
+  }
+
+  private ForInLoop ParseForInLoop(string line, ref int i)
+  {
+    var forInMatch = Regex.Match(line, @"for \((let|const) (\w+)(?::\s*(\w+))? in (.+)\) \{");
+    if (forInMatch.Success)
+    {
+      var variable = forInMatch.Groups[2].Value;
+      var iterable = ParseExpression(forInMatch.Groups[4].Value);
+      var body = new List<Statement>();
+      i++;
+      while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+      {
+        var innerLine = _lines[i].Trim();
+        if (!string.IsNullOrEmpty(innerLine))
+        {
+          var statement = ParseStatement(innerLine, ref i);
+          if (statement != null)
+          {
+            body.Add(statement);
+          }
+        }
+        i++;
+      }
+      return new ForInLoop(variable, iterable, body);
+    }
+    throw new Exception("Invalid for-in loop syntax");
+  }
+
+  private ForLoop ParseForLoop(string line, ref int i)
+  {
+    var forMatch = Regex.Match(line, @"for \((.+); (.+); (.+)\) \{");
+    if (forMatch.Success)
+    {
+      var initStr = forMatch.Groups[1].Value.Trim();
+      var initVar = (VariableDeclaration)ParseVariableDeclaration(initStr + ";");
+
+      var condition = ParseExpression(forMatch.Groups[2].Value);
+      var update = ParseExpression(forMatch.Groups[3].Value);
+
+      var body = new List<Statement>();
+      i++;
+      while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+      {
+        var innerLine = _lines[i].Trim();
+        if (!string.IsNullOrEmpty(innerLine))
+        {
+          var statement = ParseStatement(innerLine, ref i);
+          if (statement != null)
+          {
+            body.Add(statement);
+          }
+        }
+        i++;
+      }
+      return new ForLoop(initVar, condition, update, body);
+    }
+    throw new Exception("Invalid for loop syntax");
+  }
+
+  private WhileStatement ParseWhileStatement(string line, ref int i)
+  {
+    var match = Regex.Match(line, @"while \((.+)\) \{");
+    if (!match.Success) throw new Exception("Invalid while statement");
+
+    var condition = ParseExpression(match.Groups[1].Value);
+    var body = new List<Statement>();
+    i++;
+    while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+    {
+      var innerLine = _lines[i].Trim();
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          body.Add(statement);
+        }
+      }
+      i++;
+    }
+    return new WhileStatement(condition, body);
+  }
+
+  private SwitchStatement ParseSwitchStatement(string line, ref int i)
+  {
+    var match = Regex.Match(line, @"switch \((.+)\) \{");
+    if (!match.Success) throw new Exception("Invalid switch statement");
+
+    var expression = ParseExpression(match.Groups[1].Value);
+    var cases = new List<CaseClause>();
+    DefaultClause? defaultClause = null;
+
+    i++;
+    while (i < _lines.Length && _lines[i].Trim() != "}")
+    {
+      var innerLine = _lines[i].Trim();
+      if (innerLine.StartsWith("case "))
+      {
+        // Collect all consecutive case values (for fall-through)
+        var values = new List<Expression>();
+        while (i < _lines.Length && _lines[i].Trim().StartsWith("case "))
+        {
+          var caseMatch = Regex.Match(_lines[i].Trim(), @"case (.+):");
+          values.Add(ParseExpression(caseMatch.Groups[1].Value));
+          i++;
+        }
+        
+        // Now parse the body until we hit a break, another case, default, or end
+        var body = new List<Statement>();
+        bool hasBreak = false;
+        while (i < _lines.Length && !_lines[i].Trim().StartsWith("case ") && !_lines[i].Trim().StartsWith("default:") && _lines[i].Trim() != "}")
+        {
+          var caseBodyLine = _lines[i].Trim();
+          if (caseBodyLine == "break;")
+          {
+            hasBreak = true;
+            i++;
+            break;
+          }
+          if (!string.IsNullOrEmpty(caseBodyLine))
+          {
+            var statement = ParseStatement(caseBodyLine, ref i);
+            if (statement != null)
+            {
+              body.Add(statement);
+            }
+          }
+          i++;
+        }
+        cases.Add(new CaseClause(values, body, hasBreak));
+        continue;
+      }
+      if (innerLine.StartsWith("default:"))
+      {
+        var body = new List<Statement>();
+        bool hasBreak = false;
+        i++;
+        while (i < _lines.Length && _lines[i].Trim() != "}")
+        {
+          var defaultBodyLine = _lines[i].Trim();
+          if (defaultBodyLine == "break;")
+          {
+            hasBreak = true;
+            break;
+          }
+          if (!string.IsNullOrEmpty(defaultBodyLine))
+          {
+            var statement = ParseStatement(defaultBodyLine, ref i);
+            if (statement != null)
+            {
+              body.Add(statement);
+            }
+          }
+          i++;
+        }
+        defaultClause = new DefaultClause(body, hasBreak);
+        if (hasBreak) i++;
+        continue;
+      }
+      i++;
+    }
+    return new SwitchStatement(expression, cases, defaultClause);
+  }
+
+  private Statement ParseScriptControlStatement(string line)
+  {
+    return line switch
+    {
+      "script.enableDebug();" => new ScriptEnableDebugStatement(),
+      "script.disableDebug();" => new ScriptDisableDebugStatement(),
+      "script.enableGlobbing();" => new ScriptEnableGlobbingStatement(),
+      "script.disableGlobbing();" => new ScriptDisableGlobbingStatement(),
+      "script.exitOnError();" => new ScriptExitOnErrorStatement(),
+      "script.continueOnError();" => new ScriptContinueOnErrorStatement(),
+      _ => new RawStatement(line)
+    };
+  }
+
+  private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string arrayName)
+  {
+    for (int i = 0; i < arrayLiteral.Elements.Count; i++)
+    {
+      var element = arrayLiteral.Elements[i];
+      if (element is LiteralExpression literal)
+      {
+        var actualType = literal.Type;
+        if (actualType != expectedElementType)
+        {
+          throw new InvalidOperationException($"Type mismatch in array '{arrayName}' at index {i}. Expected '{expectedElementType}' but found '{actualType}' for element '{literal.Value}'.");
+        }
+      }
+      // Add more checks for other expression types if needed
+    }
+  }
+
+  private bool IsRawBashStatement(string line)
+  {
+    // Common bash patterns that should not be parsed as Utah syntax
+    return line.StartsWith("if [ ") ||
+           line.StartsWith("while [ ") ||
+           line.StartsWith("elif [ ") ||
+           line.StartsWith("until [ ") ||
+           line == "fi" ||
+           line == "done" ||
+           line == "else" ||
+           line.StartsWith("case ") ||
+           line.StartsWith("esac") ||
+           line.StartsWith("echo ") ||
+           line.StartsWith("export ") ||
+           line.StartsWith("source ") ||
+           line.StartsWith(". ") ||
+           line.Contains("() {") ||  // Function definition
+           line.StartsWith("#!/") ||  // Shebang
+           line.StartsWith("set ") ||
+           line.StartsWith("unset ") ||
+           line.StartsWith("alias ") ||
+           line.StartsWith("cd ") ||
+           line.StartsWith("pwd") ||
+           line.StartsWith("ls ") ||
+           line.StartsWith("cat ") ||
+           line.StartsWith("grep ") ||
+           line.StartsWith("sed ") ||
+           line.StartsWith("awk ") ||
+           line.StartsWith("find ") ||
+           line.StartsWith("xargs ") ||
+           line.StartsWith("sort ") ||
+           line.StartsWith("uniq ") ||
+           line.StartsWith("head ") ||
+           line.StartsWith("tail ") ||
+           line.StartsWith("wc ") ||
+           line.StartsWith("tr ") ||
+           line.StartsWith("cut ") ||
+           line.StartsWith("join ") ||
+           line.StartsWith("paste ") ||
+           line.StartsWith("tee ") ||
+           line.StartsWith("xargs ") ||
+           line.StartsWith("mkdir ") ||
+           line.StartsWith("rmdir ") ||
+           line.StartsWith("rm ") ||
+           line.StartsWith("cp ") ||
+           line.StartsWith("mv ") ||
+           line.StartsWith("ln ") ||
+           line.StartsWith("chmod ") ||
+           line.StartsWith("chown ") ||
+           line.StartsWith("touch ") ||
+           line.EndsWith("=$((") ||  // Arithmetic assignments
+           (line.Contains("=") && !line.StartsWith("let ") && !line.StartsWith("const ") && !line.Contains(" = ")) ||  // Variable assignments (bash style without spaces)
+           Regex.IsMatch(line, @"^\w+=[^=\s].*") ||  // Simple variable assignment (bash style without spaces)
+           line.Contains("$((") ||  // Arithmetic substitution
+           line.Contains("$(") ||   // Command substitution
+           line.Contains("${") ||   // Parameter expansion
+           line.Contains("&&") ||   // Logical AND
+           line.Contains("||") ||   // Logical OR
+           line.Contains(">>") ||   // Append redirection
+           line.Contains("<<") ||   // Here document
+           line.Contains("2>&1") || // Error redirection
+           line.Contains(">/dev/null") || // Null redirection
+           line.Contains("|");      // Pipe
+  }
 }

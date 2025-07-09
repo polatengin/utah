@@ -1,10 +1,6 @@
 #!/bin/sh
 
-if command -v git &> /dev/null; then
-  gitInstalled="true"
-else
-  gitInstalled="false"
-fi
+gitInstalled=$(command -v "git" &> /dev/null && echo "true" || echo "false")
 if [ "${gitInstalled}" = "true" ]; then
   echo "Git is installed"
 else

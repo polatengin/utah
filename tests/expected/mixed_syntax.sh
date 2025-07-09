@@ -29,7 +29,7 @@ greet() {
 bash_greet() {
 echo "Bash says hello to $1"
 }
-greeting=$(greet "$name")
+greeting=$(greet "${name}")
 echo "${greeting}"
 bash_greet "World"
 result="Test completed"

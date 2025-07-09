@@ -7,3 +7,6 @@ console.log("Status: " + status);
 
 const value: number = 75;
 let test: string = value > 80 ? "crit" : value > 60 ? "warn" : "ok";
+
+alertLevel = value > 95 ? "CRITICAL" : "WARNING";
+console.log(`⚠️  HIGH MEMORY USAGE: ${value}% (threshold: ${value}%) - ${alertLevel}`);

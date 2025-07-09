@@ -2,3 +2,7 @@
 let fileExt: string = fs.extension("document.pdf");
 console.log("File extension:");
 console.log(fileExt);
+
+let fileName: string = "document.pdf";
+let pdfExt:string = fs.extension(fileName);
+console.log(pdfExt);

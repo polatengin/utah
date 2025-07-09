@@ -1,10 +1,44 @@
 using System.Text.RegularExpressions;
+using System.Linq;
 
 public partial class Parser
 {
   public Expression ParseExpression(string input)
   {
-    return ParseTernaryExpression(input.Trim());
+    return ParseAssignmentExpression(input.Trim());
+  }
+
+  private bool IsPartOfOperator(string input, int index)
+  {
+    if (index > 0)
+    {
+      char prevChar = input[index - 1];
+      if (prevChar == '!' || prevChar == '=' || prevChar == '<' || prevChar == '>')
+      {
+        return true;
+      }
+    }
+    if (index < input.Length - 1)
+    {
+      char nextChar = input[index + 1];
+      if (nextChar == '=')
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private Expression ParseAssignmentExpression(string input)
+  {
+    var parts = input.Split(new[] { '=' }, 2);
+    if (parts.Length == 2 && !IsPartOfOperator(input, input.IndexOf('=')))
+    {
+      var left = ParseTernaryExpression(parts[0].Trim());
+      var right = ParseAssignmentExpression(parts[1].Trim()); // Right-associative
+      return new AssignmentExpression(left, right);
+    }
+    return ParseTernaryExpression(input);
   }
 
   private Expression ParseTernaryExpression(string input)
@@ -13,12 +47,11 @@ public partial class Parser
     var parts = SplitTernary(input);
     if (parts.Count == 3)
     {
-      return new TernaryExpression
-      {
-        Condition = ParseLogicalOrExpression(parts[0]),
-        TrueExpression = ParseLogicalOrExpression(parts[1]),
-        FalseExpression = ParseTernaryExpression(parts[2]) // Recursively parse for nested ternaries
-      };
+      return new TernaryExpression(
+        ParseLogicalOrExpression(parts[0]),
+        ParseLogicalOrExpression(parts[1]),
+        ParseTernaryExpression(parts[2]) // Recursively parse for nested ternaries
+      );
     }
     return ParseLogicalOrExpression(input);
   }
@@ -31,12 +64,11 @@ public partial class Parser
       var left = ParseLogicalAndExpression(parts[0]);
       for (int i = 1; i < parts.Count; i++)
       {
-        left = new BinaryExpression
-        {
-          Left = left,
-          Operator = "||",
-          Right = ParseLogicalAndExpression(parts[i])
-        };
+        left = new BinaryExpression(
+          left,
+          ParseLogicalAndExpression(parts[i]),
+          "||"
+        );
       }
       return left;
     }
@@ -51,12 +83,11 @@ public partial class Parser
       var left = ParseEqualityExpression(parts[0]);
       for (int i = 1; i < parts.Count; i++)
       {
-        left = new BinaryExpression
-        {
-          Left = left,
-          Operator = "&&",
-          Right = ParseEqualityExpression(parts[i])
-        };
+        left = new BinaryExpression(
+          left,
+          ParseEqualityExpression(parts[i]),
+          "&&"
+        );
       }
       return left;
     }
@@ -71,12 +102,11 @@ public partial class Parser
       var parts = SplitByOperator(input, op);
       if (parts.Count == 2)
       {
-        return new BinaryExpression
-        {
-          Left = ParseRelationalExpression(parts[0]),
-          Operator = op,
-          Right = ParseRelationalExpression(parts[1])
-        };
+        return new BinaryExpression(
+          ParseRelationalExpression(parts[0]),
+          ParseRelationalExpression(parts[1]),
+          op
+        );
       }
     }
     return ParseRelationalExpression(input);
@@ -84,18 +114,18 @@ public partial class Parser
 
   private Expression ParseRelationalExpression(string input)
   {
+    // Check longer operators first to avoid splitting on parts of compound operators
     var operators = new[] { "<=", ">=", "<", ">" };
     foreach (var op in operators)
     {
       var parts = SplitByOperator(input, op);
       if (parts.Count == 2)
       {
-        return new BinaryExpression
-        {
-          Left = ParseAdditiveExpression(parts[0]),
-          Operator = op,
-          Right = ParseAdditiveExpression(parts[1])
-        };
+        return new BinaryExpression(
+          ParseAdditiveExpression(parts[0]),
+          ParseAdditiveExpression(parts[1]),
+          op
+        );
       }
     }
     return ParseAdditiveExpression(input);
@@ -110,12 +140,11 @@ public partial class Parser
       for (int i = 1; i < parts.Count; i++)
       {
         var op = GetOperatorBetween(input, parts[i - 1], parts[i]);
-        left = new BinaryExpression
-        {
-          Left = left,
-          Operator = op,
-          Right = ParseMultiplicativeExpression(parts[i])
-        };
+        left = new BinaryExpression(
+          left,
+          ParseMultiplicativeExpression(parts[i]),
+          op
+        );
       }
       return left;
     }
@@ -131,12 +160,11 @@ public partial class Parser
       for (int i = 1; i < parts.Count; i++)
       {
         var op = GetOperatorBetween(input, parts[i - 1], parts[i]);
-        left = new BinaryExpression
-        {
-          Left = left,
-          Operator = op,
-          Right = ParseUnaryExpression(parts[i])
-        };
+        left = new BinaryExpression(
+          left,
+          ParseUnaryExpression(parts[i]),
+          op
+        );
       }
       return left;
     }
@@ -145,22 +173,35 @@ public partial class Parser
 
   private Expression ParseUnaryExpression(string input)
   {
+    // Pre-increment
+    if (input.StartsWith("++"))
+    {
+      return new PreIncrementExpression(ParseUnaryExpression(input.Substring(2).Trim()));
+    }
+    // Pre-decrement
+    if (input.StartsWith("--"))
+    {
+      return new PreDecrementExpression(ParseUnaryExpression(input.Substring(2).Trim()));
+    }
     if (input.StartsWith("!"))
     {
-      return new UnaryExpression
-      {
-        Operator = "!",
-        Operand = ParseUnaryExpression(input.Substring(1).Trim())
-      };
+      return new UnaryExpression(ParseUnaryExpression(input.Substring(1).Trim()), "!");
     }
     if (input.StartsWith("-"))
     {
-      return new UnaryExpression
-      {
-        Operator = "-",
-        Operand = ParseUnaryExpression(input.Substring(1).Trim())
-      };
+      return new UnaryExpression(ParseUnaryExpression(input.Substring(1).Trim()), "-");
     }
+    
+    // Check for post-increment/decrement
+    if (input.EndsWith("++"))
+    {
+      return new PostIncrementExpression(ParsePrimaryExpression(input.Substring(0, input.Length - 2).Trim()));
+    }
+    if (input.EndsWith("--"))
+    {
+      return new PostDecrementExpression(ParsePrimaryExpression(input.Substring(0, input.Length - 2).Trim()));
+    }
+    
     return ParsePrimaryExpression(input);
   }
 
@@ -171,20 +212,13 @@ public partial class Parser
     // Parenthesized expression
     if (input.StartsWith("(") && input.EndsWith(")"))
     {
-      return new ParenthesizedExpression
-      {
-        Inner = ParseExpression(input.Substring(1, input.Length - 2))
-      };
+      return new ParenthesizedExpression(ParseExpression(input.Substring(1, input.Length - 2)));
     }
 
     // String literal
     if (input.StartsWith("\"") && input.EndsWith("\""))
     {
-      return new LiteralExpression
-      {
-        Value = input.Substring(1, input.Length - 2),
-        Type = "string"
-      };
+      return new LiteralExpression(input.Substring(1, input.Length - 2), "string");
     }
 
     // Template literal
@@ -196,46 +230,39 @@ public partial class Parser
     // Number literal
     if (double.TryParse(input, out _))
     {
-      return new LiteralExpression
-      {
-        Value = input,
-        Type = "number"
-      };
+      return new LiteralExpression(input, "number");
     }
 
     // Boolean literal
     if (input == "true" || input == "false")
     {
-      return new LiteralExpression
-      {
-        Value = input,
-        Type = "boolean"
-      };
+      return new LiteralExpression(input, "boolean");
     }
 
     // Array literal: [1, 2, 3] or ["a", "b", "c"]
     if (input.StartsWith("[") && input.EndsWith("]"))
     {
       var content = input.Substring(1, input.Length - 2).Trim();
-      var arrayLiteral = new ArrayLiteral();
+      var elements = new List<Expression>();
+      var elementType = "any";
 
       if (!string.IsNullOrEmpty(content))
       {
-        var elements = SplitByComma(content);
-        foreach (var element in elements)
+        var elementStrings = SplitByComma(content);
+        foreach (var element in elementStrings)
         {
           var elementExpr = ParseExpression(element.Trim());
-          arrayLiteral.Elements.Add(elementExpr);
+          elements.Add(elementExpr);
 
           // Determine element type from first element
-          if (arrayLiteral.ElementType == string.Empty && elementExpr is LiteralExpression literal)
+          if (elementType == "any" && elementExpr is LiteralExpression literal)
           {
-            arrayLiteral.ElementType = literal.Type;
+            elementType = literal.Type;
           }
         }
       }
 
-      return arrayLiteral;
+      return new ArrayLiteral(elements, elementType);
     }
 
     // Array access: arrayName[index]
@@ -245,11 +272,7 @@ public partial class Parser
       var arrayName = input.Substring(0, bracketIndex).Trim();
       var indexContent = input.Substring(bracketIndex + 1, input.Length - bracketIndex - 2).Trim();
 
-      return new ArrayAccess
-      {
-        Array = new VariableExpression { Name = arrayName },
-        Index = ParseExpression(indexContent)
-      };
+      return new ArrayAccess(new VariableExpression(arrayName), ParseExpression(indexContent));
     }
 
     // Array/String methods: arrayName.length, arrayName.method()
@@ -277,7 +300,7 @@ public partial class Parser
           {
             // One argument: web.get(url)
             var urlExpr = ParseExpression(args[0]);
-            return new WebGetExpression { Url = urlExpr };
+            return new WebGetExpression(urlExpr);
           }
           else
           {
@@ -289,30 +312,91 @@ public partial class Parser
       // Handle .length property
       if (methodPart == "length" || methodPart == "length()")
       {
-        var targetExpr = new VariableExpression { Name = objectName };
+        var targetExpr = new VariableExpression(objectName);
         // Heuristic to guess if it's an array or string.
         // This should be improved with a symbol table in the future.
         if (IsLikelyArray(objectName))
         {
-          return new ArrayLength { Array = targetExpr };
+          return new ArrayLength(targetExpr);
         }
-        return new StringLengthExpression { Target = targetExpr };
+        return new StringLengthExpression(targetExpr);
       }
 
       // Handle .isEmpty() method
       if (methodPart == "isEmpty()")
       {
-        return new ArrayIsEmpty { Array = new VariableExpression { Name = objectName } };
+        return new ArrayIsEmpty(new VariableExpression(objectName));
       }
 
       // Handle .reverse() method
       if (methodPart == "reverse()")
       {
-        return new ArrayReverse { Array = new VariableExpression { Name = objectName } };
+        return new ArrayReverse(new VariableExpression(objectName));
       }
 
-      // Handle string methods (existing string function parsing)
-      // This will be handled by existing string function parsing
+      // Handle .join() method
+      if (methodPart.StartsWith("join(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
+        var separatorExpr = ParseExpression(argsContent);
+        return new ArrayJoinExpression(new VariableExpression(objectName), separatorExpr);
+      }
+
+      // Handle .split() method for strings
+      if (methodPart.StartsWith("split(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(6, methodPart.Length - 7).Trim();
+        var separatorExpr = ParseExpression(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        return new StringSplitExpression(targetExpr, separatorExpr);
+      }
+
+      // Handle .toUpperCase() method for strings
+      if (methodPart == "toUpperCase()")
+      {
+        var targetExpr = ParseExpression(objectName);
+        return new StringToUpperCaseExpression(targetExpr);
+      }
+
+      // Handle .toLowerCase() method for strings
+      if (methodPart == "toLowerCase()")
+      {
+        var targetExpr = ParseExpression(objectName);
+        return new StringToLowerCaseExpression(targetExpr);
+      }
+
+      // Handle timer methods
+      if (objectName == "timer")
+      {
+        if (methodPart == "stop()")
+        {
+          return new TimerStopExpression();
+        }
+      }
+
+      if (objectName == "fs")
+      {
+        if (methodPart.StartsWith("dirname(") && methodPart.EndsWith(")"))
+        {
+          var arg = methodPart.Substring(8, methodPart.Length - 9);
+          return new FsDirnameExpression(ParseExpression(arg));
+        }
+        if (methodPart.StartsWith("fileName(") && methodPart.EndsWith(")"))
+        {
+          var arg = methodPart.Substring(9, methodPart.Length - 10);
+          return new FsFileNameExpression(ParseExpression(arg));
+        }
+        if (methodPart.StartsWith("extension(") && methodPart.EndsWith(")"))
+        {
+          var arg = methodPart.Substring(10, methodPart.Length - 11);
+          return new FsExtensionExpression(ParseExpression(arg));
+        }
+        if (methodPart.StartsWith("parentDirName(") && methodPart.EndsWith(")"))
+        {
+          var arg = methodPart.Substring(14, methodPart.Length - 15);
+          return new FsParentDirNameExpression(ParseExpression(arg));
+        }
+      }
     }
 
     // Function call: functionName(arg1, arg2, ...)
@@ -321,6 +405,33 @@ public partial class Parser
       var parenIndex = input.IndexOf('(');
       var functionName = input.Substring(0, parenIndex).Trim();
       var argsContent = input.Substring(parenIndex + 1, input.Length - parenIndex - 2).Trim();
+
+      // Special handling for fs.readFile()
+      if (functionName == "fs.readFile")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var filePathExpr = ParseExpression(args[0]);
+          return new FsReadFileExpression(filePathExpr);
+        }
+        throw new InvalidOperationException("fs.readFile() requires exactly 1 argument (filePath)");
+      }
+
+      // Special handling for fs.writeFile()
+      if (functionName == "fs.writeFile")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var filePathExpr = ParseExpression(args[0]);
+          var contentExpr = ParseExpression(args[1]);
+          // This should be a statement, but we're parsing an expression.
+          // We'll create a temporary expression node and handle it in the statement parser.
+          return new FsWriteFileExpressionPlaceholder(filePathExpr, contentExpr);
+        }
+        throw new InvalidOperationException("fs.writeFile() requires exactly 2 arguments (filePath, content)");
+      }
 
       // Special handling for console.isSudo()
       if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
@@ -332,24 +443,16 @@ public partial class Parser
       if (functionName == "console.promptYesNo" && !string.IsNullOrEmpty(argsContent))
       {
         // Extract the prompt text from the argument (should be a string literal)
-        var promptText = argsContent.Trim();
-        if (promptText.StartsWith("\"") && promptText.EndsWith("\""))
-        {
-          promptText = promptText[1..^1]; // Remove quotes
-        }
-        return new ConsolePromptYesNoExpression { PromptText = promptText };
+        var promptTextExpr = ParseExpression(argsContent.Trim());
+        return new ConsolePromptYesNoExpression(promptTextExpr);
       }
 
       // Special handling for os.isInstalled()
       if (functionName == "os.isInstalled" && !string.IsNullOrEmpty(argsContent))
       {
         // Extract the app name from the argument (should be a string literal)
-        var appName = argsContent.Trim();
-        if (appName.StartsWith("\"") && appName.EndsWith("\""))
-        {
-          appName = appName[1..^1]; // Remove quotes
-        }
-        return new OsIsInstalledExpression { AppName = appName };
+        var appNameExpr = ParseExpression(argsContent.Trim());
+        return new OsIsInstalledExpression(appNameExpr);
       }
 
       // Special handling for process.elapsedTime()
@@ -358,13 +461,55 @@ public partial class Parser
         return new ProcessElapsedTimeExpression();
       }
 
+      // Special handling for process.id()
+      if (functionName == "process.id" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessIdExpression();
+      }
+
+      // Special handling for process.cpu()
+      if (functionName == "process.cpu" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessCpuExpression();
+      }
+
+      // Special handling for process.memory()
+      if (functionName == "process.memory" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessMemoryExpression();
+      }
+
+      // Special handling for process.command()
+      if (functionName == "process.command" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessCommandExpression();
+      }
+
+      // Special handling for process.status()
+      if (functionName == "process.status" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessStatusExpression();
+      }
+
+      // Special handling for os.getLinuxVersion()
+      if (functionName == "os.getLinuxVersion" && string.IsNullOrEmpty(argsContent))
+      {
+        return new OsGetLinuxVersionExpression();
+      }
+
+      // Special handling for os.getOS()
+      if (functionName == "os.getOS" && string.IsNullOrEmpty(argsContent))
+      {
+        return new OsGetOSExpression();
+      }
+
       // Special handling for utility.random()
       if (functionName == "utility.random")
       {
         if (string.IsNullOrEmpty(argsContent))
         {
           // No arguments: utility.random()
-          return new UtilityRandomExpression();
+          return new UtilityRandomExpression(null, null);
         }
         else
         {
@@ -376,14 +521,14 @@ public partial class Parser
           {
             // One argument: utility.random(max)
             var maxExpr = ParseExpression(args[0]);
-            return new UtilityRandomExpression { MinValue = maxExpr };
+            return new UtilityRandomExpression(null, maxExpr);
           }
           else if (args.Count == 2)
           {
             // Two arguments: utility.random(min, max)
             var minExpr = ParseExpression(args[0]);
             var maxExpr = ParseExpression(args[1]);
-            return new UtilityRandomExpression { MinValue = minExpr, MaxValue = maxExpr };
+            return new UtilityRandomExpression(minExpr, maxExpr);
           }
           else
           {
@@ -395,28 +540,24 @@ public partial class Parser
       // Regular function call (not special built-in)
       if (Regex.IsMatch(functionName, @"^[\w\.]+$"))
       {
-        var functionCall = new FunctionCall { Name = functionName };
+        var arguments = new List<Expression>();
         if (!string.IsNullOrEmpty(argsContent))
         {
-          functionCall.Arguments.AddRange(SplitByComma(argsContent));
+          arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
         }
 
-        return functionCall;
+        return new FunctionCall(functionName, arguments);
       }
     }
 
     // Variable reference
     if (Regex.IsMatch(input, @"^\w+$"))
     {
-      return new VariableExpression { Name = input };
+      return new VariableExpression(input);
     }
 
     // Fallback to literal
-    return new LiteralExpression
-    {
-      Value = input,
-      Type = "unknown"
-    };
+    return new LiteralExpression(input, "unknown");
   }
 
   private List<string> SplitTernary(string input)
@@ -471,7 +612,7 @@ public partial class Parser
 
   private TemplateLiteralExpression ParseTemplateLiteral(string input)
   {
-    var template = new TemplateLiteralExpression();
+    var parts = new List<object>();
     var content = input.Substring(1, input.Length - 2); // Remove backticks
 
     var regex = new Regex(@"\$\{(.+?)\}");
@@ -482,18 +623,18 @@ public partial class Parser
     {
       if (match.Index > lastIndex)
       {
-        template.Parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
+        parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
       }
-      template.Parts.Add(ParseExpression(match.Groups[1].Value));
+      parts.Add(ParseExpression(match.Groups[1].Value));
       lastIndex = match.Index + match.Length;
     }
 
     if (lastIndex < content.Length)
     {
-      template.Parts.Add(content.Substring(lastIndex));
+      parts.Add(content.Substring(lastIndex));
     }
 
-    return template;
+    return new TemplateLiteralExpression(parts);
   }
 
   private List<string> SplitByComma(string input)
@@ -547,6 +688,9 @@ public partial class Parser
     bool inString = false;
     char stringChar = '\0';
 
+    // Sort operators by length descending to check longer ones first
+    var sortedOps = operators.OrderByDescending(op => op.Length).ToArray();
+
     for (int i = 0; i < input.Length; i++)
     {
       char c = input[i];
@@ -566,28 +710,24 @@ public partial class Parser
         else if (c == ')') depth--;
         else if (depth == 0)
         {
-          foreach (var op in operators)
+          foreach (var op in sortedOps)
           {
             if (i + op.Length <= input.Length && input.Substring(i, op.Length) == op)
             {
-              // Check if this is part of a compound operator (like <= or >=)
-              bool isPartOfCompound = false;
-              if (op == "<" && i + 1 < input.Length && input[i + 1] == '=')
-                isPartOfCompound = true;
-              if (op == ">" && i + 1 < input.Length && input[i + 1] == '=')
-                isPartOfCompound = true;
-              if (op == "=" && i > 0 && (input[i - 1] == '<' || input[i - 1] == '>' || input[i - 1] == '!' || input[i - 1] == '='))
-                isPartOfCompound = true;
-              if (op == "=" && i + 1 < input.Length && input[i + 1] == '=')
-                isPartOfCompound = true;
+              // Special case: don't split on + or - if they are part of ++ or --
+              if (op == "+" && i + 1 < input.Length && input[i + 1] == '+')
+                continue;
+              if (op == "-" && i + 1 < input.Length && input[i + 1] == '-')
+                continue;
+              if (op == "+" && i > 0 && input[i - 1] == '+')
+                continue;
+              if (op == "-" && i > 0 && input[i - 1] == '-')
+                continue;
 
-              if (!isPartOfCompound)
-              {
-                parts.Add(input.Substring(start, i - start).Trim());
-                start = i + op.Length;
-                i += op.Length - 1; // Skip the operator
-                break;
-              }
+              parts.Add(input.Substring(start, i - start).Trim());
+              start = i + op.Length;
+              i += op.Length - 1; // Skip the operator
+              break;
             }
           }
         }

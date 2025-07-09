@@ -1,6 +1,8 @@
 #!/bin/sh
 
-_temp_path="document.pdf"
-fileExt="${_temp_path##*.}"
+fileExt="pdf"
 echo "File extension:"
 echo "${fileExt}"
+fileName="document.pdf"
+pdfExt="${fileName##*.}"
+echo "${pdfExt}"

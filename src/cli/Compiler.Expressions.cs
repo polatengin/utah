@@ -7,30 +7,99 @@ public partial class Compiler
 
   private string CompileExpression(Expression expr)
   {
-    return expr switch
+    switch (expr)
     {
-      LiteralExpression lit => CompileLiteralExpression(lit),
-      VariableExpression var => CompileVariableExpression(var),
-      BinaryExpression bin => CompileBinaryExpression(bin),
-      UnaryExpression un => CompileUnaryExpression(un),
-      TernaryExpression tern => CompileTernaryExpression(tern),
-      ParenthesizedExpression paren => CompileParenthesizedExpression(paren),
-      TemplateLiteralExpression template => CompileTemplateLiteralExpression(template),
-      ArrayLiteral arr => CompileArrayLiteral(arr),
-      ArrayAccess acc => CompileArrayAccess(acc),
-      ArrayLength len => CompileArrayLength(len),
-      ArrayIsEmpty isEmpty => CompileArrayIsEmpty(isEmpty),
-      ArrayReverse reverse => CompileArrayReverse(reverse),
-      StringLengthExpression sl => CompileStringLengthExpression(sl),
-      FunctionCall func => CompileFunctionCallExpression(func),
-      ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
-      ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
-      OsIsInstalledExpression osInstalled => CompileOsIsInstalledExpression(osInstalled),
-      ProcessElapsedTimeExpression elapsed => CompileProcessElapsedTimeExpression(elapsed),
-      UtilityRandomExpression rand => CompileUtilityRandomExpression(rand),
-      WebGetExpression webGet => CompileWebGetExpression(webGet),
-      _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
-    };
+      case AssignmentExpression assign:
+        var varName = assign.Left is VariableExpression varExpr ? varExpr.Name : CompileExpression(assign.Left);
+        var value = CompileExpression(assign.Right);
+        return $"{varName}={value}";
+      case LiteralExpression lit:
+        return lit.Type == "string" ? $"\"{lit.Value}\"" : lit.Value;
+      case VariableExpression var:
+        return $"${{{var.Name}}}";
+      case BinaryExpression bin:
+        return CompileBinaryExpression(bin);
+      case UnaryExpression un:
+        return CompileUnaryExpression(un);
+      case PostIncrementExpression postInc:
+        return CompilePostIncrementExpression(postInc);
+      case PostDecrementExpression postDec:
+        return CompilePostDecrementExpression(postDec);
+      case PreIncrementExpression preInc:
+        return CompilePreIncrementExpression(preInc);
+      case PreDecrementExpression preDec:
+        return CompilePreDecrementExpression(preDec);
+      case TernaryExpression tern:
+        return CompileTernaryExpression(tern);
+      case ParenthesizedExpression paren:
+        return CompileParenthesizedExpression(paren);
+      case TemplateLiteralExpression template:
+        return CompileTemplateLiteralExpression(template);
+      case ArrayLiteral arr:
+        return CompileArrayLiteral(arr);
+      case ArrayAccess acc:
+        return CompileArrayAccess(acc);
+      case ArrayLength len:
+        return CompileArrayLength(len);
+      case ArrayIsEmpty isEmpty:
+        return CompileArrayIsEmpty(isEmpty);
+      case ArrayReverse reverse:
+        return CompileArrayReverse(reverse);
+      case StringLengthExpression sl:
+        return CompileStringLengthExpression(sl);
+      case StringSplitExpression ss:
+        return CompileStringSplitExpression(ss);
+      case FunctionCall func:
+        return CompileFunctionCallExpression(func);
+      case ConsoleIsSudoExpression sudo:
+        return CompileConsoleIsSudoExpression(sudo);
+      case ConsolePromptYesNoExpression prompt:
+        return CompileConsolePromptYesNoExpression(prompt);
+      case OsIsInstalledExpression osInstalled:
+        return CompileOsIsInstalledExpression(osInstalled);
+      case ProcessElapsedTimeExpression elapsed:
+        return CompileProcessElapsedTimeExpression(elapsed);
+      case ProcessIdExpression processId:
+        return CompileProcessIdExpression(processId);
+      case ProcessCpuExpression processCpu:
+        return CompileProcessCpuExpression(processCpu);
+      case ProcessMemoryExpression processMemory:
+        return CompileProcessMemoryExpression(processMemory);
+      case ProcessCommandExpression processCommand:
+        return CompileProcessCommandExpression(processCommand);
+      case ProcessStatusExpression processStatus:
+        return CompileProcessStatusExpression(processStatus);
+      case TimerStopExpression:
+        return CompileTimerStopExpression();
+      case OsGetLinuxVersionExpression osLinuxVersion:
+        return CompileOsGetLinuxVersionExpression(osLinuxVersion);
+      case OsGetOSExpression osGetOS:
+        return CompileOsGetOSExpression(osGetOS);
+      case UtilityRandomExpression rand:
+        return CompileUtilityRandomExpression(rand);
+      case WebGetExpression webGet:
+        return CompileWebGetExpression(webGet);
+      case ArrayJoinExpression arrayJoin:
+        return CompileArrayJoinExpression(arrayJoin);
+      case FsDirnameExpression fsDirname:
+        return CompileFsDirnameExpression(fsDirname);
+      case FsFileNameExpression fsFileName:
+        return CompileFsFileNameExpression(fsFileName);
+      case FsExtensionExpression fsExtension:
+        return CompileFsExtensionExpression(fsExtension);
+      case FsParentDirNameExpression fsParentDirName:
+        return CompileFsParentDirNameExpression(fsParentDirName);
+      case FsReadFileExpression fsReadFile:
+        return CompileFsReadFileExpression(fsReadFile);
+      case StringToUpperCaseExpression stringUpper:
+        return CompileStringToUpperCaseExpression(stringUpper);
+      case StringToLowerCaseExpression stringLower:
+        return CompileStringToLowerCaseExpression(stringLower);
+      case FsWriteFileExpressionPlaceholder fsWriteFile:
+        throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
+      default:
+        throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
+    }
   }
 
   private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)
@@ -40,20 +109,33 @@ public partial class Compiler
 
   private string CompileConsolePromptYesNoExpression(ConsolePromptYesNoExpression prompt)
   {
+    // Compile the prompt text expression and extract the string value
+    var promptText = CompileExpression(prompt.PromptText);
+    // Remove quotes if it's a string literal
+    if (promptText.StartsWith("\"") && promptText.EndsWith("\""))
+    {
+      promptText = promptText[1..^1];
+    }
     // Generate bash code that prompts the user and returns true/false based on yes/no response
-    return $"$(while true; do read -p \"{prompt.PromptText} (y/n): \" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
+    return $"$(while true; do read -p \"{promptText} (y/n): \" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
   }
 
   private string CompileOsIsInstalledExpression(OsIsInstalledExpression osInstalled)
   {
     // Generate bash code that checks if a command exists and returns true/false
-    // AppName could be a variable reference like "app" or a string literal like "docker"
-    var appReference = osInstalled.AppName;
-
-    // If it's a variable reference (no quotes), wrap it in ${}
-    if (!appReference.StartsWith("\"") && !appReference.StartsWith("'"))
+    string appReference;
+    
+    if (osInstalled.AppName is VariableExpression varExpr)
     {
-      appReference = $"${{{appReference}}}";
+      appReference = $"${{{varExpr.Name}}}";
+    }
+    else if (osInstalled.AppName is LiteralExpression literal && literal.Type == "string")
+    {
+      appReference = $"\"{literal.Value}\"";
+    }
+    else
+    {
+      appReference = CompileExpression(osInstalled.AppName);
     }
 
     return $"$(command -v {appReference} &> /dev/null && echo \"true\" || echo \"false\")";
@@ -64,6 +146,61 @@ public partial class Compiler
     // Generate bash code that gets the elapsed time since the process started
     // Using ps command to get the elapsed time of the current process
     return "$(ps -o etime -p $$ --no-headers | tr -d ' ')";
+  }
+
+  private string CompileProcessIdExpression(ProcessIdExpression processId)
+  {
+    return "$(ps -o pid -p $$ --no-headers | tr -d ' ')";
+  }
+
+  private string CompileProcessCpuExpression(ProcessCpuExpression processCpu)
+  {
+    return "$(ps -o pcpu -p $$ --no-headers | tr -d ' ')";
+  }
+
+  private string CompileProcessMemoryExpression(ProcessMemoryExpression processMemory)
+  {
+    return "$(ps -o pmem -p $$ --no-headers | tr -d ' ')";
+  }
+
+  private string CompileProcessCommandExpression(ProcessCommandExpression processCommand)
+  {
+    return "$(ps -o cmd= -p $$)";
+  }
+
+  private string CompileProcessStatusExpression(ProcessStatusExpression processStatus)
+  {
+    return "$(ps -o stat= -p $$)";
+  }
+
+  private string CompileOsGetLinuxVersionExpression(OsGetLinuxVersionExpression osLinuxVersion)
+  {
+    // Generate the complex bash script for getting Linux version
+    return "$(" +
+           "if [[ -f /etc/os-release ]]; then " +
+           "source /etc/os-release; " +
+           "echo \"${VERSION_ID}\"; " +
+           "elif type lsb_release >/dev/null 2>&1; then " +
+           "lsb_release -sr; " +
+           "elif [[ -f /etc/lsb-release ]]; then " +
+           "source /etc/lsb-release; " +
+           "echo \"${DISTRIB_RELEASE}\"; " +
+           "else " +
+           "echo \"unknown\"; " +
+           "fi)";
+  }
+
+  private string CompileOsGetOSExpression(OsGetOSExpression osGetOS)
+  {
+    // Generate the complex bash script for getting OS type
+    return "$(" +
+           "_uname_os_get_os=$(uname | tr '[:upper:]' '[:lower:]'); " +
+           "case $_uname_os_get_os in " +
+           "linux*) echo \"linux\" ;; " +
+           "darwin*) echo \"mac\" ;; " +
+           "msys*|cygwin*|mingw*|nt|win*) echo \"windows\" ;; " +
+           "*) echo \"unknown\" ;; " +
+           "esac)";
   }
 
   private string CompileUtilityRandomExpression(UtilityRandomExpression rand)
@@ -83,11 +220,11 @@ public partial class Compiler
       minValue = CompileExpression(rand.MinValue);
       maxValue = CompileExpression(rand.MaxValue);
     }
-    else if (rand.MinValue != null)
+    else if (rand.MaxValue != null)
     {
       // Only one parameter provided: utility.random(max)
       minValue = "0";
-      maxValue = CompileExpression(rand.MinValue);
+      maxValue = CompileExpression(rand.MaxValue);
     }
     // If no parameters, use defaults (0, 32767)
 
@@ -140,11 +277,11 @@ public partial class Compiler
       minValue = CompileExpression(rand.MinValue);
       maxValue = CompileExpression(rand.MaxValue);
     }
-    else if (rand.MinValue != null)
+    else if (rand.MaxValue != null)
     {
       // Only one parameter provided: utility.random(max)
       minValue = "0";
-      maxValue = CompileExpression(rand.MinValue);
+      maxValue = CompileExpression(rand.MaxValue);
     }
     // If no parameters, use defaults (0, 32767)
 
@@ -247,6 +384,46 @@ public partial class Compiler
     };
   }
 
+  private string CompilePostIncrementExpression(PostIncrementExpression postInc)
+  {
+    if (postInc.Operand is VariableExpression varExpr)
+    {
+      // For post-increment, we need to return the old value and increment the variable
+      // In bash, this is complex, so we'll just return the variable and rely on 
+      // the statement context to handle the increment
+      return $"${{{varExpr.Name}}}";
+    }
+    throw new NotSupportedException("Post-increment can only be applied to variables");
+  }
+
+  private string CompilePostDecrementExpression(PostDecrementExpression postDec)
+  {
+    if (postDec.Operand is VariableExpression varExpr)
+    {
+      return $"${{{varExpr.Name}}}";
+    }
+    throw new NotSupportedException("Post-decrement can only be applied to variables");
+  }
+
+  private string CompilePreIncrementExpression(PreIncrementExpression preInc)
+  {
+    if (preInc.Operand is VariableExpression varExpr)
+    {
+      // For pre-increment, we increment first then return the new value
+      return $"$(({varExpr.Name} + 1))";
+    }
+    throw new NotSupportedException("Pre-increment can only be applied to variables");
+  }
+
+  private string CompilePreDecrementExpression(PreDecrementExpression preDec)
+  {
+    if (preDec.Operand is VariableExpression varExpr)
+    {
+      return $"$(({varExpr.Name} - 1))";
+    }
+    throw new NotSupportedException("Pre-decrement can only be applied to variables");
+  }
+
   private string CompileTernaryExpression(TernaryExpression tern)
   {
     // Helper to compile the condition part of a ternary
@@ -254,7 +431,12 @@ public partial class Compiler
     {
       if (expr is FunctionCall fc && fc.Name == "env.get" && fc.Arguments.Count == 1)
       {
-        var varName = fc.Arguments[0].Trim('"');
+        var varName = CompileExpression(fc.Arguments[0]);
+        // Remove quotes if it's a string literal
+        if (varName.StartsWith("\"") && varName.EndsWith("\""))
+        {
+          varName = varName[1..^1];
+        }
         return $"[ -n \"${{{varName}}}\" ]";
       }
       if (expr is VariableExpression varExpr)
@@ -281,7 +463,12 @@ public partial class Compiler
     {
       if (expr is FunctionCall fc && fc.Name == "env.get" && fc.Arguments.Count == 1)
       {
-        var varName = fc.Arguments[0].Trim('"');
+        var varName = CompileExpression(fc.Arguments[0]);
+        // Remove quotes if it's a string literal
+        if (varName.StartsWith("\"") && varName.EndsWith("\""))
+        {
+          varName = varName[1..^1];
+        }
         return $"\"${{{varName}}}\"";
       }
       return CompileExpression(expr);
@@ -362,7 +549,8 @@ public partial class Compiler
 
   private string CompileArrayAccess(ArrayAccess acc)
   {
-    var arrayName = ExtractVariableName(CompileExpression(acc.Array));
+    // Get the array name directly if it's a variable expression
+    var arrayName = acc.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(acc.Array));
     var index = CompileExpression(acc.Index);
 
     // In bash, array access is ${arrayName[index]}
@@ -371,7 +559,7 @@ public partial class Compiler
 
   private string CompileArrayLength(ArrayLength len)
   {
-    var arrayName = ExtractVariableName(CompileExpression(len.Array));
+    var arrayName = len.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(len.Array));
 
     // In bash, array length is ${#arrayName[@]}
     return $"\"${{#{arrayName}[@]}}\"";
@@ -379,7 +567,7 @@ public partial class Compiler
 
   private string CompileArrayIsEmpty(ArrayIsEmpty isEmpty)
   {
-    var arrayName = ExtractVariableName(CompileExpression(isEmpty.Array));
+    var arrayName = isEmpty.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(isEmpty.Array));
 
     // In bash, check if array length is zero: [ ${#arrayName[@]} -eq 0 ]
     return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
@@ -387,7 +575,7 @@ public partial class Compiler
 
   private string CompileArrayReverse(ArrayReverse reverse)
   {
-    var arrayName = ExtractVariableName(CompileExpression(reverse.Array));
+    var arrayName = reverse.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(reverse.Array));
 
     // In bash, reverse an array by creating a new array with elements in reverse order
     // We use readarray to convert the output into an array
@@ -396,38 +584,54 @@ public partial class Compiler
 
   private string CompileStringLengthExpression(StringLengthExpression sl)
   {
-    var varName = ExtractVariableName(CompileExpression(sl.Target));
+    var varName = sl.Target is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(sl.Target));
     return $"${{#{varName}}}";
   }
 
   private string CompileFunctionCallExpression(FunctionCall func)
   {
     // Special handling for env.get() function calls
-    if (func.Name == "env.get" && func.Arguments.Count == 1)
+    if (func.Name == "env.get")
     {
-      var varName = func.Arguments[0].Trim('"');
-      return $"\"${{{varName}}}\"";
+      if (func.Arguments.Count == 1)
+      {
+        // env.get("VAR") -> "${VAR}"
+        var varName = CompileExpression(func.Arguments[0]);
+        // Remove quotes if it's a string literal
+        if (varName.StartsWith("\"") && varName.EndsWith("\""))
+        {
+          varName = varName[1..^1];
+        }
+        return $"\"${{{varName}}}\"";
+      }
+      else if (func.Arguments.Count == 2)
+      {
+        // env.get("VAR", "default") -> "${VAR:-default}"
+        var varName = CompileExpression(func.Arguments[0]);
+        var defaultValue = CompileExpression(func.Arguments[1]);
+        // Remove quotes from varName if it's a string literal
+        if (varName.StartsWith("\"") && varName.EndsWith("\""))
+        {
+          varName = varName[1..^1];
+        }
+        // Remove quotes from defaultValue if it's a string literal
+        if (defaultValue.StartsWith("\"") && defaultValue.EndsWith("\""))
+        {
+          defaultValue = defaultValue[1..^1];
+        }
+        return $"\"${{{varName}:-{defaultValue}}}\"";
+      }
     }
 
     // In bash, function calls in expressions use command substitution
-    var bashArgs = func.Arguments.Select(a =>
-    {
-      var trimmed = a.Trim();
-      if (trimmed.StartsWith("\"") && trimmed.EndsWith("\""))
+    var bashArgs = func.Arguments.Select(arg => {
+      var compiled = CompileExpression(arg);
+      // Quote variable references for proper word splitting
+      if (arg is VariableExpression && compiled.StartsWith("${") && compiled.EndsWith("}"))
       {
-        // String literal - use as-is
-        return trimmed;
+        return $"\"{compiled}\"";
       }
-      else if (double.TryParse(trimmed, out _))
-      {
-        // Number literal - use as-is
-        return trimmed;
-      }
-      else
-      {
-        // Variable reference - add $ prefix
-        return $"\"${trimmed}\"";
-      }
+      return compiled;
     }).ToList();
 
     if (bashArgs.Count > 0)
@@ -485,6 +689,82 @@ public partial class Compiler
     return $"$(curl -s {curlUrl} 2>/dev/null || echo \"\")";
   }
 
+  private string CompileArrayJoinExpression(ArrayJoinExpression arrayJoin)
+  {
+    var arrayName = ExtractVariableName(CompileExpression(arrayJoin.Array));
+    var separator = CompileExpression(arrayJoin.Separator);
+
+    // In bash, joining an array requires a custom function or a loop
+    // Here's a simple implementation using a loop and printf
+    return $"$(IFS={separator}; echo \"${{{arrayName}[*]}}\")";
+  }
+
+  private string CompileFsDirnameExpression(FsDirnameExpression fsDirname)
+  {
+    var path = CompileExpression(fsDirname.Path);
+    return $"$(dirname {path})";
+  }
+
+  private string CompileFsFileNameExpression(FsFileNameExpression fsFileName)
+  {
+    var path = CompileExpression(fsFileName.Path);
+    return $"$(basename {path})";
+  }
+
+  private string CompileFsExtensionExpression(FsExtensionExpression fsExtension)
+  {
+    // Handle string literals specially - extract extension directly
+    if (fsExtension.Path is LiteralExpression literal && literal.Type == "string")
+    {
+      // For string literals, we can extract the extension directly
+      var fileName = literal.Value;
+      var dotIndex = fileName.LastIndexOf('.');
+      if (dotIndex >= 0 && dotIndex < fileName.Length - 1)
+      {
+        var extension = fileName.Substring(dotIndex + 1);
+        return $"\"{extension}\"";
+      }
+      else
+      {
+        return "\"\""; // No extension
+      }
+    }
+    
+    // For variables, use bash parameter expansion
+    var path = CompileExpression(fsExtension.Path);
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(path);
+    return $"\"${{{varName}##*.}}\"";
+  }
+
+  private string CompileFsReadFileExpression(FsReadFileExpression fsReadFile)
+  {
+    var filePath = CompileExpression(fsReadFile.FilePath);
+    return $"$(cat {filePath})";
+  }
+
+  private string CompileFsParentDirNameExpression(FsParentDirNameExpression fsParentDirName)
+  {
+    var path = CompileExpression(fsParentDirName.Path);
+    return $"$(basename $(dirname {path}))";
+  }
+
+  private string CompileStringToUpperCaseExpression(StringToUpperCaseExpression stringUpper)
+  {
+    // Extract variable name if it's in ${var} format
+    var target = CompileExpression(stringUpper.Target);
+    var varName = ExtractVariableName(target);
+    return $"\"${{{varName}^^}}\"";
+  }
+
+  private string CompileStringToLowerCaseExpression(StringToLowerCaseExpression stringLower)
+  {
+    // Extract variable name if it's in ${var} format
+    var target = CompileExpression(stringLower.Target);
+    var varName = ExtractVariableName(target);
+    return $"\"${{{varName},,}}\"";
+  }
+
   private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)
   {
     var result = new StringBuilder("\"");
@@ -511,5 +791,18 @@ public partial class Compiler
 
     result.Append("\"");
     return result.ToString();
+  }
+
+  private string CompileStringSplitExpression(StringSplitExpression ss)
+  {
+    // String split is handled specially in variable declarations
+    // For now, return a placeholder that indicates this needs special handling
+    throw new InvalidOperationException("StringSplitExpression should be handled in variable declaration context");
+  }
+
+  private string CompileTimerStopExpression()
+  {
+    // timer.stop() generates the end timer, calculates elapsed time, and returns it
+    return "(_utah_timer_end=$(date +%s%3N); echo $((_utah_timer_end - _utah_timer_start)))";
   }
 }

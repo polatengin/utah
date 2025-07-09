@@ -1,2 +1,5 @@
 let flags: boolean[] = [true, false, "Test"];
 console.log(flags);
+
+let numbers: number[] = [1, 2, "three", 4];
+console.log(numbers);
