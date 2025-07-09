@@ -195,10 +195,14 @@ public partial class Parser
     // Check for assignment statements
     if (line.Contains(" = ") && line.EndsWith(";") && !line.StartsWith("let ") && !line.StartsWith("const "))
     {
-      var match = Regex.Match(line, @"(\w+)\s*=\s*(.+);");
+      // Updated regex to handle both simple variables and array access patterns
+      var match = Regex.Match(line, @"([a-zA-Z_][a-zA-Z0-9_]*(?:\[[^\]]+\])?)\s*=\s*(.+);");
       if (match.Success)
       {
-        var variableName = match.Groups[1].Value;
+        var leftSide = match.Groups[1].Value;
+        
+        // Extract variable name for const checking
+        var variableName = leftSide.Contains('[') ? leftSide.Substring(0, leftSide.IndexOf('[')) : leftSide;
 
         // Check if trying to reassign a const variable
         if (_constVariables.Contains(variableName))

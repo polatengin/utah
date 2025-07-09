@@ -16,7 +16,15 @@ public partial class Compiler
           var arrayName = arrayAccess.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(arrayAccess.Array));
           var index = CompileExpression(arrayAccess.Index);
           var value = CompileExpression(assign.Right);
-          return $"{arrayName}[{ExtractVariableName(index)}]={value}";
+          
+          // For array indices, we need to handle the compiled expression properly
+          // If it's an array length expression, it will be quoted and we need to remove quotes
+          if (index.StartsWith("\"") && index.EndsWith("\""))
+          {
+            index = index[1..^1]; // Remove quotes
+          }
+          
+          return $"{arrayName}[{index}]={value}";
         }
         else
         {
