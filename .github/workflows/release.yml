@@ -55,7 +55,6 @@ jobs:
         run: dotnet build src/cli/utah.csproj --configuration Release
 
       - name: Run Tests
-        id: test
         run: |
           echo "🧪 Running Utah CLI Tests..."
 
@@ -65,13 +64,11 @@ jobs:
             BADGE_STATUS="passing"
             BADGE_COLOR="brightgreen"
             echo "TEST_STATUS=success" >> $GITHUB_ENV
-            echo "All tests passed! ✅" >> $GITHUB_ENV
           else
             TEST_STATUS="failure"
             BADGE_STATUS="failing"
             BADGE_COLOR="red"
             echo "TEST_STATUS=failure" >> $GITHUB_ENV
-            echo "Some tests failed! ❌" >> $GITHUB_ENV
           fi
 
           # Extract test statistics
@@ -90,53 +87,34 @@ jobs:
           echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_ENV
           echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_ENV
 
-          # Create detailed test results for environment
-          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
-          echo "## 🧪 Test Results" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "| Metric | Value |" >> $GITHUB_ENV
-          echo "|--------|-------|" >> $GITHUB_ENV
-          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_ENV
-          echo "| Passed | $PASSED_TESTS ✅ |" >> $GITHUB_ENV
-          echo "| Failed | $FAILED_TESTS ❌ |" >> $GITHUB_ENV
-          echo "| Success Rate | $(( PASSED_TESTS * 100 / TOTAL_TESTS ))% |" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-
-          # Add individual test results
-          echo "### Individual Test Results" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "\`\`\`" >> $GITHUB_ENV
-          # Extract test results from log
-          grep "🔍 Testing" test_output.log >> $GITHUB_ENV || echo "No test details found" >> $GITHUB_ENV
-          echo "\`\`\`" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
-        with:
-          name: test-results
-          path: |
-            test_output.log
-            tests/temp/
-          retention-days: 30
-
-      - name: Create Test Summary
-        if: always()
-        run: |
+          # Create test summary
           echo "## 🧪 Utah CLI Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Status:** ${{ env.TEST_STATUS == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$TEST_STATUS" = "success" ]; then
+            echo "**Build Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Build Status:** ❌ Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total Tests | ${{ env.TOTAL_TESTS }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Passed | ${{ env.PASSED_TESTS }} ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Failed | ${{ env.FAILED_TESTS }} ❌ |" >> $GITHUB_STEP_SUMMARY
-          echo "| Success Rate | $(( ${{ env.PASSED_TESTS }} * 100 / ${{ env.TOTAL_TESTS }} ))% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
+
+          # Calculate success rate safely
+          if [ "$TOTAL_TESTS" != "0" ]; then
+            SUCCESS_RATE=$(( PASSED_TESTS * 100 / TOTAL_TESTS ))
+            echo "| Success Rate | ${SUCCESS_RATE}% |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Success Rate | N/A |" >> $GITHUB_STEP_SUMMARY
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ env.TEST_STATUS }}" = "success" ]; then
+          if [ "$TEST_STATUS" = "success" ]; then
             echo "🎉 All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Some tests failed. Check the logs for details." >> $GITHUB_STEP_SUMMARY
@@ -151,6 +129,16 @@ jobs:
           echo "- Built-in functions (console, fs, os, process, timer, utility, script)" >> $GITHUB_STEP_SUMMARY
           echo "- String manipulation and arrays" >> $GITHUB_STEP_SUMMARY
           echo "- Error handling and edge cases" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test_output.log
+            tests/temp/
+          retention-days: 30
 
       - name: Comment PR with Test Results
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
