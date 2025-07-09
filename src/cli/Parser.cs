@@ -142,6 +142,10 @@ public partial class Parser
     {
       return ParseSwitchStatement(line, ref i);
     }
+    if (line.StartsWith("try {"))
+    {
+      return ParseTryCatchStatement(line, ref i);
+    }
     if (line.StartsWith("return "))
     {
       var valueStr = line.Substring(7).TrimEnd(';');
@@ -506,6 +510,69 @@ public partial class Parser
       i++;
     }
     return new SwitchStatement(expression, cases, defaultClause);
+  }
+
+  private TryCatchStatement ParseTryCatchStatement(string line, ref int i)
+  {
+    if (!line.StartsWith("try {")) throw new Exception("Invalid try statement");
+
+    var tryBody = new List<Statement>();
+    var catchBody = new List<Statement>();
+    
+    // Parse try block
+    i++;
+    while (i < _lines.Length && _lines[i].Trim() != "}")
+    {
+      var innerLine = _lines[i].Trim();
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          tryBody.Add(statement);
+        }
+      }
+      i++;
+    }
+    
+    // Expect "catch {" on the next line
+    i++;
+    if (i >= _lines.Length || !_lines[i].Trim().StartsWith("catch"))
+    {
+      throw new Exception("Try statement must be followed by catch block");
+    }
+    
+    var catchLine = _lines[i].Trim();
+    string? errorMessage = null;
+    
+    // Check if catch has a specific error message: catch("error message") {
+    var catchWithMessage = Regex.Match(catchLine, @"catch\s*\(\s*""([^""]*)""\s*\)\s*\{");
+    if (catchWithMessage.Success)
+    {
+      errorMessage = catchWithMessage.Groups[1].Value;
+    }
+    else if (!catchLine.StartsWith("catch {"))
+    {
+      throw new Exception("Invalid catch statement syntax");
+    }
+    
+    // Parse catch block
+    i++;
+    while (i < _lines.Length && _lines[i].Trim() != "}")
+    {
+      var innerLine = _lines[i].Trim();
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          catchBody.Add(statement);
+        }
+      }
+      i++;
+    }
+    
+    return new TryCatchStatement(tryBody, catchBody, errorMessage);
   }
 
   private Statement ParseScriptControlStatement(string line)

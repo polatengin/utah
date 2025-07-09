@@ -78,3 +78,4 @@ public record BreakStatement() : Statement;
 public record ContinueStatement() : Statement;
 public record FsWriteFileStatement(Expression FilePath, Expression Content) : Statement;
 public record TimerStartStatement() : Statement;
+public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;

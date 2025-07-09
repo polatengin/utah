@@ -463,7 +463,193 @@ while (processing) {
 }
 ```
 
-## 📋 Arrays
+## 🫴 Error Handling: Try/Catch Blocks
+
+Utah supports try/catch blocks for error handling, allowing you to gracefully handle failures and continue script execution. Try/catch blocks are useful for handling command failures, network errors, file operations, and other operations that might fail.
+
+### Basic Try/Catch Syntax
+
+```typescript
+try {
+  // Code that might fail
+  console.log("Attempting risky operation");
+  exit(1); // This will cause an error
+  console.log("This won't execute");
+}
+catch {
+  console.log("Error caught and handled");
+}
+
+console.log("Script continues normally");
+```
+
+### Try/Catch with File Operations
+
+```typescript
+try {
+  let content: string = fs.readFile("/nonexistent/file.txt");
+  console.log("File content: " + content);
+}
+catch {
+  console.log("Failed to read file - using default content");
+  let content: string = "default content";
+}
+```
+
+### Try/Catch with System Commands
+
+```typescript
+try {
+  console.log("Checking if directory exists");
+  // Raw bash commands that might fail
+  ls /some/directory;
+  console.log("Directory exists");
+}
+catch {
+  console.log("Directory not found - creating it");
+  // Handle the error by creating the directory
+}
+```
+
+### Try/Catch with Custom Error Messages
+
+```typescript
+try {
+  console.log("Starting critical operation");
+  exit(2);
+}
+catch {
+  console.log("Handled critical failure");
+}
+```
+
+### Multiple Try/Catch Blocks
+
+```typescript
+try {
+  console.log("First operation");
+  let result: string = web.get("https://api.example.com/data");
+}
+catch {
+  console.log("API call failed");
+}
+
+try {
+  console.log("Second operation");
+  fs.writeFile("output.txt", "some data");
+}
+catch {
+  console.log("File write failed");
+}
+
+console.log("Both operations completed (with or without errors)");
+```
+
+### Generated Bash Code for Try/Catch
+
+Utah try/catch blocks transpile to bash functions with subshells and proper error handling:
+
+```bash
+# Try/catch becomes bash functions with subshells
+_utah_try_block_1() {
+  (
+    set -e  # Exit on any error within the try block
+    echo "Attempting risky operation"
+    exit 1
+    echo "This won't execute"
+  )
+}
+
+utah_catch_1() {
+  echo "Error caught and handled"
+}
+
+_utah_try_block_1 || utah_catch_1
+echo "Script continues normally"
+
+# Raw bash commands get proper error handling
+_utah_try_block_2() {
+  (
+    set -e
+    echo "Checking if directory exists"
+    ls /some/directory || exit 1
+    echo "Directory exists"
+  )
+}
+
+utah_catch_2() {
+  echo "Directory not found - creating it"
+}
+
+_utah_try_block_2 || utah_catch_2
+```
+
+### Try/Catch Best Practices
+
+- **Use for recoverable errors**: Try/catch is best for operations where you can provide alternative behavior
+- **Keep try blocks focused**: Include only the specific operations that might fail
+- **Provide meaningful error handling**: Use catch blocks to log errors, set defaults, or retry operations
+- **Don't catch everything**: Only catch errors you can meaningfully handle
+- **Clean up resources**: Use catch blocks to clean up temporary files or connections
+- **Log for debugging**: Include error logging in catch blocks for troubleshooting
+
+### Common Try/Catch Patterns
+
+#### File Operations with Fallback
+
+```typescript
+try {
+  let config: string = fs.readFile("config.json");
+  console.log("Using custom config");
+}
+catch {
+  console.log("Config file not found - using defaults");
+  let config: string = '{"debug": false}';
+}
+```
+
+#### Network Operations with Retry
+
+```typescript
+let attempt: number = 0;
+let maxAttempts: number = 3;
+let success: boolean = false;
+
+while (attempt < maxAttempts && !success) {
+  try {
+    let data: string = web.get("https://api.example.com/data");
+    console.log("API call successful");
+    success = true;
+  }
+  catch {
+    attempt = attempt + 1;
+    console.log("Attempt " + attempt + " failed");
+    if (attempt < maxAttempts) {
+      console.log("Retrying...");
+    }
+  }
+}
+```
+
+#### Conditional Operations
+
+```typescript
+let hasDocker: boolean = os.isInstalled("docker");
+
+if (hasDocker) {
+  try {
+    console.log("Starting Docker container");
+    // docker run commands here
+  }
+  catch {
+    console.log("Docker operation failed");
+  }
+} else {
+  console.log("Docker not available - skipping container operations");
+}
+```
+
+## 📃 Arrays
 
 Utah provides comprehensive support for typed arrays including `string[]`, `number[]`, and `boolean[]`. Arrays can be created using array literals or by splitting strings.
 
@@ -1796,6 +1982,7 @@ Current tests cover:
 - **switch_case.shx** - Complex switch statements with fall-through cases
 - **ternary_operators.shx** - Ternary conditional operators
 - **timer_start_stop.shx** - Timer functions for performance measurement
+- **try_catch.shx** - Try/catch blocks for error handling and graceful failure recovery
 - **variable_declaration.shx** - Variable declarations and usage
 - **while_loop.shx** - While loops with break statements and conditional logic
 
@@ -1892,7 +2079,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `@decorator()` syntax for decorators for validation (`@notNullable()`, `@notEmpty()`, `@greaterThan()`, `@ipv4()`, `@numberOnly()`, `@alphaNumeric()`, `@email()`)
 
-- [ ] Error handling: try/catch, trap
+- [x] Error handling: try/catch, subshell
 
 - [ ] Typecasting and type conversion
 

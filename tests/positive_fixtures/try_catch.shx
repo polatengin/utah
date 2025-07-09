@@ -1,0 +1,26 @@
+try {
+  let message: string = "Success";
+  console.log("Try block executed successfully");
+}
+catch {
+  console.log("This should not execute");
+}
+
+try {
+  console.log("Hope the following folder exists");
+  ls "/non/existing/folder"
+  console.log("this line doesn't executed");
+}
+catch {
+  console.log("Error caught successfully");
+}
+
+try {
+  console.log("About to exit with error");
+  exit(1);
+}
+catch {
+  console.log("Error caught successfully");
+}
+
+console.log("Script completed");

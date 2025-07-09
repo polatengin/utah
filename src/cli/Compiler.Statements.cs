@@ -9,7 +9,15 @@ public partial class Compiler
     switch (stmt)
     {
       case RawStatement raw:
-        lines.Add(raw.Content);
+        if (_inTryBlock)
+        {
+          // In try blocks, ensure raw statements properly exit on failure
+          lines.Add($"{raw.Content} || exit 1");
+        }
+        else
+        {
+          lines.Add(raw.Content);
+        }
         break;
 
       case VariableDeclaration v:
@@ -40,7 +48,7 @@ public partial class Compiler
               targetValue = $"${{{ExtractVariableName(compiled)}}}";
             }
           }
-          
+
           var separator = CompileExpression(split.Separator);
           // Remove quotes from separator if it's a string literal
           if (separator.StartsWith("\"") && separator.EndsWith("\""))
@@ -86,13 +94,13 @@ public partial class Compiler
         {
           var writeFilePath = CompileExpression(fsWritePlaceholder.FilePath);
           var writeContent = CompileExpression(fsWritePlaceholder.Content);
-          
+
           // Always add quotes around content if not already present
           if (!writeContent.StartsWith("\""))
           {
             writeContent = $"\"{writeContent}\"";
           }
-          
+
           lines.Add($"echo {writeContent} > {writeFilePath}");
         }
         // For function calls in statement context, don't wrap in $()
@@ -177,7 +185,7 @@ public partial class Compiler
           var returnValue = CompileExpression(ret.Value);
           // Remove quotes if the value is already quoted (like string literals)
           // or if it's an arithmetic expression
-          if ((returnValue.StartsWith("\"") && returnValue.EndsWith("\"")) || 
+          if ((returnValue.StartsWith("\"") && returnValue.EndsWith("\"")) ||
               (returnValue.StartsWith("$((") && returnValue.EndsWith("))")))
           {
             lines.Add($"echo {returnValue}");
@@ -377,6 +385,10 @@ public partial class Compiler
         lines.Add($"exit {CompileExpression(e.ExitCode)}");
         break;
 
+      case TryCatchStatement tryStmt:
+        CompileTryCatchStatement(tryStmt, lines);
+        break;
+
       case FsWriteFileStatement fws:
         var filePath = CompileExpression(fws.FilePath);
         var content = CompileExpression(fws.Content);
@@ -385,6 +397,72 @@ public partial class Compiler
     }
 
     return lines;
+  }
+
+  private static int _tryCatchCounter = 0;
+  private static bool _inTryBlock = false;
+
+  private void CompileTryCatchStatement(TryCatchStatement tryStmt, List<string> lines)
+  {
+    // Generate unique function name for this try block
+    _tryCatchCounter++;
+    var functionName = $"_utah_try_block_{_tryCatchCounter}";
+
+    // Generate the try function
+    lines.Add($"{functionName}() {{");
+    lines.Add("  (");
+    lines.Add("    set -e");
+
+    // Set flag to indicate we're in a try block
+    var wasInTryBlock = _inTryBlock;
+    _inTryBlock = true;
+
+    // Compile try block statements inside subshell
+    foreach (var stmt in tryStmt.TryBody)
+    {
+      var stmtLines = CompileStatement(stmt);
+      foreach (var stmtLine in stmtLines)
+      {
+        lines.Add($"    {stmtLine}");
+      }
+    }
+
+    // Restore previous try block state
+    _inTryBlock = wasInTryBlock;
+
+    lines.Add("  )");
+    lines.Add("}");
+
+    // Generate the catch block
+    lines.Add($"utah_catch_{_tryCatchCounter}() {{");
+
+    if (tryStmt.CatchBody.Any())
+    {
+      // User defined catch behavior
+      foreach (var stmt in tryStmt.CatchBody)
+      {
+        var stmtLines = CompileStatement(stmt);
+        foreach (var stmtLine in stmtLines)
+        {
+          lines.Add($"  {stmtLine}");
+        }
+      }
+    }
+    else if (!string.IsNullOrEmpty(tryStmt.ErrorMessage))
+    {
+      // Custom error message only
+      lines.Add($"  echo \"⚠️ Error: {tryStmt.ErrorMessage}\"");
+    }
+    else
+    {
+      // Default catch behavior if no catch body provided
+      lines.Add($"  echo \"⚠️ Error: An error occurred\"");
+    }
+
+    lines.Add("}");
+
+    // Generate the try/catch invocation
+    lines.Add($"{functionName} || utah_catch_{_tryCatchCounter}");
   }
 
   private string CompileForLoopUpdate(Expression update)
