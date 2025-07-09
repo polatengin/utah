@@ -10,3 +10,9 @@ if [ "${gitInstalled}" = "true" ]; then
 else
   echo "Git is not installed"
 fi
+readonly applications=("docker" "nginx" "git" "curl")
+for app in "${applications[@]}"; do
+  isInstalled=$(command -v ${app} &> /dev/null && echo "true" || echo "false")
+  status=$([ "${isInstalled}" = "true" ] && echo "✅ INSTALLED" || echo "❌ MISSING")
+  echo "${status}: ${app}"
+done

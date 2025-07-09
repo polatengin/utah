@@ -5,3 +5,12 @@ if (gitInstalled) {
 } else {
   console.log("Git is not installed");
 }
+
+const applications: string[] = ["docker", "nginx", "git", "curl"];
+
+for (let app: string in applications) {
+  let isInstalled: boolean = os.isInstalled(app);
+  let status: string = isInstalled ? "✅ INSTALLED" : "❌ MISSING";
+
+  console.log(`${status}: ${app}`);
+}
