@@ -360,7 +360,7 @@ public class ParenthesizedExpression : Expression
 
 public class TemplateLiteralExpression : Expression
 {
-  public string Template = string.Empty;
+  public List<object> Parts { get; set; } = new(); // Can be string or Expression
 }
 
 // Switch/Case/Default nodes
@@ -416,6 +416,10 @@ public class RawStatement : Node
 public class OsIsInstalledExpression : Expression
 {
   public string AppName { get; set; } = string.Empty;
+}
+
+public class ProcessElapsedTimeExpression : Expression
+{
 }
 
 public class WebGetExpression : Expression

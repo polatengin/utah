@@ -12,24 +12,8 @@ public partial class Parser
       var match = Regex.Match(line, @"console\.log\((.+)\);");
       var raw = match.Groups[1].Value.Trim();
 
-      if (raw.StartsWith("`"))
-      {
-        // Template literal - use the old way
-        var msg = raw[1..^1];
-        return new ConsoleLog { Message = msg };
-      }
-      else if (raw.StartsWith("\"") && raw.EndsWith("\"") && !raw.Contains("+"))
-      {
-        // Simple string literal - use the old way
-        var msg = raw[1..^1];
-        return new ConsoleLog { Message = msg };
-      }
-      else
-      {
-        // Expression - parse it properly
-        var expression = ParseExpression(raw);
-        return new ConsoleLog { IsExpression = true, Expression = expression };
-      }
+      var expression = ParseExpression(raw);
+      return new ConsoleLog { IsExpression = true, Expression = expression };
     }
     else if (line == "console.clear();")
     {

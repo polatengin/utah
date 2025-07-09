@@ -354,6 +354,12 @@ public partial class Parser
         return new OsIsInstalledExpression { AppName = appName };
       }
 
+      // Special handling for process.elapsedTime()
+      if (functionName == "process.elapsedTime" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ProcessElapsedTimeExpression();
+      }
+
       // Special handling for utility.random()
       if (functionName == "utility.random")
       {
@@ -531,7 +537,7 @@ public partial class Parser
     {
       char c = input[i];
 
-      if (!inString && (c == '"' || c == '\''))
+      if (!inString && (c == '"' || c == '\'' || c == '`'))
       {
         inString = true;
         stringChar = c;
@@ -593,21 +599,40 @@ public partial class Parser
   {
     // Remove the backticks
     var content = input.Substring(1, input.Length - 2);
+    var templateExpression = new TemplateLiteralExpression();
+    var lastIndex = 0;
 
-    // If no expressions, return a simple string literal
-    if (!content.Contains("${"))
+    var regex = new Regex(@"\$\{(.+?)\}");
+    var matches = regex.Matches(content);
+
+    foreach (Match match in matches)
     {
-      return new LiteralExpression
+      // Add the text part before the expression
+      if (match.Index > lastIndex)
       {
-        Value = content,
-        Type = "string"
-      };
+        templateExpression.Parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
+      }
+
+      // Add the expression part
+      var expressionString = match.Groups[1].Value;
+      var expression = ParseExpression(expressionString);
+      templateExpression.Parts.Add(expression);
+
+      lastIndex = match.Index + match.Length;
     }
 
-    // Parse template literal with expressions
-    return new TemplateLiteralExpression
+    // Add the final text part after the last expression
+    if (lastIndex < content.Length)
     {
-      Template = content
-    };
+      templateExpression.Parts.Add(content.Substring(lastIndex));
+    }
+
+    // If there are no expressions, it's a simple string literal.
+    if (matches.Count == 0)
+    {
+      return new LiteralExpression { Value = content, Type = "string" };
+    }
+
+    return templateExpression;
   }
 }

@@ -419,13 +419,22 @@ public partial class Parser
               }
               else
               {
-                ifStmt.ThenBody.Add(new VariableDeclaration
+                var processNode = ParseProcessFunction(m.Groups[1].Value, value);
+                if (processNode != null)
                 {
-                  Name = m.Groups[1].Value,
-                  Type = m.Groups[2].Value,
-                  Value = value.Trim('"'),
-                  IsConst = false
-                });
+                  ifStmt.ThenBody.Add(processNode);
+                }
+                else
+                {
+                  var expression = ParseExpression(value);
+                  ifStmt.ThenBody.Add(new VariableDeclarationExpression
+                  {
+                    Name = m.Groups[1].Value,
+                    Type = m.Groups[2].Value,
+                    Value = expression,
+                    IsConst = false
+                  });
+                }
               }
             }
           }
@@ -442,13 +451,22 @@ public partial class Parser
               }
               else
               {
-                ifStmt.ThenBody.Add(new VariableDeclaration
+                var processNode = ParseProcessFunction(m.Groups[1].Value, value);
+                if (processNode != null)
                 {
-                  Name = m.Groups[1].Value,
-                  Type = m.Groups[2].Value,
-                  Value = value.Trim('"'),
-                  IsConst = true
-                });
+                  ifStmt.ThenBody.Add(processNode);
+                }
+                else
+                {
+                  var expression = ParseExpression(value);
+                  ifStmt.ThenBody.Add(new VariableDeclarationExpression
+                  {
+                    Name = m.Groups[1].Value,
+                    Type = m.Groups[2].Value,
+                    Value = expression,
+                    IsConst = true
+                  });
+                }
               }
             }
           }

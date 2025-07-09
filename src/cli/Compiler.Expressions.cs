@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 
 public partial class Compiler
 {
@@ -24,6 +25,7 @@ public partial class Compiler
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
       OsIsInstalledExpression osInstalled => CompileOsIsInstalledExpression(osInstalled),
+      ProcessElapsedTimeExpression elapsed => CompileProcessElapsedTimeExpression(elapsed),
       UtilityRandomExpression rand => CompileUtilityRandomExpression(rand),
       WebGetExpression webGet => CompileWebGetExpression(webGet),
       _ => throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported")
@@ -54,6 +56,13 @@ public partial class Compiler
     }
 
     return $"$(command -v {appReference} &> /dev/null && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileProcessElapsedTimeExpression(ProcessElapsedTimeExpression elapsed)
+  {
+    // Generate bash code that gets the elapsed time since the process started
+    // Using ps command to get the elapsed time of the current process
+    return "$(ps -o etime -p $$ --no-headers | tr -d ' ')";
   }
 
   private string CompileUtilityRandomExpression(UtilityRandomExpression rand)
@@ -471,58 +480,29 @@ public partial class Compiler
 
   private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)
   {
-    var content = template.Template;
+    var result = new StringBuilder("\"");
 
-    // Process ${...} expressions in the template
-    var result = new StringBuilder();
-    var i = 0;
-
-    while (i < content.Length)
+    foreach (var part in template.Parts)
     {
-      if (i < content.Length - 1 && content[i] == '$' && content[i + 1] == '{')
+      if (part is string str)
       {
-        // Find the closing brace
-        var braceCount = 1;
-        var j = i + 2;
-        while (j < content.Length && braceCount > 0)
+        result.Append(str);
+      }
+      else if (part is Expression expr)
+      {
+        var compiledExpression = CompileExpression(expr);
+        if (expr is VariableExpression)
         {
-          if (content[j] == '{') braceCount++;
-          else if (content[j] == '}') braceCount--;
-          j++;
-        }
-
-        if (braceCount == 0)
-        {
-          // Extract and compile the expression
-          var exprContent = content.Substring(i + 2, j - i - 3);
-
-          // Special handling for .length property on arrays
-          if (exprContent.Contains(".length"))
-          {
-            var varName = exprContent.Split('.')[0];
-            result.Append($"${{#{varName}[@]}}");
-          }
-          else
-          {
-            // For other expressions, use variable substitution
-            result.Append($"${{{exprContent}}}");
-          }
-
-          i = j;
+          result.Append(compiledExpression);
         }
         else
         {
-          result.Append(content[i]);
-          i++;
+          result.Append($"$({compiledExpression})");
         }
-      }
-      else
-      {
-        result.Append(content[i]);
-        i++;
       }
     }
 
-    return $"\"{result}\"";
+    result.Append("\"");
+    return result.ToString();
   }
 }
