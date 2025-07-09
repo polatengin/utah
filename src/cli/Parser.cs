@@ -199,13 +199,13 @@ public partial class Parser
       if (match.Success)
       {
         var variableName = match.Groups[1].Value;
-        
+
         // Check if trying to reassign a const variable
         if (_constVariables.Contains(variableName))
         {
           throw new InvalidOperationException($"Error: Cannot reassign const variable '{variableName}'. Const variables are immutable once declared.");
         }
-        
+
         // Parse as regular assignment expression
         var expression = ParseExpression(line.TrimEnd(';'));
         return new ExpressionStatement(expression);
@@ -259,14 +259,14 @@ public partial class Parser
       }
 
       var value = ParseExpression(valueStr);
-      
+
       // Validate array element types if this is an array type
       if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
       {
         var elementType = type.Substring(0, type.Length - 2); // Remove []
         ValidateArrayElementTypes(arrayLiteral, elementType, name);
       }
-      
+
       return new VariableDeclaration(name, type, value, isConst);
     }
     throw new Exception($"Invalid variable declaration: {line}");
@@ -454,7 +454,7 @@ public partial class Parser
           values.Add(ParseExpression(caseMatch.Groups[1].Value));
           i++;
         }
-        
+
         // Now parse the body until we hit a break, another case, default, or end
         var body = new List<Statement>();
         bool hasBreak = false;
@@ -518,7 +518,7 @@ public partial class Parser
 
     var tryBody = new List<Statement>();
     var catchBody = new List<Statement>();
-    
+
     // Parse try block
     i++;
     while (i < _lines.Length && _lines[i].Trim() != "}")
@@ -534,17 +534,17 @@ public partial class Parser
       }
       i++;
     }
-    
+
     // Expect "catch {" on the next line
     i++;
     if (i >= _lines.Length || !_lines[i].Trim().StartsWith("catch"))
     {
       throw new Exception("Try statement must be followed by catch block");
     }
-    
+
     var catchLine = _lines[i].Trim();
     string? errorMessage = null;
-    
+
     // Check if catch has a specific error message: catch("error message") {
     var catchWithMessage = Regex.Match(catchLine, @"catch\s*\(\s*""([^""]*)""\s*\)\s*\{");
     if (catchWithMessage.Success)
@@ -555,7 +555,7 @@ public partial class Parser
     {
       throw new Exception("Invalid catch statement syntax");
     }
-    
+
     // Parse catch block
     i++;
     while (i < _lines.Length && _lines[i].Trim() != "}")
@@ -571,7 +571,7 @@ public partial class Parser
       }
       i++;
     }
-    
+
     return new TryCatchStatement(tryBody, catchBody, errorMessage);
   }
 

@@ -124,7 +124,7 @@ public partial class Compiler
   {
     // Generate bash code that checks if a command exists and returns true/false
     string appReference;
-    
+
     if (osInstalled.AppName is VariableExpression varExpr)
     {
       appReference = $"${{{varExpr.Name}}}";
@@ -624,7 +624,8 @@ public partial class Compiler
     }
 
     // In bash, function calls in expressions use command substitution
-    var bashArgs = func.Arguments.Select(arg => {
+    var bashArgs = func.Arguments.Select(arg =>
+    {
       var compiled = CompileExpression(arg);
       // Quote variable references for proper word splitting
       if (arg is VariableExpression && compiled.StartsWith("${") && compiled.EndsWith("}"))
@@ -729,7 +730,7 @@ public partial class Compiler
         return "\"\""; // No extension
       }
     }
-    
+
     // For variables, use bash parameter expansion
     var path = CompileExpression(fsExtension.Path);
     // Extract variable name if it's in ${var} format

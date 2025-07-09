@@ -191,7 +191,7 @@ public partial class Parser
     {
       return new UnaryExpression(ParseUnaryExpression(input.Substring(1).Trim()), "-");
     }
-    
+
     // Check for post-increment/decrement
     if (input.EndsWith("++"))
     {
@@ -201,7 +201,7 @@ public partial class Parser
     {
       return new PostDecrementExpression(ParsePrimaryExpression(input.Substring(0, input.Length - 2).Trim()));
     }
-    
+
     return ParsePrimaryExpression(input);
   }
 
