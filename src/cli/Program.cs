@@ -1,5 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Server;
 using System.Diagnostics;
+using System.Reflection;
 
 if (args.Length > 0)
 {
@@ -25,6 +26,11 @@ if (args.Length > 0)
         return;
       }
       RunFile(args[1]);
+      break;
+    case "--version":
+    case "-v":
+    case "version":
+      PrintVersion();
       break;
     default:
       PrintUsage();
@@ -148,7 +154,26 @@ static void PrintUsage()
 {
   Console.WriteLine("Usage: utah <command>");
   Console.WriteLine("Commands:");
-  Console.WriteLine("  run <file.shx>        Compile and run a .shx file.");
-  Console.WriteLine("  compile <file.shx>    Compile a .shx file to a .sh file.");
-  Console.WriteLine("  lsp                   Run the language server.");
+  Console.WriteLine("  run <file.shx>           Compile and run a .shx file.");
+  Console.WriteLine("  compile <file.shx>       Compile a .shx file to a .sh file.");
+  Console.WriteLine("  lsp                      Run the language server.");
+  Console.WriteLine("  version (--version, -v)  Show version information.");
+}
+
+static void PrintVersion()
+{
+  var assembly = typeof(Program).Assembly;
+  var version = assembly.GetName().Version;
+  var versionString = version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "1.0.0";
+
+  Console.WriteLine("Copyright (c) 2025 Utah Project");
+  Console.WriteLine("Licensed under MIT License");
+  Console.WriteLine();
+  Console.WriteLine("Project Information:");
+  Console.WriteLine($"  Version: {versionString}");
+  Console.WriteLine();
+  Console.WriteLine("Runtime Information:");
+  Console.WriteLine($"  DotNet Version: {Environment.Version}");
+  Console.WriteLine($"  OS: {Environment.OSVersion}");
+  Console.WriteLine($"  Architecture: {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}");
 }
