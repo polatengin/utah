@@ -48,49 +48,28 @@ jobs:
       - name: Update project version
         run: |
           sed -i 's|<Version>.*</Version>|<Version>${{ steps.version.outputs.version }}</Version>|' src/cli/utah.csproj
+          sed -i 's|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${{ steps.version.outputs.version }}</AssemblyVersion>|' src/cli/utah.csproj
+          sed -i 's|<FileVersion>.*</FileVersion>|<FileVersion>${{ steps.version.outputs.version }}</FileVersion>|' src/cli/utah.csproj
 
       - name: Build
         run: dotnet build src/cli/utah.csproj --configuration Release
-
-      - name: Test
-        run: make test
-
-      - name: Run Tests for Badge
-        id: test-badge
-        run: |
-          # Run tests and capture results
-          if make test > badge_test_output.log 2>&1; then
-            TEST_STATUS="passing"
-            COLOR="brightgreen"
-          else
-            TEST_STATUS="failing"
-            COLOR="red"
-          fi
-
-          # Extract test statistics
-          TOTAL_TESTS=$(grep -o "Total tests: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
-          PASSED_TESTS=$(grep -o "Passed: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
-          FAILED_TESTS=$(grep -o "Failed: [0-9]*" badge_test_output.log | grep -o "[0-9]*" || echo "0")
-
-          echo "TEST_STATUS=$TEST_STATUS" >> $GITHUB_OUTPUT
-          echo "COLOR=$COLOR" >> $GITHUB_OUTPUT
-          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_OUTPUT
-          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
-          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
 
       - name: Run Tests
         id: test
         run: |
           echo "🧪 Running Utah CLI Tests..."
 
-          # Set up test result tracking
-          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
-
           # Run tests and capture output with color codes preserved
           if make test 2>&1 | tee test_output.log; then
+            TEST_STATUS="success"
+            BADGE_STATUS="passing"
+            BADGE_COLOR="brightgreen"
             echo "TEST_STATUS=success" >> $GITHUB_ENV
             echo "All tests passed! ✅" >> $GITHUB_ENV
           else
+            TEST_STATUS="failure"
+            BADGE_STATUS="failing"
+            BADGE_COLOR="red"
             echo "TEST_STATUS=failure" >> $GITHUB_ENV
             echo "Some tests failed! ❌" >> $GITHUB_ENV
           fi
@@ -100,11 +79,19 @@ jobs:
           PASSED_TESTS=$(grep -o "Passed: [0-9]*" test_output.log | grep -o "[0-9]*" || echo "0")
           FAILED_TESTS=$(grep -o "Failed: [0-9]*" test_output.log | grep -o "[0-9]*" || echo "0")
 
+          # Set outputs for both badge and environment variables
+          echo "TEST_STATUS=$BADGE_STATUS" >> $GITHUB_OUTPUT
+          echo "COLOR=$BADGE_COLOR" >> $GITHUB_OUTPUT
+          echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_OUTPUT
+
           echo "TOTAL_TESTS=$TOTAL_TESTS" >> $GITHUB_ENV
           echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_ENV
           echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_ENV
 
-          # Create detailed test results
+          # Create detailed test results for environment
+          echo "TEST_RESULTS<<EOF" >> $GITHUB_ENV
           echo "## 🧪 Test Results" >> $GITHUB_ENV
           echo "" >> $GITHUB_ENV
           echo "| Metric | Value |" >> $GITHUB_ENV
