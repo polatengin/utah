@@ -1,6 +1,3 @@
-using System.Text.RegularExpressions;
-using System.Text;
-
 public partial class Parser
 {
   private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string variableName)
