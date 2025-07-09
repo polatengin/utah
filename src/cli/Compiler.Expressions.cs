@@ -496,11 +496,11 @@ public partial class Compiler
           // Extract and compile the expression
           var exprContent = content.Substring(i + 2, j - i - 3);
 
-          // Special handling for .length() method on strings
-          if (exprContent.Contains(".length()"))
+          // Special handling for .length property on arrays
+          if (exprContent.Contains(".length"))
           {
             var varName = exprContent.Split('.')[0];
-            result.Append($"${{#{varName}}}");
+            result.Append($"${{#{varName}[@]}}");
           }
           else
           {
