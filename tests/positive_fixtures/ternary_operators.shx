@@ -4,3 +4,6 @@ console.log("Result: " + result);
 
 let status: string = x >= 10 ? "high" : "low";
 console.log("Status: " + status);
+
+const value: number = 75;
+let test: string = value > 80 ? "crit" : value > 60 ? "warn" : "ok";

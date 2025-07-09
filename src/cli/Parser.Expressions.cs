@@ -17,7 +17,7 @@ public partial class Parser
       {
         Condition = ParseLogicalOrExpression(parts[0]),
         TrueExpression = ParseLogicalOrExpression(parts[1]),
-        FalseExpression = ParseLogicalOrExpression(parts[2])
+        FalseExpression = ParseTernaryExpression(parts[2]) // Recursively parse for nested ternaries
       };
     }
     return ParseLogicalOrExpression(input);
@@ -432,18 +432,37 @@ public partial class Parser
     int depth = 0;
     int questionIndex = -1;
     int colonIndex = -1;
+    bool inQuotes = false;
+    char quoteChar = '\0';
 
     for (int i = 0; i < input.Length; i++)
     {
-      if (input[i] == '(') depth++;
-      else if (input[i] == ')') depth--;
-      else if (depth == 0 && input[i] == '?' && questionIndex == -1)
+      var ch = input[i];
+      
+      // Handle quotes
+      if (!inQuotes && (ch == '"' || ch == '\'' || ch == '`'))
       {
-        questionIndex = i;
+        inQuotes = true;
+        quoteChar = ch;
       }
-      else if (depth == 0 && input[i] == ':' && questionIndex != -1 && colonIndex == -1)
+      else if (inQuotes && ch == quoteChar)
       {
-        colonIndex = i;
+        inQuotes = false;
+        quoteChar = '\0';
+      }
+      else if (!inQuotes)
+      {
+        if (ch == '(') depth++;
+        else if (ch == ')') depth--;
+        else if (depth == 0 && ch == '?' && questionIndex == -1)
+        {
+          questionIndex = i;
+        }
+        else if (depth == 0 && ch == ':' && questionIndex != -1 && colonIndex == -1)
+        {
+          colonIndex = i;
+          break; // Found the first colon at the same level, this is our split point
+        }
       }
     }
 

@@ -285,8 +285,15 @@ public partial class Compiler
     {
       // Recursively build the chain, removing the outer `$()` from the nested compilation
       var nestedTernaryStr = CompileTernaryExpression(nestedTern);
-      var nestedChain = nestedTernaryStr.Substring(2, nestedTernaryStr.Length - 3);
-      return $"$({condition} && echo {trueExpr} || {nestedChain})";
+      if (nestedTernaryStr.StartsWith("$(") && nestedTernaryStr.EndsWith(")"))
+      {
+        var nestedChain = nestedTernaryStr.Substring(2, nestedTernaryStr.Length - 3);
+        return $"$({condition} && echo {trueExpr} || {nestedChain})";
+      }
+      else
+      {
+        return $"$({condition} && echo {trueExpr} || {nestedTernaryStr})";
+      }
     }
 
     var falseExpr = CompileTernaryValue(tern.FalseExpression);
