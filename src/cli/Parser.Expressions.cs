@@ -287,30 +287,28 @@ public partial class Parser
       }
 
       // Handle .length property
-      if (methodPart == "length")
+      if (methodPart == "length" || methodPart == "length()")
       {
-        return new ArrayLength
+        var targetExpr = new VariableExpression { Name = objectName };
+        // Heuristic to guess if it's an array or string.
+        // This should be improved with a symbol table in the future.
+        if (IsLikelyArray(objectName))
         {
-          Array = new VariableExpression { Name = objectName }
-        };
+          return new ArrayLength { Array = targetExpr };
+        }
+        return new StringLengthExpression { Target = targetExpr };
       }
 
       // Handle .isEmpty() method
       if (methodPart == "isEmpty()")
       {
-        return new ArrayIsEmpty
-        {
-          Array = new VariableExpression { Name = objectName }
-        };
+        return new ArrayIsEmpty { Array = new VariableExpression { Name = objectName } };
       }
 
       // Handle .reverse() method
       if (methodPart == "reverse()")
       {
-        return new ArrayReverse
-        {
-          Array = new VariableExpression { Name = objectName }
-        };
+        return new ArrayReverse { Array = new VariableExpression { Name = objectName } };
       }
 
       // Handle string methods (existing string function parsing)
@@ -397,18 +395,10 @@ public partial class Parser
       // Regular function call (not special built-in)
       if (Regex.IsMatch(functionName, @"^[\w\.]+$"))
       {
-        var functionCall = new FunctionCall
-        {
-          Name = functionName
-        };
-
+        var functionCall = new FunctionCall { Name = functionName };
         if (!string.IsNullOrEmpty(argsContent))
         {
-          var args = SplitByComma(argsContent);
-          foreach (var arg in args)
-          {
-            functionCall.Arguments.Add(arg.Trim());
-          }
+          functionCall.Arguments.AddRange(SplitByComma(argsContent));
         }
 
         return functionCall;
@@ -418,10 +408,7 @@ public partial class Parser
     // Variable reference
     if (Regex.IsMatch(input, @"^\w+$"))
     {
-      return new VariableExpression
-      {
-        Name = input
-      };
+      return new VariableExpression { Name = input };
     }
 
     // Fallback to literal
@@ -480,6 +467,33 @@ public partial class Parser
     }
 
     return parts;
+  }
+
+  private TemplateLiteralExpression ParseTemplateLiteral(string input)
+  {
+    var template = new TemplateLiteralExpression();
+    var content = input.Substring(1, input.Length - 2); // Remove backticks
+
+    var regex = new Regex(@"\$\{(.+?)\}");
+    var matches = regex.Matches(content);
+    var lastIndex = 0;
+
+    foreach (Match match in matches)
+    {
+      if (match.Index > lastIndex)
+      {
+        template.Parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
+      }
+      template.Parts.Add(ParseExpression(match.Groups[1].Value));
+      lastIndex = match.Index + match.Length;
+    }
+
+    if (lastIndex < content.Length)
+    {
+      template.Parts.Add(content.Substring(lastIndex));
+    }
+
+    return template;
   }
 
   private List<string> SplitByComma(string input)
@@ -595,44 +609,10 @@ public partial class Parser
     return input.Substring(leftEnd, rightStart - leftEnd).Trim();
   }
 
-  private Expression ParseTemplateLiteral(string input)
+  private bool IsLikelyArray(string variableName)
   {
-    // Remove the backticks
-    var content = input.Substring(1, input.Length - 2);
-    var templateExpression = new TemplateLiteralExpression();
-    var lastIndex = 0;
-
-    var regex = new Regex(@"\$\{(.+?)\}");
-    var matches = regex.Matches(content);
-
-    foreach (Match match in matches)
-    {
-      // Add the text part before the expression
-      if (match.Index > lastIndex)
-      {
-        templateExpression.Parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
-      }
-
-      // Add the expression part
-      var expressionString = match.Groups[1].Value;
-      var expression = ParseExpression(expressionString);
-      templateExpression.Parts.Add(expression);
-
-      lastIndex = match.Index + match.Length;
-    }
-
-    // Add the final text part after the last expression
-    if (lastIndex < content.Length)
-    {
-      templateExpression.Parts.Add(content.Substring(lastIndex));
-    }
-
-    // If there are no expressions, it's a simple string literal.
-    if (matches.Count == 0)
-    {
-      return new LiteralExpression { Value = content, Type = "string" };
-    }
-
-    return templateExpression;
+    // Simple heuristic: if the variable name suggests it's an array
+    // This should be replaced with a proper symbol table lookup
+    return variableName.EndsWith("s") || variableName.Contains("array", StringComparison.OrdinalIgnoreCase) || variableName.Contains("list", StringComparison.OrdinalIgnoreCase);
   }
 }

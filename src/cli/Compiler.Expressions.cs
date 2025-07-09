@@ -21,6 +21,7 @@ public partial class Compiler
       ArrayLength len => CompileArrayLength(len),
       ArrayIsEmpty isEmpty => CompileArrayIsEmpty(isEmpty),
       ArrayReverse reverse => CompileArrayReverse(reverse),
+      StringLengthExpression sl => CompileStringLengthExpression(sl),
       FunctionCall func => CompileFunctionCallExpression(func),
       ConsoleIsSudoExpression sudo => CompileConsoleIsSudoExpression(sudo),
       ConsolePromptYesNoExpression prompt => CompileConsolePromptYesNoExpression(prompt),
@@ -365,7 +366,7 @@ public partial class Compiler
     var index = CompileExpression(acc.Index);
 
     // In bash, array access is ${arrayName[index]}
-    return $"\"${{{arrayName}[{ExtractVariableName(index)}]}}\"";
+    return $"${{{arrayName}[{ExtractVariableName(index)}]}}";
   }
 
   private string CompileArrayLength(ArrayLength len)
@@ -391,6 +392,12 @@ public partial class Compiler
     // In bash, reverse an array by creating a new array with elements in reverse order
     // We use readarray to convert the output into an array
     return $"($(for ((i=${{#{arrayName}[@]}}-1; i>=0; i--)); do echo \"${{{arrayName}[i]}}\"; done))";
+  }
+
+  private string CompileStringLengthExpression(StringLengthExpression sl)
+  {
+    var varName = ExtractVariableName(CompileExpression(sl.Target));
+    return $"${{#{varName}}}";
   }
 
   private string CompileFunctionCallExpression(FunctionCall func)
@@ -491,7 +498,7 @@ public partial class Compiler
       else if (part is Expression expr)
       {
         var compiledExpression = CompileExpression(expr);
-        if (expr is VariableExpression)
+        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression)
         {
           result.Append(compiledExpression);
         }

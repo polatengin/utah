@@ -22,7 +22,7 @@ public class FunctionDeclaration : Node
 
 public class FunctionCall : Expression
 {
-  public string Name = string.Empty;
+  public string Name { get; set; } = string.Empty;
   public List<string> Arguments = new();
 }
 
@@ -94,12 +94,10 @@ public class ArrayLength : Expression
 {
   public Expression Array = null!;
 }
-
 public class ArrayIsEmpty : Expression
 {
   public Expression Array = null!;
 }
-
 public class ArrayReverse : Expression
 {
   public Expression Array = null!;
@@ -422,7 +420,12 @@ public class ProcessElapsedTimeExpression : Expression
 {
 }
 
+public class StringLengthExpression : Expression
+{
+  public Expression Target = null!;
+}
+
 public class WebGetExpression : Expression
 {
-  public Expression Url { get; set; } = null!; // The URL to make GET request to
+  public Expression Url = null!;
 }

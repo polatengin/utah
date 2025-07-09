@@ -33,6 +33,10 @@ public partial class Compiler
         else
         {
           var expressionValue = CompileExpression(ve.Value);
+          if (ve.Value is ArrayAccess)
+          {
+            expressionValue = $"\"{expressionValue}\"";
+          }
           if (ve.IsConst)
           {
             lines.Add($"readonly {ve.Name}={expressionValue}");
@@ -378,6 +382,10 @@ public partial class Compiler
 
       case AssignmentStatement assign:
         var assignValue = CompileExpression(assign.Value);
+        if (assign.Value is ArrayAccess)
+        {
+          assignValue = $"\"{assignValue}\"";
+        }
         lines.Add($"{assign.VariableName}={assignValue}");
         break;
 

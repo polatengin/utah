@@ -23,7 +23,7 @@ done
 empty=()
 reversedEmpty=($(for ((i=${#empty[@]}-1; i>=0; i--)); do echo "${empty[i]}"; done))
 echo "Empty array reversed length:"
-echo "${#reversedEmpty[@]}"
+echo "${#reversedEmpty}"
 first="${reversedNumbers[0]}"
 echo "First element of reversed numbers:"
 echo "${first}"
