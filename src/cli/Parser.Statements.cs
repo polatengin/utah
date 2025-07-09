@@ -188,7 +188,7 @@ public partial class Parser
         var arrayName = arrayMatch.Groups[1].Value;
         var indexExpr = ParseExpression(arrayMatch.Groups[2].Value);
         var valueExpr = ParseExpression(arrayMatch.Groups[3].Value);
-        
+
         return new ArrayAssignment
         {
           ArrayName = arrayName,
