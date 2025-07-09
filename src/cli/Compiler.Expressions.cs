@@ -10,9 +10,20 @@ public partial class Compiler
     switch (expr)
     {
       case AssignmentExpression assign:
-        var varName = assign.Left is VariableExpression varExpr ? varExpr.Name : CompileExpression(assign.Left);
-        var value = CompileExpression(assign.Right);
-        return $"{varName}={value}";
+        // Handle array assignment specially
+        if (assign.Left is ArrayAccess arrayAccess)
+        {
+          var arrayName = arrayAccess.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(arrayAccess.Array));
+          var index = CompileExpression(arrayAccess.Index);
+          var value = CompileExpression(assign.Right);
+          return $"{arrayName}[{ExtractVariableName(index)}]={value}";
+        }
+        else
+        {
+          var varName = assign.Left is VariableExpression varExpr2 ? varExpr2.Name : CompileExpression(assign.Left);
+          var value = CompileExpression(assign.Right);
+          return $"{varName}={value}";
+        }
       case LiteralExpression lit:
         return lit.Type == "string" ? $"\"{lit.Value}\"" : lit.Value;
       case VariableExpression var:
