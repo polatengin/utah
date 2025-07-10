@@ -1657,7 +1657,7 @@ isDebug=$(__utah_has_arg "--debug" "$@" && echo "true" || echo "false")
 - **POSIX Compliance**: Generated bash code works on all POSIX-compliant shells
 - **Flexible Syntax**: Support for `--arg=value` and `--arg value` formats
 
-## �💻 Operating System Utilities
+## 💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
 
