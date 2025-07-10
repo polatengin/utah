@@ -131,6 +131,19 @@ public partial class Compiler
             }
           }
         }
+        // Parallel function call
+        else if (exprStmt.Expression is ParallelFunctionCall parallelCall)
+        {
+          var bashArgs = parallelCall.Arguments.Select(CompileExpression).ToList();
+          if (bashArgs.Count > 0)
+          {
+            lines.Add($"{parallelCall.Name} {string.Join(" ", bashArgs)} &");
+          }
+          else
+          {
+            lines.Add($"{parallelCall.Name} &");
+          }
+        }
         // Special handling for increment/decrement expressions in statement context
         else if (exprStmt.Expression is PostIncrementExpression postInc && postInc.Operand is VariableExpression incVar)
         {

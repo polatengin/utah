@@ -1,0 +1,14 @@
+function slowEcho(msg: string): void {
+  console.log(`Start: ${msg}`);
+  // Simulate slow work
+  let _ = `$(sleep 1)`;
+  console.log(`End: ${msg}`);
+}
+
+console.log("Main start");
+parallel slowEcho("A");
+parallel slowEcho("B");
+console.log("Main end");
+// Wait for background jobs to finish
+let _ = `$(wait)`;
+console.log("All done");

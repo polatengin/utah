@@ -565,6 +565,23 @@ public partial class Parser
         }
       }
 
+      // Check for parallel keyword
+      if (input.TrimStart().StartsWith("parallel "))
+      {
+        var parallelInput = input.TrimStart().Substring("parallel ".Length).Trim();
+        var match = Regex.Match(parallelInput, @"^(\w+)\((.*)\)$");
+        if (match.Success)
+        {
+          var parallelFunctionName = match.Groups[1].Value;
+          var parallelArgsContent = match.Groups[2].Value;
+          var parallelArguments = new List<Expression>();
+          if (!string.IsNullOrEmpty(parallelArgsContent))
+          {
+            parallelArguments.AddRange(SplitByComma(parallelArgsContent).Select(arg => ParseExpression(arg.Trim())));
+          }
+          return new ParallelFunctionCall(parallelFunctionName, parallelArguments);
+        }
+      }
       // Regular function call (not special built-in)
       if (Regex.IsMatch(functionName, @"^[\w\.]+$"))
       {
@@ -573,7 +590,6 @@ public partial class Parser
         {
           arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
         }
-
         return new FunctionCall(functionName, arguments);
       }
     }

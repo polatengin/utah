@@ -12,6 +12,7 @@ public record TernaryExpression(Expression Condition, Expression TrueExpression,
 public record ParenthesizedExpression(Expression Inner) : Expression;
 public record TemplateLiteralExpression(List<object> Parts) : Expression; // Parts can be string or Expression
 public record FunctionCall(string Name, List<Expression> Arguments) : Expression;
+public record ParallelFunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ConsoleIsSudoExpression() : Expression;
 public record ConsolePromptYesNoExpression(Expression PromptText) : Expression;
 public record UtilityRandomExpression(Expression? MinValue, Expression? MaxValue) : Expression;

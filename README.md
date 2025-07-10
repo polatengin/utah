@@ -1444,6 +1444,58 @@ done
 - **Testing**: Verify API responses and web service functionality
 - **Data Collection**: Gather information from multiple web sources
 
+## ⚡️ Parallel Function Calls
+
+Utah supports parallel execution of user-defined functions using the `parallel` keyword. This allows you to run functions in the background, enabling concurrent operations and non-blocking flows.
+
+### Usage
+
+Prefix a function call with `parallel` to run it in the background:
+
+```typescript
+function slowEcho(msg: string): void {
+  console.log(`Start: ${msg}`);
+  let _ = `$(sleep 1)`;
+  console.log(`End: ${msg}`);
+}
+
+console.log("Main start");
+parallel slowEcho("A");
+parallel slowEcho("B");
+console.log("Main end");
+let _ = `$(wait)`;
+console.log("All done");
+```
+
+### Generated Bash Code
+
+```bash
+slowEcho() {
+  local msg="$1"
+  echo "Start: ${msg}"
+  _="$(sleep 1)"
+  echo "End: ${msg}"
+}
+echo "Main start"
+slowEcho "A" &
+slowEcho "B" &
+echo "Main end"
+_="$(wait)"
+echo "All done"
+```
+
+### How It Works
+
+- Each `parallel` function call is run in the background using Bash's `&` operator.
+- The main script flow continues immediately after launching parallel jobs.
+- Use `wait` to block until all background jobs finish.
+
+### Use Cases
+
+- Running multiple tasks concurrently (e.g., downloads, processing)
+- Improving script performance for independent operations
+- Non-blocking UI or logging
+
 ## 📜 Script Metadata and Argument Parsing
 
 Utah provides a powerful argument parsing system that allows you to create professional command-line scripts with help text, default values, and type validation. You can also add metadata to your scripts for better documentation.
@@ -2215,6 +2267,7 @@ Current tests cover:
 - **os_getlinuxversion.shx** - Operating system Linux version detection
 - **os_getos.shx** - Operating system detection
 - **os_isinstalled.shx** - Command/application installation checking
+- **parallel_function_call.shx** - Parallel function calls
 - **process_info.shx** - Process information functions (ID, CPU, memory, etc.)
 - **script_continueonerror.shx** - Script control function for continuing on errors
 - **script_description.shx** - Script description metadata function
@@ -2361,7 +2414,9 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
-- [ ] Job queueing and parallel execution
+- [x] Parallel execution
+
+- [ ] Job queueing and scheduling
 
 - [ ] Time and Resource monitoring
 
