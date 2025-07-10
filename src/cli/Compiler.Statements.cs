@@ -543,7 +543,7 @@ public partial class Compiler
     lines.Add($"__UTAH_ARG_DESCRIPTIONS+=(\"{argsDefine.Description}\")");
     lines.Add($"__UTAH_ARG_TYPES+=(\"{argsDefine.Type}\")");
     lines.Add($"__UTAH_ARG_REQUIRED+=(\"{(argsDefine.IsRequired ? "true" : "false")}\")");
-    
+
     var defaultValue = "";
     if (argsDefine.DefaultValue != null)
     {

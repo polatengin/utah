@@ -36,8 +36,8 @@ public partial class Compiler
   private bool ProgramUsesArgs(ProgramNode program)
   {
     // Check if any statement is an args statement
-    return program.Statements.Any(stmt => 
-      stmt is ArgsDefineStatement || 
+    return program.Statements.Any(stmt =>
+      stmt is ArgsDefineStatement ||
       stmt is ArgsShowHelpStatement ||
       ContainsArgsExpression(stmt));
   }
@@ -46,8 +46,8 @@ public partial class Compiler
   {
     // This is a simplified check - in a real implementation, 
     // you'd want to recursively check all expressions in the statement
-    return stmt.ToString().Contains("ArgsHas") || 
-           stmt.ToString().Contains("ArgsGet") || 
+    return stmt.ToString().Contains("ArgsHas") ||
+           stmt.ToString().Contains("ArgsGet") ||
            stmt.ToString().Contains("ArgsAll");
   }
 

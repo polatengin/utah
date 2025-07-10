@@ -629,28 +629,28 @@ public partial class Parser
       var paramStart = line.IndexOf('(') + 1;
       var paramEnd = line.LastIndexOf(')');
       var parametersStr = line.Substring(paramStart, paramEnd - paramStart).Trim();
-      
+
       // Parse the parameters - expecting: "longFlag", "shortFlag", "description", "type", required, defaultValue
       var parameters = ParseFunctionParameters(parametersStr);
-      
+
       if (parameters.Count < 3)
         throw new Exception("args.define() requires at least 3 parameters: longFlag, shortFlag, description");
-      
+
       var longFlag = StripQuotes(parameters[0]);
       var shortFlag = StripQuotes(parameters[1]);
       var description = StripQuotes(parameters[2]);
       var type = parameters.Count > 3 ? StripQuotes(parameters[3]) : "string";
       var isRequired = parameters.Count > 4 ? bool.Parse(parameters[4]) : false;
       Expression? defaultValue = parameters.Count > 5 ? ParseExpression(parameters[5]) : null;
-      
+
       return new ArgsDefineStatement(longFlag, shortFlag, description, type, isRequired, defaultValue);
     }
-    
+
     if (line == "args.showHelp();")
     {
       return new ArgsShowHelpStatement();
     }
-    
+
     return new RawStatement(line);
   }
 
@@ -661,11 +661,11 @@ public partial class Parser
     var inQuotes = false;
     var quoteChar = '\0';
     var parenCount = 0;
-    
+
     for (int i = 0; i < parametersStr.Length; i++)
     {
       var c = parametersStr[i];
-      
+
       if (!inQuotes && (c == '"' || c == '\''))
       {
         inQuotes = true;
@@ -697,12 +697,12 @@ public partial class Parser
         current.Append(c);
       }
     }
-    
+
     if (current.Length > 0)
     {
       parameters.Add(current.ToString().Trim());
     }
-    
+
     return parameters;
   }
 
