@@ -1444,7 +1444,7 @@ done
 - **Testing**: Verify API responses and web service functionality
 - **Data Collection**: Gather information from multiple web sources
 
-## � Script Metadata and Argument Parsing
+## 📜 Script Metadata and Argument Parsing
 
 Utah provides a powerful argument parsing system that allows you to create professional command-line scripts with help text, default values, and type validation. You can also add metadata to your scripts for better documentation.
 
