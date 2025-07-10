@@ -1,0 +1,4 @@
+script.description("This is a test script for demonstration purposes");
+console.log("Script description has been set");
+let appName: string = "TestApp";
+console.log("Application: " + appName);

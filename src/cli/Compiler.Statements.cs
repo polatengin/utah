@@ -363,6 +363,10 @@ public partial class Compiler
         lines.Add("set +e");
         break;
 
+      case ScriptDescriptionStatement scriptDesc:
+        lines.Add($"__UTAH_SCRIPT_DESCRIPTION=\"{scriptDesc.Description}\"");
+        break;
+
       case ForInLoop forInLoop:
         var iterableName = forInLoop.Iterable is VariableExpression varE ? varE.Name : ExtractVariableName(CompileExpression(forInLoop.Iterable));
         lines.Add($"for {forInLoop.VariableName} in \"${{{iterableName}[@]}}\"; do");

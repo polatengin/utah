@@ -589,6 +589,22 @@ public partial class Parser
 
   private Statement ParseScriptControlStatement(string line)
   {
+    // Handle script.description() with parameter
+    if (line.StartsWith("script.description(") && line.EndsWith(");"))
+    {
+      var paramStart = line.IndexOf('(') + 1;
+      var paramEnd = line.LastIndexOf(')');
+      var parameter = line.Substring(paramStart, paramEnd - paramStart).Trim();
+      
+      // Remove quotes if present
+      if (parameter.StartsWith("\"") && parameter.EndsWith("\""))
+      {
+        parameter = parameter.Substring(1, parameter.Length - 2);
+      }
+      
+      return new ScriptDescriptionStatement(parameter);
+    }
+    
     return line switch
     {
       "script.enableDebug();" => new ScriptEnableDebugStatement(),

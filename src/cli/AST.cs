@@ -64,6 +64,7 @@ public record ScriptDisableGlobbingStatement() : Statement;
 public record ScriptEnableGlobbingStatement() : Statement;
 public record ScriptExitOnErrorStatement() : Statement;
 public record ScriptContinueOnErrorStatement() : Statement;
+public record ScriptDescriptionStatement(string Description) : Statement;
 public record ReturnStatement(Expression? Value) : Statement;
 public record IfStatement(Expression Condition, List<Statement> ThenBody, List<Statement> ElseBody) : Statement;
 public record ExitStatement(Expression ExitCode) : Statement;

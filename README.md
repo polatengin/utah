@@ -1724,6 +1724,10 @@ Utah provides script control functions for managing shell behavior and debugging
 
 ### Available Script Control Functions
 
+#### Script Metadata
+
+- `script.description("description")` - Set a description for the script (stored in __UTAH_SCRIPT_DESCRIPTION variable)
+
 #### Debug Control
 
 - `script.enableDebug()` - Enable shell debugging and command tracing (set -x)
@@ -1742,6 +1746,10 @@ Utah provides script control functions for managing shell behavior and debugging
 ### Script Control Functions Usage
 
 ```typescript
+// Set a description for the script
+script.description("Application Health Check Script - Monitors system resources and application status");
+console.log("Script description has been set");
+
 // Enable debug mode to trace command execution
 script.enableDebug();
 console.log("Debug mode is now enabled");
@@ -1816,11 +1824,28 @@ script.enableGlobbing();
 console.log("Globbing re-enabled for file operations");
 ```
 
+### Script Metadata Example
+
+```typescript
+// Document what your script does
+script.description("Server Health Check - Monitors CPU, memory, disk space, and running services");
+console.log("Health check script initialized");
+
+// The description is stored in a variable and can be used by other tools
+// or displayed in help messages
+let appName: string = "HealthChecker";
+console.log(`${appName} v1.0 - See __UTAH_SCRIPT_DESCRIPTION for details`);
+```
+
 ### Generated Bash Code for Script Control Functions
 
 The script control functions transpile to standard bash `set` commands:
 
 ```bash
+# script.description("description") becomes:
+__UTAH_SCRIPT_DESCRIPTION="Application Health Check Script - Monitors system resources and application status"
+echo "Script description has been set"
+
 # script.enableDebug() becomes:
 set -x
 echo "Debug mode is now enabled"
@@ -1849,6 +1874,7 @@ echo "Script will continue even if commands fail"
 
 ### Script Control Functions Use Cases
 
+- **Script Documentation**: Use `script.description()` to document the purpose and functionality of your scripts
 - **Debugging**: Enable/disable command tracing to troubleshoot script issues
 - **Error Handling**: Control whether scripts exit on command failures
 - **File Operations**: Control glob expansion for literal vs. pattern matching
@@ -1858,6 +1884,7 @@ echo "Script will continue even if commands fail"
 
 ### Best Practices
 
+- **Document your scripts**: Use `script.description()` at the beginning of scripts to explain their purpose
 - **Use debug mode sparingly**: Enable only when needed to avoid verbose output
 - **Exit on error for critical operations**: Use `script.exitOnError()` for deployment scripts
 - **Disable globbing for literal patterns**: Prevent unexpected expansion when working with patterns as strings
@@ -1869,6 +1896,7 @@ echo "Script will continue even if commands fail"
 
 | Utah Function | Bash Command | Description |
 |---------------|--------------|-------------|
+| `script.description("desc")` | `__UTAH_SCRIPT_DESCRIPTION="desc"` | Set a description variable for the script |
 | `script.enableDebug()` | `set -x` | Print commands and their arguments as they are executed |
 | `script.disableDebug()` | `set +x` | Disable command tracing |
 | `script.disableGlobbing()` | `set -f` | Disable filename expansion (globbing) |
@@ -1975,6 +2003,13 @@ Current tests cover:
 - **os_getos.shx** - Operating system detection
 - **os_isinstalled.shx** - Command/application installation checking
 - **process_info.shx** - Process information functions (ID, CPU, memory, etc.)
+- **script_continueonerror.shx** - Script control function for continuing on errors
+- **script_description.shx** - Script description metadata function
+- **script_disabledebug.shx** - Script control function for disabling debug mode
+- **script_disableglobbing.shx** - Script control function for disabling globbing
+- **script_enabledebug.shx** - Script control function for enabling debug mode
+- **script_enableglobbing.shx** - Script control function for enabling globbing
+- **script_exitonerror.shx** - Script control function for exiting on errors
 - **simple_console.shx** - Basic console.log functionality
 - **simple_for_loop.shx** - Traditional for loops
 - **simple_switch.shx** - Basic switch/case/default statements
@@ -2067,7 +2102,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] Throw error if `min` is greater than max in `utility.random(<min>, <max>)` function
 
-- [x] `script.*` functions (`enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
+- [x] `script.*` functions (`description()`, `enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
 
 - [ ] `args.*` functions (`get()`, `has()`, `all()`)
 
