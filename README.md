@@ -1444,7 +1444,220 @@ done
 - **Testing**: Verify API responses and web service functionality
 - **Data Collection**: Gather information from multiple web sources
 
-## 💻 Operating System Utilities
+## � Script Metadata and Argument Parsing
+
+Utah provides a powerful argument parsing system that allows you to create professional command-line scripts with help text, default values, and type validation. You can also add metadata to your scripts for better documentation.
+
+### Script Description
+
+Add a description to your script using `script.description()`:
+
+```typescript
+script.description("User Management Tool - Creates and manages user accounts");
+```
+
+This description will be displayed when users run your script with the `--help` flag.
+
+### Argument Definition
+
+Define command-line arguments using `args.define()` with the following syntax:
+
+```typescript
+args.define(longFlag, shortFlag, description, type, required, defaultValue);
+```
+
+#### Basic Argument Definition
+
+```typescript
+// Simple flag without short version
+args.define("--verbose", "", "Enable verbose output");
+
+// Flag with both long and short versions
+args.define("--help", "-h", "Show this help message");
+
+// String argument with default value
+args.define("--name", "-n", "Specify the user's name", "string", false, "Anonymous");
+
+// Number argument with default value
+args.define("--port", "-p", "Server port number", "number", false, 8080);
+
+// Boolean flag (presence indicates true)
+args.define("--debug", "-d", "Enable debug mode", "boolean", false, false);
+```
+
+#### Advanced Argument Examples
+
+```typescript
+// Required argument
+args.define("--config", "-c", "Configuration file path", "string", true);
+
+// Optional argument with no default (will be empty if not provided)
+args.define("--output", "-o", "Output file path", "string", false);
+
+// Multiple argument types in one script
+args.define("--host", "-h", "Database host", "string", false, "localhost");
+args.define("--port", "-p", "Database port", "number", false, 5432);
+args.define("--ssl", "", "Use SSL connection", "boolean", false, false);
+args.define("--timeout", "-t", "Connection timeout in seconds", "number", false, 30);
+```
+
+### Checking for Arguments
+
+Use `args.has()` to check if an argument was provided:
+
+```typescript
+if (args.has("--help")) {
+  args.showHelp();
+  exit(0);
+}
+
+if (args.has("--verbose")) {
+  console.log("Verbose mode enabled");
+}
+
+// Check for boolean flags
+if (args.has("--debug")) {
+  console.log("Debug mode is ON");
+}
+```
+
+### Getting Argument Values
+
+Use `args.get()` to retrieve argument values. If not provided, returns the default value:
+
+```typescript
+let userName: string = args.get("--name");      // Returns "Anonymous" if not provided
+let port: number = args.get("--port");          // Returns 8080 if not provided
+let configFile: string = args.get("--config"); // Returns provided value or empty string
+```
+
+### Displaying Help
+
+Show automatically generated help text using `args.showHelp()`:
+
+```typescript
+if (args.has("--help")) {
+  args.showHelp();
+  exit(0);
+}
+```
+
+The help output includes:
+
+- Script description
+- Usage syntax
+- All defined arguments with descriptions
+- Default values for optional arguments
+
+### Getting All Arguments
+
+Retrieve all command-line arguments as passed to the script:
+
+```typescript
+console.log("All arguments: " + args.all());
+```
+
+### Complete Example
+
+Here's a comprehensive example showing all argument parsing features:
+
+```typescript
+script.description("User Management Tool - Creates and manages user accounts");
+
+// Define various types of arguments
+args.define("--version", "-v", "Show the application version");
+args.define("--help", "-h", "Show this help message");
+args.define("--name", "-n", "Specify the user's name", "string", false, "Anonymous");
+args.define("--age", "", "Specify the user's age", "number", false, 25);
+args.define("--admin", "", "Create user with admin privileges", "boolean", false, false);
+args.define("--config", "-c", "Configuration file path", "string", true);
+
+// Handle help and version
+if (args.has("--help")) {
+  args.showHelp();
+  exit(0);
+}
+
+if (args.has("--version")) {
+  console.log("User Management Tool v1.0.0");
+  exit(0);
+}
+
+// Get argument values
+let userName: string = args.get("--name");
+let userAge: number = args.get("--age");
+let isAdmin: boolean = args.has("--admin");
+let configPath: string = args.get("--config");
+
+// Use the values
+console.log(`Creating user: ${userName}, age: ${userAge}, admin: ${isAdmin}`);
+console.log(`Using config: ${configPath}`);
+console.log("All arguments: " + args.all());
+```
+
+### Generated Help Output
+
+When users run your script with `--help`, they'll see:
+
+```text
+User Management Tool - Creates and manages user accounts
+
+Usage: script.sh [OPTIONS]
+
+Options:
+  -v, --version            Show the application version
+  -h, --help               Show this help message
+  -n, --name               Specify the user's name (default: Anonymous)
+      --age                Specify the user's age (default: 25)
+      --admin              Create user with admin privileges
+  -c, --config             Configuration file path
+```
+
+### Generated Bash Code for Arguments
+
+The argument parsing system generates efficient bash code:
+
+```bash
+# Argument metadata arrays
+__UTAH_ARG_NAMES=("--name" "--port" "--debug")
+__UTAH_ARG_SHORT_NAMES=("-n" "-p" "-d")
+__UTAH_ARG_DESCRIPTIONS=("User name" "Port number" "Debug mode")
+__UTAH_ARG_TYPES=("string" "number" "boolean")
+__UTAH_ARG_REQUIRED=("false" "false" "false")
+__UTAH_ARG_DEFAULTS=("Anonymous" "8080" "false")
+
+# Helper functions for argument parsing
+__utah_has_arg() {
+  # Checks if an argument was provided
+}
+
+__utah_get_arg() {
+  # Gets argument value or returns default
+}
+
+__utah_show_help() {
+  # Displays formatted help text
+}
+
+# Script description
+__UTAH_SCRIPT_DESCRIPTION="Your script description"
+
+# Usage in script
+userName=$(__utah_get_arg "--name" "$@")
+isDebug=$(__utah_has_arg "--debug" "$@" && echo "true" || echo "false")
+```
+
+### Argument Parsing Features
+
+- **Type Support**: String, number, and boolean argument types
+- **Default Values**: Automatic fallback values when arguments aren't provided
+- **Short and Long Flags**: Support for both `-n` and `--name` style arguments
+- **Required Arguments**: Mark arguments as mandatory
+- **Auto-generated Help**: Professional help text with usage and descriptions
+- **POSIX Compliance**: Generated bash code works on all POSIX-compliant shells
+- **Flexible Syntax**: Support for `--arg=value` and `--arg value` formats
+
+## �💻 Operating System Utilities
 
 Utah provides utilities for interacting with the operating system and checking system capabilities.
 
@@ -2104,7 +2317,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `script.*` functions (`description()`, `enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
 
-- [ ] `args.*` functions (`get()`, `has()`, `all()`)
+- [x] `args.*` functions (`get()`, `has()`, `all()`, `define()`, `showHelp()` implemented)
 
 - [x] `web.*` functions (`get()` implemented - `put()`, `speedtest()` coming soon)
 
@@ -2146,7 +2359,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] Support for async/await patterns
 
-- [ ] Argument parsing and validation
+- [x] Argument parsing and validation (with default values, types, and help generation)
 
 - [ ] Job queueing and parallel execution
 

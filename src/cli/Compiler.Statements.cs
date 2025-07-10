@@ -217,14 +217,14 @@ public partial class Compiler
           ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
         }
         // Handle boolean function calls (ArrayIsEmpty, ConsoleIsSudo, etc.)
-        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression)
         {
           // For boolean functions, check if the result equals "true"
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
         else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
-                 (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression))
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
           // For negated boolean functions, check if the result equals "false"
@@ -365,6 +365,14 @@ public partial class Compiler
 
       case ScriptDescriptionStatement scriptDesc:
         lines.Add($"__UTAH_SCRIPT_DESCRIPTION=\"{scriptDesc.Description}\"");
+        break;
+
+      case ArgsDefineStatement argsDefine:
+        CompileArgsDefineStatement(argsDefine, lines);
+        break;
+
+      case ArgsShowHelpStatement:
+        lines.Add("__utah_show_help \"$@\"");
         break;
 
       case ForInLoop forInLoop:
@@ -525,5 +533,28 @@ public partial class Compiler
         $"{varExpr.Name}=$(({varExpr.Name} - 1))",
       _ => CompileExpression(update)
     };
+  }
+
+  private void CompileArgsDefineStatement(ArgsDefineStatement argsDefine, List<string> lines)
+  {
+    // Add this argument definition to the arrays
+    lines.Add($"__UTAH_ARG_NAMES+=(\"{argsDefine.LongFlag}\")");
+    lines.Add($"__UTAH_ARG_SHORT_NAMES+=(\"{argsDefine.ShortFlag}\")");
+    lines.Add($"__UTAH_ARG_DESCRIPTIONS+=(\"{argsDefine.Description}\")");
+    lines.Add($"__UTAH_ARG_TYPES+=(\"{argsDefine.Type}\")");
+    lines.Add($"__UTAH_ARG_REQUIRED+=(\"{(argsDefine.IsRequired ? "true" : "false")}\")");
+    
+    var defaultValue = "";
+    if (argsDefine.DefaultValue != null)
+    {
+      defaultValue = CompileExpression(argsDefine.DefaultValue);
+      // Remove quotes if they exist since we'll add them
+      if (defaultValue.StartsWith("\"") && defaultValue.EndsWith("\""))
+      {
+        defaultValue = defaultValue.Substring(1, defaultValue.Length - 2);
+      }
+    }
+    lines.Add($"__UTAH_ARG_DEFAULTS+=(\"{defaultValue}\")");
+    lines.Add("");
   }
 }

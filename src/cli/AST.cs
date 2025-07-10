@@ -48,6 +48,9 @@ public record PreIncrementExpression(Expression Operand) : Expression;
 public record PreDecrementExpression(Expression Operand) : Expression;
 public record TimerStartExpression() : Expression;
 public record TimerStopExpression() : Expression;
+public record ArgsHasExpression(string Flag) : Expression;
+public record ArgsGetExpression(string Flag) : Expression;
+public record ArgsAllExpression() : Expression;
 
 // Statements
 public abstract record Statement : Node;
@@ -80,3 +83,5 @@ public record ContinueStatement() : Statement;
 public record FsWriteFileStatement(Expression FilePath, Expression Content) : Statement;
 public record TimerStartStatement() : Statement;
 public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;
+public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;
+public record ArgsShowHelpStatement() : Statement;

@@ -74,6 +74,12 @@ public partial class Compiler
         return CompileConsoleIsSudoExpression(sudo);
       case ConsolePromptYesNoExpression prompt:
         return CompileConsolePromptYesNoExpression(prompt);
+      case ArgsHasExpression argsHas:
+        return CompileArgsHasExpression(argsHas);
+      case ArgsGetExpression argsGet:
+        return CompileArgsGetExpression(argsGet);
+      case ArgsAllExpression argsAll:
+        return CompileArgsAllExpression(argsAll);
       case OsIsInstalledExpression osInstalled:
         return CompileOsIsInstalledExpression(osInstalled);
       case ProcessElapsedTimeExpression elapsed:
@@ -529,7 +535,12 @@ public partial class Compiler
 
     // Handle variable expressions - extract and format properly
     string rightPart;
-    if (right.StartsWith("${") && right.EndsWith("}"))
+    if (right.StartsWith("$(") && right.EndsWith(")"))
+    {
+      // Command substitution, use as is
+      rightPart = right;
+    }
+    else if (right.StartsWith("${") && right.EndsWith("}"))
     {
       // Already in ${var} format, use as is
       rightPart = right;
@@ -798,7 +809,7 @@ public partial class Compiler
       else if (part is Expression expr)
       {
         var compiledExpression = CompileExpression(expr);
-        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression)
+        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression || expr is ArgsAllExpression || expr is ArgsGetExpression)
         {
           result.Append(compiledExpression);
         }
@@ -824,5 +835,20 @@ public partial class Compiler
   {
     // timer.stop() generates the end timer, calculates elapsed time, and returns it
     return "(_utah_timer_end=$(date +%s%3N); echo $((_utah_timer_end - _utah_timer_start)))";
+  }
+
+  private string CompileArgsHasExpression(ArgsHasExpression argsHas)
+  {
+    return $"$(__utah_has_arg \"{argsHas.Flag}\" \"$@\" && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileArgsGetExpression(ArgsGetExpression argsGet)
+  {
+    return "$(__utah_get_arg \"" + argsGet.Flag + "\" \"$@\")";
+  }
+
+  private string CompileArgsAllExpression(ArgsAllExpression argsAll)
+  {
+    return "$(__utah_all_args \"$@\")";
   }
 }

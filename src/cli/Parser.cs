@@ -191,6 +191,10 @@ public partial class Parser
     {
       return ParseScriptControlStatement(line);
     }
+    if (line.StartsWith("args."))
+    {
+      return ParseArgsStatement(line);
+    }
 
     // Check for assignment statements
     if (line.Contains(" = ") && line.EndsWith(";") && !line.StartsWith("let ") && !line.StartsWith("const "))
@@ -615,6 +619,101 @@ public partial class Parser
       "script.continueOnError();" => new ScriptContinueOnErrorStatement(),
       _ => new RawStatement(line)
     };
+  }
+
+  private Statement ParseArgsStatement(string line)
+  {
+    // Handle args.define() with parameters
+    if (line.StartsWith("args.define(") && line.EndsWith(");"))
+    {
+      var paramStart = line.IndexOf('(') + 1;
+      var paramEnd = line.LastIndexOf(')');
+      var parametersStr = line.Substring(paramStart, paramEnd - paramStart).Trim();
+      
+      // Parse the parameters - expecting: "longFlag", "shortFlag", "description", "type", required, defaultValue
+      var parameters = ParseFunctionParameters(parametersStr);
+      
+      if (parameters.Count < 3)
+        throw new Exception("args.define() requires at least 3 parameters: longFlag, shortFlag, description");
+      
+      var longFlag = StripQuotes(parameters[0]);
+      var shortFlag = StripQuotes(parameters[1]);
+      var description = StripQuotes(parameters[2]);
+      var type = parameters.Count > 3 ? StripQuotes(parameters[3]) : "string";
+      var isRequired = parameters.Count > 4 ? bool.Parse(parameters[4]) : false;
+      Expression? defaultValue = parameters.Count > 5 ? ParseExpression(parameters[5]) : null;
+      
+      return new ArgsDefineStatement(longFlag, shortFlag, description, type, isRequired, defaultValue);
+    }
+    
+    if (line == "args.showHelp();")
+    {
+      return new ArgsShowHelpStatement();
+    }
+    
+    return new RawStatement(line);
+  }
+
+  private List<string> ParseFunctionParameters(string parametersStr)
+  {
+    var parameters = new List<string>();
+    var current = new StringBuilder();
+    var inQuotes = false;
+    var quoteChar = '\0';
+    var parenCount = 0;
+    
+    for (int i = 0; i < parametersStr.Length; i++)
+    {
+      var c = parametersStr[i];
+      
+      if (!inQuotes && (c == '"' || c == '\''))
+      {
+        inQuotes = true;
+        quoteChar = c;
+        current.Append(c);
+      }
+      else if (inQuotes && c == quoteChar)
+      {
+        inQuotes = false;
+        current.Append(c);
+      }
+      else if (!inQuotes && c == '(')
+      {
+        parenCount++;
+        current.Append(c);
+      }
+      else if (!inQuotes && c == ')')
+      {
+        parenCount--;
+        current.Append(c);
+      }
+      else if (!inQuotes && c == ',' && parenCount == 0)
+      {
+        parameters.Add(current.ToString().Trim());
+        current.Clear();
+      }
+      else
+      {
+        current.Append(c);
+      }
+    }
+    
+    if (current.Length > 0)
+    {
+      parameters.Add(current.ToString().Trim());
+    }
+    
+    return parameters;
+  }
+
+  private string StripQuotes(string str)
+  {
+    str = str.Trim();
+    if ((str.StartsWith("\"") && str.EndsWith("\"")) || (str.StartsWith("'") && str.EndsWith("'")))
+    {
+      return str.Substring(1, str.Length - 2);
+    }
+    return str;
   }
 
   private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string arrayName)

@@ -1,0 +1,24 @@
+script.description("User Management Tool - Creates and manages user accounts");
+
+args.define("--version", "-v", "Show the application version");
+args.define("--help", "-h", "Show this help message");
+args.define("--name", "-n", "Specify the user's name", "string", false, "Anonymous");
+args.define("--age", "", "Specify the user's age", "number", false, 25);
+args.define("--admin", "", "Create user with admin privileges", "boolean", false, false);
+
+if (args.has("--help")) {
+  args.showHelp();
+  exit(0);
+}
+
+if (args.has("--version")) {
+  console.log("User Management Tool v1.0.0");
+  exit(0);
+}
+
+let userName: string = args.get("--name");
+let userAge: number = args.get("--age");
+let isAdmin: boolean = args.has("--admin");
+
+console.log(`Creating user: ${userName}, age: ${userAge}, admin: ${isAdmin}`);
+console.log("All arguments: " + args.all());

@@ -447,6 +447,34 @@ public partial class Parser
         return new ConsolePromptYesNoExpression(promptTextExpr);
       }
 
+      // Special handling for args.has()
+      if (functionName == "args.has" && !string.IsNullOrEmpty(argsContent))
+      {
+        var flagExpr = ParseExpression(argsContent.Trim());
+        if (flagExpr is LiteralExpression literal)
+        {
+          return new ArgsHasExpression(literal.Value);
+        }
+        throw new InvalidOperationException("args.has() requires a string literal argument");
+      }
+
+      // Special handling for args.get()
+      if (functionName == "args.get" && !string.IsNullOrEmpty(argsContent))
+      {
+        var flagExpr = ParseExpression(argsContent.Trim());
+        if (flagExpr is LiteralExpression literal)
+        {
+          return new ArgsGetExpression(literal.Value);
+        }
+        throw new InvalidOperationException("args.get() requires a string literal argument");
+      }
+
+      // Special handling for args.all()
+      if (functionName == "args.all" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ArgsAllExpression();
+      }
+
       // Special handling for os.isInstalled()
       if (functionName == "os.isInstalled" && !string.IsNullOrEmpty(argsContent))
       {
