@@ -3,7 +3,33 @@
   "displayName": "Utah Shell Extension",
   "description": "Language support for Utah shell scripts (.shx files)",
   "version": "0.0.1",
+  "publisher": "polatengin",
+  "author": {
+    "name": "Engin Polat"
+  },
+  "license": "MIT",
   "icon": "assets/extension-icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polatengin/utah.git"
+  },
+  "bugs": {
+    "url": "https://github.com/polatengin/utah/issues"
+  },
+  "homepage": "https://github.com/polatengin/utah",
+  "keywords": [
+    "utah",
+    "shell",
+    "bash",
+    "scripting",
+    "shx",
+    "syntax highlighting",
+    "language server"
+  ],
   "engines": {
     "vscode": "^1.101.0"
   },
