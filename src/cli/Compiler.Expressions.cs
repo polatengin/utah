@@ -62,6 +62,8 @@ public partial class Compiler
         return CompileArrayLength(len);
       case ArrayIsEmpty isEmpty:
         return CompileArrayIsEmpty(isEmpty);
+      case ArrayContains contains:
+        return CompileArrayContains(contains);
       case ArrayReverse reverse:
         return CompileArrayReverse(reverse);
       case StringLengthExpression sl:
@@ -603,6 +605,18 @@ public partial class Compiler
     return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
   }
 
+  private string CompileArrayContains(ArrayContains contains)
+  {
+    var arrayName = contains.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(contains.Array));
+    var item = CompileExpression(contains.Item);
+
+    // Remove quotes from item if it's a string literal for comparison
+    var itemValue = item.StartsWith("\"") && item.EndsWith("\"") ? item[1..^1] : item;
+
+    // Use a simpler approach with case statement for better compatibility
+    return $"$(case \" ${{{arrayName}[@]}} \" in *\" {itemValue} \"*) echo \"true\" ;; *) echo \"false\" ;; esac)";
+  }
+
   private string CompileArrayReverse(ArrayReverse reverse)
   {
     var arrayName = reverse.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(reverse.Array));
@@ -809,7 +823,7 @@ public partial class Compiler
       else if (part is Expression expr)
       {
         var compiledExpression = CompileExpression(expr);
-        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression || expr is ArgsAllExpression || expr is ArgsGetExpression)
+        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression || expr is ArgsAllExpression || expr is ArgsGetExpression || expr is ArrayContains || expr is ArrayIsEmpty)
         {
           result.Append(compiledExpression);
         }

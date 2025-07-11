@@ -20,6 +20,7 @@ public record ArrayLiteral(List<Expression> Elements, string ElementType) : Expr
 public record ArrayAccess(Expression Array, Expression Index) : Expression;
 public record ArrayLength(Expression Array) : Expression;
 public record ArrayIsEmpty(Expression Array) : Expression;
+public record ArrayContains(Expression Array, Expression Item) : Expression;
 public record ArrayReverse(Expression Array) : Expression;
 public record ArrayJoinExpression(Expression Array, Expression Separator) : Expression;
 public record StringLengthExpression(Expression Target) : Expression;

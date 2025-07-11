@@ -720,6 +720,42 @@ if (!numbers.reverse().isEmpty()) {
 }
 ```
 
+Check if an array contains a specific element using the `.contains()` method:
+
+```typescript
+let fruits: string[] = ["apple", "banana", "cherry"];
+let numbers: number[] = [1, 2, 3, 4, 5];
+let flags: boolean[] = [true, false, true];
+
+// Check for specific values
+let hasApple: boolean = fruits.contains("apple");      // Gets true
+let hasGrape: boolean = fruits.contains("grape");      // Gets false
+let hasThree: boolean = numbers.contains(3);           // Gets true
+let hasTen: boolean = numbers.contains(10);            // Gets false
+let hasTrue: boolean = flags.contains(true);           // Gets true
+
+// Use in conditionals
+if (fruits.contains("apple")) {
+  console.log("Found apple in fruits array");
+}
+
+if (!numbers.contains(99)) {
+  console.log("99 is not in the numbers array");
+}
+
+// Use with variables
+let searchFruit: string = "cherry";
+let searchNumber: number = 2;
+
+if (fruits.contains(searchFruit)) {
+  console.log(`Found ${searchFruit} in fruits`);
+}
+
+if (numbers.contains(searchNumber)) {
+  console.log(`Found ${searchNumber} in numbers`);
+}
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -792,6 +828,15 @@ reversed=($(for ((i=${#numbers[@]}-1; i>=0; i--)); do echo "${numbers[i]}"; done
 
 # Array reverse() with empty arrays:
 reversedEmpty=($(for ((i=${#emptyArray[@]}-1; i>=0; i--)); do echo "${emptyArray[i]}"; done))
+
+# Array contains() uses bash case statement for efficient searching:
+hasApple=$(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac)
+hasThree=$(case " ${numbers[@]} " in *" 3 "*) echo "true" ;; *) echo "false" ;; esac)
+
+# Array contains() in conditionals:
+if [ "$(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac)" = "true" ]; then
+  echo "Found apple in fruits array"
+fi
 
 # Array iteration uses bash array expansion:
 for color in "${colors[@]}"; do
@@ -2247,6 +2292,7 @@ make test              # Full test output
 Current tests cover:
 
 - **arrays.shx** - Array literals, access, length, and iteration
+- **array_contains.shx** - Array contains() method for checking element presence
 - **arrays_isempty.shx** - Array isEmpty() method for checking empty arrays
 - **console_issudo.shx** - Console system functions and privilege checking
 - **console_prompt_yesno.shx** - User interaction with yes/no prompts
@@ -2358,7 +2404,9 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `array.reverse()` function
 
-- [ ] `array.*` functions (`contains()`, `join()`, `sort()`, `merge()`)
+- [x] `array.contains()` function
+
+- [ ] `array.*` functions (`join()`, `sort()`, `merge()`)
 
 - [x] Add shebang (`#!/bin/sh`) to generated scripts
 

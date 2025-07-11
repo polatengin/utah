@@ -328,6 +328,14 @@ public partial class Parser
         return new ArrayIsEmpty(new VariableExpression(objectName));
       }
 
+      // Handle .contains() method
+      if (methodPart.StartsWith("contains(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
+        var itemExpr = ParseExpression(argsContent);
+        return new ArrayContains(new VariableExpression(objectName), itemExpr);
+      }
+
       // Handle .reverse() method
       if (methodPart == "reverse()")
       {

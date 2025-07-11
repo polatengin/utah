@@ -1,0 +1,47 @@
+let fruits: string[] = ["apple", "banana", "cherry"];
+let numbers: number[] = [1, 2, 3, 4, 5];
+let flags: boolean[] = [true, false, true];
+
+// Test string array contains
+let hasApple: boolean = fruits.contains("apple");
+let hasBanana: boolean = fruits.contains("banana");
+let hasGrape: boolean = fruits.contains("grape");
+
+console.log(`Has apple: ${hasApple}`);
+console.log(`Has banana: ${hasBanana}`);
+console.log(`Has grape: ${hasGrape}`);
+
+// Test number array contains
+let hasThree: boolean = numbers.contains(3);
+let hasTen: boolean = numbers.contains(10);
+
+console.log(`Has 3: ${hasThree}`);
+console.log(`Has 10: ${hasTen}`);
+
+// Test boolean array contains
+let hasTrue: boolean = flags.contains(true);
+let hasFalse: boolean = flags.contains(false);
+
+console.log(`Has true: ${hasTrue}`);
+console.log(`Has false: ${hasFalse}`);
+
+// Test contains in conditionals
+if (fruits.contains("apple")) {
+  console.log("Found apple in fruits array");
+}
+
+if (!numbers.contains(99)) {
+  console.log("99 is not in the numbers array");
+}
+
+// Test with variables
+let searchFruit: string = "cherry";
+let searchNumber: number = 2;
+
+if (fruits.contains(searchFruit)) {
+  console.log(`Found ${searchFruit} in fruits`);
+}
+
+if (numbers.contains(searchNumber)) {
+  console.log(`Found ${searchNumber} in numbers`);
+}
