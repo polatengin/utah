@@ -134,7 +134,7 @@ for (let item: string in items) {
 }
 ```
 
-### Generated Bash Code
+### Example Generated Bash Code
 
 For loops are transpiled to efficient bash while loops and for loops:
 
