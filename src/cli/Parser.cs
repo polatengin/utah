@@ -114,7 +114,7 @@ public partial class Parser
   {
     if (line.StartsWith("let ") || line.StartsWith("const "))
     {
-      return ParseVariableDeclaration(line);
+      return ParseVariableDeclaration(line, ref i);
     }
     if (line.StartsWith("function "))
     {
@@ -251,7 +251,85 @@ public partial class Parser
     return null;
   }
 
-  private VariableDeclaration ParseVariableDeclaration(string line)
+  private VariableDeclaration ParseVariableDeclaration(string line, ref int i)
+  {
+    var isConst = line.StartsWith("const ");
+    
+    // Check if this is a multi-line array literal
+    if (line.Contains("= [") && !line.TrimEnd().EndsWith("];"))
+    {
+      // This is a multi-line array literal, collect all lines until we find the closing ]
+      var fullDeclaration = line;
+      var originalI = i;
+      
+      i++;
+      while (i < _lines.Length)
+      {
+        var nextLine = _lines[i].Trim();
+        fullDeclaration += " " + nextLine;
+        
+        if (nextLine.EndsWith("];"))
+        {
+          break;
+        }
+        i++;
+      }
+      
+      // Now parse the complete declaration
+      var match = Regex.Match(fullDeclaration, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+      if (match.Success)
+      {
+        var name = match.Groups[2].Value;
+        var type = match.Groups[3].Value;
+        var valueStr = match.Groups[4].Value;
+
+        if (isConst)
+        {
+          _constVariables.Add(name);
+        }
+
+        var value = ParseExpression(valueStr);
+
+        // Validate array element types if this is an array type
+        if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
+        {
+          var elementType = type.Substring(0, type.Length - 2); // Remove []
+          ValidateArrayElementTypes(arrayLiteral, elementType, name);
+        }
+
+        return new VariableDeclaration(name, type, value, isConst);
+      }
+      throw new Exception($"Invalid multi-line variable declaration: {fullDeclaration}");
+    }
+    
+    // Single-line variable declaration
+    var singleLineMatch = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+    if (singleLineMatch.Success)
+    {
+      var name = singleLineMatch.Groups[2].Value;
+      var type = singleLineMatch.Groups[3].Value;
+      var valueStr = singleLineMatch.Groups[4].Value;
+
+      if (isConst)
+      {
+        _constVariables.Add(name);
+      }
+
+      var value = ParseExpression(valueStr);
+
+      // Validate array element types if this is an array type
+      if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
+      {
+        var elementType = type.Substring(0, type.Length - 2); // Remove []
+        ValidateArrayElementTypes(arrayLiteral, elementType, name);
+      }
+
+      return new VariableDeclaration(name, type, value, isConst);
+    }
+    throw new Exception($"Invalid variable declaration: {line}");
+  }
+
+  private VariableDeclaration ParseSingleLineVariableDeclaration(string line)
   {
     var isConst = line.StartsWith("const ");
     var match = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
@@ -398,7 +476,7 @@ public partial class Parser
     if (forMatch.Success)
     {
       var initStr = forMatch.Groups[1].Value.Trim();
-      var initVar = (VariableDeclaration)ParseVariableDeclaration(initStr + ";");
+      var initVar = (VariableDeclaration)ParseSingleLineVariableDeclaration(initStr + ";");
 
       var condition = ParseExpression(forMatch.Groups[2].Value);
       var update = ParseExpression(forMatch.Groups[3].Value);

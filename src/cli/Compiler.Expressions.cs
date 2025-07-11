@@ -269,6 +269,10 @@ public partial class Compiler
     {
       // Already in correct format ${varName}
     }
+    else if (minValue.StartsWith("$((") && minValue.EndsWith("))"))
+    {
+      // It's an arithmetic expression like $((expr)), use it directly
+    }
     else if (!int.TryParse(minValue, out _))
     {
       // It's a variable name without ${}, add $ prefix
@@ -278,6 +282,10 @@ public partial class Compiler
     if (maxValue.StartsWith("${") && maxValue.EndsWith("}"))
     {
       // It's a variable, use it directly
+    }
+    else if (maxValue.StartsWith("$((") && maxValue.EndsWith("))"))
+    {
+      // It's an arithmetic expression like $((expr)), use it directly
     }
     else if (!int.TryParse(maxValue, out _))
     {
@@ -598,7 +606,8 @@ public partial class Compiler
     var arrayName = len.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(len.Array));
 
     // In bash, array length is ${#arrayName[@]}
-    return $"\"${{#{arrayName}[@]}}\"";
+    // Don't quote it as it's often used in arithmetic contexts
+    return $"${{#{arrayName}[@]}}";
   }
 
   private string CompileArrayIsEmpty(ArrayIsEmpty isEmpty)
@@ -695,6 +704,20 @@ public partial class Compiler
 
   private string ExtractVariableName(string varExpr)
   {
+    // Handle quoted strings - remove quotes
+    if (varExpr.StartsWith("\"") && varExpr.EndsWith("\""))
+    {
+      varExpr = varExpr[1..^1]; // Remove quotes
+    }
+    
+    // Handle array length expressions - keep them as-is for arithmetic
+    if (varExpr.StartsWith("${#") && varExpr.EndsWith("[@]}"))
+    {
+      // This is an array length expression like ${#arrayName[@]}
+      // In arithmetic contexts, return as-is 
+      return varExpr;
+    }
+    
     // Handle both $var and ${var} formats
     if (varExpr.StartsWith("${") && varExpr.EndsWith("}"))
     {
@@ -704,6 +727,14 @@ public partial class Compiler
     {
       return varExpr[1..]; // Remove $
     }
+    
+    // Handle complex expressions that are already unquoted
+    if (varExpr.Contains("#") && varExpr.Contains("[@]"))
+    {
+      // This is an array length expression like #{arrayName[@]}
+      return varExpr;
+    }
+    
     return varExpr;
   }
 

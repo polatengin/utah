@@ -35,3 +35,13 @@ console.log("Colors:");
 for (let color: string in colors) {
   console.log(color);
 }
+
+let messages: string[] = [
+  "System monitoring complete! 🎉",
+  "All systems checked! 🚀",
+  "Health check finished! ✨",
+  "Monitoring mission accomplished! 🏆"
+];
+
+let randomIndex: number = utility.random(0, messages.length - 1);
+let finalMessage: string = messages[randomIndex];
