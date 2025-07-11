@@ -95,6 +95,15 @@ jobs:
           echo "PASSED_TESTS=$PASSED_TESTS" >> $GITHUB_ENV
           echo "FAILED_TESTS=$FAILED_TESTS" >> $GITHUB_ENV
 
+          # Create installation instructions
+          echo "## 🛠️ Installation Instructions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To install the Utah CLI, run the following command:" >> $GITHUB_STEP_SUMMARY
+          echo "```sh" >> $GITHUB_STEP_SUMMARY
+          echo "curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           # Create test summary
           echo "## 🧪 Utah CLI Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -224,6 +233,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          body: |
+            ## Installation Instructions
+
+            To install the Utah CLI, run the following command:
+
+            ```sh
+            curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+            ```
           tag_name: ${{ steps.version.outputs.new_version_tag }}
           release_name: Release ${{ steps.version.outputs.new_version_tag }}
           draft: false
