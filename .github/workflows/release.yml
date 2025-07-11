@@ -55,12 +55,12 @@ jobs:
         run: dotnet build src/cli/utah.csproj --configuration Release
 
       - name: Run CodeQL Analysis
-        uses: github/codeql-action/init@396bb3e45325a47dd9ef434068033c6d5bb0d11a # v3.27.6
+        uses: github/codeql-action/init@181d5eefc20863364f96762470ba6f862bdef56b # v3.27.6
         with:
           languages: 'csharp,javascript'
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@396bb3e45325a47dd9ef434068033c6d5bb0d11a # v3.27.6
+        uses: github/codeql-action/analyze@181d5eefc20863364f96762470ba6f862bdef56b # v3.27.6
 
       - name: Run Tests
         run: |
