@@ -122,6 +122,10 @@ public partial class Compiler
         return CompileStringToUpperCaseExpression(stringUpper);
       case StringToLowerCaseExpression stringLower:
         return CompileStringToLowerCaseExpression(stringLower);
+      case StringStartsWithExpression stringStartsWith:
+        return CompileStringStartsWithExpression(stringStartsWith);
+      case StringEndsWithExpression stringEndsWith:
+        return CompileStringEndsWithExpression(stringEndsWith);
       case FsWriteFileExpressionPlaceholder fsWriteFile:
         throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
       default:
@@ -808,6 +812,38 @@ public partial class Compiler
     var target = CompileExpression(stringLower.Target);
     var varName = ExtractVariableName(target);
     return $"\"${{{varName},,}}\"";
+  }
+
+  private string CompileStringStartsWithExpression(StringStartsWithExpression stringStartsWith)
+  {
+    var target = CompileExpression(stringStartsWith.Target);
+    var prefix = CompileExpression(stringStartsWith.Prefix);
+    
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+    
+    // Remove quotes from prefix if it's a literal string
+    var prefixValue = prefix.StartsWith("\"") && prefix.EndsWith("\"") 
+      ? prefix[1..^1] 
+      : prefix;
+      
+    return $"[[ \"${{{varName}}}\" == {prefixValue}* ]]";
+  }
+
+  private string CompileStringEndsWithExpression(StringEndsWithExpression stringEndsWith)
+  {
+    var target = CompileExpression(stringEndsWith.Target);
+    var suffix = CompileExpression(stringEndsWith.Suffix);
+    
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+    
+    // Remove quotes from suffix if it's a literal string
+    var suffixValue = suffix.StartsWith("\"") && suffix.EndsWith("\"") 
+      ? suffix[1..^1] 
+      : suffix;
+      
+    return $"[[ \"${{{varName}}}\" == *{suffixValue} ]]";
   }
 
   private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)

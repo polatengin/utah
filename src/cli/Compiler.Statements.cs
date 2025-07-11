@@ -247,6 +247,58 @@ public partial class Compiler
         {
           ifCondition = ifCondition.Substring(2, ifCondition.Length - 4);
         }
+        else if (ifCondition.StartsWith("[[ ") && ifCondition.EndsWith(" ]]"))
+        {
+          // For [[ ]] expressions, use them directly without wrapping in [ ]
+          lines.Add($"if {ifCondition}; then");
+          foreach (var b in ifs.ThenBody)
+            lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+
+          // Handle else if (elif) cases for [[ ]] expressions
+          if (ifs.ElseBody.Count == 1 && ifs.ElseBody[0] is IfStatement nestedElseIf)
+          {
+            // This is an else if - generate elif
+            var nestedElifCondition = CompileExpression(nestedElseIf.Condition);
+
+            // Handle [[ ]] elif conditions
+            if (nestedElifCondition.StartsWith("[[ ") && nestedElifCondition.EndsWith(" ]]"))
+            {
+              lines.Add($"elif {nestedElifCondition}; then");
+            }
+            else
+            {
+              // Handle boolean variable conditions for elif
+              if (nestedElseIf.Condition is VariableExpression nestedElifVarExpr)
+              {
+                nestedElifCondition = $"\"${{{nestedElifVarExpr.Name}}}\" = \"true\"";
+              }
+              else if (nestedElseIf.Condition is UnaryExpression nestedElifUnary && nestedElifUnary.Operator == "!" && nestedElifUnary.Operand is VariableExpression nestedElifNegVarExpr)
+              {
+                nestedElifCondition = $"\"${{{nestedElifNegVarExpr.Name}}}\" = \"false\"";
+              }
+              lines.Add($"elif [ {nestedElifCondition} ]; then");
+            }
+
+            foreach (var b in nestedElseIf.ThenBody)
+              lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+
+            if (nestedElseIf.ElseBody.Count > 0)
+            {
+              lines.Add("else");
+              foreach (var b in nestedElseIf.ElseBody)
+                lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+            }
+          }
+          else if (ifs.ElseBody.Count > 0)
+          {
+            lines.Add("else");
+            foreach (var b in ifs.ElseBody)
+              lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+          }
+
+          lines.Add("fi");
+          break;
+        }
 
         lines.Add($"if [ {ifCondition} ]; then");
         foreach (var b in ifs.ThenBody)

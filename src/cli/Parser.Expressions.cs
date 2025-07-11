@@ -373,6 +373,24 @@ public partial class Parser
         return new StringToLowerCaseExpression(targetExpr);
       }
 
+      // Handle .startsWith() method for strings
+      if (methodPart.StartsWith("startsWith(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(11, methodPart.Length - 12).Trim();
+        var prefixExpr = ParseExpression(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        return new StringStartsWithExpression(targetExpr, prefixExpr);
+      }
+
+      // Handle .endsWith() method for strings
+      if (methodPart.StartsWith("endsWith(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
+        var suffixExpr = ParseExpression(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        return new StringEndsWithExpression(targetExpr, suffixExpr);
+      }
+
       // Handle timer methods
       if (objectName == "timer")
       {

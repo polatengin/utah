@@ -43,6 +43,8 @@ public record FsReadFileExpression(Expression FilePath) : Expression;
 public record FsWriteFileExpressionPlaceholder(Expression FilePath, Expression Content) : Expression;
 public record StringToUpperCaseExpression(Expression Target) : Expression;
 public record StringToLowerCaseExpression(Expression Target) : Expression;
+public record StringStartsWithExpression(Expression Target, Expression Prefix) : Expression;
+public record StringEndsWithExpression(Expression Target, Expression Suffix) : Expression;
 public record AssignmentExpression(Expression Left, Expression Right) : Expression;
 public record PostIncrementExpression(Expression Operand) : Expression;
 public record PostDecrementExpression(Expression Operand) : Expression;

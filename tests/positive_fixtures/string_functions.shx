@@ -6,3 +6,15 @@ console.log("Text: " + text);
 console.log("Length: " + length);
 console.log("Upper: " + upper);
 console.log("Lower: " + lower);
+
+let logPath: string = "/var/log/nginx.log";
+console.log(logPath);
+
+if (logPath.startsWith("/var")) {
+  console.log("Log is in var directory");
+}
+
+let filename: string = "test.txt";
+if (filename.endsWith(".txt")) {
+  console.log("Text file detected");
+}
