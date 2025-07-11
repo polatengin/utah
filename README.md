@@ -2432,17 +2432,9 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] Typecasting and type conversion
 
-- [ ] Check for 100% POSIX compliance
-
 - [x] More complex expressions and operators
 
-- [ ] Process Substitution
-
 - [x] Support for managing environment variables
-
-- [ ] Lastpipe operator
-
-- [ ] Parameter expansion and manipulation
 
 - [ ] Support for functions with multiple return values
 
@@ -2454,19 +2446,13 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] File I/O operations (exists, delete, copy, move, rename, permissions, etc.)
 
-- [ ] Support for command substitution
-
-- [ ] Improved error messages and debugging support
-
-- [ ] Support for async/await patterns
-
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
 - [x] Parallel execution
 
 - [ ] Job queueing and scheduling
 
-- [ ] Time and Resource monitoring
+- [x] Time and Resource monitoring
 
 - [x] VS Code extension for syntax highlighting
 
