@@ -818,15 +818,15 @@ public partial class Compiler
   {
     var target = CompileExpression(stringStartsWith.Target);
     var prefix = CompileExpression(stringStartsWith.Prefix);
-    
+
     // Extract variable name if it's in ${var} format
     var varName = ExtractVariableName(target);
-    
+
     // Remove quotes from prefix if it's a literal string
-    var prefixValue = prefix.StartsWith("\"") && prefix.EndsWith("\"") 
-      ? prefix[1..^1] 
+    var prefixValue = prefix.StartsWith("\"") && prefix.EndsWith("\"")
+      ? prefix[1..^1]
       : prefix;
-      
+
     return $"[[ \"${{{varName}}}\" == {prefixValue}* ]]";
   }
 
@@ -834,15 +834,15 @@ public partial class Compiler
   {
     var target = CompileExpression(stringEndsWith.Target);
     var suffix = CompileExpression(stringEndsWith.Suffix);
-    
+
     // Extract variable name if it's in ${var} format
     var varName = ExtractVariableName(target);
-    
+
     // Remove quotes from suffix if it's a literal string
-    var suffixValue = suffix.StartsWith("\"") && suffix.EndsWith("\"") 
-      ? suffix[1..^1] 
+    var suffixValue = suffix.StartsWith("\"") && suffix.EndsWith("\"")
+      ? suffix[1..^1]
       : suffix;
-      
+
     return $"[[ \"${{{varName}}}\" == *{suffixValue} ]]";
   }
 
