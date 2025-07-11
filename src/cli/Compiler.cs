@@ -44,7 +44,7 @@ public partial class Compiler
 
   private bool ContainsArgsExpression(Statement stmt)
   {
-    // This is a simplified check - in a real implementation, 
+    // This is a simplified check - in a real implementation,
     // you'd want to recursively check all expressions in the statement
     return stmt.ToString().Contains("ArgsHas") ||
            stmt.ToString().Contains("ArgsGet") ||
@@ -55,8 +55,6 @@ public partial class Compiler
   {
     return new List<string>
     {
-      "# Utah argument parsing infrastructure",
-      "# Initialize argument parsing arrays",
       "__UTAH_ARG_NAMES=()",
       "__UTAH_ARG_SHORT_NAMES=()",
       "__UTAH_ARG_DESCRIPTIONS=()",
@@ -74,7 +72,6 @@ public partial class Compiler
       "        ;;",
       "    esac",
       "  done",
-      "  # Check short flags",
       "  for i in \"${!__UTAH_ARG_NAMES[@]}\"; do",
       "    if [ \"${__UTAH_ARG_NAMES[$i]}\" = \"$flag\" ]; then",
       "      local short=\"${__UTAH_ARG_SHORT_NAMES[$i]}\"",
@@ -97,15 +94,14 @@ public partial class Compiler
       "  shift",
       "  local next_is_value=false",
       "  local short_flag=\"\"",
-      "  ",
-      "  # Find the short flag for this long flag",
+      "",
       "  for i in \"${!__UTAH_ARG_NAMES[@]}\"; do",
       "    if [ \"${__UTAH_ARG_NAMES[$i]}\" = \"$flag\" ]; then",
       "      short_flag=\"${__UTAH_ARG_SHORT_NAMES[$i]}\"",
       "      break",
       "    fi",
       "  done",
-      "  ",
+      "",
       "  for arg in \"$@\"; do",
       "    if [ \"$next_is_value\" = true ]; then",
       "      echo \"$arg\"",
@@ -132,15 +128,14 @@ public partial class Compiler
       "        ;;",
       "    esac",
       "  done",
-      "  ",
-      "  # Return default value if not found",
+      "",
       "  for i in \"${!__UTAH_ARG_NAMES[@]}\"; do",
       "    if [ \"${__UTAH_ARG_NAMES[$i]}\" = \"$flag\" ]; then",
       "      echo \"${__UTAH_ARG_DEFAULTS[$i]}\"",
       "      return 0",
       "    fi",
       "  done",
-      "  ",
+      "",
       "  return 1",
       "}",
       "",
@@ -160,13 +155,13 @@ public partial class Compiler
       "    local desc=\"${__UTAH_ARG_DESCRIPTIONS[$i]}\"",
       "    local type=\"${__UTAH_ARG_TYPES[$i]}\"",
       "    local default=\"${__UTAH_ARG_DEFAULTS[$i]}\"",
-      "    ",
+      "",
       "    if [ -n \"$short\" ]; then",
       "      printf \"  %s, %-20s %s\" \"$short\" \"$flag\" \"$desc\"",
       "    else",
       "      printf \"  %-24s %s\" \"$flag\" \"$desc\"",
       "    fi",
-      "    ",
+      "",
       "    if [ \"$type\" != \"boolean\" ] && [ -n \"$default\" ]; then",
       "      printf \" (default: %s)\" \"$default\"",
       "    fi",
@@ -183,7 +178,6 @@ public partial class Compiler
     return new List<string>
     {
       "",
-      "# Parse command line arguments",
       "for i in \"${!__UTAH_ARG_NAMES[@]}\"; do",
       "  flag=\"${__UTAH_ARG_NAMES[$i]}\"",
       "  short=\"${__UTAH_ARG_SHORT_NAMES[$i]}\"",
@@ -191,7 +185,6 @@ public partial class Compiler
       "  type=\"${__UTAH_ARG_TYPES[$i]}\"",
       "  required=\"${__UTAH_ARG_REQUIRED[$i]}\"",
       "  default=\"${__UTAH_ARG_DEFAULTS[$i]}\"",
-      "  # Add to help display logic here",
       "done"
     };
   }

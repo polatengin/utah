@@ -416,7 +416,7 @@ public partial class Compiler
     if (postInc.Operand is VariableExpression varExpr)
     {
       // For post-increment, we need to return the old value and increment the variable
-      // In bash, this is complex, so we'll just return the variable and rely on 
+      // In bash, this is complex, so we'll just return the variable and rely on
       // the statement context to handle the increment
       return $"${{{varExpr.Name}}}";
     }

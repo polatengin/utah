@@ -58,7 +58,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "promptYesNo(prompt: string): boolean",
           Documentation = "Display a yes/no prompt and return the user's choice"
         },
-        
+
         // Timer methods
         new CompletionItem
         {
@@ -74,7 +74,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "timeout(milliseconds: number)",
           Documentation = "Set a timeout"
         },
-        
+
         // String methods
         new CompletionItem
         {
@@ -118,7 +118,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "trim()",
           Documentation = "Remove whitespace from both ends"
         },
-        
+
         // Utility methods
         new CompletionItem
         {
@@ -134,7 +134,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "exit(code?: number)",
           Documentation = "Exit the program"
         },
-        
+
         // Script methods
         new CompletionItem
         {
@@ -178,7 +178,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "continueOnError()",
           Documentation = "Continue script execution on command failure (set +e)"
         },
-        
+
         // Array methods
         new CompletionItem
         {
@@ -321,7 +321,7 @@ public class CompletionHandler : ICompletionHandler
           Detail = "break",
           Documentation = "Break out of loop or switch"
         },
-        
+
         // Namespaces/Objects
         new CompletionItem
         {

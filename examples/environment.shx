@@ -38,16 +38,16 @@ if (environment === "development") {
 
 function validateConfig(): boolean {
   let isValid: boolean = true;
-  
+
   if (env.get("API_KEY", "") === "") {
     console.log("Warning: API_KEY not configured");
     isValid = false;
   }
-  
+
   if (env.get("PORT", "0") < "1024") {
     console.log("Warning: Port number should be >= 1024");
   }
-  
+
   return isValid;
 }
 
@@ -57,7 +57,7 @@ function startApp(): void {
   console.log(`Environment: ${environment}`);
   console.log(`Port: ${serverPort}`);
   console.log(`Debug mode: ${debugMode}`);
-  
+
   if (validateConfig()) {
     console.log("Configuration validated successfully");
   }
@@ -75,7 +75,7 @@ let configFile: string = `${homeDirectory}/.config/myapp/config.json`;
 let logFile: string = `${env.get("LOG_DIR", "/var/log")}/app.log`;
 let databaseUrl: string = `postgresql://${dbUser}@${dbHost}:${dbPort}/${dbName}`;
 
-let cacheTimeout: number = environment === "production" 
+let cacheTimeout: number = environment === "production"
   ? env.get("CACHE_TIMEOUT", "3600")
   : env.get("CACHE_TIMEOUT", "60");
 

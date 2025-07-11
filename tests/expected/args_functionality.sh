@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Utah argument parsing infrastructure
-# Initialize argument parsing arrays
 __UTAH_ARG_NAMES=()
 __UTAH_ARG_SHORT_NAMES=()
 __UTAH_ARG_DESCRIPTIONS=()
@@ -19,7 +17,6 @@ __utah_has_arg() {
         ;;
     esac
   done
-  # Check short flags
   for i in "${!__UTAH_ARG_NAMES[@]}"; do
     if [ "${__UTAH_ARG_NAMES[$i]}" = "$flag" ]; then
       local short="${__UTAH_ARG_SHORT_NAMES[$i]}"
@@ -42,15 +39,14 @@ __utah_get_arg() {
   shift
   local next_is_value=false
   local short_flag=""
-  
-  # Find the short flag for this long flag
+
   for i in "${!__UTAH_ARG_NAMES[@]}"; do
     if [ "${__UTAH_ARG_NAMES[$i]}" = "$flag" ]; then
       short_flag="${__UTAH_ARG_SHORT_NAMES[$i]}"
       break
     fi
   done
-  
+
   for arg in "$@"; do
     if [ "$next_is_value" = true ]; then
       echo "$arg"
@@ -77,15 +73,14 @@ __utah_get_arg() {
         ;;
     esac
   done
-  
-  # Return default value if not found
+
   for i in "${!__UTAH_ARG_NAMES[@]}"; do
     if [ "${__UTAH_ARG_NAMES[$i]}" = "$flag" ]; then
       echo "${__UTAH_ARG_DEFAULTS[$i]}"
       return 0
     fi
   done
-  
+
   return 1
 }
 
@@ -105,13 +100,13 @@ __utah_show_help() {
     local desc="${__UTAH_ARG_DESCRIPTIONS[$i]}"
     local type="${__UTAH_ARG_TYPES[$i]}"
     local default="${__UTAH_ARG_DEFAULTS[$i]}"
-    
+
     if [ -n "$short" ]; then
       printf "  %s, %-20s %s" "$short" "$flag" "$desc"
     else
       printf "  %-24s %s" "$flag" "$desc"
     fi
-    
+
     if [ "$type" != "boolean" ] && [ -n "$default" ]; then
       printf " (default: %s)" "$default"
     fi
@@ -170,7 +165,6 @@ isAdmin=$(__utah_has_arg "--admin" "$@" && echo "true" || echo "false")
 echo "Creating user: ${userName}, age: ${userAge}, admin: ${isAdmin}"
 echo "All arguments: $(__utah_all_args "$@")"
 
-# Parse command line arguments
 for i in "${!__UTAH_ARG_NAMES[@]}"; do
   flag="${__UTAH_ARG_NAMES[$i]}"
   short="${__UTAH_ARG_SHORT_NAMES[$i]}"
@@ -178,5 +172,4 @@ for i in "${!__UTAH_ARG_NAMES[@]}"; do
   type="${__UTAH_ARG_TYPES[$i]}"
   required="${__UTAH_ARG_REQUIRED[$i]}"
   default="${__UTAH_ARG_DEFAULTS[$i]}"
-  # Add to help display logic here
 done
