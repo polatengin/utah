@@ -6,7 +6,7 @@ public partial class Compiler
   {
     var lines = new List<string>
     {
-      "#!/bin/sh",
+      "#!/bin/bash",
       "" // Empty line after shebang
     };
 

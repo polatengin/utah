@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 IFS=',' read -ra items <<< "one,two,three"
 echo "Using for-in loop:"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 text="Hello World"
 length=${#text}

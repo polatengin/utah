@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 dir=$(dirname "/home/user/documents/file.txt")
 echo "Directory:"

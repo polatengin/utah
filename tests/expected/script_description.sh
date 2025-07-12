@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 __UTAH_SCRIPT_DESCRIPTION="This is a test script for demonstration purposes"
 echo "Script description has been set"

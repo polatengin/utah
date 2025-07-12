@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Testing fs.readFile and fs.writeFile"
 echo "Hello World" > "test1.txt"

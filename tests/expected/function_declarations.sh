@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 greet() {
   local name="$1"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 _utah_timer_start=$(date +%s%3N)
 echo "Timer started"

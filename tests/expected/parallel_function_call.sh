@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 slowEcho() {
   local msg="$1"

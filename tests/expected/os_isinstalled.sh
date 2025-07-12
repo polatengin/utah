@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 gitInstalled=$(command -v "git" &> /dev/null && echo "true" || echo "false")
 if [ "${gitInstalled}" = "true" ]; then

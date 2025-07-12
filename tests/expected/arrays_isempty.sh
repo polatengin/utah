@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 emptyArray=()
 filledArray=("apple" "banana" "cherry")

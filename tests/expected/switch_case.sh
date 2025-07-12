@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 score=85
 category=""

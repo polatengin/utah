@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 _utah_try_block_1() {
   (

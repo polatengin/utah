@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Before clear - this should be visible initially"
 echo "Another line before clear"

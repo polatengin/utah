@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 readonly x=10
 readonly result=$([ ${x} -gt 5 ] && echo $((x * 2)) || echo $((x / 2)))

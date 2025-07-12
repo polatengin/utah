@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 __UTAH_ARG_NAMES=()
 __UTAH_ARG_SHORT_NAMES=()

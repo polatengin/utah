@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 x=50
 if [ ${x} -gt 80 ]; then

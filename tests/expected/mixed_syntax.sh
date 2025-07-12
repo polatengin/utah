@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 name="Utah"
 count=5

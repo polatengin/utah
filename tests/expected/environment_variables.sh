@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 name="${USER:-unknown}"
 echo "Hello ${name}"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Process Information Test"
 pid=$(ps -o pid -p $$ --no-headers | tr -d ' ')

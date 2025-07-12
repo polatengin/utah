@@ -2409,7 +2409,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `array.*` functions (`join()`, `sort()`, `merge()`)
 
-- [x] Add shebang (`#!/bin/sh`) to generated scripts
+- [x] Add shebang (`#!/bin/bash`) to generated scripts
 
 - [ ] Typed return values and richer type checking
 

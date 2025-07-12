@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 grade="B"
 case ${grade} in
