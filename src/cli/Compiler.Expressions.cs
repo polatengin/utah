@@ -976,10 +976,10 @@ public partial class Compiler
     // Remove quotes from value if it's a string literal
     var valueStr = value.StartsWith("\"") && value.EndsWith("\"") ? value[1..^1] : value;
 
-    // In bash, to push to an array and return the new length: array+=(value); echo ${#array[@]}
-    // But since this is an expression, we need to handle it as a statement-like operation
-    // For now, we'll return the action that needs to be performed
-    return $"({array}+=({valueStr}); echo ${{#{array}[@]}})";
+    // In bash, to push to an array: array+=(value)
+    // Only return the length if this is used in an expression context that needs a value
+    // For most cases (statement context), we just want the push operation without echoing
+    return $"{array}+=({valueStr})";
   }
 
   private string CompileTimerCurrentExpression(TimerCurrentExpression timerCurrent)
