@@ -2306,6 +2306,7 @@ Current tests cover:
 - **fs_parentdirname.shx** - File system parent directory name extraction
 - **fs_path.shx** - File system path manipulation
 - **function_declarations.shx** - Function definitions with typed parameters and return values
+- **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
 - **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility

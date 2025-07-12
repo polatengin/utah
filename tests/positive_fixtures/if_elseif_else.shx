@@ -1,0 +1,9 @@
+let x: number = 50;
+
+if (x > 80) {
+  console.log("High");
+} else if (x > 60) {
+  console.log("Medium");
+} else {
+  console.log("Low");
+}

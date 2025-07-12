@@ -401,12 +401,72 @@ public partial class Parser
     var elseBody = new List<Statement>();
 
     i++;
-    while (i < _lines.Length && _lines[i].Trim() != "}")
+    // Parse the then body until we hit a closing } (possibly followed by else)
+    while (i < _lines.Length)
     {
       var innerLine = _lines[i].Trim();
-      if (innerLine == "} else {" || innerLine == "else {")
+      
+      // Check if this line ends the then body
+      if (innerLine == "}" || innerLine == "} else {" || innerLine.StartsWith("} else if ("))
       {
-        i++;
+        // Handle the else clause if present on the same line
+        if (innerLine == "} else {")
+        {
+          // Parse the else body
+          i++; // Move past the } else { line
+          while (i < _lines.Length && _lines[i].Trim() != "}")
+          {
+            var elseLine = _lines[i].Trim();
+            if (!string.IsNullOrEmpty(elseLine))
+            {
+              var statement = ParseStatement(elseLine, ref i);
+              if (statement != null)
+              {
+                elseBody.Add(statement);
+              }
+            }
+            i++;
+          }
+        }
+        else if (innerLine.StartsWith("} else if ("))
+        {
+          // Handle else if
+          var elseIfLine = innerLine.Substring(2); // Remove "} " prefix
+          var elseIfStatement = ParseIfStatement(elseIfLine, ref i);
+          elseBody.Add(elseIfStatement);
+        }
+        break; // Exit the then body parsing loop
+      }
+      
+      // Parse regular statements in the then body
+      if (!string.IsNullOrEmpty(innerLine))
+      {
+        var statement = ParseStatement(innerLine, ref i);
+        if (statement != null)
+        {
+          thenBody.Add(statement);
+        }
+      }
+      i++;
+    }
+    
+    // Check if there's an else clause on the next line (for multi-line format)
+    if (elseBody.Count == 0 && i + 1 < _lines.Length)
+    {
+      var nextLine = _lines[i + 1].Trim();
+      
+      if (nextLine.StartsWith("else if ("))
+      {
+        // Handle else if as a nested if statement
+        i++; // Move to the else if line
+        var elseIfStatement = ParseIfStatement(nextLine, ref i);
+        elseBody.Add(elseIfStatement);
+      }
+      else if (nextLine == "else {")
+      {
+        // Handle else clause
+        i++; // Move to the else line
+        i++; // Move past the opening brace of else
         while (i < _lines.Length && _lines[i].Trim() != "}")
         {
           var elseLine = _lines[i].Trim();
@@ -420,26 +480,9 @@ public partial class Parser
           }
           i++;
         }
-        break;
       }
-      else if (innerLine.StartsWith("} else if (") || innerLine.StartsWith("else if ("))
-      {
-        // Handle else if as a nested if statement
-        var elseIfLine = innerLine.StartsWith("} else if (") ? innerLine.Substring(2) : innerLine; // Remove "} " prefix if present
-        var elseIfStatement = ParseIfStatement(elseIfLine, ref i);
-        elseBody.Add(elseIfStatement);
-        break;
-      }
-      if (!string.IsNullOrEmpty(innerLine))
-      {
-        var statement = ParseStatement(innerLine, ref i);
-        if (statement != null)
-        {
-          thenBody.Add(statement);
-        }
-      }
-      i++;
     }
+
     return new IfStatement(condition, thenBody, elseBody);
   }
 
