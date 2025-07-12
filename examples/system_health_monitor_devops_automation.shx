@@ -4,11 +4,11 @@
 script.description("Utah DevOps Automation Suite - System Health, Performance Analytics, User Management & CI/CD Pipeline Monitoring");
 
 // Advanced argument parsing with rich types and validation
-args.define("--help", "-h", "Show this comprehensive hel// Advanced log analysis and trend monitoring
+args.define("--help", "-h", "Show this comprehensive help. Advanced log analysis and trend monitoring");
 console.log(`📋 Intelligent Log Analysis:`);
 let logEntries: string[] = [
   "INFO: User authentication successful",
-  "ERROR: Database connection timeout", 
+  "ERROR: Database connection timeout",
   "WARN: Memory usage approaching limit",
   "INFO: Automated backup completed",
   "ERROR: Network interface error",
@@ -28,7 +28,7 @@ for (let entry: string in logEntries) {
     errorCount = errorCount + 1;
     let errorMsg: string = entry.substring(7); // Remove "ERROR: " prefix
     criticalErrors.push(errorMsg);
-    
+
     // Pattern matching for critical issues
     if (errorMsg.indexOf("Database") >= 0 || errorMsg.indexOf("Service") >= 0) {
       console.log(`   🚨 CRITICAL: ${errorMsg}`);
@@ -70,7 +70,7 @@ if (cpuHistory.length >= 3) {
   let recent: number = cpuHistory[cpuHistory.length - 1];
   let previous: number = cpuHistory[cpuHistory.length - 2];
   let older: number = cpuHistory[cpuHistory.length - 3];
-  
+
   if (recent > previous && previous > older) {
     cpuTrend = "rising ↗️";
   } else if (recent < previous && previous < older) {
@@ -84,7 +84,7 @@ if (memHistory.length >= 3) {
   let recent: number = memHistory[memHistory.length - 1];
   let previous: number = memHistory[memHistory.length - 2];
   let older: number = memHistory[memHistory.length - 3];
-  
+
   if (recent > previous && previous > older) {
     memTrend = "rising ↗️";
   } else if (recent < previous && previous < older) {
@@ -105,7 +105,7 @@ let alertsTriggered: number = 0;
 if (currentCpu > maxCpuThreshold || currentMemory > 85) {
   alertsTriggered = alertsTriggered + 1;
   console.log(`   🚨 ALERT: Resource usage critical!`);
-  
+
   // Escalation logic based on severity
   let severity: string = "LOW";
   if (currentCpu > 90 || currentMemory > 95) {
@@ -113,9 +113,9 @@ if (currentCpu > maxCpuThreshold || currentMemory > 85) {
   } else if (currentCpu > maxCpuThreshold + 10 || currentMemory > 90) {
     severity = "HIGH";
   }
-  
+
   console.log(`   📊 Severity Level: ${severity}`);
-  
+
   // Auto-remediation suggestions
   if (currentCpu > 90) {
     console.log(`   💡 Suggestion: Consider restarting high-CPU processes`);
@@ -159,7 +159,7 @@ for (let latency: number in latencies) {
 if (validTests > 0) {
   let avgLatency: number = totalLatency / validTests;
   console.log(`   📊 Average Latency: ${avgLatency}ms across ${validTests} hosts`);
-  
+
   if (avgLatency > 1000) {
     console.log(`   ⚠️  Network performance degraded`);
     alertsTriggered = alertsTriggered + 1;
@@ -175,7 +175,7 @@ for (let path: string in importantPaths) {
   // Simulated disk usage check (in real implementation, you'd use actual system calls)
   let usagePercent: number = utility.random(20, 95);
   let usageStatus: string = "🟢 Normal";
-  
+
   if (usagePercent > 90) {
     usageStatus = "🔴 Critical";
     spaceIssues = true;
@@ -183,7 +183,7 @@ for (let path: string in importantPaths) {
   } else if (usagePercent > 80) {
     usageStatus = "🟡 Warning";
   }
-  
+
   console.log(`   ${path}: ${usagePercent}% ${usageStatus}`);
 }
 
@@ -297,7 +297,7 @@ console.log(`${statusIcon} Status: ${statusMessage}`);
 // Motivational message with array selection
 let messages: string[] = [
   "System monitoring complete! Utah makes it simple! 🎉",
-  "All systems analyzed! TypeScript-like syntax rocks! 🚀", 
+  "All systems analyzed! TypeScript-like syntax rocks! 🚀",
   "Health check finished! Clean code wins! ✨",
   "Monitoring mission accomplished! Utah > Bash! 🏆",
   "System audit complete! Modern scripting ftw! 🔥"
@@ -523,20 +523,20 @@ if (currentCpu > maxCpuThreshold || currentMemory > maxMemoryThreshold) {
   console.log("🚨 SYSTEM ALERT: Resource usage exceeds defined thresholds!");
   console.log(`   CPU: ${currentCpu}% (Max: ${maxCpuThreshold}%)`);
   console.log(`   Memory: ${currentMemory}% (Max: ${maxMemoryThreshold}%)`);
-  
+
   if (verbose) {
     console.log("   📧 Alert would be sent to: " + alertEmail);
     console.log("   ⏰ Alert timestamp: $(date '+%Y-%m-%d %H:%M:%S')");
     console.log("   🔄 Monitoring interval: " + monitorInterval + " seconds");
   }
-  
+
   let shouldContinue: boolean = console.promptYesNo("🚨 Critical resource usage detected. Continue monitoring?");
   if (!shouldContinue) {
     console.log("⚠️  Monitoring terminated by administrator.");
     console.log("📋 Reason: Resource usage exceeds safety thresholds");
     exit(1);
   }
-  
+
   console.log("✅ Continuing with enhanced monitoring mode...");
 } else {
   console.log("✅ System Performance: All metrics within normal parameters");
@@ -551,15 +551,15 @@ try {
 
   // Create backup directory if it doesn't exist
   let _ = "$(mkdir -p " + backupDir + ")";
-  
+
   fs.writeFile(configPath, configContent);
   console.log(`   ✅ Configuration written to: ${configPath}`);
-  
+
   // Create timestamped backup
   let backupFile: string = backupDir + "/utah-config-backup-$(date +%Y%m%d-%H%M%S).json";
   fs.writeFile(backupFile, configContent);
   console.log(`   💾 Backup created: ${backupFile}`);
-  
+
   // Read back and validate
   let savedConfig: string = fs.readFile(configPath);
   if (verbose) {
@@ -568,7 +568,7 @@ try {
     console.log(savedConfig);
     console.log("   └" + "─".repeat(50) + "┘");
   }
-  
+
   console.log("   ✅ Configuration validation: PASSED");
 }
 catch {
@@ -665,30 +665,30 @@ let isSudo: boolean = console.isSudo();
 if (isSudo) {
   console.log("   ✅ Administrator privileges: CONFIRMED");
   console.log("   🔐 Security context: Full system access available");
-  
+
   let confirmUserOp: boolean = console.promptYesNo(`🔧 Create user '${targetUser}' with enhanced capabilities?`);
   if (confirmUserOp) {
     let roleDescription: string = makeAdmin ? "administrator with full system privileges" : "standard user with limited access";
     let homeDirectory: string = "/home/" + targetUser;
     let shellPath: string = "/bin/bash";
-    
+
     console.log(`   🔨 Creating user profile: ${targetUser}`);
     console.log(`   👥 Role assignment: ${roleDescription}`);
     console.log(`   🏠 Home directory: ${homeDirectory}`);
     console.log(`   🐚 Default shell: ${shellPath}`);
-    
+
     if (makeAdmin) {
       console.log("   ⚡ Granting sudo privileges...");
       console.log("   🔑 Adding to admin groups: sudo, wheel, admin");
     }
-    
+
     // Simulate user creation with detailed feedback
     console.log("   ⏳ Executing user creation process...");
     console.log("   ✅ User account created successfully");
     console.log("   ✅ Home directory initialized");
     console.log("   ✅ Shell configuration applied");
     console.log("   ✅ Permission structure established");
-    
+
     if (verbose) {
       console.log("   📋 User creation summary:");
       console.log("      - Account: " + targetUser);
