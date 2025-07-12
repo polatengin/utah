@@ -424,6 +424,30 @@ public partial class Parser
         return new StringIndexOfExpression(targetExpr, searchValueExpr);
       }
 
+      // Handle .replace() method for strings
+      if (methodPart.StartsWith("replace(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2)
+        {
+          throw new InvalidOperationException("replace() requires exactly 2 arguments (searchValue, replaceValue)");
+        }
+        var searchValueExpr = ParseExpression(args[0]);
+        var replaceValueExpr = ParseExpression(args[1]);
+        var targetExpr = ParseExpression(objectName);
+        return new StringReplaceExpression(targetExpr, searchValueExpr, replaceValueExpr);
+      }
+
+      // Handle .includes() method for strings
+      if (methodPart.StartsWith("includes(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
+        var searchValueExpr = ParseExpression(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        return new StringIncludesExpression(targetExpr, searchValueExpr);
+      }
+
       // Handle .push() method for arrays
       if (methodPart.StartsWith("push(") && methodPart.EndsWith(")"))
       {

@@ -130,6 +130,10 @@ public partial class Compiler
         return CompileStringSubstringExpression(stringSubstring);
       case StringIndexOfExpression stringIndexOf:
         return CompileStringIndexOfExpression(stringIndexOf);
+      case StringReplaceExpression stringReplace:
+        return CompileStringReplaceExpression(stringReplace);
+      case StringIncludesExpression stringIncludes:
+        return CompileStringIncludesExpression(stringIncludes);
       case ArrayPushExpression arrayPush:
         return CompileArrayPushExpression(arrayPush);
       case TimerCurrentExpression timerCurrent:
@@ -1041,5 +1045,38 @@ public partial class Compiler
   private string CompileArgsAllExpression(ArgsAllExpression argsAll)
   {
     return "$(__utah_all_args \"$@\")";
+  }
+
+  private string CompileStringReplaceExpression(StringReplaceExpression stringReplace)
+  {
+    var target = CompileExpression(stringReplace.Target);
+    var searchValue = CompileExpression(stringReplace.SearchValue);
+    var replaceValue = CompileExpression(stringReplace.ReplaceValue);
+
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+
+    // Remove quotes from search and replace values if they're literals
+    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
+    var replaceStr = replaceValue.StartsWith("\"") && replaceValue.EndsWith("\"") ? replaceValue[1..^1] : replaceValue;
+
+    // Use bash parameter expansion for simple string replacement: ${var/search/replace}
+    return $"\"${{{varName}/{searchStr}/{replaceStr}}}\"";
+  }
+
+  private string CompileStringIncludesExpression(StringIncludesExpression stringIncludes)
+  {
+    var target = CompileExpression(stringIncludes.Target);
+    var searchValue = CompileExpression(stringIncludes.SearchValue);
+
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+
+    // Remove quotes from search value if it's a literal
+    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
+
+    // Use bash case pattern matching to check if string contains substring
+    // Returns "true" if found, "false" if not found
+    return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
   }
 }

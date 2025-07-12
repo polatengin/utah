@@ -47,6 +47,8 @@ public record StringStartsWithExpression(Expression Target, Expression Prefix) :
 public record StringEndsWithExpression(Expression Target, Expression Suffix) : Expression;
 public record StringSubstringExpression(Expression Target, Expression StartIndex, Expression? Length = null) : Expression;
 public record StringIndexOfExpression(Expression Target, Expression SearchValue) : Expression;
+public record StringReplaceExpression(Expression Target, Expression SearchValue, Expression ReplaceValue) : Expression;
+public record StringIncludesExpression(Expression Target, Expression SearchValue) : Expression;
 public record ArrayPushExpression(Expression Array, Expression Item) : Expression;
 public record TimerCurrentExpression() : Expression;
 public record AssignmentExpression(Expression Left, Expression Right) : Expression;
