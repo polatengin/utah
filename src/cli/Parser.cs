@@ -405,7 +405,7 @@ public partial class Parser
     while (i < _lines.Length)
     {
       var innerLine = _lines[i].Trim();
-      
+
       // Check if this line ends the then body
       if (innerLine == "}" || innerLine == "} else {" || innerLine.StartsWith("} else if ("))
       {
@@ -437,7 +437,7 @@ public partial class Parser
         }
         break; // Exit the then body parsing loop
       }
-      
+
       // Parse regular statements in the then body
       if (!string.IsNullOrEmpty(innerLine))
       {
@@ -449,12 +449,12 @@ public partial class Parser
       }
       i++;
     }
-    
+
     // Check if there's an else clause on the next line (for multi-line format)
     if (elseBody.Count == 0 && i + 1 < _lines.Length)
     {
       var nextLine = _lines[i + 1].Trim();
-      
+
       if (nextLine.StartsWith("else if ("))
       {
         // Handle else if as a nested if statement
