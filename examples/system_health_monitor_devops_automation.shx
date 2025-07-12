@@ -134,7 +134,7 @@ timer.start();
 for (let host: string in testHosts) {
   try {
     let startTime: number = timer.current();
-    let response: string = web.get(`https://${host}`);
+    let response: string = web.get("https://${host}");
     let endTime: number = timer.current();
     let latency: number = endTime - startTime;
     latencies.push(latency);
