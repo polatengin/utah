@@ -254,27 +254,27 @@ public partial class Parser
   private VariableDeclaration ParseVariableDeclaration(string line, ref int i)
   {
     var isConst = line.StartsWith("const ");
-    
+
     // Check if this is a multi-line array literal
     if (line.Contains("= [") && !line.TrimEnd().EndsWith("];"))
     {
       // This is a multi-line array literal, collect all lines until we find the closing ]
       var fullDeclaration = line;
       var originalI = i;
-      
+
       i++;
       while (i < _lines.Length)
       {
         var nextLine = _lines[i].Trim();
         fullDeclaration += " " + nextLine;
-        
+
         if (nextLine.EndsWith("];"))
         {
           break;
         }
         i++;
       }
-      
+
       // Now parse the complete declaration
       var match = Regex.Match(fullDeclaration, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
       if (match.Success)
@@ -301,7 +301,7 @@ public partial class Parser
       }
       throw new Exception($"Invalid multi-line variable declaration: {fullDeclaration}");
     }
-    
+
     // Single-line variable declaration
     var singleLineMatch = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
     if (singleLineMatch.Success)

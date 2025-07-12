@@ -709,7 +709,7 @@ public partial class Compiler
     {
       varExpr = varExpr[1..^1]; // Remove quotes
     }
-    
+
     // Handle array length expressions - keep them as-is for arithmetic
     if (varExpr.StartsWith("${#") && varExpr.EndsWith("[@]}"))
     {
@@ -717,7 +717,7 @@ public partial class Compiler
       // In arithmetic contexts, return as-is 
       return varExpr;
     }
-    
+
     // Handle both $var and ${var} formats
     if (varExpr.StartsWith("${") && varExpr.EndsWith("}"))
     {
@@ -727,14 +727,14 @@ public partial class Compiler
     {
       return varExpr[1..]; // Remove $
     }
-    
+
     // Handle complex expressions that are already unquoted
     if (varExpr.Contains("#") && varExpr.Contains("[@]"))
     {
       // This is an array length expression like #{arrayName[@]}
       return varExpr;
     }
-    
+
     return varExpr;
   }
 
