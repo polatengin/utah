@@ -893,6 +893,15 @@ public partial class Parser
   {
     // Simple heuristic: if the variable name suggests it's an array
     // This should be replaced with a proper symbol table lookup
-    return variableName.EndsWith("s") || variableName.Contains("array", StringComparison.OrdinalIgnoreCase) || variableName.Contains("list", StringComparison.OrdinalIgnoreCase);
+    return variableName.EndsWith("s") || 
+           variableName.EndsWith("es") || 
+           variableName.EndsWith("ies") ||
+           variableName.Contains("array", StringComparison.OrdinalIgnoreCase) || 
+           variableName.Contains("list", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("history", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("items", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("entries", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("values", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("data", StringComparison.OrdinalIgnoreCase);
   }
 }

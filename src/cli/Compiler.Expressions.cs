@@ -403,11 +403,11 @@ public partial class Compiler
     return bin.Operator switch
     {
       "+" when IsStringConcatenation(bin) => CompileStringConcatenation(left, right),
-      "+" => $"$(({ExtractVariableName(left)} + {ExtractVariableName(right)}))",
-      "-" => $"$(({ExtractVariableName(left)} - {ExtractVariableName(right)}))",
-      "*" => $"$(({ExtractVariableName(left)} * {ExtractVariableName(right)}))",
-      "/" => $"$(({ExtractVariableName(left)} / {ExtractVariableName(right)}))",
-      "%" => $"$(({ExtractVariableName(left)} % {ExtractVariableName(right)}))",
+      "+" => $"$(({GetArithmeticValue(left)} + {GetArithmeticValue(right)}))",
+      "-" => $"$(({GetArithmeticValue(left)} - {GetArithmeticValue(right)}))",
+      "*" => $"$(({GetArithmeticValue(left)} * {GetArithmeticValue(right)}))",
+      "/" => $"$(({GetArithmeticValue(left)} / {GetArithmeticValue(right)}))",
+      "%" => $"$(({GetArithmeticValue(left)} % {GetArithmeticValue(right)}))",
       "==" => IsNumericLiteral(bin.Right) ? $"[ {left} -eq {right} ]" : $"[ {left} = {right} ]",
       "!=" => $"[ {left} != {right} ]",
       "<" => $"[ {left} -lt {right} ]",
@@ -754,9 +754,41 @@ public partial class Compiler
     return varExpr;
   }
 
+  private string GetArithmeticValue(string expression)
+  {
+    // Handle array length expressions - they should remain as-is in arithmetic contexts
+    if (expression.StartsWith("${#") && expression.EndsWith("[@]}"))
+    {
+      return expression;
+    }
+
+    // Handle numeric literals - they should remain as-is
+    if (int.TryParse(expression, out _) || double.TryParse(expression, out _))
+    {
+      return expression;
+    }
+
+    // Handle quoted numeric literals
+    if (expression.StartsWith("\"") && expression.EndsWith("\""))
+    {
+      var innerValue = expression[1..^1];
+      if (int.TryParse(innerValue, out _) || double.TryParse(innerValue, out _))
+      {
+        return innerValue;
+      }
+    }
+
+    // For everything else, extract the variable name
+    return ExtractVariableName(expression);
+  }
+
   private bool IsNumericLiteral(Expression expr)
   {
-    return expr is LiteralExpression lit && lit.Type == "number";
+    if (expr is LiteralExpression literal)
+    {
+      return literal.Type == "number" || int.TryParse(literal.Value, out _) || double.TryParse(literal.Value, out _);
+    }
+    return false;
   }
 
   private string CompileWebGetExpression(WebGetExpression webGet)
