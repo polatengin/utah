@@ -196,10 +196,10 @@ console.log(`📄 Log file: ${logFileName}`);
 let configPaths: string[] = ["/etc/nginx/nginx.conf", "/etc/docker/daemon.json"];
 for (let configPath: string in configPaths) {
   let configDir: string = fs.dirname(configPath);
-  let configFile: string = fs.fileName(configPath);
+  let configFileName: string = fs.fileName(configPath);
   let configExt: string = fs.extension(configPath);
 
-  console.log(`⚙️  Config: ${configFile} (${configExt}) in ${configDir}`);
+  console.log(`⚙️  Config: ${configFileName} (${configExt}) in ${configDir}`);
 }
 
 // Generate comprehensive report
