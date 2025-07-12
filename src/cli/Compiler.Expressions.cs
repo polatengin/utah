@@ -539,7 +539,15 @@ public partial class Compiler
 
   private string CompileParenthesizedExpression(ParenthesizedExpression paren)
   {
-    return $"({CompileExpression(paren.Inner)})";
+    var inner = CompileExpression(paren.Inner);
+    
+    // If the inner expression is already an arithmetic expression (starts with $((, don't add extra parentheses
+    if (inner.StartsWith("$((") && inner.EndsWith("))"))
+    {
+      return inner;
+    }
+    
+    return $"({inner})";
   }
 
   private string CompileStringConcatenation(string left, string right)
