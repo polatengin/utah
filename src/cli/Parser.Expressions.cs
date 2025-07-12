@@ -397,7 +397,7 @@ public partial class Parser
         var argsContent = methodPart.Substring(10, methodPart.Length - 11).Trim();
         var args = SplitByComma(argsContent);
         var targetExpr = ParseExpression(objectName);
-        
+
         if (args.Count == 1)
         {
           var startIndexExpr = ParseExpression(args[0]);
@@ -893,10 +893,10 @@ public partial class Parser
   {
     // Simple heuristic: if the variable name suggests it's an array
     // This should be replaced with a proper symbol table lookup
-    return variableName.EndsWith("s") || 
-           variableName.EndsWith("es") || 
+    return variableName.EndsWith("s") ||
+           variableName.EndsWith("es") ||
            variableName.EndsWith("ies") ||
-           variableName.Contains("array", StringComparison.OrdinalIgnoreCase) || 
+           variableName.Contains("array", StringComparison.OrdinalIgnoreCase) ||
            variableName.Contains("list", StringComparison.OrdinalIgnoreCase) ||
            variableName.Contains("history", StringComparison.OrdinalIgnoreCase) ||
            variableName.Contains("items", StringComparison.OrdinalIgnoreCase) ||
