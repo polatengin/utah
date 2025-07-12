@@ -186,12 +186,12 @@ public partial class Compiler
 
   private string CompileProcessCpuExpression(ProcessCpuExpression processCpu)
   {
-    return "$(ps -o pcpu -p $$ --no-headers | tr -d ' ')";
+    return "$(ps -o pcpu -p $$ --no-headers | tr -d ' ' | awk '{printf(\"%d\", $1 + 0.5)}')";
   }
 
   private string CompileProcessMemoryExpression(ProcessMemoryExpression processMemory)
   {
-    return "$(ps -o pmem -p $$ --no-headers | tr -d ' ')";
+    return "$(ps -o pmem -p $$ --no-headers | tr -d ' ' | awk '{printf(\"%d\", $1 + 0.5)}')";
   }
 
   private string CompileProcessCommandExpression(ProcessCommandExpression processCommand)
