@@ -400,6 +400,63 @@ public partial class Parser
     var thenBody = new List<Statement>();
     var elseBody = new List<Statement>();
 
+    // Check if this is a single-line if statement (content and closing brace on same line)
+    if (line.Contains("} ") || line.EndsWith("}"))
+    {
+      // Extract the content between { and }
+      var startBrace = line.IndexOf('{');
+      var endBrace = line.LastIndexOf('}');
+      if (startBrace >= 0 && endBrace > startBrace)
+      {
+        var content = line.Substring(startBrace + 1, endBrace - startBrace - 1).Trim();
+        if (!string.IsNullOrEmpty(content))
+        {
+          // Parse the single-line content as a statement
+          var tempIndex = 0;
+          var statement = ParseStatement(content, ref tempIndex);
+          if (statement != null)
+          {
+            thenBody.Add(statement);
+          }
+        }
+
+        // Check if there's an else clause on the next line
+        if (i + 1 < _lines.Length)
+        {
+          var nextLine = _lines[i + 1].Trim();
+          if (nextLine.StartsWith("else {"))
+          {
+            // Handle single-line else
+            i++; // Move to the else line
+            var elseStartBrace = nextLine.IndexOf('{');
+            var elseEndBrace = nextLine.LastIndexOf('}');
+            if (elseStartBrace >= 0 && elseEndBrace > elseStartBrace)
+            {
+              var elseContent = nextLine.Substring(elseStartBrace + 1, elseEndBrace - elseStartBrace - 1).Trim();
+              if (!string.IsNullOrEmpty(elseContent))
+              {
+                var tempIndex = 0;
+                var elseStatement = ParseStatement(elseContent, ref tempIndex);
+                if (elseStatement != null)
+                {
+                  elseBody.Add(elseStatement);
+                }
+              }
+            }
+          }
+          else if (nextLine.StartsWith("else if ("))
+          {
+            // Handle else if as a nested if statement
+            i++; // Move to the else if line
+            var elseIfStatement = ParseIfStatement(nextLine, ref i);
+            elseBody.Add(elseIfStatement);
+          }
+        }
+
+        return new IfStatement(condition, thenBody, elseBody);
+      }
+    }
+
     i++;
     // Parse the then body until we hit a closing } (possibly followed by else)
     while (i < _lines.Length)
