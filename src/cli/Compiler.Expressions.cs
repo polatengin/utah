@@ -126,6 +126,14 @@ public partial class Compiler
         return CompileStringStartsWithExpression(stringStartsWith);
       case StringEndsWithExpression stringEndsWith:
         return CompileStringEndsWithExpression(stringEndsWith);
+      case StringSubstringExpression stringSubstring:
+        return CompileStringSubstringExpression(stringSubstring);
+      case StringIndexOfExpression stringIndexOf:
+        return CompileStringIndexOfExpression(stringIndexOf);
+      case ArrayPushExpression arrayPush:
+        return CompileArrayPushExpression(arrayPush);
+      case TimerCurrentExpression timerCurrent:
+        return CompileTimerCurrentExpression(timerCurrent);
       case FsWriteFileExpressionPlaceholder fsWriteFile:
         throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
       default:
@@ -885,39 +893,101 @@ public partial class Compiler
     return $"[[ \"${{{varName}}}\" == *{suffixValue} ]]";
   }
 
+  private string CompileStringSubstringExpression(StringSubstringExpression stringSubstring)
+  {
+    var target = CompileExpression(stringSubstring.Target);
+    var start = CompileExpression(stringSubstring.StartIndex);
+
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+
+    // Remove quotes from start index if it's a literal
+    var startValue = start.StartsWith("\"") && start.EndsWith("\"") ? start[1..^1] : start;
+
+    if (stringSubstring.Length != null)
+    {
+      var length = CompileExpression(stringSubstring.Length);
+      var lengthValue = length.StartsWith("\"") && length.EndsWith("\"") ? length[1..^1] : length;
+      return $"\"${{{varName}:{startValue}:{lengthValue}}}\"";
+    }
+    else
+    {
+      // If no length specified, get substring from start to end
+      return $"\"${{{varName}:{startValue}}}\"";
+    }
+  }
+
+  private string CompileStringIndexOfExpression(StringIndexOfExpression stringIndexOf)
+  {
+    var target = CompileExpression(stringIndexOf.Target);
+    var searchValue = CompileExpression(stringIndexOf.SearchValue);
+
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+
+    // Remove quotes from search value if it's a literal
+    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
+
+    // Simple approach using grep to find position (returns -1 if not found, 0-based index if found)
+    return $"$(echo \"${{{varName}}}\" | awk -v search=\"{searchStr}\" '{{ pos = index($0, search); print (pos > 0 ? pos - 1 : -1) }}')";
+  }
+
+  private string CompileArrayPushExpression(ArrayPushExpression arrayPush)
+  {
+    var array = arrayPush.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(arrayPush.Array));
+    var value = CompileExpression(arrayPush.Item);
+
+    // Remove quotes from value if it's a string literal
+    var valueStr = value.StartsWith("\"") && value.EndsWith("\"") ? value[1..^1] : value;
+
+    // In bash, to push to an array and return the new length: array+=(value); echo ${#array[@]}
+    // But since this is an expression, we need to handle it as a statement-like operation
+    // For now, we'll return the action that needs to be performed
+    return $"({array}+=({valueStr}); echo ${{#{array}[@]}})";
+  }
+
+  private string CompileTimerCurrentExpression(TimerCurrentExpression timerCurrent)
+  {
+    // Current timer value is the time elapsed since timer start
+    return "$(( $(date +%s%3N) - _utah_timer_start ))";
+  }
+
   private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)
   {
-    var result = new StringBuilder("\"");
-
+    var parts = new List<string>();
     foreach (var part in template.Parts)
     {
       if (part is string str)
       {
-        result.Append(str);
+        parts.Add(str);
       }
       else if (part is Expression expr)
       {
-        var compiledExpression = CompileExpression(expr);
-        if (expr is VariableExpression || expr is ArrayAccess || expr is StringLengthExpression || expr is ArrayLength || expr is TernaryExpression || expr is ArgsAllExpression || expr is ArgsGetExpression || expr is ArrayContains || expr is ArrayIsEmpty)
+        var compiled = CompileExpression(expr);
+        // Remove quotes if it's a string literal
+        if (compiled.StartsWith("\"") && compiled.EndsWith("\""))
         {
-          result.Append(compiledExpression);
+          compiled = compiled[1..^1];
         }
-        else
-        {
-          result.Append($"$({compiledExpression})");
-        }
+        parts.Add($"${{{ExtractVariableName(compiled)}}}");
       }
     }
-
-    result.Append("\"");
-    return result.ToString();
+    return $"\"{string.Join("", parts)}\"";
   }
 
-  private string CompileStringSplitExpression(StringSplitExpression ss)
+  private string CompileStringSplitExpression(StringSplitExpression split)
   {
-    // String split is handled specially in variable declarations
-    // For now, return a placeholder that indicates this needs special handling
-    throw new InvalidOperationException("StringSplitExpression should be handled in variable declaration context");
+    var target = CompileExpression(split.Target);
+    var separator = CompileExpression(split.Separator);
+
+    // Extract variable name if it's in ${var} format
+    var varName = ExtractVariableName(target);
+
+    // Remove quotes from separator if it's a literal
+    var sepValue = separator.StartsWith("\"") && separator.EndsWith("\"") ? separator[1..^1] : separator;
+
+    // In bash, we can use IFS to split a string into an array
+    return $"(IFS='{sepValue}' read -ra SPLIT_ARRAY <<< \"${{{varName}}}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
   }
 
   private string CompileTimerStopExpression()

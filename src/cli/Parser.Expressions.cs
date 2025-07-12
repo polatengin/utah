@@ -391,6 +391,48 @@ public partial class Parser
         return new StringEndsWithExpression(targetExpr, suffixExpr);
       }
 
+      // Handle .substring() method for strings
+      if (methodPart.StartsWith("substring(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(10, methodPart.Length - 11).Trim();
+        var args = SplitByComma(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        
+        if (args.Count == 1)
+        {
+          var startIndexExpr = ParseExpression(args[0]);
+          return new StringSubstringExpression(targetExpr, startIndexExpr);
+        }
+        else if (args.Count == 2)
+        {
+          var startIndexExpr = ParseExpression(args[0]);
+          var lengthExpr = ParseExpression(args[1]);
+          return new StringSubstringExpression(targetExpr, startIndexExpr, lengthExpr);
+        }
+        else
+        {
+          throw new InvalidOperationException("substring() requires 1 or 2 arguments (startIndex, length)");
+        }
+      }
+
+      // Handle .indexOf() method for strings
+      if (methodPart.StartsWith("indexOf(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
+        var searchValueExpr = ParseExpression(argsContent);
+        var targetExpr = ParseExpression(objectName);
+        return new StringIndexOfExpression(targetExpr, searchValueExpr);
+      }
+
+      // Handle .push() method for arrays
+      if (methodPart.StartsWith("push(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
+        var itemExpr = ParseExpression(argsContent);
+        var targetExpr = new VariableExpression(objectName);
+        return new ArrayPushExpression(targetExpr, itemExpr);
+      }
+
       // Handle timer methods
       if (objectName == "timer")
       {
@@ -398,29 +440,9 @@ public partial class Parser
         {
           return new TimerStopExpression();
         }
-      }
-
-      if (objectName == "fs")
-      {
-        if (methodPart.StartsWith("dirname(") && methodPart.EndsWith(")"))
+        if (methodPart == "current()")
         {
-          var arg = methodPart.Substring(8, methodPart.Length - 9);
-          return new FsDirnameExpression(ParseExpression(arg));
-        }
-        if (methodPart.StartsWith("fileName(") && methodPart.EndsWith(")"))
-        {
-          var arg = methodPart.Substring(9, methodPart.Length - 10);
-          return new FsFileNameExpression(ParseExpression(arg));
-        }
-        if (methodPart.StartsWith("extension(") && methodPart.EndsWith(")"))
-        {
-          var arg = methodPart.Substring(10, methodPart.Length - 11);
-          return new FsExtensionExpression(ParseExpression(arg));
-        }
-        if (methodPart.StartsWith("parentDirName(") && methodPart.EndsWith(")"))
-        {
-          var arg = methodPart.Substring(14, methodPart.Length - 15);
-          return new FsParentDirNameExpression(ParseExpression(arg));
+          return new TimerCurrentExpression();
         }
       }
     }
@@ -457,6 +479,54 @@ public partial class Parser
           return new FsWriteFileExpressionPlaceholder(filePathExpr, contentExpr);
         }
         throw new InvalidOperationException("fs.writeFile() requires exactly 2 arguments (filePath, content)");
+      }
+
+      // Special handling for fs.dirname()
+      if (functionName == "fs.dirname")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsDirnameExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.dirname() requires exactly 1 argument (path)");
+      }
+
+      // Special handling for fs.fileName()
+      if (functionName == "fs.fileName")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsFileNameExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.fileName() requires exactly 1 argument (path)");
+      }
+
+      // Special handling for fs.extension()
+      if (functionName == "fs.extension")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsExtensionExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.extension() requires exactly 1 argument (path)");
+      }
+
+      // Special handling for fs.parentDirName()
+      if (functionName == "fs.parentDirName")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsParentDirNameExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.parentDirName() requires exactly 1 argument (path)");
       }
 
       // Special handling for console.isSudo()
