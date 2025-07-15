@@ -1,9 +1,92 @@
+// Basic env.get with default value
 let name: string = env.get("USER", "unknown");
-
 console.log("Hello " + name);
 
+// Basic env.set
 env.set("GREETING", "Utah Language");
-
 let greeting: string = env.get("GREETING", "default");
-
 console.log(greeting);
+
+// Test env.get without default (single argument)
+let path: string = env.get("PATH");
+console.log("PATH length: " + path.length);
+
+// Test env.set with command substitution
+env.set("START_TIME", "$(date -Iseconds)");
+env.set("PID", "$$");
+env.set("HOSTNAME", "$(hostname)");
+
+// Test env.get with various data types
+let serverPort: number = env.get("PORT", "8080");
+let debugMode: boolean = env.get("DEBUG", "false") === "true";
+let enableMetrics: boolean = env.get("ENABLE_METRICS", "true") === "true";
+
+console.log("Server port: " + serverPort);
+console.log("Debug mode: " + debugMode);
+console.log("Metrics enabled: " + enableMetrics);
+
+// Test env.set with variables
+let appName: string = "utah-transpiler";
+let version: string = "1.0.0";
+env.set("APP_NAME", appName);
+env.set("APP_VERSION", version);
+
+// Test env.get in template literals
+let configPath: string = `${env.get("HOME", "/tmp")}/.config/utah`;
+let logFile: string = `${env.get("LOG_DIR", "/var/log")}/utah.log`;
+let dataDir: string = `${env.get("DATA_DIR", "/var/lib")}/utah`;
+
+console.log("Config path: " + configPath);
+console.log("Log file: " + logFile);
+console.log("Data directory: " + dataDir);
+
+// Test env.load and env.delete
+env.load(".env");
+env.load("config/.env.local");
+
+env.set("TEMP_VAR", "temporary value");
+let tempValue: string = env.get("TEMP_VAR", "");
+console.log("Temp value before delete: " + tempValue);
+
+env.delete("TEMP_VAR");
+let deletedValue: string = env.get("TEMP_VAR", "not found");
+console.log("Temp value after delete: " + deletedValue);
+
+// Test conditional env.set
+if (env.get("NODE_ENV", "development") === "production") {
+  env.set("LOG_LEVEL", "warn");
+  env.set("DEBUG", "false");
+} else {
+  env.set("LOG_LEVEL", "debug");
+  env.set("DEBUG", "true");
+}
+
+// Test env.get in expressions
+let timeout: number = env.get("TIMEOUT", "30") * 1000;
+let maxRetries: number = env.get("MAX_RETRIES", "3") + 1;
+
+console.log("Timeout in ms: " + timeout);
+console.log("Max retries plus one: " + maxRetries);
+
+// Test env.get with complex defaults
+let databaseUrl: string = env.get("DATABASE_URL", "postgresql://user:pass@localhost:5432/db");
+let apiEndpoint: string = env.get("API_ENDPOINT", "https://api.example.com/v1");
+
+console.log("Database URL: " + databaseUrl);
+console.log("API Endpoint: " + apiEndpoint);
+
+// Test env variables in function calls
+function getConfigValue(key: string, defaultValue: string): string {
+  return env.get(key, defaultValue);
+}
+
+let customConfig: string = getConfigValue("CUSTOM_CONFIG", "default-config");
+console.log("Custom config: " + customConfig);
+
+// Test array of environment variables
+let envVars: string[] = ["HOME", "USER", "PATH", "SHELL"];
+for (let i = 0; i < envVars.length; i++) {
+  let envVar: string = envVars[i];
+  let value: string = env.get(envVar, "not set");
+  console.log(envVar + ": " + value);
+}
