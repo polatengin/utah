@@ -913,6 +913,12 @@ public partial class Parser
 
   private bool IsRawBashStatement(string line)
   {
+    // Don't treat Utah function calls as raw bash even if they contain command substitution
+    if (Regex.IsMatch(line.Trim(), @"^\w+\.\w+\s*\(.*\)\s*;?\s*$"))
+    {
+      return false;
+    }
+
     // Common bash patterns that should not be parsed as Utah syntax
     return line.StartsWith("if [ ") ||
            line.StartsWith("while [ ") ||

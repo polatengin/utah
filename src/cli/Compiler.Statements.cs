@@ -81,6 +81,11 @@ public partial class Compiler
           {
             expressionValue = $"\"{expressionValue}\"";
           }
+          // For boolean assignments from binary expressions, wrap in command substitution
+          if (v.Value is BinaryExpression binExpr && IsBooleanComparison(binExpr))
+          {
+            expressionValue = $"$({expressionValue} && echo \"true\" || echo \"false\")";
+          }
           if (v.IsConst)
           {
             lines.Add($"readonly {v.Name}={expressionValue}");
@@ -121,6 +126,23 @@ public partial class Compiler
               varName = varName[1..^1];
             }
             lines.Add($"export {varName}={value}");
+          }
+          // Special handling for env.load() function calls
+          else if (funcCall.Name == "env.load" && funcCall.Arguments.Count == 1)
+          {
+            var envFilePath = CompileExpression(funcCall.Arguments[0]);
+            lines.Add($"[ -f {envFilePath} ] && source {envFilePath}");
+          }
+          // Special handling for env.delete() function calls
+          else if (funcCall.Name == "env.delete" && funcCall.Arguments.Count == 1)
+          {
+            var varName = CompileExpression(funcCall.Arguments[0]);
+            // Remove quotes from varName if it's a string literal
+            if (varName.StartsWith("\"") && varName.EndsWith("\""))
+            {
+              varName = varName[1..^1];
+            }
+            lines.Add($"unset {varName}");
           }
           // Special handling for git.undoLastCommit() function calls
           else if (funcCall.Name == "git.undoLastCommit")
@@ -642,5 +664,14 @@ public partial class Compiler
       foreach (var b in elseIf.ElseBody)
         lines.AddRange(CompileStatement(b).Select(l => "  " + l));
     }
+  }
+
+  private bool IsBooleanComparison(BinaryExpression binExpr)
+  {
+    return binExpr.Operator switch
+    {
+      "==" or "===" or "!=" or "<" or "<=" or ">" or ">=" => true,
+      _ => false
+    };
   }
 }

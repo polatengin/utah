@@ -420,8 +420,9 @@ public partial class Compiler
       "*" => $"$(({GetArithmeticValue(left)} * {GetArithmeticValue(right)}))",
       "/" => $"$(({GetArithmeticValue(left)} / {GetArithmeticValue(right)}))",
       "%" => $"$(({GetArithmeticValue(left)} % {GetArithmeticValue(right)}))",
-      "==" => IsNumericLiteral(bin.Right) ? $"[ {left} -eq {right} ]" : $"[ {left} = {right} ]",
-      "!=" => $"[ {left} != {right} ]",
+      "==" => IsNumericLiteral(bin.Right) ? $"[ {left} -eq {right} ]" : $"[ {EnsureQuoted(left)} = {EnsureQuoted(right)} ]",
+      "===" => IsNumericLiteral(bin.Right) ? $"[ {left} -eq {right} ]" : $"[ {EnsureQuoted(left)} = {EnsureQuoted(right)} ]",
+      "!=" => $"[ {EnsureQuoted(left)} != {EnsureQuoted(right)} ]",
       "<" => $"[ {left} -lt {right} ]",
       "<=" => $"[ {left} -le {right} ]",
       ">" => $"[ {left} -gt {right} ]",
@@ -1086,5 +1087,22 @@ public partial class Compiler
     // Use bash case pattern matching to check if string contains substring
     // Returns "true" if found, "false" if not found
     return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
+  }
+
+  private string EnsureQuoted(string value)
+  {
+    // If it's already quoted or is a literal number, don't add quotes
+    if (value.StartsWith("\"") && value.EndsWith("\""))
+      return value;
+    if (IsNumericLiteralValue(value))
+      return value;
+    
+    // For variable expressions like ${var}, wrap in quotes
+    return $"\"{value}\"";
+  }
+
+  private bool IsNumericLiteralValue(string value)
+  {
+    return int.TryParse(value, out _) || double.TryParse(value, out _);
   }
 }

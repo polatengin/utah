@@ -96,7 +96,7 @@ public partial class Parser
 
   private Expression ParseEqualityExpression(string input)
   {
-    var operators = new[] { "==", "!=" };
+    var operators = new[] { "===", "==", "!=" };
     foreach (var op in operators)
     {
       var parts = SplitByOperator(input, op);
