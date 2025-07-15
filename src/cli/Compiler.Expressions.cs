@@ -1096,7 +1096,7 @@ public partial class Compiler
       return value;
     if (IsNumericLiteralValue(value))
       return value;
-    
+
     // For variable expressions like ${var}, wrap in quotes
     return $"\"{value}\"";
   }
