@@ -77,6 +77,10 @@ public partial class Compiler
           {
             expressionValue = $"\"{expressionValue}\"";
           }
+          if (v.Value is ArrayLength)
+          {
+            expressionValue = $"\"{expressionValue}\"";
+          }
           if (v.IsConst)
           {
             lines.Add($"readonly {v.Name}={expressionValue}");
