@@ -71,13 +71,11 @@ function cleanup(): void {
 
 startApp();
 
-let configFile: string = `${homeDirectory}/.config/myapp/config.json`;
-let logFile: string = `${env.get("LOG_DIR", "/var/log")}/app.log`;
-let databaseUrl: string = `postgresql://${dbUser}@${dbHost}:${dbPort}/${dbName}`;
+let configFile: string = "${homeDirectory}/.config/myapp/config.json";
+let logFile: string = "${env.get("LOG_DIR", "/var/log")}/app.log;"
+let databaseUrl: string = "postgresql://${dbUser}@${dbHost}:${dbPort}/${dbName}";
 
-let cacheTimeout: number = environment === "production"
-  ? env.get("CACHE_TIMEOUT", "3600")
-  : env.get("CACHE_TIMEOUT", "60");
+let cacheTimeout: number = environment === "production" ? env.get("CACHE_TIMEOUT", "3600") : env.get("CACHE_TIMEOUT", "60");
 
 let jwtSecret: string = env.get("JWT_SECRET", "development-secret-key");
 let encryptionKey: string = env.get("ENCRYPTION_KEY", "default-key");
