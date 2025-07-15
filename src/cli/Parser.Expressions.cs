@@ -779,23 +779,89 @@ public partial class Parser
     var parts = new List<object>();
     var content = input.Substring(1, input.Length - 2); // Remove backticks
 
-    var regex = new Regex(@"\$\{(.+?)\}");
-    var matches = regex.Matches(content);
-    var lastIndex = 0;
+    var i = 0;
+    var currentString = "";
 
-    foreach (Match match in matches)
+    while (i < content.Length)
     {
-      if (match.Index > lastIndex)
+      if (i < content.Length - 1 && content[i] == '$' && content[i + 1] == '{')
       {
-        parts.Add(content.Substring(lastIndex, match.Index - lastIndex));
+        // Add any accumulated string before the expression
+        if (currentString.Length > 0)
+        {
+          parts.Add(currentString);
+          currentString = "";
+        }
+
+        // Find the matching closing brace, handling nested braces and quotes
+        i += 2; // Skip '${'
+        var braceDepth = 1;
+        var exprStart = i;
+        var inQuotes = false;
+        var quoteChar = '\0';
+
+        while (i < content.Length && braceDepth > 0)
+        {
+          var currentChar = content[i];
+
+          if (!inQuotes)
+          {
+            if (currentChar == '"' || currentChar == '\'')
+            {
+              inQuotes = true;
+              quoteChar = currentChar;
+            }
+            else if (currentChar == '{')
+            {
+              braceDepth++;
+            }
+            else if (currentChar == '}')
+            {
+              braceDepth--;
+            }
+          }
+          else
+          {
+            if (currentChar == quoteChar)
+            {
+              // Check if it's escaped
+              int backslashCount = 0;
+              for (int j = i - 1; j >= 0 && content[j] == '\\'; j--)
+                backslashCount++;
+
+              if (backslashCount % 2 == 0) // Even number of backslashes means not escaped
+              {
+                inQuotes = false;
+              }
+            }
+          }
+
+          i++;
+        }
+
+        if (braceDepth == 0)
+        {
+          var exprContent = content.Substring(exprStart, i - exprStart - 1);
+          parts.Add(ParseExpression(exprContent));
+        }
+        else
+        {
+          // Unmatched braces - treat as literal text
+          currentString += "${" + content.Substring(exprStart);
+          break;
+        }
       }
-      parts.Add(ParseExpression(match.Groups[1].Value));
-      lastIndex = match.Index + match.Length;
+      else
+      {
+        currentString += content[i];
+        i++;
+      }
     }
 
-    if (lastIndex < content.Length)
+    // Add any remaining string
+    if (currentString.Length > 0)
     {
-      parts.Add(content.Substring(lastIndex));
+      parts.Add(currentString);
     }
 
     return new TemplateLiteralExpression(parts);

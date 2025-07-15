@@ -23,8 +23,8 @@ public partial class Parser
     {
       char current = input[i];
 
-      // Handle string literals
-      if (!inString && (current == '"' || current == '\''))
+      // Handle string literals and template literals
+      if (!inString && (current == '"' || current == '\'' || current == '`'))
       {
         inString = true;
         stringChar = current;
