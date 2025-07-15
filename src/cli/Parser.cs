@@ -948,6 +948,7 @@ public partial class Parser
            line.StartsWith("wc ") ||
            line.StartsWith("tr ") ||
            line.StartsWith("cut ") ||
+           line.StartsWith("git ") ||
            line.StartsWith("join ") ||
            line.StartsWith("paste ") ||
            line.StartsWith("tee ") ||

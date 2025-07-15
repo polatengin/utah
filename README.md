@@ -2028,6 +2028,199 @@ fi
 - Works consistently across all Unix-like systems (Linux, macOS, BSD)
 - Lightweight check with minimal performance impact
 
+## 🔀 Git Utilities
+
+Utah provides git utilities for common version control operations. These functions allow you to perform git operations directly within your scripts, making it easy to automate version control workflows.
+
+### Available Git Functions
+
+#### Version Control Operations
+
+- `git.undoLastCommit()` - Undo the last commit while preserving changes in the staging area
+
+### Git Utilities Usage
+
+```typescript
+// Undo the last commit (safe - keeps changes staged)
+git.undoLastCommit();
+console.log("Last commit has been undone, changes preserved in staging area");
+
+// Use in conditional logic
+let hasChanges: boolean = true; // This would typically come from checking git status
+if (hasChanges) {
+  console.log("Undoing last commit to make corrections...");
+  git.undoLastCommit();
+  console.log("Last commit undone. Make your changes and commit again.");
+}
+
+// Use in error recovery scenarios
+console.log("Checking if last commit needs to be fixed...");
+// Assume some validation logic here
+let commitNeedsFixing: boolean = true;
+
+if (commitNeedsFixing) {
+  console.log("Fixing last commit...");
+  git.undoLastCommit();
+  // Make corrections here
+  console.log("Ready to make corrected commit");
+}
+```
+
+### Practical Git Workflow Examples
+
+```typescript
+// Complete workflow: undo, fix, and recommit
+console.log("Starting commit correction workflow...");
+
+// Undo the last commit
+git.undoLastCommit();
+console.log("Last commit undone - changes are staged");
+
+// Show current status (in a real script, you might check git status)
+console.log("Files are still staged and ready for a new commit");
+
+// Example: you would make your changes here, then:
+console.log("After making corrections, commit again with:");
+console.log("git commit -m 'Corrected commit message'");
+
+// Emergency rollback scenario
+function emergencyRollback(): void {
+  console.log("EMERGENCY: Rolling back last commit");
+  git.undoLastCommit();
+  console.log("Last commit rolled back. Review changes before recommitting.");
+}
+
+// Call rollback if needed
+let needsRollback: boolean = false; // This would be determined by your logic
+if (needsRollback) {
+  emergencyRollback();
+}
+```
+
+### Integration with Other Utah Functions
+
+```typescript
+// Combine with OS utilities and user prompts
+let gitInstalled: boolean = os.isInstalled("git");
+
+if (!gitInstalled) {
+  console.log("Error: Git is not installed");
+  exit(1);
+}
+
+console.log("Git is available - proceeding with commit operations");
+
+// Confirm before undoing commit
+let shouldUndo: boolean = console.promptYesNo("Undo the last commit?");
+
+if (shouldUndo) {
+  console.log("Undoing last commit...");
+  git.undoLastCommit();
+  console.log("Last commit undone successfully");
+} else {
+  console.log("Keeping last commit as is");
+}
+
+// Use with error handling
+try {
+  console.log("Attempting to undo last commit...");
+  git.undoLastCommit();
+  console.log("Commit undone successfully");
+}
+catch {
+  console.log("Failed to undo commit - perhaps no commits exist");
+}
+```
+
+### Generated Bash Code for Git Utilities
+
+The git utilities transpile to standard git commands:
+
+```bash
+# git.undoLastCommit() becomes:
+git reset --soft HEAD~1
+
+# Complete example with error handling:
+gitInstalled=$(command -v git &> /dev/null && echo "true" || echo "false")
+
+if [ "${gitInstalled}" != "true" ]; then
+  echo "Error: Git is not installed"
+  exit 1
+fi
+
+echo "Git is available - proceeding with commit operations"
+
+shouldUndo=$(while true; do read -p "Undo the last commit? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
+
+if [ "${shouldUndo}" = "true" ]; then
+  echo "Undoing last commit..."
+  git reset --soft HEAD~1
+  echo "Last commit undone successfully"
+else
+  echo "Keeping last commit as is"
+fi
+
+# With try/catch error handling:
+_utah_try_block_1() {
+  (
+    set -e
+    echo "Attempting to undo last commit..."
+    git reset --soft HEAD~1 || exit 1
+    echo "Commit undone successfully"
+  )
+}
+
+utah_catch_1() {
+  echo "Failed to undo commit - perhaps no commits exist"
+}
+
+_utah_try_block_1 || utah_catch_1
+```
+
+### What git.undoLastCommit() Does
+
+The `git.undoLastCommit()` function performs a **soft reset** to the previous commit:
+
+- **Undoes the last commit**: Removes the most recent commit from the git history
+- **Preserves all changes**: All file modifications remain in the staging area
+- **Safe operation**: You don't lose any work - files stay staged and ready to commit
+- **Correctable**: Perfect for fixing commit messages or adding forgotten files
+
+### Git Reset Types Comparison
+
+Utah's `git.undoLastCommit()` uses `git reset --soft HEAD~1`, which is the safest option:
+
+| Reset Type | Command | Commit History | Staging Area | Working Directory |
+|------------|---------|----------------|--------------|-------------------|
+| **Soft** (Utah) | `git reset --soft HEAD~1` | ✅ Undone | ✅ Preserved | ✅ Preserved |
+| Mixed | `git reset HEAD~1` | ✅ Undone | ❌ Cleared | ✅ Preserved |
+| Hard | `git reset --hard HEAD~1` | ✅ Undone | ❌ Cleared | ❌ Cleared |
+
+### Use Cases for git.undoLastCommit()
+
+- **Fix Commit Messages**: Undo commit, then recommit with correct message
+- **Add Forgotten Files**: Undo commit, stage additional files, then recommit
+- **Split Large Commits**: Undo large commit, then make smaller, focused commits
+- **Correct Mistakes**: Undo accidental commits before pushing to remote
+- **Reorder Changes**: Undo commits to reorganize change history
+- **Emergency Rollback**: Quick rollback during development workflows
+
+### Best Practices
+
+- **Use before pushing**: Only undo commits that haven't been pushed to remote repositories
+- **Check staging area**: After undoing, verify what's staged with `git status`
+- **Commit again**: Remember to make a new commit after making corrections
+- **Combine with validation**: Use with other Utah functions to validate before undoing
+- **Document reasons**: Add comments explaining why commits are being undone
+
+### Safety Notes
+
+- **Local operation only**: This affects only your local repository
+- **No data loss**: All file changes are preserved in the staging area
+- **Reversible**: You can immediately recommit if you change your mind
+- **Safe for collaboration**: Won't affect other developers until you push
+- **Git history**: Only removes the commit, doesn't delete file contents
+
 ## 🎛️ Script Control Functions
 
 Utah provides script control functions for managing shell behavior and debugging options during script execution. These functions compile to standard shell `set` commands and allow you to control various aspects of script execution.
@@ -2306,6 +2499,7 @@ Current tests cover:
 - **fs_parentdirname.shx** - File system parent directory name extraction
 - **fs_path.shx** - File system path manipulation
 - **function_declarations.shx** - Function definitions with typed parameters and return values
+- **git_undo_last_commit.shx** - Git undo last commit functionality
 - **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
 - **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
@@ -2340,7 +2534,6 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - **array_type_mismatch.shx** - Boolean array with mixed types (string in boolean array)
 - **const_reassignment_test.shx** - Attempt to reassign a const variable after declaration
-- **number_array_with_string.shx** - Number array with string element type mismatch
 
 ### How Tests Work
 
@@ -2427,7 +2620,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
 
-- [ ] `git.*` functions (`undoLastCommit()`, `mergePR()`, `forcePush()`)
+- [ ] `git.*` functions (`undoLastCommit()` implemented, `mergePR()`, `forcePush()` coming soon)
 
 - [ ] `@decorator()` syntax for decorators for validation (`@notNullable()`, `@notEmpty()`, `@greaterThan()`, `@ipv4()`, `@numberOnly()`, `@alphaNumeric()`, `@email()`)
 

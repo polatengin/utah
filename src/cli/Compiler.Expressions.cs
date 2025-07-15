@@ -138,11 +138,19 @@ public partial class Compiler
         return CompileArrayPushExpression(arrayPush);
       case TimerCurrentExpression timerCurrent:
         return CompileTimerCurrentExpression(timerCurrent);
+      case GitUndoLastCommitExpression:
+        return CompileGitUndoLastCommitExpression();
       case FsWriteFileExpressionPlaceholder fsWriteFile:
         throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
       default:
         throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
     }
+  }
+
+  private string CompileGitUndoLastCommitExpression()
+  {
+    // Generates bash code for git.undoLastCommit()
+    return "$(git reset --soft HEAD~1)";
   }
 
   private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)

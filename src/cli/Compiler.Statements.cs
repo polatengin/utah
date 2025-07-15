@@ -118,6 +118,11 @@ public partial class Compiler
             }
             lines.Add($"export {varName}={value}");
           }
+          // Special handling for git.undoLastCommit() function calls
+          else if (funcCall.Name == "git.undoLastCommit")
+          {
+            lines.Add("git reset --soft HEAD~1");
+          }
           else
           {
             var bashArgs = funcCall.Arguments.Select(CompileExpression).ToList();

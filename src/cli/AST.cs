@@ -61,6 +61,7 @@ public record TimerStopExpression() : Expression;
 public record ArgsHasExpression(string Flag) : Expression;
 public record ArgsGetExpression(string Flag) : Expression;
 public record ArgsAllExpression() : Expression;
+public record GitUndoLastCommitExpression() : Expression;
 
 // Statements
 public abstract record Statement : Node;
