@@ -2205,7 +2205,7 @@ Utah's `git.undoLastCommit()` uses `git reset --soft HEAD~1`, which is the safes
 - **Reorder Changes**: Undo commits to reorganize change history
 - **Emergency Rollback**: Quick rollback during development workflows
 
-### Best Practices
+### Script Control Best Practices
 
 - **Use before pushing**: Only undo commits that haven't been pushed to remote repositories
 - **Check staging area**: After undoing, verify what's staged with `git status`
