@@ -2427,6 +2427,8 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
 
+- [ ] `git.*` functions (`undoLastCommit()`, `mergePR()`, `forcePush()`)
+
 - [ ] `@decorator()` syntax for decorators for validation (`@notNullable()`, `@notEmpty()`, `@greaterThan()`, `@ipv4()`, `@numberOnly()`, `@alphaNumeric()`, `@email()`)
 
 - [x] Error handling: try/catch, subshell
