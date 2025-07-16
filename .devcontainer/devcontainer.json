@@ -3,6 +3,12 @@
   "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/node:1.6.3": {},
+    "ghcr.io/devcontainers/features/go:1.3.2": {},
+    "ghcr.io/azutake/devcontainer-features/go-packages-install:0": {
+      "packages": [
+        "mvdan.cc/sh/v3/cmd/shfmt@latest"
+      ]
+    },
     "ghcr.io/devcontainers-extra/features/npm-packages:1.0.1": {
       "packages": [
         "yo@latest",
@@ -19,6 +25,7 @@
         "DavidAnson.vscode-markdownlint",
         "dbaeumer.vscode-eslint",
         "EditorConfig.EditorConfig",
+        "foxundermoon.shell-format",
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "ms-dotnettools.csharp",
