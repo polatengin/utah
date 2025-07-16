@@ -2806,11 +2806,11 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] Enhanced string manipulation functions
 
-- [x] File I/O operations (read/write files)
+- [x] File I/O operations (exists, read/write files)
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
-- [ ] File I/O operations (exists, delete, copy, move, rename, permissions, etc.)
+- [ ] File I/O operations (delete, copy, move, rename, permissions, etc.)
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
