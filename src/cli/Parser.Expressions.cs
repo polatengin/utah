@@ -1013,7 +1013,7 @@ public partial class Parser
   private LambdaExpression ParseLambdaExpression(string input)
   {
     input = input.Trim();
-    
+
     // Simple lambda: () => { statements }
     var match = Regex.Match(input, @"^\(\s*\)\s*=>\s*\{(.*)\}$", RegexOptions.Singleline);
     if (match.Success)
@@ -1022,34 +1022,34 @@ public partial class Parser
       var statements = ParseStatementBlock(bodyContent);
       return new LambdaExpression(new List<string>(), statements);
     }
-    
+
     // Lambda with parameters: (param1, param2) => { statements }
     match = Regex.Match(input, @"^\(([^)]*)\)\s*=>\s*\{(.*)\}$", RegexOptions.Singleline);
     if (match.Success)
     {
       var paramString = match.Groups[1].Value.Trim();
       var bodyContent = match.Groups[2].Value.Trim();
-      
+
       var parameters = new List<string>();
       if (!string.IsNullOrEmpty(paramString))
       {
         parameters.AddRange(paramString.Split(',').Select(p => p.Trim()));
       }
-      
+
       var statements = ParseStatementBlock(bodyContent);
       return new LambdaExpression(parameters, statements);
     }
-    
+
     throw new InvalidOperationException($"Invalid lambda expression: {input}");
   }
-  
+
   private List<Statement> ParseStatementBlock(string input)
   {
     if (string.IsNullOrWhiteSpace(input))
     {
       return new List<Statement>();
     }
-    
+
     // Create a temporary parser for the block content
     var parser = new Parser(input);
     var program = parser.Parse();

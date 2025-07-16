@@ -3,7 +3,7 @@ using System.Text;
 
 public partial class Parser
 {
-  private readonly string[] _lines;
+  private string[] _lines;
   private readonly HashSet<string> _constVariables = new HashSet<string>();
 
   public Parser(string input)
@@ -93,6 +93,9 @@ public partial class Parser
 
   public ProgramNode Parse()
   {
+    // Preprocess lines to handle malformatted code
+    _lines = PreprocessMalformattedCode(_lines);
+
     var statements = new List<Statement>();
 
     for (int i = 0; i < _lines.Length; i++)
@@ -124,7 +127,7 @@ public partial class Parser
     {
       return ParseFunctionDeclaration(line, ref i);
     }
-    if (line.StartsWith("if ("))
+    if (line.StartsWith("if(") || line.StartsWith("if ("))
     {
       return ParseIfStatement(line, ref i);
     }
@@ -288,7 +291,7 @@ public partial class Parser
       }
 
       // Now parse the complete declaration
-      var match = Regex.Match(fullDeclaration, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+      var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
       if (match.Success)
       {
         var name = match.Groups[2].Value;
@@ -315,7 +318,7 @@ public partial class Parser
     }
 
     // Single-line variable declaration
-    var singleLineMatch = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+    var singleLineMatch = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
     if (singleLineMatch.Success)
     {
       var name = singleLineMatch.Groups[2].Value;
@@ -344,7 +347,7 @@ public partial class Parser
   private VariableDeclaration ParseSingleLineVariableDeclaration(string line)
   {
     var isConst = line.StartsWith("const ");
-    var match = Regex.Match(line, @"(let|const) (\w+)(?::\s*([\w\[\]]+))?\s*=\s*(.+);");
+    var match = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
     if (match.Success)
     {
       var name = match.Groups[2].Value;
@@ -372,7 +375,7 @@ public partial class Parser
 
   private FunctionDeclaration ParseFunctionDeclaration(string line, ref int i)
   {
-    var headerMatch = Regex.Match(line, @"function (\w+)\(([^)]*)\)(?::\s*(\w+))?\s*\{");
+    var headerMatch = Regex.Match(line, @"function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*(\w+))?\s*\{");
     if (!headerMatch.Success) throw new Exception("Invalid function declaration");
 
     var name = headerMatch.Groups[1].Value;
@@ -405,7 +408,7 @@ public partial class Parser
 
   private IfStatement ParseIfStatement(string line, ref int i)
   {
-    var match = Regex.Match(line, @"if \((.+)\) \{");
+    var match = Regex.Match(line, @"if\s*\((.+)\)\s*\{");
     if (!match.Success) throw new Exception("Invalid if statement");
 
     var condition = ParseExpression(match.Groups[1].Value);
@@ -436,7 +439,7 @@ public partial class Parser
         if (i + 1 < _lines.Length)
         {
           var nextLine = _lines[i + 1].Trim();
-          if (nextLine.StartsWith("else {"))
+          if (Regex.IsMatch(nextLine, @"^else\s*\{"))
           {
             // Handle single-line else
             i++; // Move to the else line
@@ -456,7 +459,7 @@ public partial class Parser
               }
             }
           }
-          else if (nextLine.StartsWith("else if ("))
+          else if (Regex.IsMatch(nextLine, @"^else\s+if\s*\("))
           {
             // Handle else if as a nested if statement
             i++; // Move to the else if line
@@ -476,10 +479,10 @@ public partial class Parser
       var innerLine = _lines[i].Trim();
 
       // Check if this line ends the then body
-      if (innerLine == "}" || innerLine == "} else {" || innerLine.StartsWith("} else if ("))
+      if (innerLine == "}" || Regex.IsMatch(innerLine, @"^\}\s*else\s*\{") || Regex.IsMatch(innerLine, @"^\}\s*else\s+if\s*\("))
       {
         // Handle the else clause if present on the same line
-        if (innerLine == "} else {")
+        if (Regex.IsMatch(innerLine, @"^\}\s*else\s*\{"))
         {
           // Parse the else body
           i++; // Move past the } else { line
@@ -497,7 +500,7 @@ public partial class Parser
             i++;
           }
         }
-        else if (innerLine.StartsWith("} else if ("))
+        else if (Regex.IsMatch(innerLine, @"^\}\s*else\s+if\s*\("))
         {
           // Handle else if
           var elseIfLine = innerLine.Substring(2); // Remove "} " prefix
@@ -524,14 +527,14 @@ public partial class Parser
     {
       var nextLine = _lines[i + 1].Trim();
 
-      if (nextLine.StartsWith("else if ("))
+      if (Regex.IsMatch(nextLine, @"^else\s+if\s*\("))
       {
         // Handle else if as a nested if statement
         i++; // Move to the else if line
         var elseIfStatement = ParseIfStatement(nextLine, ref i);
         elseBody.Add(elseIfStatement);
       }
-      else if (nextLine == "else {")
+      else if (Regex.IsMatch(nextLine, @"^else\s*\{"))
       {
         // Handle else clause
         i++; // Move to the else line
@@ -1027,7 +1030,7 @@ public partial class Parser
     while (i < _lines.Length && braceDepth > 0)
     {
       var bodyLine = _lines[i].Trim();
-      
+
       // Count braces to handle nested blocks
       foreach (char c in bodyLine)
       {
@@ -1044,7 +1047,7 @@ public partial class Parser
           lambdaBody.Add(statement);
         }
       }
-      
+
       i++;
     }
 
@@ -1053,7 +1056,50 @@ public partial class Parser
 
     var lambda = new LambdaExpression(new List<string>(), lambdaBody);
     var schedulerCron = new SchedulerCronExpression(cronPatternExpr, lambda);
-    
+
     return new ExpressionStatement(schedulerCron);
+  }
+
+  private string[] PreprocessMalformattedCode(string[] lines)
+  {
+    var result = new List<string>();
+
+    for (int i = 0; i < lines.Length; i++)
+    {
+      var line = lines[i];
+      var trimmedLine = line.Trim();
+
+      // Handle }else { patterns - split into separate } and else { lines
+      if (Regex.IsMatch(trimmedLine, @"^\}\s*else\s*\{"))
+      {
+        result.Add("}");
+        result.Add("else {");
+        continue;
+      }
+
+      // Only normalize critical parsing patterns, don't change spacing of content
+      if (!string.IsNullOrEmpty(trimmedLine))
+      {
+        // Only fix keyword patterns that break parsing recognition
+        if (Regex.IsMatch(trimmedLine, @"^if\s*\("))
+        {
+          // Ensure if statements have proper space for recognition
+          trimmedLine = Regex.Replace(trimmedLine, @"^if\s*\(", "if (");
+        }
+        else if (Regex.IsMatch(trimmedLine, @"^function\s*\w"))
+        {
+          // Ensure function declarations have proper space for recognition  
+          trimmedLine = Regex.Replace(trimmedLine, @"^function\s+", "function ");
+        }
+
+        result.Add(trimmedLine);
+      }
+      else
+      {
+        result.Add(line); // Keep empty lines as-is
+      }
+    }
+
+    return result.ToArray();
   }
 }

@@ -1,11 +1,12 @@
 let name: string = "test";
 const value: number = 42;
-if(condition){;
-console.log("test");
-console.log("another test");
-}else{;
-console.log("else branch");
-};
+
+if(condition) {
+  console.log("test");
+  console.log("another test");
+} else {
+  console.log("else branch");
+}
 
 function testFunction(param1: string, param2: number): void {
   let result = param1 + param2;
