@@ -9,7 +9,7 @@ jobs:
 
     permissions:
       contents: write
-      security_events: write
+      security-events: write
 
     steps:
       - name: Checkout code
