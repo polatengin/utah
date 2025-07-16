@@ -27,6 +27,14 @@ if (args.Length > 0)
       }
       RunFile(args[1]);
       break;
+    case "format":
+      if (args.Length < 2 || !args[1].EndsWith(".shx"))
+      {
+        Console.WriteLine("Usage: utah format <file.shx> [-o <output.shx>] [--in-place] [--check]");
+        return;
+      }
+      FormatFile(args);
+      break;
     case "--version":
     case "-v":
     case "version":
@@ -150,6 +158,88 @@ static void RunFile(string inputPath)
   }
 }
 
+static void FormatFile(string[] args)
+{
+  var inputPath = args[1];
+  string? outputPath = null;
+  bool inPlace = false;
+  bool checkOnly = false;
+
+  // Parse additional arguments
+  for (int i = 2; i < args.Length; i++)
+  {
+    switch (args[i])
+    {
+      case "-o":
+        if (i + 1 < args.Length)
+        {
+          outputPath = args[i + 1];
+          i++; // Skip the next argument as it's the output path
+        }
+        break;
+      case "--in-place":
+        inPlace = true;
+        break;
+      case "--check":
+        checkOnly = true;
+        break;
+    }
+  }
+
+  if (!File.Exists(inputPath))
+  {
+    Console.WriteLine($"File not found: {inputPath}");
+    Environment.Exit(1);
+    return;
+  }
+
+  try
+  {
+    // Get formatting options from EditorConfig
+    var options = FormattingOptions.FromEditorConfig(inputPath);
+    var formatter = new Formatter(options);
+
+    // Format the file
+    var formattedContent = formatter.Format(inputPath);
+
+    if (checkOnly)
+    {
+      // Check if file is already formatted
+      var originalContent = File.ReadAllText(inputPath);
+      if (originalContent != formattedContent)
+      {
+        Console.WriteLine($"❌ File is not formatted: {inputPath}");
+        Environment.Exit(1);
+      }
+      else
+      {
+        Console.WriteLine($"✅ File is properly formatted: {inputPath}");
+      }
+      return;
+    }
+
+    // Determine output path
+    var finalOutputPath = outputPath ?? (inPlace ? inputPath : Path.ChangeExtension(inputPath, ".formatted.shx"));
+
+    // Write formatted content
+    File.WriteAllText(finalOutputPath, formattedContent);
+
+    if (inPlace)
+    {
+      Console.WriteLine($"✅ Formatted in place: {inputPath}");
+    }
+    else
+    {
+      Console.WriteLine($"✅ Formatted: {finalOutputPath}");
+    }
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"❌ Formatting failed: {ex.Message}");
+    Environment.Exit(1);
+  }
+}
+
 static string ResolveImports(string filePath)
 {
   var resolvedFiles = new HashSet<string>();
@@ -213,6 +303,11 @@ static void PrintUsage()
   Console.WriteLine("Commands:");
   Console.WriteLine("  run <file.shx>           Compile and run a .shx file.");
   Console.WriteLine("  compile <file.shx>       Compile a .shx file to a .sh file.");
+  Console.WriteLine("  format <file.shx>        Format a .shx file according to EditorConfig rules.");
+  Console.WriteLine("    Options:");
+  Console.WriteLine("      -o <output.shx>      Write formatted output to a specific file.");
+  Console.WriteLine("      --in-place          Format the file in place (overwrite original).");
+  Console.WriteLine("      --check             Check if file is formatted (exit 1 if not).");
   Console.WriteLine("  lsp                      Run the language server.");
   Console.WriteLine("  version (--version, -v)  Show version information.");
 }

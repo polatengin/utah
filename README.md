@@ -2598,6 +2598,39 @@ cd src/cli
 dotnet build
 ```
 
+### Formatting
+
+Utah includes a built-in code formatter that respects EditorConfig settings:
+
+```bash
+# Format a file and save to .formatted.shx
+utah format script.shx
+
+# Format with custom output path
+utah format script.shx -o formatted_script.shx
+
+# Format in place (overwrite original)
+utah format script.shx --in-place
+
+# Check if file is properly formatted (exit 1 if not)
+utah format script.shx --check
+```
+
+The formatter honors these EditorConfig properties:
+
+- `indent_style` (space/tab)
+- `indent_size` (number)
+- `end_of_line` (lf/crlf/cr)
+- `insert_final_newline` (true/false)
+- `trim_trailing_whitespace` (true/false)
+- `charset` (utf-8, etc.)
+
+Utah-specific EditorConfig properties:
+
+- `utah_brace_style` (same_line/new_line)
+- `utah_space_before_paren` (true/false) - `if(` vs `if (`
+- `utah_max_line_length` (number) - for future line wrapping
+
 ### Testing
 
 Utah includes a comprehensive regression test suite to ensure that changes don't break existing functionality.
@@ -2827,5 +2860,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 - [x] Time and Resource monitoring
 
 - [x] VS Code extension for syntax highlighting
+
+- [x] Code formatting with EditorConfig support
 
 - [ ] VS Code extension for intellisense and autocompletion
