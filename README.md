@@ -2810,7 +2810,13 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
-- [ ] File I/O operations (delete, copy, move, rename, permissions, etc.)
+- [ ] Template functions to update files with dynamic content
+
+- [ ] json parsing and manipulation functions
+
+- [ ] yaml parsing and manipulation functions
+
+- [ ] File I/O operations (watch, delete, copy, move, rename, permissions, etc.)
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
