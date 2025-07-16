@@ -2,7 +2,10 @@
 
 # Utah Installation Script
 # Usage:
-#   ./install-utah.sh
+#   ./install-utah.sh                    # Install latest version
+#   ./install-utah.sh v1.2.3             # Install specific version
+#   curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | bash -s v1.2.3
 # Requirements:
 #   - curl or wget (for downloading)
 #   - sudo access (for installing to /usr/local/bin/)
@@ -12,132 +15,109 @@ RELEASES_URI="https://api.github.com/repos/polatengin/utah/releases/latest"
 # these values will be populated below
 release_info=""
 binary_arch=""
+binary_os=""
 version=""
 
 main() {
-  # Check if utah already exists in /usr/local/bin/
+  # Handle version parameter
+  target_version="${1:-latest}"
+  
+  # Check if utah already exists
   if [ -f "/usr/local/bin/utah" ]; then
     echo "⚠️  Utah binary already exists: /usr/local/bin/utah"
     echo "❌ Installation cancelled. Please remove the existing binary first! (sudo rm /usr/local/bin/utah)"
     return 1
   fi
 
+  echo "🎯 Target version: $target_version"
+
   detect_system
-  map_architecture
-  map_os
-  fetch_latest_version
-  download_latest_utah
-  move_to_usr_local_bin
+  set_version "$target_version"
+  download_utah
+  install_utah
 }
 
 detect_system(){
-    echo "🔍 Detecting system architecture..."
-    arch=$(uname -m)
-    os=$(uname -s | tr '[:upper:]' '[:lower:]')
-    echo "📋 System info: OS=$os, Architecture=$arch"
-}
-
-map_os(){
+  echo "🔍 Detecting system..."
+  arch=$(uname -m)
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  echo "📋 System: $os ($arch)"
+  
   # Map OS to binary naming convention
   case "$os" in
-      linux)
-          binary_os="linux"
-          ;;
-      darwin)
-          binary_os="osx"
-          ;;
-      *)
-          echo "❌ Error: Unsupported operating system: $os"
-          return 1
-          ;;
+    linux) binary_os="linux" ;;
+    darwin) binary_os="osx" ;;
+    *) echo "❌ Error: Unsupported operating system: $os"; return 1 ;;
   esac
-}
-
-map_architecture(){
-  # Map system architecture to binary naming convention
+  
+  # Map architecture to binary naming convention
   case "$arch" in
-      x86_64|amd64)
-          binary_arch="x64"
-          ;;
-      arm64|aarch64)
-          binary_arch="arm64"
-          ;;
-      *)
-          echo "❌ Error: Unsupported architecture: $arch"
-          return 1
-          ;;
+    x86_64|amd64) binary_arch="x64" ;;
+    arm64|aarch64) binary_arch="arm64" ;;
+    *) echo "❌ Error: Unsupported architecture: $arch"; return 1 ;;
   esac
 }
 
-fetch_latest_version(){
-  echo "🌐 Fetching latest release information..."
+set_version(){
+  local target_version="$1"
+  
+  if [ "$target_version" = "latest" ]; then
+    echo "🌐 Fetching latest release..."
+    release_info=$(download_content "$RELEASES_URI") || return 1
+    version=$(echo "$release_info" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
+    
+    if [ -z "$version" ]; then
+      echo "❌ Error: Could not fetch latest version"
+      return 1
+    fi
+    echo "📦 Latest version: $version"
+  else
+    version="$target_version"
+    echo "📦 Using version: $version"
+  fi
+}
+
+download_content(){
+  local url="$1"
+  if command -v curl >/dev/null 2>&1; then
+    curl -s "$url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO- "$url"
+  else
+    echo "❌ Error: Neither curl nor wget is available" >&2
+    return 1
+  fi
+}
+
+download_utah() {
+  binary_name="utah-${binary_os}-${binary_arch}"
+  download_url="https://github.com/polatengin/utah/releases/download/${version}/${binary_name}"
+
+  echo "⬇️  Downloading $binary_name ($version)..."
 
   if command -v curl >/dev/null 2>&1; then
-      release_info=$(curl -s "$RELEASES_URI")
+    curl -L -o "utah" "$download_url" || { echo "❌ Download failed"; return 1; }
   elif command -v wget >/dev/null 2>&1; then
-      release_info=$(wget -qO- "$RELEASES_URI")
+    wget -O "utah" "$download_url" || { echo "❌ Download failed"; return 1; }
   else
-      echo "❌ Error: Neither curl nor wget is available"
-      return 1
+    echo "❌ Error: Neither curl nor wget is available"
+    return 1
   fi
-  version=$(echo "$release_info" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
+
+  chmod +x "utah"
+  file_size=$(ls -lh "utah" | awk '{print $5}')
+  echo "✅ Downloaded $file_size binary"
 }
 
-download_latest_utah() {
-    if [ -z "$version" ]; then
-        echo "❌ Error: Could not fetch latest version information"
-        return 1
-    fi
-
-    echo "📦 Latest version: $version"
-
-    binary_name="utah-${binary_os}-${binary_arch}"
-    download_url="https://github.com/polatengin/utah/releases/download/${version}/${binary_name}"
-
-    echo "⬇️  Downloading: $binary_name"
-    echo "🔗 URL: $download_url"
-
-    if command -v curl >/dev/null 2>&1; then
-        if curl -L -o "utah" "$download_url"; then
-            echo "✅ Download completed successfully"
-        else
-            echo "❌ Error: Download failed"
-            return 1
-        fi
-    elif command -v wget >/dev/null 2>&1; then
-        if wget -O "utah" "$download_url"; then
-            echo "✅ Download completed successfully"
-        else
-            echo "❌ Error: Download failed"
-            return 1
-        fi
-    fi
-
-    # Make the binary executable
-    chmod +x "utah"
-    echo "🔧 Made binary executable"
-
-    # Verify the download
-    if [ -f "utah" ]; then
-        file_size=$(ls -lh "utah" | awk '{print $5}')
-        echo "📁 Downloaded file size: $file_size"
-        echo "🎉 Utah binary successfully downloaded as 'utah'"
-        echo "💡 You can now run: ./utah"
-    else
-        echo "❌ Error: Binary file not found after download"
-        return 1
-    fi
-}
-
-move_to_usr_local_bin() {
-    echo "📦 Moving binary to /usr/local/bin..."
-
-    if sudo mv "utah" "/usr/local/bin/"; then
-        echo "✅ Successfully moved to /usr/local/bin/"
-    else
-        echo "❌ Error: Failed to move binary to /usr/local/bin/"
-        return 1
-    fi
+install_utah() {
+  echo "📦 Installing to /usr/local/bin..."
+  if sudo mv "utah" "/usr/local/bin/"; then
+    echo "✅ Utah $version installed successfully!"
+    echo "💡 You can now run: utah --help"
+  else
+    echo "❌ Error: Failed to install binary"
+    return 1
+  fi
 }
 
 # entry point
