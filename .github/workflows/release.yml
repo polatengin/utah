@@ -104,7 +104,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "To install the Utah CLI, run the following command:" >> $GITHUB_STEP_SUMMARY
           echo "```sh" >> $GITHUB_STEP_SUMMARY
-          echo "curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash" >> $GITHUB_STEP_SUMMARY
+          echo "curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash -s ${{ steps.version.outputs.new_version_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -243,7 +243,7 @@ jobs:
             To install the Utah CLI, run the following command:
 
             ```sh
-            curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+            curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash -s ${{ steps.version.outputs.new_version_tag }}
             ```
           tag_name: ${{ steps.version.outputs.new_version_tag }}
           release_name: Release ${{ steps.version.outputs.new_version_tag }}
