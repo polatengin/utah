@@ -12,6 +12,7 @@ if(console.isSudo()) {
   console.log("Running as user");
 }
 let userResponse = console.promptYesNo("Continue?");
+
 if(userResponse) {
   console.log("User said yes");
 }
