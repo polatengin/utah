@@ -21,7 +21,7 @@ version=""
 main() {
   # Handle version parameter
   target_version="${1:-latest}"
-  
+
   # Check if utah already exists
   if [ -f "/usr/local/bin/utah" ]; then
     echo "⚠️  Utah binary already exists: /usr/local/bin/utah"
@@ -37,35 +37,41 @@ main() {
   install_utah
 }
 
-detect_system(){
+detect_system() {
   echo "🔍 Detecting system..."
   arch=$(uname -m)
   os=$(uname -s | tr '[:upper:]' '[:lower:]')
   echo "📋 System: $os ($arch)"
-  
+
   # Map OS to binary naming convention
   case "$os" in
-    linux) binary_os="linux" ;;
-    darwin) binary_os="osx" ;;
-    *) echo "❌ Error: Unsupported operating system: $os"; return 1 ;;
+  linux) binary_os="linux" ;;
+  darwin) binary_os="osx" ;;
+  *)
+    echo "❌ Error: Unsupported operating system: $os"
+    return 1
+    ;;
   esac
-  
+
   # Map architecture to binary naming convention
   case "$arch" in
-    x86_64|amd64) binary_arch="x64" ;;
-    arm64|aarch64) binary_arch="arm64" ;;
-    *) echo "❌ Error: Unsupported architecture: $arch"; return 1 ;;
+  x86_64 | amd64) binary_arch="x64" ;;
+  arm64 | aarch64) binary_arch="arm64" ;;
+  *)
+    echo "❌ Error: Unsupported architecture: $arch"
+    return 1
+    ;;
   esac
 }
 
-set_version(){
+set_version() {
   local target_version="$1"
-  
+
   if [ "$target_version" = "latest" ]; then
     echo "🌐 Fetching latest release..."
     release_info=$(download_content "$RELEASES_URI") || return 1
     version=$(echo "$release_info" | grep '"tag_name"' | head -n1 | cut -d'"' -f4)
-    
+
     if [ -z "$version" ]; then
       echo "❌ Error: Could not fetch latest version"
       return 1
@@ -77,7 +83,7 @@ set_version(){
   fi
 }
 
-download_content(){
+download_content() {
   local url="$1"
   if command -v curl >/dev/null 2>&1; then
     curl -s "$url"
@@ -96,9 +102,15 @@ download_utah() {
   echo "⬇️  Downloading $binary_name ($version)..."
 
   if command -v curl >/dev/null 2>&1; then
-    curl -L -o "utah" "$download_url" || { echo "❌ Download failed"; return 1; }
+    curl -L -o "utah" "$download_url" || {
+      echo "❌ Download failed"
+      return 1
+    }
   elif command -v wget >/dev/null 2>&1; then
-    wget -O "utah" "$download_url" || { echo "❌ Download failed"; return 1; }
+    wget -O "utah" "$download_url" || {
+      echo "❌ Download failed"
+      return 1
+    }
   else
     echo "❌ Error: Neither curl nor wget is available"
     return 1
