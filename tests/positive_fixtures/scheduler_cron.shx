@@ -1,0 +1,25 @@
+// Test scheduler.cron functionality
+script.description("Test script for scheduler.cron implementation");
+
+console.log("Setting up scheduled task...");
+
+// Schedule a job every 6 hours
+scheduler.cron("0 */6 * * *", () => {
+  console.log("Running every 6 hours...");
+  console.log("Performing maintenance tasks...");
+});
+
+// Schedule daily at midnight
+scheduler.cron("0 0 * * *", () => {
+  console.log("Daily maintenance");
+  console.log("Cleaning up temporary files...");
+});
+
+// Schedule every Monday at 2 AM
+scheduler.cron("0 2 * * 1", () => {
+  console.log("Weekly report generation");
+  let reportDate: string = "Monday Report";
+  console.log(`Generating: ${reportDate}`);
+});
+
+console.log("Scheduler setup complete!");

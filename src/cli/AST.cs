@@ -63,6 +63,8 @@ public record ArgsHasExpression(string Flag) : Expression;
 public record ArgsGetExpression(string Flag) : Expression;
 public record ArgsAllExpression() : Expression;
 public record GitUndoLastCommitExpression() : Expression;
+public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
+public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 
 // Statements
 public abstract record Statement : Node;

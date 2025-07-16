@@ -697,6 +697,25 @@ public partial class Parser
         }
       }
 
+      // Special handling for git.undoLastCommit()
+      if (functionName == "git.undoLastCommit" && string.IsNullOrEmpty(argsContent))
+      {
+        return new GitUndoLastCommitExpression();
+      }
+
+      // Special handling for scheduler.cron()
+      if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var cronPatternExpr = ParseExpression(args[0]);
+          var lambdaExpr = ParseLambdaExpression(args[1].Trim());
+          return new SchedulerCronExpression(cronPatternExpr, lambdaExpr);
+        }
+        throw new InvalidOperationException("scheduler.cron() requires exactly 2 arguments: (cronPattern, lambda)");
+      }
+
       // Check for parallel keyword
       if (input.TrimStart().StartsWith("parallel "))
       {
@@ -991,19 +1010,59 @@ public partial class Parser
     return input.Substring(leftEnd, rightStart - leftEnd).Trim();
   }
 
+  private LambdaExpression ParseLambdaExpression(string input)
+  {
+    input = input.Trim();
+    
+    // Simple lambda: () => { statements }
+    var match = Regex.Match(input, @"^\(\s*\)\s*=>\s*\{(.*)\}$", RegexOptions.Singleline);
+    if (match.Success)
+    {
+      var bodyContent = match.Groups[1].Value.Trim();
+      var statements = ParseStatementBlock(bodyContent);
+      return new LambdaExpression(new List<string>(), statements);
+    }
+    
+    // Lambda with parameters: (param1, param2) => { statements }
+    match = Regex.Match(input, @"^\(([^)]*)\)\s*=>\s*\{(.*)\}$", RegexOptions.Singleline);
+    if (match.Success)
+    {
+      var paramString = match.Groups[1].Value.Trim();
+      var bodyContent = match.Groups[2].Value.Trim();
+      
+      var parameters = new List<string>();
+      if (!string.IsNullOrEmpty(paramString))
+      {
+        parameters.AddRange(paramString.Split(',').Select(p => p.Trim()));
+      }
+      
+      var statements = ParseStatementBlock(bodyContent);
+      return new LambdaExpression(parameters, statements);
+    }
+    
+    throw new InvalidOperationException($"Invalid lambda expression: {input}");
+  }
+  
+  private List<Statement> ParseStatementBlock(string input)
+  {
+    if (string.IsNullOrWhiteSpace(input))
+    {
+      return new List<Statement>();
+    }
+    
+    // Create a temporary parser for the block content
+    var parser = new Parser(input);
+    var program = parser.Parse();
+    return program.Statements;
+  }
+
   private bool IsLikelyArray(string variableName)
   {
-    // Simple heuristic: if the variable name suggests it's an array
-    // This should be replaced with a proper symbol table lookup
-    return variableName.EndsWith("s") ||
-           variableName.EndsWith("es") ||
-           variableName.EndsWith("ies") ||
-           variableName.Contains("array", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("list", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("history", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("items", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("entries", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("values", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("data", StringComparison.OrdinalIgnoreCase);
+    // Simple heuristic: variable names ending with 's' or containing 'Array', 'List', etc.
+    // This is a basic implementation - in a full language, we'd use a symbol table
+    return variableName.EndsWith("s", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("Array", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("List", StringComparison.OrdinalIgnoreCase) ||
+           variableName.Contains("Items", StringComparison.OrdinalIgnoreCase);
   }
 }

@@ -476,6 +476,19 @@ public class FormatterVisitor
         return "args.all()";
       case GitUndoLastCommitExpression:
         return "git.undoLastCommit()";
+      case SchedulerCronExpression schedulerCron:
+        return $"scheduler.cron({VisitExpression(schedulerCron.CronPattern)}, {VisitExpression(schedulerCron.Job)})";
+      case LambdaExpression lambda:
+        var parameters = string.Join(", ", lambda.Parameters);
+        var bodyText = "";
+        if (lambda.Body.Count > 0)
+        {
+          // Create a temporary visitor to format the lambda body
+          var tempVisitor = new FormatterVisitor(_options);
+          var tempProgram = new ProgramNode(lambda.Body);
+          bodyText = tempVisitor.Visit(tempProgram).Trim();
+        }
+        return $"({parameters}) => {{ {bodyText} }}";
       default:
         return expr.ToString() ?? "";
     }

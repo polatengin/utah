@@ -199,6 +199,14 @@ public partial class Parser
     {
       return ParseArgsStatement(line);
     }
+    if (line.StartsWith("scheduler.cron("))
+    {
+      return ParseSchedulerCronStatement(line, ref i);
+    }
+    if (line == "git.undoLastCommit();")
+    {
+      return new ExpressionStatement(new GitUndoLastCommitExpression());
+    }
 
     // Check for assignment statements
     if (line.Contains(" = ") && line.EndsWith(";") && !line.StartsWith("let ") && !line.StartsWith("const "))
@@ -997,5 +1005,55 @@ public partial class Parser
 
     var filePath = match.Groups[2].Value;
     return new ImportStatement(filePath);
+  }
+
+  private Statement ParseSchedulerCronStatement(string line, ref int i)
+  {
+    // Extract the first part: scheduler.cron("pattern", 
+    var match = Regex.Match(line, @"scheduler\.cron\s*\(\s*(.+?)\s*,\s*\(\s*\)\s*=>\s*\{");
+    if (!match.Success)
+    {
+      throw new InvalidOperationException($"Invalid scheduler.cron statement: {line}");
+    }
+
+    var cronPattern = match.Groups[1].Value.Trim();
+    var cronPatternExpr = ParseExpression(cronPattern);
+
+    // Now read the lambda body until we find the closing braces
+    var lambdaBody = new List<Statement>();
+    i++; // Move to next line after the opening line
+
+    int braceDepth = 1; // We already have one opening brace from the lambda
+    while (i < _lines.Length && braceDepth > 0)
+    {
+      var bodyLine = _lines[i].Trim();
+      
+      // Count braces to handle nested blocks
+      foreach (char c in bodyLine)
+      {
+        if (c == '{') braceDepth++;
+        else if (c == '}') braceDepth--;
+      }
+
+      // If we're still inside the lambda body, parse the line as a statement
+      if (braceDepth > 0 && !string.IsNullOrEmpty(bodyLine))
+      {
+        var statement = ParseStatement(bodyLine, ref i);
+        if (statement != null)
+        {
+          lambdaBody.Add(statement);
+        }
+      }
+      
+      i++;
+    }
+
+    // Move back one line since the main loop will increment i
+    i--;
+
+    var lambda = new LambdaExpression(new List<string>(), lambdaBody);
+    var schedulerCron = new SchedulerCronExpression(cronPatternExpr, lambda);
+    
+    return new ExpressionStatement(schedulerCron);
   }
 }
