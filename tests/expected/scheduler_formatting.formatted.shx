@@ -1,3 +1,4 @@
+// Malformatted scheduler functions
 script.description("Malformatted scheduler test");
 scheduler.cron("0 */6 * * *", () => { console.log("Running every 6 hours...");
 let status = "running";

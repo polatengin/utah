@@ -1,3 +1,4 @@
+// Malformatted built-in functions
 let isInstalled = os.isInstalled("git");
 
 if(isInstalled) {
