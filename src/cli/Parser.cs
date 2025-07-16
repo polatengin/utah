@@ -994,7 +994,7 @@ public partial class Parser
     {
       throw new InvalidOperationException($"Invalid import statement: {line}");
     }
-    
+
     var filePath = match.Groups[2].Value;
     return new ImportStatement(filePath);
   }

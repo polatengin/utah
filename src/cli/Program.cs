@@ -154,36 +154,36 @@ static string ResolveImports(string filePath)
 {
   var resolvedFiles = new HashSet<string>();
   var result = new List<string>();
-  
+
   ResolveImportsRecursive(filePath, resolvedFiles, result);
-  
+
   return string.Join(Environment.NewLine, result);
 }
 
 static void ResolveImportsRecursive(string filePath, HashSet<string> resolvedFiles, List<string> result)
 {
   var absolutePath = Path.GetFullPath(filePath);
-  
+
   if (resolvedFiles.Contains(absolutePath))
   {
     return; // Avoid circular imports
   }
-  
+
   resolvedFiles.Add(absolutePath);
-  
+
   if (!File.Exists(absolutePath))
   {
     throw new InvalidOperationException($"Import file not found: {filePath}");
   }
-  
+
   var content = File.ReadAllText(absolutePath);
   var lines = content.Split('\n');
   var baseDirectory = Path.GetDirectoryName(absolutePath) ?? "";
-  
+
   foreach (var line in lines)
   {
     var trimmedLine = line.Trim();
-    
+
     if (trimmedLine.StartsWith("import "))
     {
       // Parse import statement
@@ -191,10 +191,10 @@ static void ResolveImportsRecursive(string filePath, HashSet<string> resolvedFil
       if (match.Success)
       {
         var importPath = match.Groups[2].Value;
-        var fullImportPath = Path.IsPathRooted(importPath) 
-          ? importPath 
+        var fullImportPath = Path.IsPathRooted(importPath)
+          ? importPath
           : Path.Combine(baseDirectory, importPath);
-          
+
         // Resolve the imported file recursively
         ResolveImportsRecursive(fullImportPath, resolvedFiles, result);
       }
