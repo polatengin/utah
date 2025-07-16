@@ -1,0 +1,10 @@
+// Utility functions for testing imports
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+function greet(name: string): string {
+  return "Hello, " + name + "!";
+}
+
+let sharedMessage: string = "This message comes from utils.shx";

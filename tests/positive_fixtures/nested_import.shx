@@ -1,0 +1,17 @@
+import "utils.shx";
+import "advanced_math.shx";
+
+// Test nested imports (advanced_math.shx imports math.shx)
+console.log("Testing nested imports:");
+
+let number: number = 3;
+let cubed: number = cube(number);
+let fact: number = factorial(4);
+
+console.log("Cube of ${number}: ${cubed}");
+console.log("Factorial of 4: ${fact}");
+console.log("Advanced constant: ${advancedConstant}");
+
+// Also test the original imports
+console.log(greet("Nested Imports"));
+console.log(sharedMessage);

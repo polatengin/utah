@@ -1,0 +1,18 @@
+import "utils.shx";
+import "math.shx";
+
+// Test using imported functions and variables
+let result: number = add(5, 3);
+let squared: number = square(4);
+let product: number = multiply(6, 7);
+
+console.log("Addition result: " + result);
+console.log("Square of 4: " + squared);
+console.log("Product of 6 and 7: " + product);
+
+console.log(sharedMessage);
+console.log("Math constant: " + mathConstant);
+
+// Test using imported greet function
+let greeting: string = greet("Utah Language");
+console.log(greeting);

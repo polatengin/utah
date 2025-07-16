@@ -77,7 +77,147 @@ else
 fi
 ```
 
-## 🔄 For Loops
+## ⤵️ Import System
+
+Utah supports a module system that allows you to organize your code across multiple `.shx` files using import statements. This enables code reuse, better organization, and modular development.
+
+### Basic Import Syntax
+
+```typescript
+import "filename.shx";
+```
+
+### Multiple Imports
+
+You can have multiple import statements in a single file:
+
+```typescript
+import "utils.shx";
+import "math.shx";
+import "config.shx";
+```
+
+### Import Resolution
+
+- **Relative paths**: Imports are resolved relative to the importing file's directory
+- **Absolute paths**: Full file paths are also supported
+- **Circular import prevention**: Files are only included once to prevent infinite loops
+- **Preprocessing**: Imports are resolved before compilation, merging all content
+
+### Import Example
+
+**utils.shx** (utility functions):
+
+```typescript
+function greet(name: string): string {
+  return "Hello, " + name + "!";
+}
+
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+let sharedMessage: string = "This comes from utils.shx";
+```
+
+**math.shx** (mathematical functions):
+
+```typescript
+function multiply(x: number, y: number): number {
+  return x * y;
+}
+
+function square(n: number): number {
+  return multiply(n, n);
+}
+
+let mathConstant: number = 42;
+```
+
+**main.shx** (main application):
+
+```typescript
+import "utils.shx";
+import "math.shx";
+
+// Use imported functions and variables
+let result: number = add(5, 3);
+let squared: number = square(4);
+
+console.log("Addition result: " + result);
+console.log("Square of 4: " + squared);
+console.log(greet("Utah Language"));
+console.log(sharedMessage);
+console.log("Math constant: " + mathConstant);
+```
+
+### Nested Imports
+
+Files can import other files that themselves have imports:
+
+**advanced_math.shx**:
+
+```typescript
+import "math.shx";  // This imports multiply() and square()
+
+function cube(n: number): number {
+  return multiply(n, square(n));
+}
+```
+
+**main.shx**:
+
+```typescript
+import "utils.shx";
+import "advanced_math.shx";  // This also brings in math.shx
+
+let cubed: number = cube(3);
+console.log("Cube of 3: " + cubed);
+```
+
+### Generated Bash Code for Imports
+
+The import system works by preprocessing files and merging content before compilation:
+
+**Input files**:
+
+- `utils.shx` with greet() function
+- `main.shx` importing utils.shx and calling greet()
+
+**Generated main.sh**:
+
+```bash
+#!/bin/bash
+
+# Content from utils.shx is merged first
+greet() {
+  local name="$1"
+  echo "Hello, ${name}!"
+}
+sharedMessage="This comes from utils.shx"
+
+# Content from main.shx follows
+greeting=$(greet "Utah Language")
+echo "${greeting}"
+echo "${sharedMessage}"
+```
+
+### Import Features
+
+- **Order preservation**: Imported content appears before the importing file's content
+- **Dependency resolution**: Nested imports are handled automatically
+- **Circular import prevention**: Prevents infinite loops with smart duplicate detection
+- **Path flexibility**: Supports both relative and absolute import paths
+- **Error handling**: Clear error messages for missing import files
+
+### Import Best Practices
+
+1. **Organize by functionality**: Group related functions in separate files
+2. **Use descriptive names**: Choose clear, descriptive filenames for imported modules
+3. **Avoid deep nesting**: Keep import chains reasonably shallow for maintainability
+4. **Document dependencies**: Comment your imports to explain their purpose
+
+## 🔄️ For Loops
 
 Utah supports both traditional C-style for loops and for-in loops for iterating over space-separated values.
 
@@ -2501,10 +2641,12 @@ Current tests cover:
 - **function_declarations.shx** - Function definitions with typed parameters and return values
 - **git_undo_last_commit.shx** - Git undo last commit functionality
 - **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
+- **import_test.shx** - Basic import functionality with multiple files
 - **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
 - **nested_for_loop.shx** - Nested for loops
+- **nested_import_test.shx** - Nested import functionality with import chains
 - **os_getlinuxversion.shx** - Operating system Linux version detection
 - **os_getos.shx** - Operating system detection
 - **os_isinstalled.shx** - Command/application installation checking
@@ -2534,6 +2676,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - **array_type_mismatch.shx** - Boolean array with mixed types (string in boolean array)
 - **const_reassignment_test.shx** - Attempt to reassign a const variable after declaration
+- **import_missing_file.shx** - Import statement referencing a non-existent file
 
 ### How Tests Work
 
@@ -2590,7 +2733,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] Comment support (`//`)
 
-- [ ] import syntax for splitting .shx files
+- [x] import syntax for splitting .shx files
 
 - [x] `array.length` property
 

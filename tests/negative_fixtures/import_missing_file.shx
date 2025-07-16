@@ -1,0 +1,3 @@
+import "nonexistent.shx";
+
+console.log("This should not compile");

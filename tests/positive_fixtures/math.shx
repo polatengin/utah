@@ -1,0 +1,10 @@
+// Math utility functions
+function multiply(x: number, y: number): number {
+  return x * y;
+}
+
+function square(n: number): number {
+  return multiply(n, n);
+}
+
+let mathConstant: number = 42;

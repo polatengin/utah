@@ -112,6 +112,10 @@ public partial class Parser
 
   private Statement? ParseStatement(string line, ref int i)
   {
+    if (line.StartsWith("import "))
+    {
+      return ParseImportStatement(line);
+    }
     if (line.StartsWith("let ") || line.StartsWith("const "))
     {
       return ParseVariableDeclaration(line, ref i);
@@ -981,5 +985,17 @@ public partial class Parser
            line.Contains("2>&1") || // Error redirection
            line.Contains(">/dev/null") || // Null redirection
            line.Contains("|");      // Pipe
+  }
+
+  private ImportStatement ParseImportStatement(string line)
+  {
+    var match = Regex.Match(line, @"import\s+([""']?)([^""';]+)\1;?");
+    if (!match.Success)
+    {
+      throw new InvalidOperationException($"Invalid import statement: {line}");
+    }
+    
+    var filePath = match.Groups[2].Value;
+    return new ImportStatement(filePath);
   }
 }

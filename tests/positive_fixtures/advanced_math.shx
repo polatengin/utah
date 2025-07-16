@@ -1,0 +1,16 @@
+import "math.shx";
+
+// Advanced math operations using imported math functions
+function cube(n: number): number {
+  return multiply(n, square(n));
+}
+
+function factorial(n: number): number {
+  if (n <= 1) {
+    return 1;
+  } else {
+    return multiply(n, factorial(n - 1));
+  }
+}
+
+let advancedConstant: number = 100;

@@ -20,6 +20,10 @@ public partial class Compiler
         }
         break;
 
+      case ImportStatement import:
+        // Import statements are resolved at preprocessing time, so we don't generate any code
+        break;
+
       case VariableDeclaration v:
         // Special handling for StringSplitExpression
         if (v.Value is StringSplitExpression split)

@@ -96,3 +96,4 @@ public record TimerStartStatement() : Statement;
 public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;
 public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;
 public record ArgsShowHelpStatement() : Statement;
+public record ImportStatement(string FilePath) : Statement;
