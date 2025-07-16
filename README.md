@@ -2850,6 +2850,7 @@ Tests are organized in the `tests/` directory:
 tests/
 ├── positive_fixtures/ # Test input files (.shx)
 ├── negative_fixtures/ # Test input files (.shx)
+├── malformatted/      # Malformatted test input files (.shx)
 └── expected/          # Expected compilation outputs (.sh)
 ```
 
