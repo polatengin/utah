@@ -1,0 +1,13 @@
+// Malformatted arrays and objects
+let   arr:string[]=[  "item1"  ,"item2",   "item3"  ];
+let numbers:number[]=[1,2,3,4,5];
+
+for(let item in arr){
+console.log(item);
+}
+
+if(arr.length>0){
+console.log(`First: ${arr[0]}`);
+}
+
+let result=arr.contains("item1")?true:false;

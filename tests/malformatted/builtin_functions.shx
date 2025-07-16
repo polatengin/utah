@@ -1,0 +1,19 @@
+// Malformatted built-in functions
+let isInstalled=os.isInstalled("git");
+if(isInstalled){
+console.log("Git is available");
+}
+
+let randomValue=utility.random(1,100);
+console.log(`Random: ${randomValue}`);
+
+if(console.isSudo()){
+console.log("Running as root");
+}else{
+console.log("Running as user");
+}
+
+let userResponse=console.promptYesNo("Continue?");
+if(userResponse){
+console.log("User said yes");
+}

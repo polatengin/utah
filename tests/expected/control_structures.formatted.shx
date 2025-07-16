@@ -1,0 +1,24 @@
+for(let i:number=0;i<10;i++){
+if(i%2===0){
+console.log(`Even: ${i}`);
+}else{;
+console.log(`Odd: ${i}`);
+};
+};
+while(condition){;
+let x = getValue();
+if(x>10){;
+break;
+};
+console.log(x);
+};
+switch(value){;
+case "test":
+console.log("test case");
+break;
+case "other":
+console.log("other case");
+break;
+default:;
+console.log("default");
+};

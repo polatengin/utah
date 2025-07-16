@@ -7,8 +7,9 @@ CLI_DIR := src/cli
 VSCODE_DIR := src/vscode-extension
 TESTS_DIR := tests
 FIXTURES_DIR := $(TESTS_DIR)/positive_fixtures
-EXPECTED_DIR := $(TESTS_DIR)/expected
 NEGATIVE_TESTS_DIR := $(TESTS_DIR)/negative_fixtures
+MALFORMATTED_DIR := $(TESTS_DIR)/malformatted
+EXPECTED_DIR := $(TESTS_DIR)/expected
 TEMP_DIR := $(TESTS_DIR)/temp
 
 RED := \033[0;31m
@@ -136,6 +137,37 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 				else \
 					printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
 					passed=$$((passed + 1)); \
+				fi; \
+			fi; \
+		done; \
+		echo; \
+		echo "$(BLUE)Running format tests...$(NC)"; \
+		for malformatted_file in $(MALFORMATTED_DIR)/*.shx; do \
+			if [ -f "$$malformatted_file" ]; then \
+				test_name=$$(basename "$$malformatted_file" .shx); \
+				expected_file="$(EXPECTED_DIR)/$$test_name.formatted.shx"; \
+				actual_file="$(TEMP_DIR)/$$test_name.formatted.shx"; \
+				total=$$((total + 1)); \
+				echo -n "🔍 Testing format for $$test_name... "; \
+				if [ ! -f "$$expected_file" ]; then \
+					printf "$(RED)❌ Expected formatted file not found$(NC)\n"; \
+					failed=$$((failed + 1)); \
+					continue; \
+				fi; \
+				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$malformatted_file" -o "$$actual_file" > /dev/null 2>&1; then \
+					printf "$(RED)❌ Formatting failed$(NC)\n"; \
+					failed=$$((failed + 1)); \
+					continue; \
+				fi; \
+				if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
+					printf "$(GREEN)✅ PASS$(NC)\n"; \
+					passed=$$((passed + 1)); \
+				else \
+					printf "$(RED)❌ FAIL$(NC)\n"; \
+					printf "$(YELLOW)Expected vs Actual formatting differences:$(NC)\n"; \
+					diff -u "$$expected_file" "$$actual_file" | head -20; \
+					echo; \
+					failed=$$((failed + 1)); \
 				fi; \
 			fi; \
 		done; \
