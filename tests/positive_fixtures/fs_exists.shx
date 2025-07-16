@@ -1,0 +1,27 @@
+// Test fs.exists() function
+console.log("Testing fs.exists() function");
+
+// Test 1: Check if a file that should exist
+let fileExists: boolean = fs.exists("/bin/bash");
+console.log("Test 1 - /bin/bash exists:");
+console.log(fileExists);
+
+// Test 2: Check if a file that probably doesn't exist
+let noFileExists: boolean = fs.exists("/nonexistent/path/file.txt");
+console.log("Test 2 - Nonexistent file:");
+console.log(noFileExists);
+
+// Test 3: Check with a variable path
+let testPath: string = "/etc";
+let dirExists: boolean = fs.exists(testPath);
+console.log("Test 3 - /etc directory exists:");
+console.log(dirExists);
+
+// Test 4: Use in conditional logic
+if (fs.exists("/usr/bin")) {
+  console.log("Test 4 - /usr/bin directory found");
+} else {
+  console.log("Test 4 - /usr/bin directory not found");
+}
+
+console.log("All fs.exists() tests completed!");

@@ -1076,6 +1076,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 
 - `fs.readFile(filepath)` - Read the contents of a file into a string
 - `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
+- `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
 #### Path Manipulation Functions
 
@@ -1101,6 +1102,19 @@ fs.writeFile("app.log", logMessage);
 // Read and process file content
 let logContent: string = fs.readFile("app.log");
 console.log("Log:", logContent);
+
+// Check if files exist before operations
+let configExists: boolean = fs.exists("config.txt");
+if (configExists) {
+  let config: string = fs.readFile("config.txt");
+  console.log("Config found:", config);
+} else {
+  console.log("Config file not found, using defaults");
+}
+
+// Check if directory exists
+let backupDirExists: boolean = fs.exists("/backup");
+console.log("Backup directory available:", backupDirExists);
 ```
 
 ### Path Manipulation Usage
@@ -1139,6 +1153,18 @@ logMessage="Application started"
 echo "$logMessage" > "app.log"
 logContent=$(cat "app.log")
 echo "Log: $logContent"
+
+# File existence checks:
+configExists=$([ -e "config.txt" ] && echo "true" || echo "false")
+if [ "$configExists" = "true" ]; then
+  config=$(cat "config.txt")
+  echo "Config found: $config"
+else
+  echo "Config file not found, using defaults"
+fi
+
+backupDirExists=$([ -e "/backup" ] && echo "true" || echo "false")
+echo "Backup directory available: $backupDirExists"
 
 # Path manipulation:
 directory=$(dirname "/home/user/documents/project/readme.txt")
@@ -2633,6 +2659,7 @@ Current tests cover:
 - **environment_variables.shx** - Environment variable operations
 - **for_in_loop.shx** - For-in loops with arrays
 - **fs_dirname.shx** - File system dirname function
+- **fs_exists.shx** - File system file/directory existence checking
 - **fs_extension.shx** - File system extension extraction
 - **fs_filename.shx** - File system filename extraction
 - **fs_functions.shx** - File system read/write operations

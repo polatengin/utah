@@ -116,6 +116,8 @@ public partial class Compiler
         return CompileFsExtensionExpression(fsExtension);
       case FsParentDirNameExpression fsParentDirName:
         return CompileFsParentDirNameExpression(fsParentDirName);
+      case FsExistsExpression fsExists:
+        return CompileFsExistsExpression(fsExists);
       case FsReadFileExpression fsReadFile:
         return CompileFsReadFileExpression(fsReadFile);
       case StringToUpperCaseExpression stringUpper:
@@ -888,6 +890,12 @@ public partial class Compiler
   {
     var path = CompileExpression(fsParentDirName.Path);
     return $"$(basename $(dirname {path}))";
+  }
+
+  private string CompileFsExistsExpression(FsExistsExpression fsExists)
+  {
+    var path = CompileExpression(fsExists.Path);
+    return $"$([ -e {path} ] && echo \"true\" || echo \"false\")";
   }
 
   private string CompileStringToUpperCaseExpression(StringToUpperCaseExpression stringUpper)

@@ -553,6 +553,18 @@ public partial class Parser
         throw new InvalidOperationException("fs.parentDirName() requires exactly 1 argument (path)");
       }
 
+      // Special handling for fs.exists()
+      if (functionName == "fs.exists")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsExistsExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.exists() requires exactly 1 argument (path)");
+      }
+
       // Special handling for console.isSudo()
       if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
       {

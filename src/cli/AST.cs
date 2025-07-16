@@ -39,6 +39,7 @@ public record FsDirnameExpression(Expression Path) : Expression;
 public record FsFileNameExpression(Expression Path) : Expression;
 public record FsExtensionExpression(Expression Path) : Expression;
 public record FsParentDirNameExpression(Expression Path) : Expression;
+public record FsExistsExpression(Expression Path) : Expression;
 public record FsReadFileExpression(Expression FilePath) : Expression;
 public record FsWriteFileExpressionPlaceholder(Expression FilePath, Expression Content) : Expression;
 public record StringToUpperCaseExpression(Expression Target) : Expression;
