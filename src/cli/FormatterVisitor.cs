@@ -44,7 +44,7 @@ public class FormatterVisitor
   {
     // Always add blank line before major control structures
     if (currentStatement is FunctionDeclaration || currentStatement is ImportStatement ||
-        currentStatement is IfStatement || currentStatement is ForLoop || 
+        currentStatement is IfStatement || currentStatement is ForLoop ||
         currentStatement is ForInLoop || currentStatement is WhileStatement ||
         currentStatement is SwitchStatement || currentStatement is TryCatchStatement)
     {
@@ -58,7 +58,7 @@ public class FormatterVisitor
     }
 
     // Add blank line after control structures
-    if (prevStatement is IfStatement || prevStatement is ForLoop || 
+    if (prevStatement is IfStatement || prevStatement is ForLoop ||
         prevStatement is ForInLoop || prevStatement is WhileStatement ||
         prevStatement is SwitchStatement || prevStatement is TryCatchStatement)
     {
