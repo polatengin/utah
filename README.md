@@ -3690,7 +3690,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `utility.*` functions (`random()` with min/max parameters)
 
-- [x] Throw error if `min` is greater than max in `utility.random(<min>, <max>)` function
+- [x] Throw error if `min` is greater than `max` in `utility.random(<min>, <max>)` function
 
 - [x] `script.*` functions (`description()`, `enableDebug()`, `disableDebug()`, `disableGlobbing()`, `enableGlobbing()`, `exitOnError()`, `continueOnError()`)
 
