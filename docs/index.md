@@ -71,6 +71,28 @@ Execute functions in parallel for improved performance with the `parallel` keywo
 
 Automatic installation and verification of required tools like `jq`, `yq`, and other utilities.
 
+### 📋 **Command-Line Arguments**
+
+Built-in argument parsing with type safety:
+
+- Define arguments with `args.define()` including types, defaults, and descriptions
+- Automatic help generation with `args.showHelp()`
+- Type-safe argument access with `args.get()`, `args.getNumber()`, `args.getString()`
+- Required and optional argument support
+
+### 🛠️ **Developer Tools**
+
+- **VS Code Extension**: Full IDE integration with syntax highlighting and IntelliSense
+- **Language Server**: Real-time error checking and code completion
+- **Code Formatting**: Automatic formatting with EditorConfig support
+
+### 📝 **Script Metadata**
+
+- Script descriptions with `script.description()`
+- Error handling modes with `script.exitOnError()`
+- Debug output control with `script.enableDebug()`
+- Fault tolerance options
+
 ## Example
 
 **Input** (`example.shx`):
