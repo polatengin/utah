@@ -37,6 +37,8 @@ plugins:
 # Markdown configuration
 markdown: kramdown
 highlighter: rouge
+mermaid:
+  version: "11.9.0"
 kramdown:
   syntax_highlighter: rouge
   syntax_highlighter_opts:
