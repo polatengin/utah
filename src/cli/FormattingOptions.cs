@@ -11,7 +11,7 @@ public class FormattingOptions
 
   // Utah-specific formatting options
   public string BraceStyle { get; set; } = "same_line"; // same_line or new_line
-  public bool SpaceBeforeParen { get; set; } = false;   // if( vs if (
+  public bool SpaceBeforeParen { get; set; } = true;    // if( vs if (
   public int MaxLineLength { get; set; } = 120;
 
   public static FormattingOptions FromEditorConfig(string filePath)

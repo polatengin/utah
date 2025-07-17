@@ -1,21 +1,21 @@
 // Malformed control structures
-for(let i: number = 0; i < 10; i++) {
-  if(i % 2 === 0) {
+for (let i: number = 0; i < 10; i++) {
+  if (i % 2 === 0) {
     console.log(`Even: ${i}`);
   } else {
     console.log(`Odd: ${i}`);
   }
 }
 
-while(condition) {
+while (condition) {
   let x = getValue();
-  if(x > 10) {
+  if (x > 10) {
     break;
   }
   console.log(x);
 }
 
-switch(value) {
+switch (value) {
   case "test":
     console.log("test case");
     break;

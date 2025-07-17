@@ -1,7 +1,7 @@
 // Malformed built-in functions
 let isInstalled = os.isInstalled("git");
 
-if(isInstalled) {
+if (isInstalled) {
   console.log("Git is available");
 }
 
@@ -9,7 +9,7 @@ let randomValue = utility.random(1, 100);
 
 console.log(`Random: ${randomValue}`);
 
-if(console.isSudo()) {
+if (console.isSudo()) {
   console.log("Running as root");
 } else {
   console.log("Running as user");
@@ -17,6 +17,6 @@ if(console.isSudo()) {
 
 let userResponse = console.promptYesNo("Continue?");
 
-if(userResponse) {
+if (userResponse) {
   console.log("User said yes");
 }
