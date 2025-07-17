@@ -2668,6 +2668,232 @@ json.get(obj, ".metadata.created")        // ISO date strings
 - Large JSON objects may impact performance; consider processing in chunks
 - The `json.merge()` function performs a deep merge with the second object taking precedence
 
+## 🧩 YAML Functions
+
+Utah provides comprehensive YAML parsing and manipulation functions that mirror the JSON functions but work with YAML data. These functions use `yq` and `jq` under the hood to provide powerful and efficient YAML operations with jq-style path syntax.
+
+### Available YAML Functions
+
+#### YAML Parsing and Validation
+
+- `yaml.parse(yamlString)` - Parse a YAML string into an object that can be manipulated
+- `yaml.stringify(yamlObject)` - Convert a YAML object back to a YAML string representation
+- `yaml.isValid(yamlString)` - Check if a string contains valid YAML syntax
+
+#### YAML Property Access and Manipulation
+
+- `yaml.get(yamlObject, path)` - Get a value from YAML using jq-style path (e.g., ".user.name")
+- `yaml.set(yamlObject, path, value)` - Set a value in YAML object using jq-style path
+- `yaml.has(yamlObject, path)` - Check if a property exists at the given path
+- `yaml.delete(yamlObject, path)` - Remove a property from YAML object
+
+#### YAML Utility Functions
+
+- `yaml.keys(yamlObject)` - Get all keys from a YAML object as an array
+- `yaml.values(yamlObject)` - Get all values from a YAML object as an array
+- `yaml.merge(yamlObject1, yamlObject2)` - Merge two YAML objects (yamlObject2 overwrites yamlObject1)
+
+### YAML Functions Usage
+
+```typescript
+// Basic YAML parsing and validation
+let configYaml: string = 'debug: true\nport: 8080\nname: MyApp';
+let isValid: boolean = yaml.isValid(configYaml);
+
+if (isValid) {
+  let config: object = yaml.parse(configYaml);
+  console.log("Configuration loaded successfully");
+
+  // Access properties using jq-style paths
+  let appName: string = yaml.get(config, ".name");
+  let port: number = yaml.get(config, ".port");
+  let debugMode: boolean = yaml.get(config, ".debug");
+
+  console.log(`Starting ${appName} on port ${port}`);
+
+  if (debugMode) {
+    console.log("Debug mode is enabled");
+  }
+} else {
+  console.log("Invalid YAML configuration");
+  exit(1);
+}
+
+// Working with nested YAML objects
+let userData: string = 'user:\n  name: Jane\n  settings:\n    theme: dark\n    notifications: true';
+let userObj: object = yaml.parse(userData);
+
+// Access nested properties
+let userName: string = yaml.get(userObj, ".user.name");
+let theme: string = yaml.get(userObj, ".user.settings.theme");
+let notifications: boolean = yaml.get(userObj, ".user.settings.notifications");
+
+console.log(`User: ${userName}, Theme: ${theme}, Notifications: ${notifications}`);
+
+// Modify YAML properties
+let updatedUser: object = yaml.set(userObj, ".user.name", "John");
+updatedUser = yaml.set(updatedUser, ".user.settings.theme", "light");
+updatedUser = yaml.set(updatedUser, ".user.settings.newFeature", true);
+
+// Check if properties exist
+let hasEmail: boolean = yaml.has(updatedUser, ".user.email");
+let hasTheme: boolean = yaml.has(updatedUser, ".user.settings.theme");
+
+console.log(`Has email: ${hasEmail}, Has theme: ${hasTheme}`);
+
+// Remove properties
+let userWithoutTheme: object = yaml.delete(updatedUser, ".user.settings.theme");
+console.log("Theme setting removed");
+
+// Convert back to YAML string
+let finalUserYaml: string = yaml.stringify(userWithoutTheme);
+console.log("Updated user data: " + finalUserYaml);
+```
+
+### Working with YAML Configuration Files
+
+```typescript
+// Load and merge YAML configuration files
+let defaultConfig: string = fs.readFile("default-config.yaml");
+let userConfig: string = fs.readFile("user-config.yaml");
+
+// Validate configurations
+if (yaml.isValid(defaultConfig) && yaml.isValid(userConfig)) {
+  let defaultObj: object = yaml.parse(defaultConfig);
+  let userObj: object = yaml.parse(userConfig);
+
+  // Merge configurations (user settings override defaults)
+  let finalConfig: object = yaml.merge(defaultObj, userObj);
+
+  // Extract specific settings
+  let timeout: number = yaml.get(finalConfig, ".timeout");
+  let retries: number = yaml.get(finalConfig, ".retries");
+  let debugMode: boolean = yaml.get(finalConfig, ".debug");
+
+  console.log(`Timeout: ${timeout}s, Retries: ${retries}, Debug: ${debugMode}`);
+
+  // Save merged configuration
+  let configString: string = yaml.stringify(finalConfig);
+  fs.writeFile("merged-config.yaml", configString);
+} else {
+  console.log("Invalid YAML configuration files detected");
+  exit(1);
+}
+```
+
+### Kubernetes and DevOps Integration
+
+```typescript
+// Work with Kubernetes YAML manifests
+let deploymentYaml: string = fs.readFile("deployment.yaml");
+
+if (yaml.isValid(deploymentYaml)) {
+  let deployment: object = yaml.parse(deploymentYaml);
+
+  // Update container image
+  let newImage: string = "myapp:v2.0.0";
+  let updatedDeployment: object = yaml.set(deployment, ".spec.template.spec.containers[0].image", newImage);
+
+  // Update replicas
+  updatedDeployment = yaml.set(updatedDeployment, ".spec.replicas", 3);
+
+  // Add environment variable
+  updatedDeployment = yaml.set(updatedDeployment, ".spec.template.spec.containers[0].env[0].name", "ENVIRONMENT");
+  updatedDeployment = yaml.set(updatedDeployment, ".spec.template.spec.containers[0].env[0].value", "production");
+
+  // Save updated manifest
+  let updatedYaml: string = yaml.stringify(updatedDeployment);
+  fs.writeFile("deployment-updated.yaml", updatedYaml);
+
+  console.log("Kubernetes deployment updated successfully");
+} else {
+  console.log("Invalid Kubernetes YAML manifest");
+  exit(1);
+}
+```
+
+### Generated Bash Code for YAML Functions
+
+The YAML functions transpile to efficient bash commands using `yq` and `jq`:
+
+```bash
+# yaml.parse() and yaml.isValid()
+validYaml='name: John\nage: 30\nactive: true'
+isValidData=$(echo ${validYaml} | yq empty >/dev/null 2>&1 && echo "true" || echo "false")
+
+if [ "${isValidData}" = "true" ]; then
+  parsedData=$(echo ${validYaml} | yq -o=json .)
+  echo "YAML parsed successfully"
+fi
+
+# yaml.get() with jq-style paths (converts to JSON internally)
+userName=$(echo "${parsedData}" | yq -o=json . | jq -r '.name')
+userAge=$(echo "${parsedData}" | yq -o=json . | jq -r '.age')
+
+# yaml.set() with different value types (converts through JSON)
+updatedData=$(echo "${parsedData}" | yq -o=json . | jq '.name = "Jane"' | yq -o=yaml .)
+updatedData=$(echo "${updatedData}" | yq -o=json . | jq '.age = 25' | yq -o=yaml .)
+
+# yaml.has() to check property existence
+hasName=$(echo "${updatedData}" | yq -o=json . | jq 'try .name catch false | type != "null"' | tr '[:upper:]' '[:lower:]')
+hasEmail=$(echo "${updatedData}" | yq -o=json . | jq 'try .email catch false | type != "null"' | tr '[:upper:]' '[:lower:]')
+
+# yaml.delete() to remove properties
+dataWithoutAge=$(echo "${updatedData}" | yq -o=json . | jq 'del(.age)' | yq -o=yaml .)
+
+# yaml.keys() and yaml.values()
+keys=$(echo "${updatedData}" | yq -o=json . | jq -r 'keys[]')
+values=$(echo "${updatedData}" | yq -o=json . | jq -r '.[]')
+
+# yaml.merge() two objects
+defaultSettings='timeout: 30\nretries: 3'
+userSettings='timeout: 60\ndebug: true'
+mergedSettings=$(echo "${defaultSettings}" | yq -o=json . | jq --argjson obj2 "$(echo \"${userSettings}\" | yq -o=json .)" '. * $obj2' | yq -o=yaml .)
+
+# yaml.stringify() (already in YAML format from yq)
+configString=$(echo "${mergedSettings}" | yq -o=yaml .)
+```
+
+### YAML Functions Features
+
+- **yq-style processing**: Uses `yq` for YAML parsing and `jq` for manipulation
+- **jq-style paths**: Same familiar jq path syntax as JSON functions
+- **Type preservation**: Maintains proper YAML types (strings, numbers, booleans, objects, arrays)
+- **Nested access**: Supports deep object navigation with dot notation
+- **Array support**: Works with YAML arrays using bracket notation
+- **Error handling**: Integrates with Utah's try/catch system for robust error handling
+- **DevOps friendly**: Perfect for Kubernetes, Docker Compose, and CI/CD configurations
+- **Cross-platform**: Uses `yq` which is available on most Unix-like systems
+
+### YAML Functions Use Cases
+
+- **Configuration Management**: Load, validate, and merge YAML configuration files
+- **Kubernetes Operations**: Manipulate YAML manifests for deployments, services, and configs
+- **CI/CD Pipelines**: Process YAML pipeline configurations and workflows
+- **Docker Compose**: Update service definitions and environment variables
+- **Infrastructure as Code**: Modify YAML-based infrastructure definitions
+- **DevOps Automation**: Process YAML output from various DevOps tools
+- **OpenAPI Specifications**: Work with OpenAPI/Swagger YAML definitions
+
+### Best Practices for YAML Functions
+
+- **Always validate**: Use `yaml.isValid()` before parsing untrusted YAML
+- **Handle errors**: Wrap YAML operations in try/catch blocks for robust error handling
+- **Use specific paths**: Be explicit with jq paths to avoid ambiguity
+- **Type awareness**: Remember that all values from `yaml.get()` are strings; cast as needed
+- **Performance**: For repeated operations on the same YAML, parse once and reuse the object
+- **Kubernetes compatibility**: Test YAML changes with `kubectl dry-run` when working with K8s manifests
+
+### YAML Functions Technical Notes
+
+- YAML functions require both `yq` and `jq` to be installed on the system
+- YAML is internally converted to JSON for manipulation, then back to YAML for output
+- All YAML objects are stored as bash variables containing the parsed data
+- Property values are extracted as strings; type conversion happens at the Utah level
+- Large YAML files may impact performance; consider processing in chunks
+- The `yaml.merge()` function performs a deep merge with the second object taking precedence
+- Complex YAML features like anchors and aliases are preserved during simple operations
+
 ## 🛠️ Git Utilities
 
 Utah provides git utilities for common version control operations. These functions allow you to perform git operations directly within your scripts, making it easy to automate version control workflows.
@@ -3208,6 +3434,10 @@ Current tests cover:
 - **try_catch.shx** - Try/catch blocks for error handling and graceful failure recovery
 - **variable_declaration.shx** - Variable declarations and usage
 - **while_loop.shx** - While loops with break statements and conditional logic
+- **yaml_manipulation.shx** - YAML property manipulation and modification functions
+- **yaml_parse_validation.shx** - YAML parsing and validation functions
+- **yaml_property_access.shx** - YAML property access and existence checking
+- **yaml_utilities.shx** - YAML utility functions (keys, values, merge)
 
 ### Negative Test Coverage
 
@@ -3326,7 +3556,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] json parsing and manipulation functions
 
-- [ ] yaml parsing and manipulation functions
+- [x] yaml parsing and manipulation functions
 
 - [ ] File I/O operations (watch, delete, copy, move, rename, permissions, etc.)
 
