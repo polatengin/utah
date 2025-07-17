@@ -20,7 +20,7 @@ public class Formatter
     {
       // Read the original source with comments preserved
       var originalContent = File.ReadAllText(inputPath);
-      
+
       // Format with comment preservation
       return FormatWithComments(originalContent);
     }
@@ -29,20 +29,20 @@ public class Formatter
       throw new Exception($"Formatting failed: {ex.Message}", ex);
     }
   }
-  
+
   private string FormatWithComments(string content)
   {
     // Parse the content to identify comments and their positions
     var lines = content.Split('\n');
     var comments = new List<(int lineIndex, string content)>();
     var nonCommentContent = new StringBuilder();
-    
+
     // Extract comments and build non-comment content
     for (int i = 0; i < lines.Length; i++)
     {
       var line = lines[i].TrimEnd();
       var trimmed = line.Trim();
-      
+
       if (trimmed.StartsWith("//"))
       {
         // Store comment with its relative position
@@ -59,7 +59,7 @@ public class Formatter
         nonCommentContent.AppendLine();
       }
     }
-    
+
     // Format the non-comment content using AST
     string formattedContent;
     try
@@ -74,27 +74,27 @@ public class Formatter
       // If formatting fails, return original content
       return content;
     }
-    
+
     // Reinsert comments at appropriate positions
     var formattedLines = formattedContent.Split('\n').ToList();
     var result = new List<string>();
-    
+
     // Calculate relative positions for comments based on original structure
     int commentIndex = 0;
     int totalOriginalLines = lines.Length;
     int totalFormattedLines = formattedLines.Count;
-    
+
     for (int i = 0; i < formattedLines.Count; i++)
     {
       // Check if we should insert any comments before this line
       while (commentIndex < comments.Count)
       {
         var (originalLineIndex, commentContent) = comments[commentIndex];
-        
+
         // Calculate the relative position of this comment in the formatted output
         double relativePosition = (double)originalLineIndex / totalOriginalLines;
         int targetFormattedLine = (int)(relativePosition * totalFormattedLines);
-        
+
         if (targetFormattedLine <= i)
         {
           result.Add(commentContent);
@@ -105,11 +105,11 @@ public class Formatter
           break;
         }
       }
-      
+
       // Add the formatted line
       result.Add(formattedLines[i]);
     }
-    
+
     // Add any remaining comments at the end
     while (commentIndex < comments.Count)
     {
@@ -117,14 +117,14 @@ public class Formatter
       result.Add(commentContent);
       commentIndex++;
     }
-    
+
     // Join the result and ensure it ends with a newline
     var formattedResult = string.Join("\n", result);
     if (!formattedResult.EndsWith("\n"))
     {
       formattedResult += "\n";
     }
-    
+
     return formattedResult;
   }
 
