@@ -93,8 +93,8 @@ public partial class Parser
 
   public ProgramNode Parse()
   {
-    // Preprocess lines to handle malformatted code
-    _lines = PreprocessMalformattedCode(_lines);
+    // Preprocess lines to handle malformed code
+    _lines = PreprocessMalformedCode(_lines);
 
     var statements = new List<Statement>();
 
@@ -653,13 +653,13 @@ public partial class Parser
     while (i < _lines.Length && _lines[i].Trim() != "}")
     {
       var innerLine = _lines[i].Trim();
-      if (innerLine.StartsWith("case "))
+      if (innerLine.StartsWith("case ") || innerLine.StartsWith("case\"") || innerLine.StartsWith("case'"))
       {
         // Collect all consecutive case values (for fall-through)
         var values = new List<Expression>();
-        while (i < _lines.Length && _lines[i].Trim().StartsWith("case "))
+        while (i < _lines.Length && (_lines[i].Trim().StartsWith("case ") || _lines[i].Trim().StartsWith("case\"") || _lines[i].Trim().StartsWith("case'")))
         {
-          var caseMatch = Regex.Match(_lines[i].Trim(), @"case (.+):");
+          var caseMatch = Regex.Match(_lines[i].Trim(), @"case\s*(.+):");
           values.Add(ParseExpression(caseMatch.Groups[1].Value));
           i++;
         }
@@ -667,7 +667,7 @@ public partial class Parser
         // Now parse the body until we hit a break, another case, default, or end
         var body = new List<Statement>();
         bool hasBreak = false;
-        while (i < _lines.Length && !_lines[i].Trim().StartsWith("case ") && !_lines[i].Trim().StartsWith("default:") && _lines[i].Trim() != "}")
+        while (i < _lines.Length && !_lines[i].Trim().StartsWith("case ") && !_lines[i].Trim().StartsWith("case\"") && !_lines[i].Trim().StartsWith("case'") && !_lines[i].Trim().StartsWith("default:") && _lines[i].Trim() != "}")
         {
           var caseBodyLine = _lines[i].Trim();
           if (caseBodyLine == "break;")
@@ -943,6 +943,8 @@ public partial class Parser
            line == "done" ||
            line == "else" ||
            line.StartsWith("case ") ||
+           line.StartsWith("case\"") ||
+           line.StartsWith("case'") ||
            line.StartsWith("esac") ||
            line.StartsWith("echo ") ||
            line.StartsWith("export ") ||
@@ -1060,7 +1062,7 @@ public partial class Parser
     return new ExpressionStatement(schedulerCron);
   }
 
-  private string[] PreprocessMalformattedCode(string[] lines)
+  private string[] PreprocessMalformedCode(string[] lines)
   {
     var result = new List<string>();
 

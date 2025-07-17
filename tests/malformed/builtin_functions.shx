@@ -1,4 +1,4 @@
-// Malformatted built-in functions
+// Malformed built-in functions
 let isInstalled=os.isInstalled("git");
 if(isInstalled){
 console.log("Git is available");

@@ -1,4 +1,4 @@
-// Malformatted basic syntax test
+// Malformed basic syntax test
 let   name:string="test"  ;
 const     value    :  number   =42;
 

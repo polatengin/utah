@@ -1,4 +1,4 @@
-// Malformatted control structures
+// Malformed control structures
 for(let i: number = 0; i < 10; i++) {
   if(i % 2 === 0) {
     console.log(`Even: ${i}`);
@@ -16,6 +16,12 @@ while(condition) {
 }
 
 switch(value) {
+  case "test":
+    console.log("test case");
+    break;
+  case "other":
+    console.log("other case");
+    break;
   default:
     console.log("default");
 }

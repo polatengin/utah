@@ -8,7 +8,7 @@ VSCODE_DIR := src/vscode-extension
 TESTS_DIR := tests
 FIXTURES_DIR := $(TESTS_DIR)/positive_fixtures
 NEGATIVE_TESTS_DIR := $(TESTS_DIR)/negative_fixtures
-MALFORMATTED_DIR := $(TESTS_DIR)/malformatted
+MALFORMED_DIR := $(TESTS_DIR)/malformed
 EXPECTED_DIR := $(TESTS_DIR)/expected
 TEMP_DIR := $(TESTS_DIR)/temp
 
@@ -142,9 +142,9 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		done; \
 		echo; \
 		echo "$(BLUE)Running format tests...$(NC)"; \
-		for malformatted_file in $(MALFORMATTED_DIR)/*.shx; do \
-			if [ -f "$$malformatted_file" ]; then \
-				test_name=$$(basename "$$malformatted_file" .shx); \
+		for malformed_file in $(MALFORMED_DIR)/*.shx; do \
+			if [ -f "$$malformed_file" ]; then \
+				test_name=$$(basename "$$malformed_file" .shx); \
 				expected_file="$(EXPECTED_DIR)/$$test_name.formatted.shx"; \
 				actual_file="$(TEMP_DIR)/$$test_name.formatted.shx"; \
 				total=$$((total + 1)); \
@@ -154,7 +154,7 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 					failed=$$((failed + 1)); \
 					continue; \
 				fi; \
-				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$malformatted_file" -o "$$actual_file" > /dev/null 2>&1; then \
+				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$malformed_file" -o "$$actual_file" > /dev/null 2>&1; then \
 					printf "$(RED)❌ Formatting failed$(NC)\n"; \
 					failed=$$((failed + 1)); \
 					continue; \
