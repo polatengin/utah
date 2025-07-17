@@ -829,6 +829,132 @@ public partial class Parser
         throw new InvalidOperationException("json.merge() requires exactly 2 arguments (jsonObject1, jsonObject2)");
       }
 
+      // Special handling for yaml.parse()
+      if (functionName == "yaml.parse")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var yamlStringExpr = ParseExpression(args[0]);
+          return new YamlParseExpression(yamlStringExpr);
+        }
+        throw new InvalidOperationException("yaml.parse() requires exactly 1 argument (yamlString)");
+      }
+
+      // Special handling for yaml.stringify()
+      if (functionName == "yaml.stringify")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          return new YamlStringifyExpression(yamlObjectExpr);
+        }
+        throw new InvalidOperationException("yaml.stringify() requires exactly 1 argument (yamlObject)");
+      }
+
+      // Special handling for yaml.isValid()
+      if (functionName == "yaml.isValid")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var yamlStringExpr = ParseExpression(args[0]);
+          return new YamlIsValidExpression(yamlStringExpr);
+        }
+        throw new InvalidOperationException("yaml.isValid() requires exactly 1 argument (yamlString)");
+      }
+
+      // Special handling for yaml.get()
+      if (functionName == "yaml.get")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new YamlGetExpression(yamlObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("yaml.get() requires exactly 2 arguments (yamlObject, path)");
+      }
+
+      // Special handling for yaml.set()
+      if (functionName == "yaml.set")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 3)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          var valueExpr = ParseExpression(args[2]);
+          return new YamlSetExpression(yamlObjectExpr, pathExpr, valueExpr);
+        }
+        throw new InvalidOperationException("yaml.set() requires exactly 3 arguments (yamlObject, path, value)");
+      }
+
+      // Special handling for yaml.has()
+      if (functionName == "yaml.has")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new YamlHasExpression(yamlObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("yaml.has() requires exactly 2 arguments (yamlObject, path)");
+      }
+
+      // Special handling for yaml.delete()
+      if (functionName == "yaml.delete")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new YamlDeleteExpression(yamlObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("yaml.delete() requires exactly 2 arguments (yamlObject, path)");
+      }
+
+      // Special handling for yaml.keys()
+      if (functionName == "yaml.keys")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          return new YamlKeysExpression(yamlObjectExpr);
+        }
+        throw new InvalidOperationException("yaml.keys() requires exactly 1 argument (yamlObject)");
+      }
+
+      // Special handling for yaml.values()
+      if (functionName == "yaml.values")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var yamlObjectExpr = ParseExpression(args[0]);
+          return new YamlValuesExpression(yamlObjectExpr);
+        }
+        throw new InvalidOperationException("yaml.values() requires exactly 1 argument (yamlObject)");
+      }
+
+      // Special handling for yaml.merge()
+      if (functionName == "yaml.merge")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var yamlObject1Expr = ParseExpression(args[0]);
+          var yamlObject2Expr = ParseExpression(args[1]);
+          return new YamlMergeExpression(yamlObject1Expr, yamlObject2Expr);
+        }
+        throw new InvalidOperationException("yaml.merge() requires exactly 2 arguments (yamlObject1, yamlObject2)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

@@ -1,0 +1,44 @@
+console.log("Testing YAML utility functions");
+
+// Create test YAML data
+let sampleData: string = 'firstName: John\nlastName: Doe\nage: 30\ncity: "New York"';
+let dataObj: object = yaml.parse(sampleData);
+
+// Test yaml.keys()
+console.log("YAML keys:");
+let keys: string[] = yaml.keys(dataObj);
+for (let key: string in keys) {
+  console.log("Key: " + key);
+}
+
+// Test yaml.values()
+console.log("YAML values:");
+let values: any[] = yaml.values(dataObj);
+for (let value: any in values) {
+  console.log("Value: " + value);
+}
+
+// Test yaml.merge()
+let defaultSettings: string = 'timeout: 30\nretries: 3\ndebug: false';
+let userSettings: string = 'timeout: 60\ndebug: true\nlogLevel: info';
+
+let defaultObj: object = yaml.parse(defaultSettings);
+let userObj: object = yaml.parse(userSettings);
+
+let mergedSettings: object = yaml.merge(defaultObj, userObj);
+console.log("Merged settings:");
+let mergedString: string = yaml.stringify(mergedSettings);
+console.log(mergedString);
+
+// Verify merged values
+let finalTimeout: number = yaml.get(mergedSettings, ".timeout");
+let finalRetries: number = yaml.get(mergedSettings, ".retries");
+let finalDebug: boolean = yaml.get(mergedSettings, ".debug");
+let finalLogLevel: string = yaml.get(mergedSettings, ".logLevel");
+
+console.log("Final timeout: " + finalTimeout);
+console.log("Final retries: " + finalRetries);
+console.log("Final debug: " + finalDebug);
+console.log("Final log level: " + finalLogLevel);
+
+console.log("YAML utility tests completed!");

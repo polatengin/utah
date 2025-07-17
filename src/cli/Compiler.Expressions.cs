@@ -162,6 +162,26 @@ public partial class Compiler
         return CompileJsonValuesExpression(jsonValues);
       case JsonMergeExpression jsonMerge:
         return CompileJsonMergeExpression(jsonMerge);
+      case YamlParseExpression yamlParse:
+        return CompileYamlParseExpression(yamlParse);
+      case YamlStringifyExpression yamlStringify:
+        return CompileYamlStringifyExpression(yamlStringify);
+      case YamlIsValidExpression yamlIsValid:
+        return CompileYamlIsValidExpression(yamlIsValid);
+      case YamlGetExpression yamlGet:
+        return CompileYamlGetExpression(yamlGet);
+      case YamlSetExpression yamlSet:
+        return CompileYamlSetExpression(yamlSet);
+      case YamlHasExpression yamlHas:
+        return CompileYamlHasExpression(yamlHas);
+      case YamlDeleteExpression yamlDelete:
+        return CompileYamlDeleteExpression(yamlDelete);
+      case YamlKeysExpression yamlKeys:
+        return CompileYamlKeysExpression(yamlKeys);
+      case YamlValuesExpression yamlValues:
+        return CompileYamlValuesExpression(yamlValues);
+      case YamlMergeExpression yamlMerge:
+        return CompileYamlMergeExpression(yamlMerge);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -1309,6 +1329,119 @@ public partial class Compiler
     var varName2 = ExtractVariableName(jsonObject2);
     
     return $"$(echo \"${{{varName1}}}\" | jq --argjson obj2 \"${{{varName2}}}\" '. * $obj2')";
+  }
+
+  private string CompileYamlParseExpression(YamlParseExpression yamlParse)
+  {
+    var yamlString = CompileExpression(yamlParse.YamlString);
+    // For yaml.parse(), we convert YAML to JSON internally for easier manipulation
+    return $"$(echo {yamlString} | yq -o=json .)";
+  }
+
+  private string CompileYamlStringifyExpression(YamlStringifyExpression yamlStringify)
+  {
+    var yamlObject = CompileExpression(yamlStringify.YamlObject);
+    // Extract variable name if it's in ${var} format, otherwise use as-is
+    var varName = ExtractVariableName(yamlObject);
+    return $"$(echo \"${{{varName}}}\" | yq -o=yaml .)";
+  }
+
+  private string CompileYamlIsValidExpression(YamlIsValidExpression yamlIsValid)
+  {
+    var yamlString = CompileExpression(yamlIsValid.YamlString);
+    return $"$(echo {yamlString} | yq empty >/dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileYamlGetExpression(YamlGetExpression yamlGet)
+  {
+    var yamlObject = CompileExpression(yamlGet.YamlObject);
+    var path = CompileExpression(yamlGet.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(yamlObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r '{pathValue}')";
+  }
+
+  private string CompileYamlSetExpression(YamlSetExpression yamlSet)
+  {
+    var yamlObject = CompileExpression(yamlSet.YamlObject);
+    var path = CompileExpression(yamlSet.Path);
+    var value = CompileExpression(yamlSet.Value);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(yamlObject);
+    var pathValue = path.Trim('"');
+    
+    // Handle different value types
+    if (value.StartsWith("\"") && value.EndsWith("\""))
+    {
+      // String value - keep quotes for yq
+      return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq '{pathValue} = {value}' | yq -o=yaml .)";
+    }
+    else if (value == "true" || value == "false" || (int.TryParse(value, out _)) || (double.TryParse(value, out _)))
+    {
+      // Boolean or numeric value - no quotes
+      return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq '{pathValue} = {value}' | yq -o=yaml .)";
+    }
+    else
+    {
+      // Variable reference - use --arg
+      var valueVarName = ExtractVariableName(value);
+      return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq --arg val \"${{{valueVarName}}}\" '{pathValue} = $val' | yq -o=yaml .)";
+    }
+  }
+
+  private string CompileYamlHasExpression(YamlHasExpression yamlHas)
+  {
+    var yamlObject = CompileExpression(yamlHas.YamlObject);
+    var path = CompileExpression(yamlHas.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(yamlObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq 'try {pathValue} catch false | type != \"null\"' | tr '[:upper:]' '[:lower:]')";
+  }
+
+  private string CompileYamlDeleteExpression(YamlDeleteExpression yamlDelete)
+  {
+    var yamlObject = CompileExpression(yamlDelete.YamlObject);
+    var path = CompileExpression(yamlDelete.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(yamlObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq 'del({pathValue})' | yq -o=yaml .)";
+  }
+
+  private string CompileYamlKeysExpression(YamlKeysExpression yamlKeys)
+  {
+    var yamlObject = CompileExpression(yamlKeys.YamlObject);
+    var varName = ExtractVariableName(yamlObject);
+    
+    return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r 'keys[]')";
+  }
+
+  private string CompileYamlValuesExpression(YamlValuesExpression yamlValues)
+  {
+    var yamlObject = CompileExpression(yamlValues.YamlObject);
+    var varName = ExtractVariableName(yamlObject);
+    
+    return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r '.[]')";
+  }
+
+  private string CompileYamlMergeExpression(YamlMergeExpression yamlMerge)
+  {
+    var yamlObject1 = CompileExpression(yamlMerge.YamlObject1);
+    var yamlObject2 = CompileExpression(yamlMerge.YamlObject2);
+    
+    var varName1 = ExtractVariableName(yamlObject1);
+    var varName2 = ExtractVariableName(yamlObject2);
+    
+    return $"$(echo \"${{{varName1}}}\" | yq -o=json . | jq --argjson obj2 \"$(echo \\\"${{{varName2}}}\\\" | yq -o=json .)\" '. * $obj2' | yq -o=yaml .)";
   }
 
   private static int _uniqueIdCounter = 0;

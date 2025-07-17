@@ -1,0 +1,32 @@
+console.log("Testing YAML property access functions");
+
+// Create test YAML data
+let userData: string = 'user:\n  name: Jane\n  age: 25\n  settings:\n    theme: dark\n    notifications: true';
+let userObj: object = yaml.parse(userData);
+
+// Test yaml.get() with simple path
+let userName: string = yaml.get(userObj, ".user.name");
+console.log("User name:");
+console.log(userName);
+
+// Test yaml.get() with nested path
+let userTheme: string = yaml.get(userObj, ".user.settings.theme");
+console.log("User theme:");
+console.log(userTheme);
+
+// Test yaml.get() with boolean value
+let notifications: boolean = yaml.get(userObj, ".user.settings.notifications");
+console.log("Notifications enabled:");
+console.log(notifications);
+
+// Test yaml.has() with existing path
+let hasUserName: boolean = yaml.has(userObj, ".user.name");
+console.log("Has user name:");
+console.log(hasUserName);
+
+// Test yaml.has() with non-existing path
+let hasUserEmail: boolean = yaml.has(userObj, ".user.email");
+console.log("Has user email:");
+console.log(hasUserEmail);
+
+console.log("YAML property access tests completed!");

@@ -1,0 +1,24 @@
+console.log("Testing YAML parse and validation functions");
+
+// Test yaml.parse() with valid YAML
+let validYaml: string = 'name: John\nage: 30\nactive: true';
+let parsedData: object = yaml.parse(validYaml);
+console.log("Parsed YAML successfully");
+
+// Test yaml.isValid() with valid YAML
+let isValidData: boolean = yaml.isValid(validYaml);
+console.log("Valid YAML check:");
+console.log(isValidData);
+
+// Test yaml.isValid() with invalid YAML
+let invalidYaml: string = 'name: John\nage: [unclosed array';
+let isInvalidData: boolean = yaml.isValid(invalidYaml);
+console.log("Invalid YAML check:");
+console.log(isInvalidData);
+
+// Test yaml.stringify() 
+let stringifiedData: string = yaml.stringify(parsedData);
+console.log("Stringified YAML:");
+console.log(stringifiedData);
+
+console.log("YAML parse and validation tests completed!");

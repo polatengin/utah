@@ -1,0 +1,32 @@
+console.log("Testing YAML property manipulation functions");
+
+// Create test YAML data
+let configData: string = 'app:\n  name: MyApp\n  version: "1.0"\n  debug: false';
+let config: object = yaml.parse(configData);
+
+// Test yaml.set() with string value
+let updatedConfig: object = yaml.set(config, ".app.name", "UpdatedApp");
+console.log("Updated app name:");
+let newName: string = yaml.get(updatedConfig, ".app.name");
+console.log(newName);
+
+// Test yaml.set() with boolean value
+updatedConfig = yaml.set(updatedConfig, ".app.debug", true);
+console.log("Updated debug setting:");
+let debugMode: boolean = yaml.get(updatedConfig, ".app.debug");
+console.log(debugMode);
+
+// Test yaml.set() with new property
+updatedConfig = yaml.set(updatedConfig, ".app.port", 8080);
+console.log("Added port setting:");
+let port: number = yaml.get(updatedConfig, ".app.port");
+console.log(port);
+
+// Test yaml.delete() to remove property
+let configWithoutDebug: object = yaml.delete(updatedConfig, ".app.debug");
+console.log("Removed debug property:");
+let hasDebug: boolean = yaml.has(configWithoutDebug, ".app.debug");
+console.log("Has debug after deletion:");
+console.log(hasDebug);
+
+console.log("YAML property manipulation tests completed!");
