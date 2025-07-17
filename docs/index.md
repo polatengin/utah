@@ -36,6 +36,12 @@ Get started with Utah in minutes:
    ./hello.sh
    ```
 
+4. **Run directly:**
+
+   ```bash
+   utah run hello.shx
+   ```
+
 ## Key Features
 
 ### 🎯 **Type Safety**
