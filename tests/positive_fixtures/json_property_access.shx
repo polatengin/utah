@@ -1,0 +1,32 @@
+console.log("Testing JSON property access functions");
+
+// Create test JSON data
+let userData: string = '{"user": {"name": "Jane", "age": 25, "settings": {"theme": "dark", "notifications": true}}}';
+let userObj: object = json.parse(userData);
+
+// Test json.get() with simple path
+let userName: string = json.get(userObj, ".user.name");
+console.log("User name:");
+console.log(userName);
+
+// Test json.get() with nested path
+let userTheme: string = json.get(userObj, ".user.settings.theme");
+console.log("User theme:");
+console.log(userTheme);
+
+// Test json.get() with boolean value
+let notifications: boolean = json.get(userObj, ".user.settings.notifications");
+console.log("Notifications enabled:");
+console.log(notifications);
+
+// Test json.has() with existing path
+let hasUserName: boolean = json.has(userObj, ".user.name");
+console.log("Has user name:");
+console.log(hasUserName);
+
+// Test json.has() with non-existing path
+let hasUserEmail: boolean = json.has(userObj, ".user.email");
+console.log("Has user email:");
+console.log(hasUserEmail);
+
+console.log("JSON property access tests completed!");

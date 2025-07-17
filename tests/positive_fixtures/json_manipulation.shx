@@ -1,0 +1,32 @@
+console.log("Testing JSON property manipulation functions");
+
+// Create test JSON data
+let configData: string = '{"app": {"name": "MyApp", "version": "1.0", "debug": false}}';
+let config: object = json.parse(configData);
+
+// Test json.set() with string value
+let updatedConfig: object = json.set(config, ".app.name", "UpdatedApp");
+console.log("Updated app name:");
+let newName: string = json.get(updatedConfig, ".app.name");
+console.log(newName);
+
+// Test json.set() with boolean value
+updatedConfig = json.set(updatedConfig, ".app.debug", true);
+console.log("Updated debug setting:");
+let debugMode: boolean = json.get(updatedConfig, ".app.debug");
+console.log(debugMode);
+
+// Test json.set() with new property
+updatedConfig = json.set(updatedConfig, ".app.port", 8080);
+console.log("Added port setting:");
+let port: number = json.get(updatedConfig, ".app.port");
+console.log(port);
+
+// Test json.delete() to remove property
+let configWithoutDebug: object = json.delete(updatedConfig, ".app.debug");
+console.log("Removed debug property:");
+let hasDebug: boolean = json.has(configWithoutDebug, ".app.debug");
+console.log("Has debug after deletion:");
+console.log(hasDebug);
+
+console.log("JSON property manipulation tests completed!");

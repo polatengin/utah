@@ -703,6 +703,132 @@ public partial class Parser
         return new GitUndoLastCommitExpression();
       }
 
+      // Special handling for json.parse()
+      if (functionName == "json.parse")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var jsonStringExpr = ParseExpression(args[0]);
+          return new JsonParseExpression(jsonStringExpr);
+        }
+        throw new InvalidOperationException("json.parse() requires exactly 1 argument (jsonString)");
+      }
+
+      // Special handling for json.stringify()
+      if (functionName == "json.stringify")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          return new JsonStringifyExpression(jsonObjectExpr);
+        }
+        throw new InvalidOperationException("json.stringify() requires exactly 1 argument (jsonObject)");
+      }
+
+      // Special handling for json.isValid()
+      if (functionName == "json.isValid")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var jsonStringExpr = ParseExpression(args[0]);
+          return new JsonIsValidExpression(jsonStringExpr);
+        }
+        throw new InvalidOperationException("json.isValid() requires exactly 1 argument (jsonString)");
+      }
+
+      // Special handling for json.get()
+      if (functionName == "json.get")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new JsonGetExpression(jsonObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("json.get() requires exactly 2 arguments (jsonObject, path)");
+      }
+
+      // Special handling for json.set()
+      if (functionName == "json.set")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 3)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          var valueExpr = ParseExpression(args[2]);
+          return new JsonSetExpression(jsonObjectExpr, pathExpr, valueExpr);
+        }
+        throw new InvalidOperationException("json.set() requires exactly 3 arguments (jsonObject, path, value)");
+      }
+
+      // Special handling for json.has()
+      if (functionName == "json.has")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new JsonHasExpression(jsonObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("json.has() requires exactly 2 arguments (jsonObject, path)");
+      }
+
+      // Special handling for json.delete()
+      if (functionName == "json.delete")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          var pathExpr = ParseExpression(args[1]);
+          return new JsonDeleteExpression(jsonObjectExpr, pathExpr);
+        }
+        throw new InvalidOperationException("json.delete() requires exactly 2 arguments (jsonObject, path)");
+      }
+
+      // Special handling for json.keys()
+      if (functionName == "json.keys")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          return new JsonKeysExpression(jsonObjectExpr);
+        }
+        throw new InvalidOperationException("json.keys() requires exactly 1 argument (jsonObject)");
+      }
+
+      // Special handling for json.values()
+      if (functionName == "json.values")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var jsonObjectExpr = ParseExpression(args[0]);
+          return new JsonValuesExpression(jsonObjectExpr);
+        }
+        throw new InvalidOperationException("json.values() requires exactly 1 argument (jsonObject)");
+      }
+
+      // Special handling for json.merge()
+      if (functionName == "json.merge")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var jsonObject1Expr = ParseExpression(args[0]);
+          var jsonObject2Expr = ParseExpression(args[1]);
+          return new JsonMergeExpression(jsonObject1Expr, jsonObject2Expr);
+        }
+        throw new InvalidOperationException("json.merge() requires exactly 2 arguments (jsonObject1, jsonObject2)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

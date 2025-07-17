@@ -2401,7 +2401,274 @@ fi
 - Works consistently across all Unix-like systems (Linux, macOS, BSD)
 - Lightweight check with minimal performance impact
 
-## 🔀 Git Utilities
+## 🧩 JSON Functions
+
+Utah provides comprehensive JSON parsing and manipulation functions that allow you to work with JSON data directly in your scripts. These functions use `jq` under the hood to provide powerful and efficient JSON operations with jq-style path syntax.
+
+### Available JSON Functions
+
+#### JSON Parsing and Validation
+
+- `json.parse(jsonString)` - Parse a JSON string into an object that can be manipulated
+- `json.stringify(jsonObject)` - Convert a JSON object back to a string representation
+- `json.isValid(jsonString)` - Check if a string contains valid JSON syntax
+
+#### JSON Property Access and Manipulation
+
+- `json.get(jsonObject, path)` - Get a value from JSON using jq-style path (e.g., ".user.name")
+- `json.set(jsonObject, path, value)` - Set a value in JSON object using jq-style path
+- `json.has(jsonObject, path)` - Check if a property exists at the given path
+- `json.delete(jsonObject, path)` - Remove a property from JSON object
+
+#### JSON Utility Functions
+
+- `json.keys(jsonObject)` - Get all keys from a JSON object as an array
+- `json.values(jsonObject)` - Get all values from a JSON object as an array
+- `json.merge(jsonObject1, jsonObject2)` - Merge two JSON objects (jsonObject2 overwrites jsonObject1)
+
+### JSON Functions Usage
+
+```typescript
+// Basic JSON parsing and validation
+let configJson: string = '{"debug": true, "port": 8080, "name": "MyApp"}';
+let isValid: boolean = json.isValid(configJson);
+
+if (isValid) {
+  let config: object = json.parse(configJson);
+  console.log("Configuration loaded successfully");
+
+  // Access properties using jq-style paths
+  let appName: string = json.get(config, ".name");
+  let port: number = json.get(config, ".port");
+  let debugMode: boolean = json.get(config, ".debug");
+
+  console.log(`Starting ${appName} on port ${port}`);
+
+  if (debugMode) {
+    console.log("Debug mode is enabled");
+  }
+} else {
+  console.log("Invalid JSON configuration");
+  exit(1);
+}
+
+// Working with nested JSON objects
+let userData: string = '{"user": {"name": "Jane", "settings": {"theme": "dark", "notifications": true}}}';
+let userObj: object = json.parse(userData);
+
+// Access nested properties
+let userName: string = json.get(userObj, ".user.name");
+let theme: string = json.get(userObj, ".user.settings.theme");
+let notifications: boolean = json.get(userObj, ".user.settings.notifications");
+
+console.log(`User: ${userName}, Theme: ${theme}, Notifications: ${notifications}`);
+
+// Modify JSON properties
+let updatedUser: object = json.set(userObj, ".user.name", "John");
+updatedUser = json.set(updatedUser, ".user.settings.theme", "light");
+updatedUser = json.set(updatedUser, ".user.settings.newFeature", true);
+
+// Check if properties exist
+let hasEmail: boolean = json.has(updatedUser, ".user.email");
+let hasTheme: boolean = json.has(updatedUser, ".user.settings.theme");
+
+console.log(`Has email: ${hasEmail}, Has theme: ${hasTheme}`);
+
+// Remove properties
+let userWithoutTheme: object = json.delete(updatedUser, ".user.settings.theme");
+console.log("Theme setting removed");
+
+// Convert back to string
+let finalUserJson: string = json.stringify(userWithoutTheme);
+console.log("Updated user data: " + finalUserJson);
+```
+
+### Working with JSON Arrays and Complex Data
+
+```typescript
+// JSON array manipulation
+let fruitsJson: string = '{"fruits": ["apple", "banana", "cherry"], "count": 3}';
+let data: object = json.parse(fruitsJson);
+
+// Access array elements (using jq array syntax)
+let firstFruit: string = json.get(data, ".fruits[0]");
+let fruitCount: number = json.get(data, ".count");
+
+console.log(`First fruit: ${firstFruit}, Total count: ${fruitCount}`);
+
+// Add new properties
+let updatedData: object = json.set(data, ".fruits[3]", "date");
+updatedData = json.set(updatedData, ".count", 4);
+
+// Get all keys and values
+let keys: string[] = json.keys(data);
+let values: any[] = json.values(data);
+
+for (let key: string in keys) {
+  console.log("Property: " + key);
+}
+```
+
+### JSON Configuration Management
+
+```typescript
+// Load and merge configuration files
+let defaultConfig: string = fs.readFile("default-config.json");
+let userConfig: string = fs.readFile("user-config.json");
+
+// Validate configurations
+if (json.isValid(defaultConfig) && json.isValid(userConfig)) {
+  let defaultObj: object = json.parse(defaultConfig);
+  let userObj: object = json.parse(userConfig);
+
+  // Merge configurations (user settings override defaults)
+  let finalConfig: object = json.merge(defaultObj, userObj);
+
+  // Extract specific settings
+  let timeout: number = json.get(finalConfig, ".timeout");
+  let retries: number = json.get(finalConfig, ".retries");
+  let debugMode: boolean = json.get(finalConfig, ".debug");
+
+  console.log(`Timeout: ${timeout}s, Retries: ${retries}, Debug: ${debugMode}`);
+
+  // Save merged configuration
+  let configString: string = json.stringify(finalConfig);
+  fs.writeFile("merged-config.json", configString);
+} else {
+  console.log("Invalid configuration files detected");
+  exit(1);
+}
+```
+
+### Integration with Web APIs
+
+```typescript
+// Work with JSON API responses
+let apiUrl: string = "https://api.github.com/users/octocat";
+let response: string = web.get(apiUrl);
+
+if (json.isValid(response)) {
+  let userData: object = json.parse(response);
+
+  let username: string = json.get(userData, ".login");
+  let name: string = json.get(userData, ".name");
+  let followers: number = json.get(userData, ".followers");
+  let repos: number = json.get(userData, ".public_repos");
+
+  console.log(`GitHub User: ${name} (@${username})`);
+  console.log(`Followers: ${followers}, Public Repos: ${repos}`);
+
+  // Create summary object
+  let summary: object = json.parse("{}");
+  summary = json.set(summary, ".username", username);
+  summary = json.set(summary, ".followers", followers);
+  summary = json.set(summary, ".repositories", repos);
+
+  let summaryJson: string = json.stringify(summary);
+  fs.writeFile("user-summary.json", summaryJson);
+} else {
+  console.log("Failed to retrieve valid JSON from API");
+}
+```
+
+### Generated Bash Code for JSON Functions
+
+The JSON functions transpile to efficient bash commands using `jq`:
+
+```bash
+# json.parse() and json.isValid()
+validJson='{"name": "John", "age": 30, "active": true}'
+isValidData=$(echo ${validJson} | jq empty >/dev/null 2>&1 && echo "true" || echo "false")
+
+if [ "${isValidData}" = "true" ]; then
+  parsedData=$(echo ${validJson} | jq .)
+  echo "JSON parsed successfully"
+fi
+
+# json.get() with jq-style paths
+userName=$(echo "${parsedData}" | jq -r '.name')
+userAge=$(echo "${parsedData}" | jq -r '.age')
+
+# json.set() with different value types
+updatedData=$(echo "${parsedData}" | jq '.name = "Jane"')
+updatedData=$(echo "${updatedData}" | jq '.age = 25')
+updatedData=$(echo "${updatedData}" | jq '.active = false')
+
+# json.has() to check property existence
+hasName=$(echo "${updatedData}" | jq 'try .name catch false | type != "null"' | tr '[:upper:]' '[:lower:]')
+hasEmail=$(echo "${updatedData}" | jq 'try .email catch false | type != "null"' | tr '[:upper:]' '[:lower:]')
+
+# json.delete() to remove properties
+dataWithoutAge=$(echo "${updatedData}" | jq 'del(.age)')
+
+# json.keys() and json.values()
+keys=$(echo "${updatedData}" | jq -r 'keys[]')
+values=$(echo "${updatedData}" | jq -r '.[]')
+
+# json.merge() two objects
+defaultSettings='{"timeout": 30, "retries": 3}'
+userSettings='{"timeout": 60, "debug": true}'
+mergedSettings=$(echo "${defaultSettings}" | jq --argjson obj2 "${userSettings}" '. * $obj2')
+
+# json.stringify() (already in JSON format from jq)
+configString=$(echo "${mergedSettings}" | jq -c .)
+```
+
+### JSON Functions Features
+
+- **jq-style paths**: Uses familiar jq path syntax like `.user.name` and `.items[0]`
+- **Type preservation**: Maintains proper JSON types (strings, numbers, booleans, objects, arrays)
+- **Nested access**: Supports deep object navigation with dot notation
+- **Array support**: Works with JSON arrays using bracket notation
+- **Error handling**: Integrates with Utah's try/catch system for robust error handling
+- **Performance**: Leverages `jq` which is optimized for JSON processing
+- **Cross-platform**: Uses `jq` which is available on most Unix-like systems
+
+### JSON Path Examples
+
+```typescript
+// Basic property access
+json.get(obj, ".name")              // Get top-level property
+json.get(obj, ".user.name")         // Get nested property
+json.get(obj, ".user.settings.theme") // Get deeply nested property
+
+// Array access
+json.get(obj, ".items[0]")          // Get first array element
+json.get(obj, ".users[2].name")     // Get property of array element
+json.get(obj, ".tags[-1]")          // Get last array element
+
+// Complex paths
+json.get(obj, ".config.servers[0].host")  // Nested array access
+json.get(obj, ".metadata.created")        // ISO date strings
+```
+
+### JSON Functions Use Cases
+
+- **Configuration Management**: Load, validate, and merge JSON configuration files
+- **API Integration**: Parse JSON responses from web APIs and extract specific data
+- **Data Processing**: Transform and manipulate JSON data structures
+- **Settings Management**: Update application settings stored as JSON
+- **Log Processing**: Extract information from JSON-formatted log files
+- **Microservices**: Handle JSON communication between services
+- **DevOps Automation**: Process JSON output from various tools and APIs
+
+### Best Practices for JSON Functions
+
+- **Always validate**: Use `json.isValid()` before parsing untrusted JSON
+- **Handle errors**: Wrap JSON operations in try/catch blocks for robust error handling
+- **Use specific paths**: Be explicit with jq paths to avoid ambiguity
+- **Type awareness**: Remember that all values from `json.get()` are strings; cast as needed
+- **Performance**: For repeated operations on the same JSON, parse once and reuse the object
+
+### JSON Functions Technical Notes
+
+- JSON functions require `jq` to be installed on the system
+- All JSON objects are stored as bash variables containing the parsed JSON
+- Property values are extracted as strings; type conversion happens at the Utah level
+- Large JSON objects may impact performance; consider processing in chunks
+- The `json.merge()` function performs a deep merge with the second object taking precedence
+
+## 🛠️ Git Utilities
 
 Utah provides git utilities for common version control operations. These functions allow you to perform git operations directly within your scripts, making it easy to automate version control workflows.
 
@@ -2910,6 +3177,10 @@ Current tests cover:
 - **git_undo_last_commit.shx** - Git undo last commit functionality
 - **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
 - **import_test.shx** - Basic import functionality with multiple files
+- **json_manipulation.shx** - JSON property manipulation and modification functions
+- **json_parse_validation.shx** - JSON parsing and validation functions
+- **json_property_access.shx** - JSON property access and existence checking
+- **json_utilities.shx** - JSON utility functions (keys, values, merge)
 - **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
@@ -3053,7 +3324,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] Template functions to update files with dynamic content
 
-- [ ] json parsing and manipulation functions
+- [x] json parsing and manipulation functions
 
 - [ ] yaml parsing and manipulation functions
 

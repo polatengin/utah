@@ -142,6 +142,26 @@ public partial class Compiler
         return CompileTimerCurrentExpression(timerCurrent);
       case GitUndoLastCommitExpression:
         return CompileGitUndoLastCommitExpression();
+      case JsonParseExpression jsonParse:
+        return CompileJsonParseExpression(jsonParse);
+      case JsonStringifyExpression jsonStringify:
+        return CompileJsonStringifyExpression(jsonStringify);
+      case JsonIsValidExpression jsonIsValid:
+        return CompileJsonIsValidExpression(jsonIsValid);
+      case JsonGetExpression jsonGet:
+        return CompileJsonGetExpression(jsonGet);
+      case JsonSetExpression jsonSet:
+        return CompileJsonSetExpression(jsonSet);
+      case JsonHasExpression jsonHas:
+        return CompileJsonHasExpression(jsonHas);
+      case JsonDeleteExpression jsonDelete:
+        return CompileJsonDeleteExpression(jsonDelete);
+      case JsonKeysExpression jsonKeys:
+        return CompileJsonKeysExpression(jsonKeys);
+      case JsonValuesExpression jsonValues:
+        return CompileJsonValuesExpression(jsonValues);
+      case JsonMergeExpression jsonMerge:
+        return CompileJsonMergeExpression(jsonMerge);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -1175,5 +1195,125 @@ public partial class Compiler
     // Lambda expressions are typically compiled as part of their parent construct
     // For now, we'll throw an error if someone tries to use a lambda outside of supported contexts
     throw new InvalidOperationException("Lambda expressions can only be used in specific contexts like scheduler.cron()");
+  }
+
+  private string CompileJsonParseExpression(JsonParseExpression jsonParse)
+  {
+    var jsonString = CompileExpression(jsonParse.JsonString);
+    // For json.parse(), we store the parsed JSON in a variable that can be referenced later
+    var varName = ExtractVariableName(jsonString);
+    return $"$(echo {jsonString} | jq .)";
+  }
+
+  private string CompileJsonStringifyExpression(JsonStringifyExpression jsonStringify)
+  {
+    var jsonObject = CompileExpression(jsonStringify.JsonObject);
+    // Extract variable name if it's in ${var} format, otherwise use as-is
+    var varName = ExtractVariableName(jsonObject);
+    return $"$(echo \"${{{varName}}}\" | jq -c .)";
+  }
+
+  private string CompileJsonIsValidExpression(JsonIsValidExpression jsonIsValid)
+  {
+    var jsonString = CompileExpression(jsonIsValid.JsonString);
+    return $"$(echo {jsonString} | jq empty >/dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileJsonGetExpression(JsonGetExpression jsonGet)
+  {
+    var jsonObject = CompileExpression(jsonGet.JsonObject);
+    var path = CompileExpression(jsonGet.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(jsonObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | jq -r '{pathValue}')";
+  }
+
+  private string CompileJsonSetExpression(JsonSetExpression jsonSet)
+  {
+    var jsonObject = CompileExpression(jsonSet.JsonObject);
+    var path = CompileExpression(jsonSet.Path);
+    var value = CompileExpression(jsonSet.Value);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(jsonObject);
+    var pathValue = path.Trim('"');
+    
+    // Handle different value types
+    if (value.StartsWith("\"") && value.EndsWith("\""))
+    {
+      // String value - keep quotes for jq
+      return $"$(echo \"${{{varName}}}\" | jq '{pathValue} = {value}')";
+    }
+    else if (value == "true" || value == "false" || (int.TryParse(value, out _)) || (double.TryParse(value, out _)))
+    {
+      // Boolean or numeric value - no quotes
+      return $"$(echo \"${{{varName}}}\" | jq '{pathValue} = {value}')";
+    }
+    else
+    {
+      // Variable reference - use --arg
+      var valueVarName = ExtractVariableName(value);
+      return $"$(echo \"${{{varName}}}\" | jq --arg val \"${{{valueVarName}}}\" '{pathValue} = $val')";
+    }
+  }
+
+  private string CompileJsonHasExpression(JsonHasExpression jsonHas)
+  {
+    var jsonObject = CompileExpression(jsonHas.JsonObject);
+    var path = CompileExpression(jsonHas.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(jsonObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | jq 'try {pathValue} catch false | type != \"null\"' | tr '[:upper:]' '[:lower:]')";
+  }
+
+  private string CompileJsonDeleteExpression(JsonDeleteExpression jsonDelete)
+  {
+    var jsonObject = CompileExpression(jsonDelete.JsonObject);
+    var path = CompileExpression(jsonDelete.Path);
+    
+    // Extract variable name and remove quotes from path
+    var varName = ExtractVariableName(jsonObject);
+    var pathValue = path.Trim('"');
+    
+    return $"$(echo \"${{{varName}}}\" | jq 'del({pathValue})')";
+  }
+
+  private string CompileJsonKeysExpression(JsonKeysExpression jsonKeys)
+  {
+    var jsonObject = CompileExpression(jsonKeys.JsonObject);
+    var varName = ExtractVariableName(jsonObject);
+    
+    return $"$(echo \"${{{varName}}}\" | jq -r 'keys[]')";
+  }
+
+  private string CompileJsonValuesExpression(JsonValuesExpression jsonValues)
+  {
+    var jsonObject = CompileExpression(jsonValues.JsonObject);
+    var varName = ExtractVariableName(jsonObject);
+    
+    return $"$(echo \"${{{varName}}}\" | jq -r '.[]')";
+  }
+
+  private string CompileJsonMergeExpression(JsonMergeExpression jsonMerge)
+  {
+    var jsonObject1 = CompileExpression(jsonMerge.JsonObject1);
+    var jsonObject2 = CompileExpression(jsonMerge.JsonObject2);
+    
+    var varName1 = ExtractVariableName(jsonObject1);
+    var varName2 = ExtractVariableName(jsonObject2);
+    
+    return $"$(echo \"${{{varName1}}}\" | jq --argjson obj2 \"${{{varName2}}}\" '. * $obj2')";
+  }
+
+  private static int _uniqueIdCounter = 0;
+  private static int GetUniqueId()
+  {
+    return ++_uniqueIdCounter;
   }
 }

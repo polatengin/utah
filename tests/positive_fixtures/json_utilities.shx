@@ -1,0 +1,44 @@
+console.log("Testing JSON utility functions");
+
+// Create test JSON data
+let sampleData: string = '{"firstName": "John", "lastName": "Doe", "age": 30, "city": "New York"}';
+let dataObj: object = json.parse(sampleData);
+
+// Test json.keys()
+console.log("JSON keys:");
+let keys: string[] = json.keys(dataObj);
+for (let key: string in keys) {
+  console.log("Key: " + key);
+}
+
+// Test json.values()
+console.log("JSON values:");
+let values: any[] = json.values(dataObj);
+for (let value: any in values) {
+  console.log("Value: " + value);
+}
+
+// Test json.merge()
+let defaultSettings: string = '{"timeout": 30, "retries": 3, "debug": false}';
+let userSettings: string = '{"timeout": 60, "debug": true, "logLevel": "info"}';
+
+let defaultObj: object = json.parse(defaultSettings);
+let userObj: object = json.parse(userSettings);
+
+let mergedSettings: object = json.merge(defaultObj, userObj);
+console.log("Merged settings:");
+let mergedString: string = json.stringify(mergedSettings);
+console.log(mergedString);
+
+// Verify merged values
+let finalTimeout: number = json.get(mergedSettings, ".timeout");
+let finalRetries: number = json.get(mergedSettings, ".retries");
+let finalDebug: boolean = json.get(mergedSettings, ".debug");
+let finalLogLevel: string = json.get(mergedSettings, ".logLevel");
+
+console.log("Final timeout: " + finalTimeout);
+console.log("Final retries: " + finalRetries);
+console.log("Final debug: " + finalDebug);
+console.log("Final log level: " + finalLogLevel);
+
+console.log("JSON utility tests completed!");

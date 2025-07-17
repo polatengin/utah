@@ -63,6 +63,16 @@ public record ArgsHasExpression(string Flag) : Expression;
 public record ArgsGetExpression(string Flag) : Expression;
 public record ArgsAllExpression() : Expression;
 public record GitUndoLastCommitExpression() : Expression;
+public record JsonParseExpression(Expression JsonString) : Expression;
+public record JsonStringifyExpression(Expression JsonObject) : Expression;
+public record JsonIsValidExpression(Expression JsonString) : Expression;
+public record JsonGetExpression(Expression JsonObject, Expression Path) : Expression;
+public record JsonSetExpression(Expression JsonObject, Expression Path, Expression Value) : Expression;
+public record JsonHasExpression(Expression JsonObject, Expression Path) : Expression;
+public record JsonDeleteExpression(Expression JsonObject, Expression Path) : Expression;
+public record JsonKeysExpression(Expression JsonObject) : Expression;
+public record JsonValuesExpression(Expression JsonObject) : Expression;
+public record JsonMergeExpression(Expression JsonObject1, Expression JsonObject2) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 

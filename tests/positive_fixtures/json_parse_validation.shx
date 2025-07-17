@@ -1,0 +1,24 @@
+console.log("Testing JSON parse and validation functions");
+
+// Test json.parse() with valid JSON
+let validJson: string = '{"name": "John", "age": 30, "active": true}';
+let parsedData: object = json.parse(validJson);
+console.log("Parsed JSON successfully");
+
+// Test json.isValid() with valid JSON
+let isValidData: boolean = json.isValid(validJson);
+console.log("Valid JSON check:");
+console.log(isValidData);
+
+// Test json.isValid() with invalid JSON
+let invalidJson: string = '{"name": "John", "age":}';
+let isInvalidData: boolean = json.isValid(invalidJson);
+console.log("Invalid JSON check:");
+console.log(isInvalidData);
+
+// Test json.stringify() 
+let stringifiedData: string = json.stringify(parsedData);
+console.log("Stringified JSON:");
+console.log(stringifiedData);
+
+console.log("JSON parse and validation tests completed!");
