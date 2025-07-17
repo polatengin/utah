@@ -39,12 +39,6 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "utah.helloWorld",
-        "title": "Hello World"
-      }
-    ],
     "languages": [
       {
         "id": "utah",
