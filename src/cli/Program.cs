@@ -290,7 +290,7 @@ static void FormatAllFiles(string[] args)
     }
 
     Console.WriteLine($"Found {shxFiles.Length} .shx file(s) to format:");
-    
+
     int formattedCount = 0;
     int alreadyFormattedCount = 0;
     int errorCount = 0;
