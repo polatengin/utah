@@ -1243,11 +1243,11 @@ public partial class Compiler
   {
     var jsonObject = CompileExpression(jsonGet.JsonObject);
     var path = CompileExpression(jsonGet.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(jsonObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | jq -r '{pathValue}')";
   }
 
@@ -1256,11 +1256,11 @@ public partial class Compiler
     var jsonObject = CompileExpression(jsonSet.JsonObject);
     var path = CompileExpression(jsonSet.Path);
     var value = CompileExpression(jsonSet.Value);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(jsonObject);
     var pathValue = path.Trim('"');
-    
+
     // Handle different value types
     if (value.StartsWith("\"") && value.EndsWith("\""))
     {
@@ -1284,11 +1284,11 @@ public partial class Compiler
   {
     var jsonObject = CompileExpression(jsonHas.JsonObject);
     var path = CompileExpression(jsonHas.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(jsonObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | jq 'try {pathValue} catch false | type != \"null\"' | tr '[:upper:]' '[:lower:]')";
   }
 
@@ -1296,11 +1296,11 @@ public partial class Compiler
   {
     var jsonObject = CompileExpression(jsonDelete.JsonObject);
     var path = CompileExpression(jsonDelete.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(jsonObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | jq 'del({pathValue})')";
   }
 
@@ -1308,7 +1308,7 @@ public partial class Compiler
   {
     var jsonObject = CompileExpression(jsonKeys.JsonObject);
     var varName = ExtractVariableName(jsonObject);
-    
+
     return $"$(echo \"${{{varName}}}\" | jq -r 'keys[]')";
   }
 
@@ -1316,7 +1316,7 @@ public partial class Compiler
   {
     var jsonObject = CompileExpression(jsonValues.JsonObject);
     var varName = ExtractVariableName(jsonObject);
-    
+
     return $"$(echo \"${{{varName}}}\" | jq -r '.[]')";
   }
 
@@ -1324,10 +1324,10 @@ public partial class Compiler
   {
     var jsonObject1 = CompileExpression(jsonMerge.JsonObject1);
     var jsonObject2 = CompileExpression(jsonMerge.JsonObject2);
-    
+
     var varName1 = ExtractVariableName(jsonObject1);
     var varName2 = ExtractVariableName(jsonObject2);
-    
+
     return $"$(echo \"${{{varName1}}}\" | jq --argjson obj2 \"${{{varName2}}}\" '. * $obj2')";
   }
 
@@ -1356,11 +1356,11 @@ public partial class Compiler
   {
     var yamlObject = CompileExpression(yamlGet.YamlObject);
     var path = CompileExpression(yamlGet.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(yamlObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r '{pathValue}')";
   }
 
@@ -1369,11 +1369,11 @@ public partial class Compiler
     var yamlObject = CompileExpression(yamlSet.YamlObject);
     var path = CompileExpression(yamlSet.Path);
     var value = CompileExpression(yamlSet.Value);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(yamlObject);
     var pathValue = path.Trim('"');
-    
+
     // Handle different value types
     if (value.StartsWith("\"") && value.EndsWith("\""))
     {
@@ -1397,11 +1397,11 @@ public partial class Compiler
   {
     var yamlObject = CompileExpression(yamlHas.YamlObject);
     var path = CompileExpression(yamlHas.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(yamlObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq 'try {pathValue} catch false | type != \"null\"' | tr '[:upper:]' '[:lower:]')";
   }
 
@@ -1409,11 +1409,11 @@ public partial class Compiler
   {
     var yamlObject = CompileExpression(yamlDelete.YamlObject);
     var path = CompileExpression(yamlDelete.Path);
-    
+
     // Extract variable name and remove quotes from path
     var varName = ExtractVariableName(yamlObject);
     var pathValue = path.Trim('"');
-    
+
     return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq 'del({pathValue})' | yq -o=yaml .)";
   }
 
@@ -1421,7 +1421,7 @@ public partial class Compiler
   {
     var yamlObject = CompileExpression(yamlKeys.YamlObject);
     var varName = ExtractVariableName(yamlObject);
-    
+
     return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r 'keys[]')";
   }
 
@@ -1429,7 +1429,7 @@ public partial class Compiler
   {
     var yamlObject = CompileExpression(yamlValues.YamlObject);
     var varName = ExtractVariableName(yamlObject);
-    
+
     return $"$(echo \"${{{varName}}}\" | yq -o=json . | jq -r '.[]')";
   }
 
@@ -1437,10 +1437,10 @@ public partial class Compiler
   {
     var yamlObject1 = CompileExpression(yamlMerge.YamlObject1);
     var yamlObject2 = CompileExpression(yamlMerge.YamlObject2);
-    
+
     var varName1 = ExtractVariableName(yamlObject1);
     var varName2 = ExtractVariableName(yamlObject2);
-    
+
     return $"$(echo \"${{{varName1}}}\" | yq -o=json . | jq --argjson obj2 \"$(echo \\\"${{{varName2}}}\\\" | yq -o=json .)\" '. * $obj2' | yq -o=yaml .)";
   }
 
