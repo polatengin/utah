@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Test Results](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml)
+[![Release Workflow](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2586,7 +2586,7 @@ console.log("Installation result: " + installResult);
 let jqAvailable: boolean = os.isInstalled("jq");
 if (jqAvailable) {
   console.log("JSON processing tools are ready");
-  
+
   // Now you can safely use JSON functions
   let config: string = '{"database": {"host": "localhost", "port": 5432}}';
   let configObj: object = json.parse(config);
@@ -2892,7 +2892,7 @@ let jqAvailable: boolean = os.isInstalled("jq");
 
 if (yqAvailable && jqAvailable) {
   console.log("YAML processing tools are ready");
-  
+
   // Now you can safely use YAML functions
   let config: string = 'database:\n  host: localhost\n  port: 5432\n  ssl: true';
   let configObj: object = yaml.parse(config);
