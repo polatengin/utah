@@ -9,12 +9,6 @@ Comprehensive guides for Utah development, from basic automation to advanced Dev
 
 ## Available Guides
 
-### Development Workflow
-
-- **[Development Setup](development-setup.md)** - Configure your development environment
-- **[Testing Utah Scripts](testing.md)** - Unit testing and integration testing strategies
-- **[Debugging Techniques](debugging.md)** - Troubleshooting and debugging Utah scripts
-
 ### Automation Patterns
 
 - **[File Processing](file-processing.md)** - Batch file operations and data transformation
