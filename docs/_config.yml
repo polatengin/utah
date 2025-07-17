@@ -7,7 +7,7 @@ url: "https://polatengin.github.io/utah"
 remote_theme: just-the-docs/just-the-docs
 
 # Color scheme
-color_scheme: light
+color_scheme: dark
 
 # Search configuration
 search_enabled: true
