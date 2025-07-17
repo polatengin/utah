@@ -2,6 +2,7 @@
 script.description("Malformatted scheduler test");
 scheduler.cron("0 */6 * * *", () => { console.log("Running every 6 hours...");
 let status = "running";
+
 console.log(`Status: ${status}`); });
 scheduler.cron("0 0 * * *", () => { console.log("Daily task");
 console.log("Cleanup completed"); });

@@ -131,21 +131,21 @@ public partial class Parser
     {
       return ParseIfStatement(line, ref i);
     }
-    if (line.StartsWith("for ("))
+    if (line.StartsWith("for(") || line.StartsWith("for ("))
     {
       // Disambiguate between for and for-in loops
-      var forInMatch = Regex.Match(line, @"for \((let|const) (\w+)(?::\s*(\w+))? in (.+)\) \{");
+      var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+in\s+(.+)\)\s*\{");
       if (forInMatch.Success)
       {
         return ParseForInLoop(line, ref i);
       }
       return ParseForLoop(line, ref i);
     }
-    if (line.StartsWith("while ("))
+    if (line.StartsWith("while(") || line.StartsWith("while ("))
     {
       return ParseWhileStatement(line, ref i);
     }
-    if (line.StartsWith("switch ("))
+    if (line.StartsWith("switch(") || line.StartsWith("switch ("))
     {
       return ParseSwitchStatement(line, ref i);
     }
@@ -560,7 +560,7 @@ public partial class Parser
 
   private ForInLoop ParseForInLoop(string line, ref int i)
   {
-    var forInMatch = Regex.Match(line, @"for \((let|const) (\w+)(?::\s*(\w+))? in (.+)\) \{");
+    var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+in\s+(.+)\)\s*\{");
     if (forInMatch.Success)
     {
       var variable = forInMatch.Groups[2].Value;
@@ -587,7 +587,7 @@ public partial class Parser
 
   private ForLoop ParseForLoop(string line, ref int i)
   {
-    var forMatch = Regex.Match(line, @"for \((.+); (.+); (.+)\) \{");
+    var forMatch = Regex.Match(line, @"for\s*\((.+);\s*(.+);\s*(.+)\)\s*\{");
     if (forMatch.Success)
     {
       var initStr = forMatch.Groups[1].Value.Trim();
@@ -618,7 +618,7 @@ public partial class Parser
 
   private WhileStatement ParseWhileStatement(string line, ref int i)
   {
-    var match = Regex.Match(line, @"while \((.+)\) \{");
+    var match = Regex.Match(line, @"while\s*\((.+)\)\s*\{");
     if (!match.Success) throw new Exception("Invalid while statement");
 
     var condition = ParseExpression(match.Groups[1].Value);
@@ -642,7 +642,7 @@ public partial class Parser
 
   private SwitchStatement ParseSwitchStatement(string line, ref int i)
   {
-    var match = Regex.Match(line, @"switch \((.+)\) \{");
+    var match = Regex.Match(line, @"switch\s*\((.+)\)\s*\{");
     if (!match.Success) throw new Exception("Invalid switch statement");
 
     var expression = ParseExpression(match.Groups[1].Value);

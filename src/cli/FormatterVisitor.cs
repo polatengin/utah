@@ -20,9 +20,10 @@ public class FormatterVisitor
     for (int i = 0; i < program.Statements.Count; i++)
     {
       var statement = program.Statements[i];
+      var prevStatement = i > 0 ? program.Statements[i - 1] : null;
 
-      // Add blank line before functions, classes, and major blocks (except first statement)
-      if (i > 0 && ShouldAddBlankLineBefore(statement))
+      // Add blank line between different statement types
+      if (i > 0 && ShouldAddBlankLineBetween(prevStatement!, statement))
       {
         _output.AppendLine();
       }
@@ -37,6 +38,34 @@ public class FormatterVisitor
     }
 
     return _output.ToString();
+  }
+
+  private bool ShouldAddBlankLineBetween(Statement prevStatement, Statement currentStatement)
+  {
+    // Always add blank line before major control structures
+    if (currentStatement is FunctionDeclaration || currentStatement is ImportStatement ||
+        currentStatement is IfStatement || currentStatement is ForLoop || 
+        currentStatement is ForInLoop || currentStatement is WhileStatement ||
+        currentStatement is SwitchStatement || currentStatement is TryCatchStatement)
+    {
+      return true;
+    }
+
+    // Add blank line between variable declarations and other statement types
+    if (prevStatement is VariableDeclaration && !(currentStatement is VariableDeclaration))
+    {
+      return true;
+    }
+
+    // Add blank line after control structures
+    if (prevStatement is IfStatement || prevStatement is ForLoop || 
+        prevStatement is ForInLoop || prevStatement is WhileStatement ||
+        prevStatement is SwitchStatement || prevStatement is TryCatchStatement)
+    {
+      return true;
+    }
+
+    return false;
   }
 
   private bool ShouldAddBlankLineBefore(Statement statement)
