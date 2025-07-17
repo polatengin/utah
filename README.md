@@ -2425,6 +2425,7 @@ Utah provides comprehensive JSON parsing and manipulation functions that allow y
 - `json.keys(jsonObject)` - Get all keys from a JSON object as an array
 - `json.values(jsonObject)` - Get all values from a JSON object as an array
 - `json.merge(jsonObject1, jsonObject2)` - Merge two JSON objects (jsonObject2 overwrites jsonObject1)
+- `json.installDependencies()` - Check and install required JSON processing tools (jq)
 
 ### JSON Functions Usage
 
@@ -2571,6 +2572,39 @@ if (json.isValid(response)) {
 }
 ```
 
+### JSON Dependency Management
+
+Utah provides an automated dependency installation function that ensures all required tools for JSON processing are available:
+
+```typescript
+// Check and install JSON dependencies
+console.log("Setting up JSON environment...");
+let installResult: string = json.installDependencies();
+console.log("Installation result: " + installResult);
+
+// Verify dependencies are available
+let jqAvailable: boolean = os.isInstalled("jq");
+if (jqAvailable) {
+  console.log("JSON processing tools are ready");
+  
+  // Now you can safely use JSON functions
+  let config: string = '{"database": {"host": "localhost", "port": 5432}}';
+  let configObj: object = json.parse(config);
+  let dbHost: string = json.get(configObj, ".database.host");
+  console.log(`Database host: ${dbHost}`);
+} else {
+  console.log("JSON tools installation failed");
+  exit(1);
+}
+
+// Use in setup scripts
+if (!os.isInstalled("jq")) {
+  console.log("Installing JSON dependencies...");
+  json.installDependencies();
+  console.log("JSON environment ready");
+}
+```
+
 ### Generated Bash Code for JSON Functions
 
 The JSON functions transpile to efficient bash commands using `jq`:
@@ -2612,6 +2646,35 @@ mergedSettings=$(echo "${defaultSettings}" | jq --argjson obj2 "${userSettings}"
 
 # json.stringify() (already in JSON format from jq)
 configString=$(echo "${mergedSettings}" | jq -c .)
+
+# json.installDependencies() - automated dependency installation
+installResult=$(
+if ! command -v jq &> /dev/null; then
+  echo "Installing jq for JSON processing..."
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y jq
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y jq
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y jq
+  elif command -v brew &> /dev/null; then
+    brew install jq
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -S --noconfirm jq
+  else
+    echo "Error: Unable to install jq. Please install it manually."
+    exit 1
+  fi
+  if command -v jq &> /dev/null; then
+    echo "jq installed successfully"
+  else
+    echo "Error: jq installation failed"
+    exit 1
+  fi
+else
+  echo "jq is already installed"
+fi
+)
 ```
 
 ### JSON Functions Features
@@ -2692,6 +2755,7 @@ Utah provides comprehensive YAML parsing and manipulation functions that mirror 
 - `yaml.keys(yamlObject)` - Get all keys from a YAML object as an array
 - `yaml.values(yamlObject)` - Get all values from a YAML object as an array
 - `yaml.merge(yamlObject1, yamlObject2)` - Merge two YAML objects (yamlObject2 overwrites yamlObject1)
+- `yaml.installDependencies()` - Check and install required YAML processing tools (yq and jq)
 
 ### YAML Functions Usage
 
@@ -2812,6 +2876,42 @@ if (yaml.isValid(deploymentYaml)) {
 }
 ```
 
+### YAML Dependency Management
+
+Utah provides an automated dependency installation function that ensures all required tools for YAML processing are available:
+
+```typescript
+// Check and install YAML dependencies
+console.log("Setting up YAML environment...");
+let installResult: string = yaml.installDependencies();
+console.log("Installation result: " + installResult);
+
+// Verify dependencies are available
+let yqAvailable: boolean = os.isInstalled("yq");
+let jqAvailable: boolean = os.isInstalled("jq");
+
+if (yqAvailable && jqAvailable) {
+  console.log("YAML processing tools are ready");
+  
+  // Now you can safely use YAML functions
+  let config: string = 'database:\n  host: localhost\n  port: 5432\n  ssl: true';
+  let configObj: object = yaml.parse(config);
+  let dbHost: string = yaml.get(configObj, ".database.host");
+  let sslEnabled: boolean = yaml.get(configObj, ".database.ssl");
+  console.log(`Database host: ${dbHost}, SSL: ${sslEnabled}`);
+} else {
+  console.log("YAML tools installation failed");
+  exit(1);
+}
+
+// Use in DevOps setup scripts
+if (!os.isInstalled("yq") || !os.isInstalled("jq")) {
+  console.log("Installing YAML dependencies...");
+  yaml.installDependencies();
+  console.log("YAML environment ready for Kubernetes and CI/CD operations");
+}
+```
+
 ### Generated Bash Code for YAML Functions
 
 The YAML functions transpile to efficient bash commands using `yq` and `jq`:
@@ -2852,6 +2952,57 @@ mergedSettings=$(echo "${defaultSettings}" | yq -o=json . | jq --argjson obj2 "$
 
 # yaml.stringify() (already in YAML format from yq)
 configString=$(echo "${mergedSettings}" | yq -o=yaml .)
+
+# yaml.installDependencies() - automated dependency installation
+installResult=$(
+if ! command -v yq &> /dev/null; then
+  echo "Installing yq for YAML processing..."
+  if command -v snap &> /dev/null; then
+    sudo snap install yq
+  elif command -v brew &> /dev/null; then
+    brew install yq
+  elif command -v wget &> /dev/null; then
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod +x /usr/local/bin/yq
+  else
+    echo "Error: Unable to install yq. Please install it manually."
+    exit 1
+  fi
+  if command -v yq &> /dev/null; then
+    echo "yq installed successfully"
+  else
+    echo "Error: yq installation failed"
+    exit 1
+  fi
+else
+  echo "yq is already installed"
+fi
+if ! command -v jq &> /dev/null; then
+  echo "Installing jq for JSON processing (required by YAML functions)..."
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y jq
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y jq
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y jq
+  elif command -v brew &> /dev/null; then
+    brew install jq
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -S --noconfirm jq
+  else
+    echo "Error: Unable to install jq. Please install it manually."
+    exit 1
+  fi
+  if command -v jq &> /dev/null; then
+    echo "jq installed successfully"
+  else
+    echo "Error: jq installation failed"
+    exit 1
+  fi
+else
+  echo "jq is already installed"
+fi
+)
 ```
 
 ### YAML Functions Features
@@ -3407,6 +3558,7 @@ Current tests cover:
 - **json_parse_validation.shx** - JSON parsing and validation functions
 - **json_property_access.shx** - JSON property access and existence checking
 - **json_utilities.shx** - JSON utility functions (keys, values, merge)
+- **json_install_dependencies.shx** - JSON dependency installation and verification
 - **let_reassignment_test.shx** - Variable reassignment and mutability
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
@@ -3438,6 +3590,7 @@ Current tests cover:
 - **yaml_parse_validation.shx** - YAML parsing and validation functions
 - **yaml_property_access.shx** - YAML property access and existence checking
 - **yaml_utilities.shx** - YAML utility functions (keys, values, merge)
+- **yaml_install_dependencies.shx** - YAML dependency installation and verification
 
 ### Negative Test Coverage
 

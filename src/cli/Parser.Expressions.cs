@@ -829,6 +829,16 @@ public partial class Parser
         throw new InvalidOperationException("json.merge() requires exactly 2 arguments (jsonObject1, jsonObject2)");
       }
 
+      // Special handling for json.installDependencies()
+      if (functionName == "json.installDependencies")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          return new JsonInstallDependenciesExpression();
+        }
+        throw new InvalidOperationException("json.installDependencies() requires no arguments");
+      }
+
       // Special handling for yaml.parse()
       if (functionName == "yaml.parse")
       {
@@ -953,6 +963,16 @@ public partial class Parser
           return new YamlMergeExpression(yamlObject1Expr, yamlObject2Expr);
         }
         throw new InvalidOperationException("yaml.merge() requires exactly 2 arguments (yamlObject1, yamlObject2)");
+      }
+
+      // Special handling for yaml.installDependencies()
+      if (functionName == "yaml.installDependencies")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          return new YamlInstallDependenciesExpression();
+        }
+        throw new InvalidOperationException("yaml.installDependencies() requires no arguments");
       }
 
       // Special handling for scheduler.cron()

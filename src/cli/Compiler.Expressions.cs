@@ -162,6 +162,8 @@ public partial class Compiler
         return CompileJsonValuesExpression(jsonValues);
       case JsonMergeExpression jsonMerge:
         return CompileJsonMergeExpression(jsonMerge);
+      case JsonInstallDependenciesExpression jsonInstallDependencies:
+        return CompileJsonInstallDependenciesExpression(jsonInstallDependencies);
       case YamlParseExpression yamlParse:
         return CompileYamlParseExpression(yamlParse);
       case YamlStringifyExpression yamlStringify:
@@ -182,6 +184,8 @@ public partial class Compiler
         return CompileYamlValuesExpression(yamlValues);
       case YamlMergeExpression yamlMerge:
         return CompileYamlMergeExpression(yamlMerge);
+      case YamlInstallDependenciesExpression yamlInstallDependencies:
+        return CompileYamlInstallDependenciesExpression(yamlInstallDependencies);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -1331,6 +1335,37 @@ public partial class Compiler
     return $"$(echo \"${{{varName1}}}\" | jq --argjson obj2 \"${{{varName2}}}\" '. * $obj2')";
   }
 
+  private string CompileJsonInstallDependenciesExpression(JsonInstallDependenciesExpression jsonInstallDependencies)
+  {
+    return @"$(
+if ! command -v jq &> /dev/null; then
+  echo ""Installing jq for JSON processing...""
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y jq
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y jq
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y jq
+  elif command -v brew &> /dev/null; then
+    brew install jq
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -S --noconfirm jq
+  else
+    echo ""Error: Unable to install jq. Please install it manually.""
+    exit 1
+  fi
+  if command -v jq &> /dev/null; then
+    echo ""jq installed successfully""
+  else
+    echo ""Error: jq installation failed""
+    exit 1
+  fi
+else
+  echo ""jq is already installed""
+fi
+)";
+  }
+
   private string CompileYamlParseExpression(YamlParseExpression yamlParse)
   {
     var yamlString = CompileExpression(yamlParse.YamlString);
@@ -1442,6 +1477,59 @@ public partial class Compiler
     var varName2 = ExtractVariableName(yamlObject2);
 
     return $"$(echo \"${{{varName1}}}\" | yq -o=json . | jq --argjson obj2 \"$(echo \\\"${{{varName2}}}\\\" | yq -o=json .)\" '. * $obj2' | yq -o=yaml .)";
+  }
+
+  private string CompileYamlInstallDependenciesExpression(YamlInstallDependenciesExpression yamlInstallDependencies)
+  {
+    return @"$(
+if ! command -v yq &> /dev/null; then
+  echo ""Installing yq for YAML processing...""
+  if command -v snap &> /dev/null; then
+    sudo snap install yq
+  elif command -v brew &> /dev/null; then
+    brew install yq
+  elif command -v wget &> /dev/null; then
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod +x /usr/local/bin/yq
+  else
+    echo ""Error: Unable to install yq. Please install it manually.""
+    exit 1
+  fi
+  if command -v yq &> /dev/null; then
+    echo ""yq installed successfully""
+  else
+    echo ""Error: yq installation failed""
+    exit 1
+  fi
+else
+  echo ""yq is already installed""
+fi
+if ! command -v jq &> /dev/null; then
+  echo ""Installing jq for JSON processing (required by YAML functions)...""
+  if command -v apt-get &> /dev/null; then
+    sudo apt-get update && sudo apt-get install -y jq
+  elif command -v yum &> /dev/null; then
+    sudo yum install -y jq
+  elif command -v dnf &> /dev/null; then
+    sudo dnf install -y jq
+  elif command -v brew &> /dev/null; then
+    brew install jq
+  elif command -v pacman &> /dev/null; then
+    sudo pacman -S --noconfirm jq
+  else
+    echo ""Error: Unable to install jq. Please install it manually.""
+    exit 1
+  fi
+  if command -v jq &> /dev/null; then
+    echo ""jq installed successfully""
+  else
+    echo ""Error: jq installation failed""
+    exit 1
+  fi
+else
+  echo ""jq is already installed""
+fi
+)";
   }
 
   private static int _uniqueIdCounter = 0;

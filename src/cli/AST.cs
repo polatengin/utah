@@ -73,6 +73,7 @@ public record JsonDeleteExpression(Expression JsonObject, Expression Path) : Exp
 public record JsonKeysExpression(Expression JsonObject) : Expression;
 public record JsonValuesExpression(Expression JsonObject) : Expression;
 public record JsonMergeExpression(Expression JsonObject1, Expression JsonObject2) : Expression;
+public record JsonInstallDependenciesExpression() : Expression;
 public record YamlParseExpression(Expression YamlString) : Expression;
 public record YamlStringifyExpression(Expression YamlObject) : Expression;
 public record YamlIsValidExpression(Expression YamlString) : Expression;
@@ -83,6 +84,7 @@ public record YamlDeleteExpression(Expression YamlObject, Expression Path) : Exp
 public record YamlKeysExpression(Expression YamlObject) : Expression;
 public record YamlValuesExpression(Expression YamlObject) : Expression;
 public record YamlMergeExpression(Expression YamlObject1, Expression YamlObject2) : Expression;
+public record YamlInstallDependenciesExpression() : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 
