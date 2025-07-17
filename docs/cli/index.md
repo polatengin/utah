@@ -19,8 +19,11 @@ utah compile script.shx
 # Run a script directly
 utah run script.shx
 
-# Format a script
+# Format a single script
 utah format script.shx
+
+# Format all .shx files in project recursively
+utah format --in-place
 ```
 
 ## Available Commands
@@ -29,9 +32,11 @@ utah format script.shx
 |---------|-------------|-------|
 | `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o <output.sh>]` |
 | `run` | Compile and execute | `utah run <file.shx>` |
-| `format` | Format source code | `utah format <file.shx> [options]` |
+| `format` | Format source code | `utah format [file.shx] [options]` |
 | `lsp` | Language server | `utah lsp` |
 | `version` | Show version info | `utah version` |
+
+> When no file is specified, `utah format` automatically processes all `.shx` files recursively from the current directory.
 
 ## Command Details
 
@@ -71,7 +76,10 @@ utah run script.shx
 Formats Utah source code according to EditorConfig rules:
 
 ```bash
-utah format script.shx                    # Creates script.formatted.shx
+utah format                               # Format all .shx files recursively
+utah format --in-place                   # Format all files in place
+utah format --check                      # Check all files formatting
+utah format script.shx                   # Creates script.formatted.shx
 utah format script.shx -o clean.shx      # Creates clean.shx
 utah format script.shx --in-place        # Overwrites script.shx
 utah format script.shx --check           # Exit 1 if not formatted
@@ -79,8 +87,9 @@ utah format script.shx --check           # Exit 1 if not formatted
 
 **Options:**
 
-- `-o <file>`: Specify output file
-- `--in-place`: Overwrite original file
+- No file specified: Format all `.shx` files recursively
+- `-o <file>`: Specify output file (single file only)
+- `--in-place`: Overwrite original file(s)
 - `--check`: Check formatting without modifying
 
 ### Language Server
@@ -236,12 +245,17 @@ utah compile main.shx
 # Compile all .shx files in a directory
 find . -name "*.shx" -exec utah compile {} \;
 
-# Format all files in place
-find . -name "*.shx" -exec utah format {} --in-place \;
+# Format all files recursively (recommended)
+utah format --in-place
 
-# Check all files are formatted
-find . -name "*.shx" -exec utah format {} --check \; || echo "Some files need formatting"
+# Check all files are formatted recursively (recommended)
+utah format --check
+
+# Legacy: Format with find (still works)
+find . -name "*.shx" -exec utah format {} --in-place \;
 ```
+
+**Note**: The new `utah format` without a filename automatically processes all `.shx` files recursively, providing better progress reporting and error handling than the legacy `find` approach.
 
 ### Output Redirection
 

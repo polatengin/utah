@@ -28,12 +28,26 @@ if (args.Length > 0)
       RunFile(args[1]);
       break;
     case "format":
-      if (args.Length < 2 || !args[1].EndsWith(".shx"))
+      if (args.Length < 2)
       {
-        Console.WriteLine("Usage: utah format <file.shx> [-o <output.shx>] [--in-place] [--check]");
+        // No file provided, format all .shx files recursively
+        FormatAllFiles(args);
+      }
+      else if (args[1].StartsWith("-"))
+      {
+        // Options provided without file, format all .shx files recursively with options
+        FormatAllFiles(args);
+      }
+      else if (!args[1].EndsWith(".shx"))
+      {
+        Console.WriteLine("Usage: utah format [file.shx] [-o <output.shx>] [--in-place] [--check]");
+        Console.WriteLine("       utah format                   # Format all .shx files recursively");
         return;
       }
-      FormatFile(args);
+      else
+      {
+        FormatFile(args);
+      }
       break;
     case "--version":
     case "-v":
@@ -240,6 +254,132 @@ static void FormatFile(string[] args)
   }
 }
 
+static void FormatAllFiles(string[] args)
+{
+  bool inPlace = false;
+  bool checkOnly = false;
+
+  // Parse arguments (skip the first "format" argument)
+  for (int i = 1; i < args.Length; i++)
+  {
+    switch (args[i])
+    {
+      case "--in-place":
+        inPlace = true;
+        break;
+      case "--check":
+        checkOnly = true;
+        break;
+      case "-o":
+        Console.WriteLine("❌ -o option is not supported when formatting all files. Use --in-place instead.");
+        Environment.Exit(1);
+        return;
+    }
+  }
+
+  try
+  {
+    // Find all .shx files recursively starting from current directory
+    var currentDirectory = Directory.GetCurrentDirectory();
+    var shxFiles = Directory.GetFiles(currentDirectory, "*.shx", SearchOption.AllDirectories);
+
+    if (shxFiles.Length == 0)
+    {
+      Console.WriteLine("No .shx files found in current directory and subdirectories.");
+      return;
+    }
+
+    Console.WriteLine($"Found {shxFiles.Length} .shx file(s) to format:");
+    
+    int formattedCount = 0;
+    int alreadyFormattedCount = 0;
+    int errorCount = 0;
+
+    foreach (var filePath in shxFiles)
+    {
+      try
+      {
+        var relativePath = Path.GetRelativePath(currentDirectory, filePath);
+        Console.Write($"  {relativePath}... ");
+
+        // Get formatting options from EditorConfig
+        var options = FormattingOptions.FromEditorConfig(filePath);
+        var formatter = new Formatter(options);
+
+        // Format the file
+        var formattedContent = formatter.Format(filePath);
+
+        if (checkOnly)
+        {
+          // Check if file is already formatted
+          var originalContent = File.ReadAllText(filePath);
+          if (originalContent != formattedContent)
+          {
+            Console.WriteLine("❌ not formatted");
+            formattedCount++;
+          }
+          else
+          {
+            Console.WriteLine("✅ already formatted");
+            alreadyFormattedCount++;
+          }
+        }
+        else
+        {
+          // Check if formatting is needed
+          var originalContent = File.ReadAllText(filePath);
+          if (originalContent != formattedContent)
+          {
+            if (inPlace)
+            {
+              File.WriteAllText(filePath, formattedContent);
+              Console.WriteLine("✅ formatted");
+              formattedCount++;
+            }
+            else
+            {
+              var outputPath = Path.ChangeExtension(filePath, ".formatted.shx");
+              File.WriteAllText(outputPath, formattedContent);
+              Console.WriteLine($"✅ formatted -> {Path.GetRelativePath(currentDirectory, outputPath)}");
+              formattedCount++;
+            }
+          }
+          else
+          {
+            Console.WriteLine("✅ already formatted");
+            alreadyFormattedCount++;
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"❌ error: {ex.Message}");
+        errorCount++;
+      }
+    }
+
+    Console.WriteLine();
+    if (checkOnly)
+    {
+      Console.WriteLine($"Summary: {alreadyFormattedCount} properly formatted, {formattedCount} need formatting, {errorCount} errors");
+      if (formattedCount > 0)
+      {
+        Console.WriteLine("Run 'utah format --in-place' to format all files.");
+        Environment.Exit(1);
+      }
+    }
+    else
+    {
+      Console.WriteLine($"Summary: {formattedCount} formatted, {alreadyFormattedCount} already formatted, {errorCount} errors");
+    }
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"❌ Error finding .shx files: {ex.Message}");
+    Environment.Exit(1);
+  }
+}
+
 static string ResolveImports(string filePath)
 {
   var resolvedFiles = new HashSet<string>();
@@ -303,11 +443,12 @@ static void PrintUsage()
   Console.WriteLine("Commands:");
   Console.WriteLine("  run <file.shx>           Compile and run a .shx file.");
   Console.WriteLine("  compile <file.shx>       Compile a .shx file to a .sh file.");
-  Console.WriteLine("  format <file.shx>        Format a .shx file according to EditorConfig rules.");
+  Console.WriteLine("  format [file.shx]        Format .shx file(s) according to EditorConfig rules.");
   Console.WriteLine("    Options:");
-  Console.WriteLine("      -o <output.shx>      Write formatted output to a specific file.");
-  Console.WriteLine("      --in-place          Format the file in place (overwrite original).");
-  Console.WriteLine("      --check             Check if file is formatted (exit 1 if not).");
+  Console.WriteLine("      (no file)            Format all .shx files recursively from current directory.");
+  Console.WriteLine("      -o <output.shx>      Write formatted output to a specific file (single file only).");
+  Console.WriteLine("      --in-place          Format the file(s) in place (overwrite original).");
+  Console.WriteLine("      --check             Check if file(s) are formatted (exit 1 if not).");
   Console.WriteLine("  lsp                      Run the language server.");
   Console.WriteLine("  version (--version, -v)  Show version information.");
 }

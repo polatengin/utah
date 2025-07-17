@@ -3465,7 +3465,24 @@ utah format script.shx --in-place
 
 # Check if file is properly formatted (exit 1 if not)
 utah format script.shx --check
+
+# Format all .shx files recursively from current directory
+utah format
+
+# Format all .shx files recursively in place
+utah format --in-place
+
+# Check all .shx files recursively are properly formatted
+utah format --check
 ```
+
+**Recursive Formatting**: When no file is specified, Utah will automatically find and format all `.shx` files recursively starting from the current directory. This is particularly useful for formatting entire projects:
+
+- `utah format` - Creates `.formatted.shx` files for all unformatted files
+- `utah format --in-place` - Formats all files in place
+- `utah format --check` - Checks all files and exits with code 1 if any need formatting
+
+**Note**: The `-o` option is not supported when formatting multiple files recursively.
 
 The formatter honors these EditorConfig properties:
 

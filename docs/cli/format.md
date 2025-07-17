@@ -10,18 +10,39 @@ The `utah format` command formats Utah (.shx) source code according to configura
 ## Basic Usage
 
 ```bash
-utah format <file.shx> [options]
+utah format [file.shx] [options]
 ```
 
 ## Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `-o <file>` | Output to specific file | `utah format script.shx -o clean.shx` |
-| `--in-place` | Overwrite original file | `utah format script.shx --in-place` |
+| (no file) | Format all .shx files recursively | `utah format` |
+| `-o <file>` | Output to specific file (single file only) | `utah format script.shx -o clean.shx` |
+| `--in-place` | Overwrite original file(s) | `utah format script.shx --in-place` |
 | `--check` | Check formatting only | `utah format script.shx --check` |
 
 ## Examples
+
+### Recursive Formatting
+
+```bash
+utah format
+```
+
+Finds and formats all `.shx` files recursively from the current directory, creating `.formatted.shx` files for those that need formatting.
+
+```bash
+utah format --in-place
+```
+
+Formats all `.shx` files recursively in place (overwrites originals).
+
+```bash
+utah format --check
+```
+
+Checks if all `.shx` files recursively are properly formatted. Exits with code 1 if any files need formatting.
 
 ### Basic Formatting
 
@@ -257,22 +278,33 @@ echo "✅ All Utah files are properly formatted"
 ### Makefile Integration
 
 ```makefile
-# Format all .shx files
+# Format all .shx files recursively (recommended)
 format:
-  find . -name "*.shx" -exec utah format {} --in-place \;
+  utah format --in-place
 
 # Check formatting without changing files
 format-check:
   @echo "Checking formatting..."
-  @find . -name "*.shx" -exec utah format {} --check \; || \
-    (echo "Run 'make format' to fix formatting" && exit 1)
+  @utah format --check
 
-# Format specific directory
+# Format and show summary
+format-summary:
+  @echo "Formatting all Utah files..."
+  @utah format --in-place
+
+# Legacy: Format specific directory
 format-src:
-  find src -name "*.shx" -exec utah format {} --in-place \;
+  cd src && utah format --in-place
 
-.PHONY: format format-check format-src
+.PHONY: format format-check format-summary format-src
 ```
+
+**Benefits of the recursive approach:**
+
+- Simpler commands (no `find` needed)
+- Better progress reporting
+- Consistent error handling
+- Works from any directory level
 
 ### VS Code Integration
 
@@ -311,29 +343,95 @@ jobs:
     - name: Check formatting
       run: |
         echo "Checking Utah file formatting..."
-        find . -name "*.shx" -exec utah format {} --check \;
+        utah format --check
+```
+
+**Alternative GitHub Actions with Auto-formatting:**
+
+```yaml
+name: Auto Format
+
+on: [push]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Utah
+      run: |
+        curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+
+    - name: Format files
+      run: utah format --in-place
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git diff --staged --quiet || git commit -m "Auto-format Utah files"
+        git push
 ```
 
 ## Advanced Usage
 
-### Batch Formatting
+### Recursive Formatting (Recommended)
 
-Format multiple files:
+Utah's built-in recursive formatting is the simplest way to format entire projects:
 
 ```bash
-# Format all .shx files in current directory
+# Format all .shx files recursively from current directory
+utah format
+
+# Format all files in place (recommended for development)
+utah format --in-place
+
+# Check all files are formatted (great for CI/CD)
+utah format --check
+```
+
+**Output Examples:**
+
+```bash
+$ utah format
+Found 5 .shx file(s) to format:
+  src/main.shx... ✅ formatted -> src/main.formatted.shx
+  src/utils.shx... ✅ already formatted
+  tests/test.shx... ✅ formatted -> tests/test.formatted.shx
+  lib/helper.shx... ✅ already formatted
+  scripts/build.shx... ✅ formatted -> scripts/build.formatted.shx
+
+Summary: 3 formatted, 2 already formatted, 0 errors
+```
+
+```bash
+$ utah format --check
+Found 5 .shx file(s) to format:
+  src/main.shx... ❌ not formatted
+  src/utils.shx... ✅ already formatted
+  tests/test.shx... ✅ already formatted
+  lib/helper.shx... ✅ already formatted
+  scripts/build.shx... ❌ not formatted
+
+Summary: 3 properly formatted, 2 need formatting, 0 errors
+Run 'utah format --in-place' to format all files.
+```
+
+### Legacy Batch Formatting
+
+For specific use cases, you can still use traditional approaches:
+
+```bash
+# Format all .shx files in current directory only (non-recursive)
 for file in *.shx; do
   utah format "$file" --in-place
 done
 
-# Format all .shx files recursively
-find . -name "*.shx" -exec utah format {} --in-place \;
-
-# Format with backup
-for file in *.shx; do
-  cp "$file" "$file.backup"
-  utah format "$file" --in-place
-done
+# Format with backup using find
+find . -name "*.shx" -exec cp {} {}.backup \; -exec utah format {} --in-place \;
 ```
 
 ### Conditional Formatting
