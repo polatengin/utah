@@ -6,6 +6,10 @@
 
 📦 File Extension: `.shx`
 
+## 📄 Documentation
+
+For detailed documentation on how to use `utah`, please refer to the [Utah shx documentation](https://utahshx.com).
+
 ## 🚀 Installation
 
 You can install the latest version of the `utah` CLI with this one-liner:
