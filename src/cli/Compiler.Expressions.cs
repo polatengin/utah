@@ -462,7 +462,7 @@ public partial class Compiler
   {
     var text = CompileExpression(hash.Text);
     var algorithm = hash.Algorithm != null ? CompileExpression(hash.Algorithm) : "\"sha256\"";
-    
+
     return $"$(echo -n {text} | case {algorithm} in \"md5\") md5sum | cut -d' ' -f1 ;; \"sha1\") sha1sum | cut -d' ' -f1 ;; \"sha256\") sha256sum | cut -d' ' -f1 ;; \"sha512\") sha512sum | cut -d' ' -f1 ;; *) echo \"Error: Unsupported hash algorithm: {algorithm}\" >&2; exit 1 ;; esac)";
   }
 

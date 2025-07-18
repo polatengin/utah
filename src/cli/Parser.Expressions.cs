@@ -736,11 +736,11 @@ public partial class Parser
         {
           throw new InvalidOperationException("utility.hash() requires at least one argument (text)");
         }
-        
+
         var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
                               .Select(arg => arg.Trim())
                               .ToList();
-        
+
         if (args.Count == 1)
         {
           // One argument: utility.hash(text) - defaults to SHA256
@@ -767,7 +767,7 @@ public partial class Parser
         {
           throw new InvalidOperationException("utility.base64Encode() requires one argument (text)");
         }
-        
+
         var textExpr = ParseExpression(argsContent);
         return new UtilityBase64EncodeExpression(textExpr);
       }
@@ -779,7 +779,7 @@ public partial class Parser
         {
           throw new InvalidOperationException("utility.base64Decode() requires one argument (text)");
         }
-        
+
         var textExpr = ParseExpression(argsContent);
         return new UtilityBase64DecodeExpression(textExpr);
       }
