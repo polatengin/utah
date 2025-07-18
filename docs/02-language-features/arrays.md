@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Arrays and Strings
+title: Arrays
 parent: Language Features
 nav_order: 4
 ---
 
-Utah provides powerful built-in functions for working with arrays and strings, making data manipulation intuitive and type-safe.
+Utah provides powerful built-in functions for working with arrays, making data manipulation intuitive and type-safe.
 
 ## Arrays
 
@@ -158,120 +158,7 @@ for (let i: number = 0; i < array.length(files); i++) {
 }
 ```
 
-## Strings
-
-### String Methods
-
-#### `string.length()`
-
-Get the length of a string:
-
-```typescript
-let message: string = "Hello, Utah!";
-let len: number = string.length(message);
-console.log(`Message length: ${len}`);
-```
-
-#### `string.contains()`
-
-Check if a string contains a substring:
-
-```typescript
-let filepath: string = "/home/user/script.shx";
-
-if (string.contains(filepath, ".shx")) {
-  console.log("This is a Utah script file");
-}
-```
-
-#### `string.startsWith()`
-
-Check if a string starts with a prefix:
-
-```typescript
-let url: string = "https://api.example.com";
-
-if (string.startsWith(url, "https://")) {
-  console.log("Secure connection");
-}
-```
-
-#### `string.endsWith()`
-
-Check if a string ends with a suffix:
-
-```typescript
-let filename: string = "backup.tar.gz";
-
-if (string.endsWith(filename, ".tar.gz")) {
-  console.log("This is a compressed archive");
-}
-```
-
-#### `string.split()`
-
-Split a string into an array:
-
-```typescript
-let path: string = "/usr/local/bin";
-let parts: string[] = string.split(path, "/");
-// parts is ["", "usr", "local", "bin"]
-```
-
-#### `string.replace()`
-
-Replace occurrences of a substring:
-
-```typescript
-let message: string = "Hello, World!";
-let updated: string = string.replace(message, "World", "Utah");
-// updated is "Hello, Utah!"
-```
-
-#### `string.trim()`
-
-Remove whitespace from both ends:
-
-```typescript
-let input: string = "  hello world  ";
-let clean: string = string.trim(input);
-// clean is "hello world"
-```
-
-#### `string.toUpperCase()` and `string.toLowerCase()`
-
-Change case:
-
-```typescript
-let name: string = "Utah";
-let upper: string = string.toUpperCase(name);  // "UTAH"
-let lower: string = string.toLowerCase(name);  // "utah"
-```
-
-### String Interpolation
-
-Use template literals for dynamic strings:
-
-```typescript
-let name: string = "Alice";
-let age: number = 30;
-let message: string = `Hello, ${name}! You are ${age} years old.`;
-```
-
-### Multi-line Strings
-
-Utah supports multi-line string literals:
-
-```typescript
-let script: string = `
-  #!/bin/bash
-  echo "Starting process..."
-  ./run-task.sh
-  echo "Process completed"
-`;
-```
-
-## Common Patterns
+## Common Array Patterns
 
 ### Processing File Lists
 
@@ -337,9 +224,9 @@ for (let email: string in emails) {
 }
 ```
 
-## Type Safety
+## Array Type Safety
 
-Arrays and strings in Utah are strongly typed:
+Arrays in Utah are strongly typed:
 
 ```typescript
 // Type-safe array operations
@@ -348,22 +235,18 @@ let strings: string[] = ["a", "b", "c"];
 
 // This would cause a compile error:
 // numbers[0] = "invalid";  // Error: Cannot assign string to number
-
-// Safe string operations
-let message: string = "Hello";
-let length: number = string.length(message);  // Always returns number
 ```
 
-## Performance Tips
+## Array Performance Tips
 
 1. **Pre-allocate arrays** when possible to avoid frequent resizing
 2. **Use appropriate methods** for your use case (contains vs iteration)
 3. **Cache array lengths** in loops to avoid repeated calculations
-4. **Use string interpolation** instead of repeated concatenation
+4. **Use array.join()** instead of repeated string concatenation
 
-## Error Handling
+## Array Error Handling
 
-Always validate inputs when working with arrays and strings:
+Always validate inputs when working with arrays:
 
 ```typescript
 function processArray(items: string[]): void {
@@ -384,4 +267,4 @@ function processArray(items: string[]): void {
 }
 ```
 
-Arrays and strings form the foundation of data manipulation in Utah, providing type-safe operations with familiar syntax and powerful built-in functions.
+Arrays provide the foundation for data collection and manipulation in Utah, offering type-safe operations with familiar syntax and powerful built-in functions.

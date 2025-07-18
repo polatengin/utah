@@ -160,7 +160,8 @@ fi
 - [Variables and Types](./02-language-features/variables.md)
 - [Control Flow](./02-language-features/control-flow.md)
 - [Functions](./02-language-features/functions.md)
-- [Arrays and Strings](./02-language-features/arrays-strings.md)
+- [Arrays](./02-language-features/arrays.md)
+- [Strings](./02-language-features/strings.md)
 - [Import System](./02-language-features/imports.md)
 - [Error Handling](./02-language-features/error-handling.md)
 

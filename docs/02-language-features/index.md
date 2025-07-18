@@ -36,7 +36,8 @@ Utah provides modern language features inspired by TypeScript, making shell scri
 
 ### Data Structures
 
-- **[Arrays and Strings](arrays-strings.md)** - Rich data manipulation
+- **[Arrays](arrays.md)** - Rich array manipulation
+- **[Strings](strings.md)** - String processing and manipulation
 
 - Typed arrays with built-in methods
 - String manipulation and interpolation
@@ -253,7 +254,7 @@ Utah combines the best of both worlds:
 1. **Start with basics**: [Variables and Types](variables.md)
 2. **Add logic**: [Control Flow](control-flow.md)
 3. **Organize code**: [Functions](functions.md)
-4. **Handle data**: [Arrays and Strings](arrays-strings.md)
+4. **Handle data**: [Arrays](arrays.md) and [Strings](strings.md)
 5. **Manage errors**: [Error Handling](error-handling.md)
 6. **Scale up**: [Import System](imports.md)
 
@@ -347,6 +348,7 @@ Explore each language feature in detail:
 1. **[Variables and Types](variables.md)** - Foundation of type-safe scripting
 2. **[Control Flow](control-flow.md)** - Logic and decision making
 3. **[Functions](functions.md)** - Code organization and reuse
-4. **[Arrays and Strings](arrays-strings.md)** - Data manipulation
-5. **[Error Handling](error-handling.md)** - Robust error management
-6. **[Import System](imports.md)** - Modular development
+4. **[Arrays](arrays.md)** - Array manipulation and operations
+5. **[Strings](strings.md)** - String processing and manipulation
+6. **[Error Handling](error-handling.md)** - Robust error management
+7. **[Import System](imports.md)** - Modular development
