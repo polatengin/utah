@@ -1,0 +1,60 @@
+// Test array.sort() method with different data types and sort orders
+
+// Test with number array
+let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6];
+
+// Test default sort (ascending)
+let numbersAsc: number[] = numbers.sort();
+console.log("Numbers ascending: " + numbersAsc.join(", "));
+
+// Test explicit ascending sort
+let numbersAscExplicit: number[] = numbers.sort("asc");
+console.log("Numbers ascending explicit: " + numbersAscExplicit.join(", "));
+
+// Test descending sort
+let numbersDesc: number[] = numbers.sort("desc");
+console.log("Numbers descending: " + numbersDesc.join(", "));
+
+// Test with string array
+let fruits: string[] = ["banana", "apple", "cherry", "date"];
+
+// Test default sort (ascending)
+let fruitsAsc: string[] = fruits.sort();
+console.log("Fruits ascending: " + fruitsAsc.join(", "));
+
+// Test descending sort
+let fruitsDesc: string[] = fruits.sort("desc");
+console.log("Fruits descending: " + fruitsDesc.join(", "));
+
+// Test with boolean array
+let flags: boolean[] = [true, false, true, false, true];
+
+// Test default sort (ascending - false before true)
+let flagsAsc: boolean[] = flags.sort();
+console.log("Flags ascending: " + flagsAsc.join(", "));
+
+// Test descending sort
+let flagsDesc: boolean[] = flags.sort("desc");
+console.log("Flags descending: " + flagsDesc.join(", "));
+
+// Test with empty array
+let empty: string[] = [];
+let emptySorted: string[] = empty.sort();
+console.log("Empty array sorted: " + emptySorted.join(", "));
+
+// Test with single element
+let single: number[] = [42];
+let singleSorted: number[] = single.sort();
+console.log("Single element sorted: " + singleSorted.join(", "));
+
+// Test using sorted result in expressions
+let numbersDescSorted: number[] = numbers.sort("desc");
+let maxNumber: number = numbersDescSorted[0];
+console.log("Maximum number: " + maxNumber);
+
+let numbersAscSorted: number[] = numbers.sort("asc");
+let minNumber: number = numbersAscSorted[0];
+console.log("Minimum number: " + minNumber);
+
+// Test that original array is unchanged
+console.log("Original numbers: " + numbers.join(", "));

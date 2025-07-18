@@ -23,6 +23,7 @@ public record ArrayIsEmpty(Expression Array) : Expression;
 public record ArrayContains(Expression Array, Expression Item) : Expression;
 public record ArrayReverse(Expression Array) : Expression;
 public record ArrayJoinExpression(Expression Array, Expression Separator) : Expression;
+public record ArraySortExpression(Expression Array, Expression? SortOrder) : Expression;
 public record StringLengthExpression(Expression Target) : Expression;
 public record StringSplitExpression(Expression Target, Expression Separator) : Expression;
 public record OsIsInstalledExpression(Expression AppName) : Expression;

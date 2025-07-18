@@ -361,6 +361,21 @@ public partial class Parser
         return new ArrayJoinExpression(new VariableExpression(objectName), separatorExpr);
       }
 
+      // Handle .sort() method
+      if (methodPart.StartsWith("sort(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
+        Expression? sortOrderExpr = null;
+
+        // If no arguments provided, use default ascending sort
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          sortOrderExpr = ParseExpression(argsContent);
+        }
+
+        return new ArraySortExpression(new VariableExpression(objectName), sortOrderExpr);
+      }
+
       // Handle .split() method for strings
       if (methodPart.StartsWith("split(") && methodPart.EndsWith(")"))
       {

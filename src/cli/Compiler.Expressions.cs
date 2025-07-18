@@ -5,6 +5,7 @@ public partial class Compiler
 {
   private static int _randomCounter = 0;
   private static int _joinCounter = 0;
+  private static int _sortCounter = 0;
 
   private string CompileExpression(Expression expr)
   {
@@ -109,6 +110,8 @@ public partial class Compiler
         return CompileWebGetExpression(webGet);
       case ArrayJoinExpression arrayJoin:
         return CompileArrayJoinExpression(arrayJoin);
+      case ArraySortExpression arraySort:
+        return CompileArraySortExpression(arraySort);
       case FsDirnameExpression fsDirname:
         return CompileFsDirnameExpression(fsDirname);
       case FsFileNameExpression fsFileName:
@@ -891,6 +894,83 @@ public partial class Compiler
     var separatorVar = $"_utah_sep_{_joinCounter}";
 
     return $"$({separatorVar}={separator}; {uniqueVar}=\"\"; for item in \"${{{arrayName}[@]}}\"; do if [ -n \"${{{uniqueVar}}}\" ]; then {uniqueVar}+=\"${{{separatorVar}}}\"; fi; {uniqueVar}+=\"$item\"; done; echo \"${{{uniqueVar}}}\")";
+  }
+
+  private string CompileArraySortExpression(ArraySortExpression arraySort)
+  {
+    var arrayName = ExtractVariableName(CompileExpression(arraySort.Array));
+
+    _sortCounter++;
+    var uniqueVar = $"_utah_sort_{_sortCounter}";
+    var tempVar = $"_utah_temp_{_sortCounter}";
+
+    // Determine sort order - default to ascending
+    var sortOrder = "asc";
+    if (arraySort.SortOrder != null)
+    {
+      var sortOrderValue = CompileExpression(arraySort.SortOrder);
+      // Remove quotes if present
+      if (sortOrderValue.StartsWith("\"") && sortOrderValue.EndsWith("\""))
+      {
+        sortOrder = sortOrderValue.Substring(1, sortOrderValue.Length - 2);
+      }
+      else
+      {
+        sortOrder = sortOrderValue;
+      }
+    }
+
+    // Generate bash code based on array type and sort order
+    var arrayType = GetArrayType(arrayName);
+
+    string sortCommand;
+    if (arrayType == "number")
+    {
+      // Numeric sort
+      sortCommand = sortOrder == "desc" ? "sort -nr" : "sort -n";
+    }
+    else if (arrayType == "boolean")
+    {
+      // Boolean sort: false (0) before true (1)
+      if (sortOrder == "desc")
+      {
+        sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -nr | sed 's/1/true/g; s/0/false/g'";
+      }
+      else
+      {
+        sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -n | sed 's/1/true/g; s/0/false/g'";
+      }
+    }
+    else
+    {
+      // String sort (lexicographic)
+      sortCommand = sortOrder == "desc" ? "sort -r" : "sort";
+    }
+
+    return $"$({uniqueVar}=(); while IFS= read -r line; do {uniqueVar}+=(\"$line\"); done < <(printf '%s\\n' \"${{{arrayName}[@]}}\" | {sortCommand}); echo \"${{{uniqueVar}[@]}}\")";
+  }
+
+  private string GetArrayType(string arrayName)
+  {
+    // For now, we'll use a simple heuristic based on common naming patterns
+    // In a full implementation, we'd track variable types through the compilation process
+
+    // Check for common number array names
+    if (arrayName.Contains("number") || arrayName.Contains("num") || arrayName.Contains("int") ||
+        arrayName.Contains("float") || arrayName.Contains("double") || arrayName.Contains("single"))
+    {
+      return "number";
+    }
+
+    // Check for common boolean array names
+    if (arrayName.Contains("boolean") || arrayName.Contains("bool") || arrayName.Contains("flag") ||
+        arrayName.Contains("flags") || arrayName.Contains("switch"))
+    {
+      return "boolean";
+    }
+
+    // Default to string for most arrays
+    return "string";
   }
 
   private string CompileFsDirnameExpression(FsDirnameExpression fsDirname)

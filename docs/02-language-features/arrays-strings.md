@@ -91,6 +91,47 @@ let numberString: string = numbers.join("-");      // "1-2-3-4-5"
 console.log(`Fruits: ${fruits.join(", ")}`);       // "Fruits: apple, banana, cherry"
 ```
 
+#### `array.sort()`
+
+Sort array elements in ascending or descending order:
+
+```typescript
+let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6];
+let fruits: string[] = ["banana", "apple", "cherry", "date"];
+let flags: boolean[] = [true, false, true, false];
+
+// Sort with default order (ascending)
+let numbersAsc: number[] = numbers.sort();         // [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAsc: string[] = fruits.sort();           // ["apple", "banana", "cherry", "date"]
+let flagsAsc: boolean[] = flags.sort();            // [false, false, true, true]
+
+// Sort with explicit ascending order
+let numbersAscExplicit: number[] = numbers.sort("asc");
+
+// Sort with descending order
+let numbersDesc: number[] = numbers.sort("desc");  // [9, 6, 5, 4, 3, 2, 1, 1]
+let fruitsDesc: string[] = fruits.sort("desc");    // ["date", "cherry", "banana", "apple"]
+
+// Original arrays remain unchanged - sort() returns a new array
+console.log(`Original: ${numbers.join(", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
+console.log(`Sorted: ${numbersAsc.join(", ")}`);    // [1, 1, 2, 3, 4, 5, 6, 9]
+
+// Use with different data types
+// - string[]: Lexicographic (alphabetical) sorting
+// - number[]: Numeric sorting
+// - boolean[]: false before true (false = 0, true = 1)
+
+// Edge cases
+let empty: string[] = [];
+let emptySorted: string[] = empty.sort();          // []
+
+let single: number[] = [42];
+let singleSorted: number[] = single.sort();        // [42]
+
+// Chain with other array methods
+let topThreeNumbers: string = numbers.sort("desc").join(", ");
+```
+
 ### Array Iteration
 
 #### For-In Loops

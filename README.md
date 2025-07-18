@@ -939,6 +939,54 @@ if (csvData.length > 0) {
 }
 ```
 
+Sort array elements using the `.sort()` method:
+
+```typescript
+let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6];
+let fruits: string[] = ["banana", "apple", "cherry", "date"];
+let flags: boolean[] = [true, false, true, false];
+
+// Sort with default order (ascending)
+let numbersAsc: number[] = numbers.sort();         // Gets [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAsc: string[] = fruits.sort();           // Gets ["apple", "banana", "cherry", "date"]
+let flagsAsc: boolean[] = flags.sort();            // Gets [false, false, true, true]
+
+// Sort with explicit ascending order
+let numbersAscExplicit: number[] = numbers.sort("asc");  // Gets [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAscExplicit: string[] = fruits.sort("asc");   // Gets ["apple", "banana", "cherry", "date"]
+
+// Sort with descending order
+let numbersDesc: number[] = numbers.sort("desc");  // Gets [9, 6, 5, 4, 3, 2, 1, 1]
+let fruitsDesc: string[] = fruits.sort("desc");    // Gets ["date", "cherry", "banana", "apple"]
+let flagsDesc: boolean[] = flags.sort("desc");     // Gets [true, true, false, false]
+
+// Use sorted arrays in expressions
+let maxNumber: number = numbers.sort("desc")[0];   // Gets the largest number
+let minNumber: number = numbers.sort("asc")[0];    // Gets the smallest number
+let lastFruit: string = fruits.sort("desc")[0];    // Gets the last fruit alphabetically
+
+// Original arrays remain unchanged
+console.log(`Original numbers: ${numbers.join(", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
+console.log(`Sorted ascending: ${numbersAsc.join(", ")}`);  // [1, 1, 2, 3, 4, 5, 6, 9]
+console.log(`Sorted descending: ${numbersDesc.join(", ")}`); // [9, 6, 5, 4, 3, 2, 1, 1]
+
+// Edge cases
+let empty: string[] = [];
+let emptySorted: string[] = empty.sort();          // Gets []
+
+let single: number[] = [42];
+let singleSorted: number[] = single.sort();        // Gets [42]
+
+// Use in conditionals and string interpolation
+let sortedFruits: string[] = fruits.sort();
+if (!sortedFruits.isEmpty()) {
+  console.log(`Sorted fruits: ${sortedFruits.join(", ")}`);
+}
+
+// Chain with other array methods
+let topThree: string = numbers.sort("desc").join(", ");  // Gets first three highest numbers as string
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -3759,7 +3807,9 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `array.join()` function
 
-- [ ] `array.*` functions (`sort()`, `merge()`)
+- [x] `array.sort()` function
+
+- [ ] `array.merge()` function
 
 - [x] Add shebang (`#!/bin/bash`) to generated scripts
 
