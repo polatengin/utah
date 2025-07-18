@@ -6,41 +6,39 @@ description: "Utah Language - Write shell scripts in TypeScript-like syntax"
 permalink: /
 ---
 
-[![Release Workflow](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml)
-
-**Utah** is a CLI tool built with .NET 9 that allows you to write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
+**Utah** is a tool that allows you to write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
 📦 **File Extension:** `.shx`
 
 ## Quick Start
 
-Get started with Utah in minutes:
+Get started with Utah in seconds:
 
-1. **Install Utah CLI:**
+- **Install Utah CLI:**
 
-   ```bash
-   curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
-   ```
+  ```bash
+  curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+  ```
 
-2. **Write your first `.shx` script:**
+- **Write your first `.shx` script:**
 
-   ```typescript
-   const message: string = "Hello, Utah!";
-   console.log(message);
-   ```
+  ```typescript
+  const message: string = "Hello, Utah!";
+  console.log(message);
+  ```
 
-3. **Compile and run:**
+- **Compile and run:**
 
-   ```bash
-   utah compile hello.shx
-   ./hello.sh
-   ```
+  ```bash
+  utah compile hello.shx
+  ./hello.sh
+  ```
 
-4. **Run directly:**
-
-   ```bash
-   utah run hello.shx
-   ```
+  > ... or **run directly:**
+  >
+  > ```bash
+  > utah run hello.shx
+  > ```
 
 ## Key Features
 
