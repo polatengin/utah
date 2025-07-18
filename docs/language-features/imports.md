@@ -18,15 +18,6 @@ import "utils.shx";
 let result: string = formatOutput("Hello World");
 ```
 
-### Import with Alias
-
-```typescript
-import "database/connection.shx" as db;
-
-// Use with alias prefix
-let connection: object = db.connect("localhost", 5432);
-```
-
 ## File Organization
 
 ### Project Structure
@@ -104,7 +95,7 @@ const DEFAULT_CONFIG: string = `{
 
 function loadConfig(): object {
   let configFile: string = "config.json";
-  
+
   if (fs.exists(configFile)) {
     try {
       let content: string = fs.readFile(configFile);
@@ -114,7 +105,7 @@ function loadConfig(): object {
       console.log("Invalid config file, using defaults");
     }
   }
-  
+
   return json.parse(DEFAULT_CONFIG);
 }
 
@@ -136,16 +127,16 @@ function connectToDatabase(): object {
   let config: object = loadConfig();
   let host: string = getConfigValue(config, ".database.host");
   let port: string = getConfigValue(config, ".database.port");
-  
+
   logMessage("INFO", `Connecting to database at ${host}:${port}`);
-  
+
   // Database connection logic here
   return { host: host, port: port, connected: true };
 }
 
 function executeQuery(connection: object, query: string): string {
   logMessage("DEBUG", `Executing query: ${query}`);
-  
+
   // Query execution logic
   return `$(psql -h ${connection.host} -p ${connection.port} -c "${query}")`;
 }
@@ -165,18 +156,18 @@ script.description("Main application with modular architecture");
 
 function main(): void {
   logMessage("INFO", "Application starting");
-  
+
   // Load configuration
   let config: object = loadConfig();
-  
+
   // Ensure required directories
   ensureDirectory("/var/log/myapp");
   ensureDirectory("/tmp/myapp");
-  
+
   // Connect to database
   try {
     let db: object = connectToDatabase();
-    
+
     // Execute some queries
     let result: string = executeQuery(db, "SELECT version()");
     logMessage("INFO", `Database version: ${result}`);
@@ -185,7 +176,7 @@ function main(): void {
     logMessage("ERROR", `Database connection failed: ${error}`);
     exit(1);
   }
-  
+
   logMessage("INFO", "Application completed successfully");
 }
 
@@ -272,7 +263,7 @@ Consistent error handling across modules:
 function handleError(module: string, operation: string, error: string): void {
   let timestamp: string = timer.current();
   let message: string = `[${timestamp}] ${module}.${operation}: ${error}`;
-  
+
   console.log(message);
   fs.appendFile("/var/log/app-errors.log", `${message}\n`);
 }
@@ -303,13 +294,13 @@ function testValidateEmail(): void {
     console.log("FAIL: Valid email rejected");
     exit(1);
   }
-  
+
   // Test invalid email
   if (validateEmail("invalid-email")) {
     console.log("FAIL: Invalid email accepted");
     exit(1);
   }
-  
+
   console.log("PASS: Email validation tests");
 }
 
@@ -341,10 +332,10 @@ import "database.shx";
 
 function generateReport(): void {
   logMessage("INFO", "Starting report generation");
-  
+
   let config: object = loadConfig();
   let db: object = connectToDatabase();
-  
+
   // Report generation logic
 }
 ```
@@ -412,7 +403,7 @@ function createUser(username: string, email: string): boolean {
   if (!validateEmail(email)) {
     return false;
   }
-  
+
   // User creation logic
   return true;
 }
@@ -427,7 +418,7 @@ import "../lib/config.shx";
 function sendEmail(to: string, subject: string, body: string): boolean {
   let config: object = loadConfig();
   let smtpHost: string = getConfigValue(config, ".smtp.host");
-  
+
   // Email sending logic
   return true;
 }
