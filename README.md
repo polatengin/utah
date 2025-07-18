@@ -1834,7 +1834,7 @@ done
 
 - **Silent operation**: Uses `curl -s` to suppress progress output
 - **Variable support**: Works with both string literals and variables
-- **String interpolation**: Compatible with template literals and variable substitution
+- **String interpolation**: Compatible with string interpolation and variable substitution
 - **Error handling**: Failed requests return empty strings that can be checked
 - **Cross-platform**: Uses `curl` which is available on most Unix-like systems
 
@@ -3901,7 +3901,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Console system functions (`console.isSudo()`)
 
-- [x] String interpolation with backticks (`Hello, ${name}`)
+- [x] String interpolation with double quotes (`"Hello, ${name}"`)
 
 - [x] Function calls with positional arguments
 

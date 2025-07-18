@@ -54,8 +54,8 @@ public partial class Compiler
         return CompileTernaryExpression(tern);
       case ParenthesizedExpression paren:
         return CompileParenthesizedExpression(paren);
-      case TemplateLiteralExpression template:
-        return CompileTemplateLiteralExpression(template);
+      case StringInterpolationExpression stringInterpolation:
+        return CompileStringInterpolationExpression(stringInterpolation);
       case ArrayLiteral arr:
         return CompileArrayLiteral(arr);
       case ArrayAccess acc:
@@ -1170,10 +1170,10 @@ public partial class Compiler
     return "$(( $(date +%s%3N) - _utah_timer_start ))";
   }
 
-  private string CompileTemplateLiteralExpression(TemplateLiteralExpression template)
+  private string CompileStringInterpolationExpression(StringInterpolationExpression stringInterpolation)
   {
     var parts = new List<string>();
-    foreach (var part in template.Parts)
+    foreach (var part in stringInterpolation.Parts)
     {
       if (part is string str)
       {

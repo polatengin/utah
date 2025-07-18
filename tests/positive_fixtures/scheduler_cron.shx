@@ -19,7 +19,7 @@ scheduler.cron("0 0 * * *", () => {
 scheduler.cron("0 2 * * 1", () => {
   console.log("Weekly report generation");
   let reportDate: string = "Monday Report";
-  console.log(`Generating: ${reportDate}`);
+  console.log("Generating: ${reportDate}");
 });
 
 console.log("Scheduler setup complete!");

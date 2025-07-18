@@ -12,5 +12,5 @@ for (let app: string in applications) {
   let isInstalled: boolean = os.isInstalled(app);
   let status: string = isInstalled ? "✅ INSTALLED" : "❌ MISSING";
 
-  console.log(`${status}: ${app}`);
+  console.log("${status}: ${app}");
 }

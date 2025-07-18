@@ -10,20 +10,20 @@ console.log("JSON dependencies check result: " + installResult);
 
 // Verify jq is available after installation
 let jqAvailable: boolean = os.isInstalled("jq");
-console.log(`jq available: ${jqAvailable}`);
+console.log("jq available: ${jqAvailable}");
 
 // Test that JSON functions work after dependency installation
 if (jqAvailable) {
   console.log("Testing JSON functions after dependency installation...");
-  
+
   let testJson: string = '{"name": "test", "version": "1.0.0"}';
   let isValidJson: boolean = json.isValid(testJson);
-  console.log(`JSON validation works: ${isValidJson}`);
-  
+  console.log("JSON validation works: ${isValidJson}");
+
   if (isValidJson) {
     let parsedJson: object = json.parse(testJson);
     let appName: string = json.get(parsedJson, ".name");
-    console.log(`Extracted name: ${appName}`);
+    console.log("Extracted name: ${appName}");
   }
 } else {
   console.log("Warning: jq not available, JSON functions may not work");

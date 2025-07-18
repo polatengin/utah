@@ -11,23 +11,23 @@ console.log("YAML dependencies check result: " + installResult);
 // Verify yq and jq are available after installation
 let yqAvailable: boolean = os.isInstalled("yq");
 let jqAvailable: boolean = os.isInstalled("jq");
-console.log(`yq available: ${yqAvailable}`);
-console.log(`jq available: ${jqAvailable}`);
+console.log("yq available: ${yqAvailable}");
+console.log("jq available: ${jqAvailable}");
 
 // Test that YAML functions work after dependency installation
 if (yqAvailable && jqAvailable) {
   console.log("Testing YAML functions after dependency installation...");
-  
+
   let testYaml: string = 'name: test\nversion: 1.0.0\nfeatures:\n  - parsing\n  - validation';
   let isValidYaml: boolean = yaml.isValid(testYaml);
-  console.log(`YAML validation works: ${isValidYaml}`);
-  
+  console.log("YAML validation works: ${isValidYaml}");
+
   if (isValidYaml) {
     let parsedYaml: object = yaml.parse(testYaml);
     let appName: string = yaml.get(parsedYaml, ".name");
     let version: string = yaml.get(parsedYaml, ".version");
-    console.log(`Extracted name: ${appName}`);
-    console.log(`Extracted version: ${version}`);
+    console.log("Extracted name: ${appName}");
+    console.log("Extracted version: ${version}");
   }
 } else {
   console.log("Warning: yq or jq not available, YAML functions may not work");

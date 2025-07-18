@@ -9,4 +9,4 @@ for (let j: number = 0; j < 1000000; j++) {
 }
 
 const elapsed: number = timer.stop();
-console.log(`Timer elapsed: ${elapsed} ms`);
+console.log("Timer elapsed: ${elapsed} ms");

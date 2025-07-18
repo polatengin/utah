@@ -31,14 +31,18 @@ let version: string = "1.0.0";
 env.set("APP_NAME", appName);
 env.set("APP_VERSION", version);
 
-// Test env.get in template literals
-let configPath: string = `${env.get("HOME", "/tmp")}/.config/utah`;
-let logFile: string = `${env.get("LOG_DIR", "/var/log")}/utah.log`;
-let dataDir: string = `${env.get("DATA_DIR", "/var/lib")}/utah`;
+// Test simple string interpolation
+let homeDir: string = env.get("HOME", "/tmp");
+let logDir: string = env.get("LOG_DIR", "/var/log");
+let dataDir: string = env.get("DATA_DIR", "/var/lib");
+
+let configPath: string = "${homeDir}/.config/utah";
+let logFile: string = "${logDir}/utah.log";
+let dataPath: string = "${dataDir}/utah";
 
 console.log("Config path: " + configPath);
 console.log("Log file: " + logFile);
-console.log("Data directory: " + dataDir);
+console.log("Data directory: " + dataPath);
 
 // Test env.load and env.delete
 env.load(".env");

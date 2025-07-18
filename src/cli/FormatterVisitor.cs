@@ -393,9 +393,9 @@ public class FormatterVisitor
       case ParallelFunctionCall parallelCall:
         var parallelArgs = string.Join(", ", parallelCall.Arguments.Select(VisitExpression));
         return $"parallel {parallelCall.Name}({parallelArgs})";
-      case TemplateLiteralExpression template:
-        var parts = template.Parts.Select(part => part is Expression partExpr ? "${" + VisitExpression(partExpr) + "}" : part.ToString());
-        return $"`{string.Join("", parts)}`";
+      case StringInterpolationExpression stringInterpolation:
+        var parts = stringInterpolation.Parts.Select(part => part is Expression partExpr ? "${" + VisitExpression(partExpr) + "}" : part.ToString());
+        return $"\"{string.Join("", parts)}\"";
       case ArrayLiteral array:
         var elements = string.Join(", ", array.Elements.Select(VisitExpression));
         return $"[{elements}]";

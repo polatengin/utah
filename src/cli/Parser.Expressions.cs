@@ -218,13 +218,15 @@ public partial class Parser
     // String literal
     if (input.StartsWith("\"") && input.EndsWith("\""))
     {
-      return new LiteralExpression(input.Substring(1, input.Length - 2), "string");
-    }
+      var content = input.Substring(1, input.Length - 2);
 
-    // Template literal
-    if (input.StartsWith("`") && input.EndsWith("`"))
-    {
-      return ParseTemplateLiteral(input);
+      // Check if the string contains ${...} interpolation
+      if (content.Contains("${"))
+      {
+        return ParseStringInterpolation(input);
+      }
+
+      return new LiteralExpression(content, "string");
     }
 
     // Number literal
@@ -1164,10 +1166,10 @@ public partial class Parser
     return parts;
   }
 
-  private TemplateLiteralExpression ParseTemplateLiteral(string input)
+  private StringInterpolationExpression ParseStringInterpolation(string input)
   {
     var parts = new List<object>();
-    var content = input.Substring(1, input.Length - 2); // Remove backticks
+    var content = input.Substring(1, input.Length - 2); // Remove quotes
 
     var i = 0;
     var currentString = "";
@@ -1254,7 +1256,7 @@ public partial class Parser
       parts.Add(currentString);
     }
 
-    return new TemplateLiteralExpression(parts);
+    return new StringInterpolationExpression(parts);
   }
 
   private List<string> SplitByComma(string input)

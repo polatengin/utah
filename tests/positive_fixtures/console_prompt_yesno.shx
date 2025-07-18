@@ -1,5 +1,5 @@
 let proceed: boolean = console.promptYesNo("Do you want to continue?");
-console.log(`User response: ${proceed}`);
+console.log("User response: ${proceed}");
 
 if (proceed) {
   console.log("User chose to continue");

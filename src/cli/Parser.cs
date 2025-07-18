@@ -23,7 +23,7 @@ public partial class Parser
     {
       char current = input[i];
 
-      // Handle string literals and template literals
+      // Handle string literals and interpolated strings
       if (!inString && (current == '"' || current == '\'' || current == '`'))
       {
         inString = true;
@@ -1014,7 +1014,7 @@ public partial class Parser
 
   private Statement ParseSchedulerCronStatement(string line, ref int i)
   {
-    // Extract the first part: scheduler.cron("pattern", 
+    // Extract the first part: scheduler.cron("pattern",
     var match = Regex.Match(line, @"scheduler\.cron\s*\(\s*(.+?)\s*,\s*\(\s*\)\s*=>\s*\{");
     if (!match.Success)
     {
@@ -1090,7 +1090,7 @@ public partial class Parser
         }
         else if (Regex.IsMatch(trimmedLine, @"^function\s*\w"))
         {
-          // Ensure function declarations have proper space for recognition  
+          // Ensure function declarations have proper space for recognition
           trimmedLine = Regex.Replace(trimmedLine, @"^function\s+", "function ");
         }
 

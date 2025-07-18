@@ -1,8 +1,8 @@
 // Test web.get() function with URL
 let response: string = web.get("https://httpbin.org/get");
-console.log(`Response length: ${response.length()}`);
+console.log("Response length: ${response.length()}");
 
 // Test with variable URL
 let apiUrl: string = "https://httpbin.org/ip";
 let ipResponse: string = web.get(apiUrl);
-console.log(`IP Response: ${ipResponse}`);
+console.log("IP Response: ${ipResponse}");

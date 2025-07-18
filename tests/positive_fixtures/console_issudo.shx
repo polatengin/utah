@@ -1,2 +1,2 @@
 let isSudo: boolean = console.isSudo();
-console.log(`${isSudo}`);
+console.log("${isSudo}");

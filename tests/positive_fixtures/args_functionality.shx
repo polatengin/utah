@@ -20,5 +20,5 @@ let userName: string = args.get("--name");
 let userAge: number = args.get("--age");
 let isAdmin: boolean = args.has("--admin");
 
-console.log(`Creating user: ${userName}, age: ${userAge}, admin: ${isAdmin}`);
+console.log("Creating user: ${userName}, age: ${userAge}, admin: ${isAdmin}");
 console.log("All arguments: " + args.all());

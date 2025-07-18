@@ -10,7 +10,7 @@ public record BinaryExpression(Expression Left, Expression Right, string Operato
 public record UnaryExpression(Expression Operand, string Operator) : Expression;
 public record TernaryExpression(Expression Condition, Expression TrueExpression, Expression FalseExpression) : Expression;
 public record ParenthesizedExpression(Expression Inner) : Expression;
-public record TemplateLiteralExpression(List<object> Parts) : Expression; // Parts can be string or Expression
+public record StringInterpolationExpression(List<object> Parts) : Expression; // Parts can be string or Expression
 public record FunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ParallelFunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ConsoleIsSudoExpression() : Expression;
