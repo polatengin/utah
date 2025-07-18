@@ -1,6 +1,8 @@
 ---
-title: Cloud Deployment
-sidebar_position: 6
+layout: default
+title: CI/CD Integration
+parent: Guides
+nav_order: 6
 ---
 
 Deploy Utah applications to cloud platforms.

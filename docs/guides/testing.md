@@ -1,10 +1,12 @@
 ---
-sidebar_position: 4
+layout: default
+title: Testing with Utah Scripts
+parent: Guides
+nav_order: 4
+
 ---
 
-# Testing Utah Scripts
-
-Learn how to test Utah scripts effectively with unit tests, integration tests, and best practices.
+Learn how to do testing with Utah scripts effectively with unit tests, integration tests, and best practices.
 
 ## Test Structure
 

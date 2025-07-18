@@ -1,8 +1,9 @@
 ---
-sidebar_position: 5
+layout: default
+title: DevOps Integration
+parent: Guides
+nav_order: 5
 ---
-
-# DevOps Integration
 
 Learn how to integrate Utah scripts into your DevOps workflows, CI/CD pipelines, and automation processes.
 
