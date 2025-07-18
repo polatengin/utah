@@ -346,7 +346,18 @@ public partial class Parser
       if (methodPart.StartsWith("join(") && methodPart.EndsWith(")"))
       {
         var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
-        var separatorExpr = ParseExpression(argsContent);
+        Expression separatorExpr;
+
+        // If no arguments provided, use default comma separator
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          separatorExpr = new LiteralExpression(",", "string");
+        }
+        else
+        {
+          separatorExpr = ParseExpression(argsContent);
+        }
+
         return new ArrayJoinExpression(new VariableExpression(objectName), separatorExpr);
       }
 

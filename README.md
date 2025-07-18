@@ -900,6 +900,45 @@ if (numbers.contains(searchNumber)) {
 }
 ```
 
+Join array elements into a string using the `.join()` method:
+
+```typescript
+let fruits: string[] = ["apple", "banana", "cherry"];
+let numbers: number[] = [1, 2, 3, 4, 5];
+let flags: boolean[] = [true, false, true];
+
+// Join with default separator (comma)
+let defaultJoin: string = fruits.join();           // Gets "apple,banana,cherry"
+let commaJoin: string = fruits.join(",");          // Gets "apple,banana,cherry"
+
+// Join with custom separators
+let pipeJoin: string = fruits.join(" | ");         // Gets "apple | banana | cherry"
+let dashJoin: string = fruits.join("-");           // Gets "apple-banana-cherry"
+let spaceJoin: string = fruits.join(" ");          // Gets "apple banana cherry"
+let noSeparator: string = fruits.join("");         // Gets "applebananacherry"
+
+// Join different array types
+let numberString: string = numbers.join("-");      // Gets "1-2-3-4-5"
+let booleanString: string = flags.join(" & ");     // Gets "true & false & true"
+
+// Use in string interpolation
+console.log(`Fruits: ${fruits.join(", ")}`);       // "Fruits: apple, banana, cherry"
+console.log(`Numbers: ${numbers.join(" -> ")}`);   // "Numbers: 1 -> 2 -> 3 -> 4 -> 5"
+
+// Edge cases
+let empty: string[] = [];
+let emptyJoin: string = empty.join(",");            // Gets ""
+
+let single: string[] = ["only"];
+let singleJoin: string = single.join(",");          // Gets "only"
+
+// Use in conditionals and assignments
+let csvData: string = fruits.join(",");
+if (csvData.length > 0) {
+  console.log(`CSV data: ${csvData}`);
+}
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -3718,7 +3757,9 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [x] `array.contains()` function
 
-- [ ] `array.*` functions (`join()`, `sort()`, `merge()`)
+- [x] `array.join()` function
+
+- [ ] `array.*` functions (`sort()`, `merge()`)
 
 - [x] Add shebang (`#!/bin/bash`) to generated scripts
 

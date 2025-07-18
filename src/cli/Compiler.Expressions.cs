@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 public partial class Compiler
 {
   private static int _randomCounter = 0;
+  private static int _joinCounter = 0;
 
   private string CompileExpression(Expression expr)
   {
@@ -885,9 +886,11 @@ public partial class Compiler
     var arrayName = ExtractVariableName(CompileExpression(arrayJoin.Array));
     var separator = CompileExpression(arrayJoin.Separator);
 
-    // In bash, joining an array requires a custom function or a loop
-    // Here's a simple implementation using a loop and printf
-    return $"$(IFS={separator}; echo \"${{{arrayName}[*]}}\")";
+    _joinCounter++;
+    var uniqueVar = $"_utah_join_{_joinCounter}";
+    var separatorVar = $"_utah_sep_{_joinCounter}";
+
+    return $"$({separatorVar}={separator}; {uniqueVar}=\"\"; for item in \"${{{arrayName}[@]}}\"; do if [ -n \"${{{uniqueVar}}}\" ]; then {uniqueVar}+=\"${{{separatorVar}}}\"; fi; {uniqueVar}+=\"$item\"; done; echo \"${{{uniqueVar}}}\")";
   }
 
   private string CompileFsDirnameExpression(FsDirnameExpression fsDirname)

@@ -64,8 +64,31 @@ Reverse the order of elements:
 
 ```typescript
 let numbers: number[] = [1, 2, 3, 4, 5];
-let reversed: number[] = array.reverse(numbers);
+let reversed: number[] = numbers.reverse();
 // reversed is [5, 4, 3, 2, 1]
+```
+
+#### `array.join()`
+
+Join array elements into a string with a separator:
+
+```typescript
+let fruits: string[] = ["apple", "banana", "cherry"];
+
+// Join with default separator (comma)
+let defaultJoin: string = fruits.join();           // "apple,banana,cherry"
+
+// Join with custom separators
+let pipeJoin: string = fruits.join(" | ");         // "apple | banana | cherry"
+let dashJoin: string = fruits.join("-");           // "apple-banana-cherry"
+let spaceJoin: string = fruits.join(" ");          // "apple banana cherry"
+
+// Join different array types
+let numbers: number[] = [1, 2, 3, 4, 5];
+let numberString: string = numbers.join("-");      // "1-2-3-4-5"
+
+// Use in string interpolation
+console.log(`Fruits: ${fruits.join(", ")}`);       // "Fruits: apple, banana, cherry"
 ```
 
 ### Array Iteration

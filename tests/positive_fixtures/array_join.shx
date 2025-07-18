@@ -1,0 +1,44 @@
+// Test array.join() method with different separators
+
+// Test with string array
+let fruits: string[] = ["apple", "banana", "cherry"];
+
+// Test with default separator (no arguments)
+let result0: string = fruits.join();
+console.log("Default separator: " + result0);
+
+// Test with comma separator explicitly
+let result1: string = fruits.join(",");
+console.log("Comma separated: " + result1);
+
+// Test with custom separator
+let result2: string = fruits.join(" | ");
+console.log("Pipe separated: " + result2);
+
+// Test with empty string separator
+let result3: string = fruits.join("");
+console.log("No separator: " + result3);
+
+// Test with dash separator
+let result4: string = fruits.join("-");
+console.log("Dash separated: " + result4);
+
+// Test with number array
+let numbers: number[] = [1, 2, 3, 4, 5];
+let numberResult: string = numbers.join("-");
+console.log("Numbers joined: " + numberResult);
+
+// Test with boolean array
+let flags: boolean[] = [true, false, true];
+let flagResult: string = flags.join(" & ");
+console.log("Booleans joined: " + flagResult);
+
+// Test with empty array
+let empty: string[] = [];
+let emptyResult: string = empty.join(",");
+console.log("Empty array result: '" + emptyResult + "'");
+
+// Test with single element
+let single: string[] = ["only"];
+let singleResult: string = single.join(",");
+console.log("Single element: " + singleResult);
