@@ -17,7 +17,7 @@ Process a template file and write the result with environment variable substitut
 
 **Example:**
 
-```utah
+```typescript
 // Set environment variables
 export APP_NAME="MyApplication"
 export VERSION="1.2.3"
@@ -51,7 +51,7 @@ success=$(_utah_template_result_1=$(envsubst < "config.template" > "backup.txt" 
 
 Generate configuration files for different environments:
 
-```utah
+```typescript
 export NODE_ENV="production"
 export DATABASE_URL="prod-db.example.com"
 export API_KEY="prod-key-xyz"
@@ -63,7 +63,7 @@ template.update("app.config.template", "app.config.json");
 
 Generate deployment scripts with environment-specific values:
 
-```utah
+```typescript
 export DEPLOYMENT_TARGET="staging"
 export BUILD_VERSION="v2.1.0"
 export DOCKER_REGISTRY="registry.example.com"
@@ -75,7 +75,7 @@ template.update("deploy.template.sh", "deploy.sh");
 
 Generate README files with dynamic content:
 
-```utah
+```typescript
 export PROJECT_NAME="my-project"
 export CURRENT_VERSION="1.0.0"
 export AUTHOR_NAME="Development Team"
@@ -109,7 +109,7 @@ Template functions will fail if:
 
 When used as expressions, the function returns "false" on failure, allowing for error handling:
 
-```utah
+```typescript
 let result = template.update("missing.template", "output.txt");
 if (result === "false") {
   console.log("Template processing failed");
@@ -121,7 +121,7 @@ if (result === "false") {
 
 Template functions work seamlessly with other Utah functions:
 
-```utah
+```typescript
 // Check if template file exists before processing
 if (fs.exists("config.template")) {
   template.update("config.template", "config.yml");

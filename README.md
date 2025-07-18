@@ -1282,7 +1282,7 @@ Utah provides template functions for processing files with variable substitution
 
 ### Template Functions Usage
 
-```utah
+```typescript
 #!/usr/bin/env utah
 
 // Set environment variables for template substitution
@@ -1356,7 +1356,7 @@ echo "Generated configuration: ${generatedConfig}"
 
 **Configuration Management:**
 
-```utah
+```typescript
 // Generate different configurations for different environments
 export NODE_ENV="development"
 export DATABASE_URL="localhost:5432"
@@ -1367,7 +1367,7 @@ template.update("app.config.template", "app.config.json");
 
 **CI/CD Pipeline Scripts:**
 
-```utah
+```typescript
 // Generate deployment scripts with environment-specific values
 export DEPLOYMENT_TARGET="staging"
 export BUILD_VERSION="v2.1.0"
@@ -1378,7 +1378,7 @@ template.update("deploy.template.sh", "deploy.sh");
 
 **Documentation Generation:**
 
-```utah
+```typescript
 // Generate README files with dynamic content
 export PROJECT_NAME="utah-lang"
 export CURRENT_VERSION="1.0.0"
