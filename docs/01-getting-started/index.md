@@ -38,6 +38,6 @@ Once you've completed the getting started guides, explore:
 ## Need Help?
 
 - **Documentation**: Browse the full documentation
-- **Examples**: Check the `examples/` directory in the repository
+- **Examples**: Check the `examples/` and `tests/` folders in the repository
 - **Issues**: [Report bugs or request features](https://github.com/polatengin/utah/issues)
 - **Discussions**: [Get community help](https://github.com/polatengin/utah/discussions)
