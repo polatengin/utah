@@ -315,7 +315,7 @@ let projects: string[] = ["project1", "project2", "project3"];
 
 for (let project: string in projects) {
   let fullPath: string = `${basePath}/${project}`;
-  
+
   if (fs.exists(fullPath)) {
     console.log(`Found project: ${fullPath}`);
   }
@@ -371,13 +371,13 @@ function processArray(items: string[]): void {
     console.log("Warning: Empty array provided");
     return;
   }
-  
+
   for (let item: string in items) {
     if (string.length(item) == 0) {
       console.log("Warning: Empty string found, skipping");
       continue;
     }
-    
+
     // Process item
     console.log(`Processing: ${item}`);
   }

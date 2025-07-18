@@ -797,7 +797,7 @@ public partial class Compiler
     if (varExpr.StartsWith("${#") && varExpr.EndsWith("[@]}"))
     {
       // This is an array length expression like ${#arrayName[@]}
-      // In arithmetic contexts, return as-is 
+      // In arithmetic contexts, return as-is
       return varExpr;
     }
 
