@@ -3776,12 +3776,19 @@ make test              # Full test output
 
 Current tests cover:
 
-- **arrays.shx** - Array literals, access, length, and iteration
+- **advanced_math.shx** - Advanced mathematical operations and calculations
+- **args_functionality.shx** - Command-line argument parsing and validation
 - **array_contains.shx** - Array contains() method for checking element presence
+- **array_join.shx** - Array join() method for converting arrays to strings
+- **array_sort.shx** - Array sort() method for sorting arrays
+- **arrays.shx** - Array literals, access, length, and iteration
 - **arrays_isempty.shx** - Array isEmpty() method for checking empty arrays
+- **arrays_reverse.shx** - Array reverse() method for reversing array order
+- **console_clear.shx** - Console clear() function for clearing terminal screen
 - **console_issudo.shx** - Console system functions and privilege checking
 - **console_prompt_yesno.shx** - User interaction with yes/no prompts
 - **const_valid_assignment.shx** - Const variable declarations and immutability
+- **env_get_ternary.shx** - Environment variable operations with ternary operators
 - **environment_variables.shx** - Environment variable operations
 - **for_in_loop.shx** - For-in loops with arrays
 - **fs_dirname.shx** - File system dirname function
@@ -3794,22 +3801,23 @@ Current tests cover:
 - **function_declarations.shx** - Function definitions with typed parameters and return values
 - **git_undo_last_commit.shx** - Git undo last commit functionality
 - **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
-- **import_test.shx** - Basic import functionality with multiple files
+- **json_install_dependencies.shx** - JSON dependency installation and verification
 - **json_manipulation.shx** - JSON property manipulation and modification functions
 - **json_parse_validation.shx** - JSON parsing and validation functions
 - **json_property_access.shx** - JSON property access and existence checking
 - **json_utilities.shx** - JSON utility functions (keys, values, merge)
-- **json_install_dependencies.shx** - JSON dependency installation and verification
 - **let_reassignment_test.shx** - Variable reassignment and mutability
+- **math.shx** - Basic mathematical operations and functions
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
 - **nested_for_loop.shx** - Nested for loops
-- **nested_import_test.shx** - Nested import functionality with import chains
+- **nested_import.shx** - Nested import functionality with import chains
 - **os_getlinuxversion.shx** - Operating system Linux version detection
 - **os_getos.shx** - Operating system detection
 - **os_isinstalled.shx** - Command/application installation checking
 - **parallel_function_call.shx** - Parallel function calls
 - **process_info.shx** - Process information functions (ID, CPU, memory, etc.)
+- **scheduler_cron.shx** - Cron job scheduling and management
 - **script_continueonerror.shx** - Script control function for continuing on errors
 - **script_description.shx** - Script description metadata function
 - **script_disabledebug.shx** - Script control function for disabling debug mode
@@ -3819,19 +3827,24 @@ Current tests cover:
 - **script_exitonerror.shx** - Script control function for exiting on errors
 - **simple_console.shx** - Basic console.log functionality
 - **simple_for_loop.shx** - Traditional for loops
+- **simple_import.shx** - Basic import functionality with multiple files
 - **simple_switch.shx** - Basic switch/case/default statements
 - **string_functions.shx** - String manipulation functions
 - **switch_case.shx** - Complex switch statements with fall-through cases
 - **ternary_operators.shx** - Ternary conditional operators
 - **timer_start_stop.shx** - Timer functions for performance measurement
 - **try_catch.shx** - Try/catch blocks for error handling and graceful failure recovery
+- **utility_functions.shx** - Utility functions for UUID generation, hashing, and Base64 encoding/decoding
+- **utility_random.shx** - Utility random number generation with range parameters
+- **utils.shx** - General utility functions and helpers
 - **variable_declaration.shx** - Variable declarations and usage
+- **web_get.shx** - Web HTTP GET requests and API communication
 - **while_loop.shx** - While loops with break statements and conditional logic
+- **yaml_install_dependencies.shx** - YAML dependency installation and verification
 - **yaml_manipulation.shx** - YAML property manipulation and modification functions
 - **yaml_parse_validation.shx** - YAML parsing and validation functions
 - **yaml_property_access.shx** - YAML property access and existence checking
 - **yaml_utilities.shx** - YAML utility functions (keys, values, merge)
-- **yaml_install_dependencies.shx** - YAML dependency installation and verification
 
 ### Negative Test Coverage
 
@@ -3840,6 +3853,16 @@ The negative test fixtures ensure that the compiler correctly handles and report
 - **array_type_mismatch.shx** - Boolean array with mixed types (string in boolean array)
 - **const_reassignment_test.shx** - Attempt to reassign a const variable after declaration
 - **import_missing_file.shx** - Import statement referencing a non-existent file
+
+### Malformed Test Coverage
+
+The malformed test fixtures ensure that the formatter correctly handles and formats malformed code:
+
+- **arrays_and_expressions.shx** - Malformed array and expression syntax for formatter testing
+- **basic_formatting.shx** - Basic formatting issues like spacing and indentation
+- **builtin_functions.shx** - Malformed built-in function calls and syntax
+- **control_structures.shx** - Malformed control flow structures (if/else, loops, switch)
+- **scheduler_formatting.shx** - Malformed scheduler and cron-related syntax
 
 ### How Tests Work
 
