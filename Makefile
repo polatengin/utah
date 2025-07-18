@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev watch
+.PHONY: help build build-extension test compile clean install info dev watch markdownlint
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -254,3 +254,13 @@ info: ## Show project information
 	@echo
 	@echo "Recent Changes:"
 	@git log --oneline -5 2>/dev/null || echo "  Not a git repository"
+
+markdownlint: ## Run markdownlint on all markdown files
+	@echo "$(BLUE)📝 Running markdownlint on markdown files...$(NC)"
+	@echo "$(BLUE)Checking markdown files...$(NC)"
+	@if markdownlint --ignore-path .gitignore --ignore node_modules --ignore src/website/node_modules --ignore src/vscode-extension/node_modules "**/*.md"; then \
+		echo "$(GREEN)✅ All markdown files passed linting$(NC)"; \
+	else \
+		echo "$(RED)❌ Markdown linting failed$(NC)"; \
+		exit 1; \
+	fi
