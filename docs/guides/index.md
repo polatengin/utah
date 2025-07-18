@@ -21,12 +21,6 @@ Comprehensive guides for Utah development, from basic automation to advanced Dev
 - **[Performance Optimization](performance.md)** - Making Utah scripts faster and more efficient
 - **[Security Best Practices](security.md)** - Writing secure automation scripts
 
-### Integration
-
-- **[Docker Integration](docker.md)** - Containerized workflows and deployment
-- **[Cloud Automation](cloud.md)** - AWS, Azure, and GCP automation
-- **[Database Operations](database.md)** - Database backup, migration, and maintenance
-
 ## Getting Started with Guides
 
 1. **Choose your use case:** Select guides based on your specific needs
@@ -160,15 +154,13 @@ We welcome contributions to the Utah guides:
 
 1. Start with [Getting Started](../getting-started/)
 2. Read [Language Features](../language-features/)
-3. Try [Development Setup](development-setup.md)
-4. Practice with [File Processing](file-processing.md)
+3. Practice with [File Processing](file-processing.md)
 
 ### Intermediate Path
 
 1. Complete beginner path
 2. Study [System Administration](system-admin.md)
-3. Learn [Testing Utah Scripts](testing.md)
-4. Explore [CI/CD Integration](cicd.md)
+3. Explore [CI/CD Integration](cicd.md)
 
 ### Advanced Path
 
