@@ -6,4 +6,7 @@ out/
 bin/
 obj/
 
+.docusaurus/
+build/
+
 tests/temp/
