@@ -1,8 +1,9 @@
 ---
-sidebar_position: 3
+layout: default
+title: Array Functions
+parent: Functions
+nav_order: 5
 ---
-
-# Array Functions
 
 Utah provides powerful array manipulation functions for data processing and collection handling.
 

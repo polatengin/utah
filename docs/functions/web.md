@@ -1,8 +1,9 @@
 ---
-sidebar_position: 5
+layout: default
+title: Web Functions
+parent: Functions
+nav_order: 10
 ---
-
-# Web Functions
 
 Utah provides web-related functions for HTTP requests, URL manipulation, and web service integration.
 

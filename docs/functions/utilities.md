@@ -1,8 +1,9 @@
 ---
-sidebar_position: 7
+layout: default
+title: Utility Functions
+parent: Functions
+nav_order: 9
 ---
-
-# Utility Functions
 
 Utah provides a collection of utility functions for common programming tasks, calculations, and data processing.
 

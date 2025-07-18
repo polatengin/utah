@@ -1,8 +1,9 @@
 ---
-sidebar_position: 6
+layout: default
+title: Git Functions
+parent: Functions
+nav_order: 6
 ---
-
-# Git Functions
 
 Utah provides comprehensive Git integration functions for version control operations and repository management.
 

@@ -1,8 +1,9 @@
 ---
-sidebar_position: 2
+layout: default
+title: String Functions
+parent: Functions
+nav_order: 7
 ---
-
-# String Functions
 
 Utah provides a comprehensive set of string manipulation functions for text processing, formatting, and transformation.
 

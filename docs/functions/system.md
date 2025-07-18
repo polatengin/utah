@@ -1,8 +1,9 @@
 ---
-sidebar_position: 4
+layout: default
+title: System Functions
+parent: Functions
+nav_order: 8
 ---
-
-# System Functions
 
 Utah provides system-level functions for process management, environment interaction, and system administration.
 
