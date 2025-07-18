@@ -1,9 +1,6 @@
 name: Deploy to GitHub Pages
 
-on:
-  push:
-    branches:
-      - main
+on: [ workflow_dispatch ]
 
 jobs:
   build:
@@ -19,7 +16,6 @@ jobs:
           node-version: 18
           cache: npm
           cache-dependency-path: src/website/package-lock.json
-        working-directory: src/website
 
       - name: Install dependencies
         working-directory: src/website
