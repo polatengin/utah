@@ -1,6 +1,8 @@
 ---
+layout: default
 title: Contributing to Utah
-sidebar_position: 5
+parent: Getting Started
+nav_order: 5
 ---
 
 Thank you for your interest in contributing to Utah! This guide will help you get started with contributing to the project.
