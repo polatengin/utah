@@ -3811,6 +3811,8 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - [ ] `array.merge()` function
 
+- [ ] `array.shuffle()` function
+
 - [x] Add shebang (`#!/bin/bash`) to generated scripts
 
 - [ ] Typed return values and richer type checking
