@@ -15,11 +15,11 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        working-directory: src/website
         with:
           node-version: 18
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: src/website/package-lock.json
+        working-directory: src/website
 
       - name: Install dependencies
         working-directory: src/website
@@ -27,13 +27,12 @@ jobs:
 
       - name: Build website
         working-directory: src/website
-        run: npm build
+        run: npm run build
 
       - name: Upload Build Artifact
-        working-directory: src/website
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          path: build
+          path: src/website/build
 
   deploy:
     name: Deploy to GitHub Pages
@@ -51,5 +50,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        working-directory: src/website
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
