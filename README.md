@@ -4090,7 +4090,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
-- [ ] Template functions to update files with dynamic content
+- [x] Template functions to update files with dynamic content
 
 - [x] json parsing and manipulation functions
 
