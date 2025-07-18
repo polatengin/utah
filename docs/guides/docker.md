@@ -1,6 +1,8 @@
 ---
+layout: default
 title: Docker Integration
-sidebar_position: 5
+parent: Guides
+nav_order: 5
 ---
 
 Docker containerization for Utah applications.
