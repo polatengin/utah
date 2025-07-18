@@ -204,6 +204,8 @@ public partial class Compiler
         return CompileLambdaExpression(lambda);
       case FsWriteFileExpressionPlaceholder fsWriteFile:
         throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
+      case TemplateUpdateExpression templateUpdate:
+        return CompileTemplateUpdateExpression(templateUpdate);
       default:
         throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
     }
@@ -1653,5 +1655,18 @@ fi
   private static int GetUniqueId()
   {
     return ++_uniqueIdCounter;
+  }
+
+  private string CompileTemplateUpdateExpression(TemplateUpdateExpression templateUpdate)
+  {
+    // Generate bash code for template.update(sourceFile, targetFile)
+    // This uses envsubst to replace ${VAR} tokens with environment variables
+    var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
+    var targetFile = CompileExpression(templateUpdate.TargetFilePath);
+
+    var uniqueId = GetUniqueId();
+    var resultVar = $"_utah_template_result_{uniqueId}";
+
+    return $"$({resultVar}=$(envsubst < {sourceFile} > {targetFile} && echo \"true\" || echo \"false\"); echo ${{{resultVar}}})";
   }
 }

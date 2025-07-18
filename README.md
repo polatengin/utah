@@ -1272,6 +1272,121 @@ filename=$(basename "/home/user/documents/project/readme.txt")
 echo "Filename: $filename"
 ```
 
+## 📝 Template Functions
+
+Utah provides template functions for processing files with variable substitution. These functions use `envsubst` to replace `${VARIABLE}` placeholders with environment variable values, making them perfect for configuration file generation and dynamic content creation.
+
+### Available Template Functions
+
+- `template.update(sourceFilePath, targetFilePath)` - Process a template file and write the result with environment variable substitution
+
+### Template Functions Usage
+
+```utah
+#!/usr/bin/env utah
+
+// Set environment variables for template substitution
+export APP_NAME="MyApplication"
+export APP_VERSION="1.2.3"
+export PORT="8080"
+
+// Create a template file with variable placeholders
+fs.writeFile("config.template", `
+server:
+  name: \${APP_NAME}
+  version: \${APP_VERSION}
+  port: \${PORT}
+  environment: \${NODE_ENV:-production}
+`);
+
+// Process the template file and generate the final configuration
+template.update("config.template", "config.yml");
+
+// Use template.update() as an expression to check success
+let success = template.update("config.template", "backup-config.yml");
+if (success === "true") {
+  console.log("Template processing completed successfully");
+} else {
+  console.log("Template processing failed");
+}
+
+// Read and display the generated configuration
+let generatedConfig = fs.readFile("config.yml");
+console.log("Generated configuration:", generatedConfig);
+```
+
+### Generated Bash Code for Template Functions
+
+Template functions transpile to `envsubst` commands for efficient variable substitution:
+
+```bash
+#!/bin/bash
+
+# Set environment variables for template substitution
+export APP_NAME="MyApplication"
+export APP_VERSION="1.2.3"
+export PORT="8080"
+
+# Create a template file with variable placeholders
+echo "
+server:
+  name: \${APP_NAME}
+  version: \${APP_VERSION}
+  port: \${PORT}
+  environment: \${NODE_ENV:-production}
+" > "config.template"
+
+# Process the template file and generate the final configuration
+envsubst < "config.template" > "config.yml"
+
+# Use template.update() as an expression to check success
+success=$(_utah_template_result_1=$(envsubst < "config.template" > "backup-config.yml" && echo "true" || echo "false"); echo ${_utah_template_result_1})
+if [ "${success}" = "true" ]; then
+  echo "Template processing completed successfully"
+else
+  echo "Template processing failed"
+fi
+
+# Read and display the generated configuration
+generatedConfig=$(cat "config.yml")
+echo "Generated configuration: ${generatedConfig}"
+```
+
+### Template Functions Use Cases
+
+**Configuration Management:**
+
+```utah
+// Generate different configurations for different environments
+export NODE_ENV="development"
+export DATABASE_URL="localhost:5432"
+export API_KEY="dev-key-123"
+
+template.update("app.config.template", "app.config.json");
+```
+
+**CI/CD Pipeline Scripts:**
+
+```utah
+// Generate deployment scripts with environment-specific values
+export DEPLOYMENT_TARGET="staging"
+export BUILD_VERSION="v2.1.0"
+export DOCKER_REGISTRY="myregistry.com"
+
+template.update("deploy.template.sh", "deploy.sh");
+```
+
+**Documentation Generation:**
+
+```utah
+// Generate README files with dynamic content
+export PROJECT_NAME="utah-lang"
+export CURRENT_VERSION="1.0.0"
+export AUTHOR_NAME="Utah Team"
+
+template.update("README.template.md", "README.md");
+```
+
 ## ⏱️ Timer Functions
 
 Utah provides timer functions for measuring execution time in your scripts. These functions are useful for performance testing, benchmarking, and monitoring script execution duration.

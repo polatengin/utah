@@ -13,6 +13,7 @@ Utah provides an extensive library of built-in functions organized into logical 
 
 - **[Console Functions](console.md)** - Output, logging, and user interaction
 - **[File System Functions](filesystem.md)** - File and directory operations
+- **[Template Functions](template.md)** - File templating and variable substitution
 - **[Operating System Functions](operating-system.md)** - System information and process management
 - **[JSON/YAML Functions](json-yaml.md)** - Data serialization and parsing
 
@@ -39,6 +40,9 @@ console.log("Hello, World!");
 // File operations
 let content: string = filesystem.readFile("file.txt");
 filesystem.writeFile("output.txt", content);
+
+// Template processing
+template.update("config.template", "config.yml");
 
 // System information
 let platform: string = os.platform();

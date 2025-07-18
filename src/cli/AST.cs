@@ -127,3 +127,5 @@ public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBo
 public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;
 public record ArgsShowHelpStatement() : Statement;
 public record ImportStatement(string FilePath) : Statement;
+public record TemplateUpdateExpression(Expression SourceFilePath, Expression TargetFilePath) : Expression;
+public record TemplateUpdateStatement(Expression SourceFilePath, Expression TargetFilePath) : Statement;

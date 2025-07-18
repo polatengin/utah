@@ -311,6 +311,34 @@ public partial class Parser
         }
       }
 
+      // Special case for template.update() - handle this as a function call
+      if (objectName == "template" && methodPart.StartsWith("update(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(7, methodPart.Length - 8).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("template.update() requires source and target file path arguments");
+        }
+        else
+        {
+          // Parse the file path arguments
+          var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(arg => arg.Trim())
+                                .ToList();
+          if (args.Count == 2)
+          {
+            // Two arguments: template.update(sourceFilePath, targetFilePath)
+            var sourceFilePathExpr = ParseExpression(args[0]);
+            var targetFilePathExpr = ParseExpression(args[1]);
+            return new TemplateUpdateExpression(sourceFilePathExpr, targetFilePathExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"template.update() accepts exactly 2 arguments (sourceFilePath, targetFilePath), got {args.Count}");
+          }
+        }
+      }
+
       // Handle .length property
       if (methodPart == "length" || methodPart == "length()")
       {

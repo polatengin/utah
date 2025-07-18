@@ -202,6 +202,10 @@ public partial class Parser
     {
       return ParseArgsStatement(line);
     }
+    if (line.StartsWith("template.update("))
+    {
+      return ParseTemplateUpdateStatement(line);
+    }
     if (line.StartsWith("scheduler.cron("))
     {
       return ParseSchedulerCronStatement(line, ref i);
@@ -842,6 +846,30 @@ public partial class Parser
     if (line == "args.showHelp();")
     {
       return new ArgsShowHelpStatement();
+    }
+
+    return new RawStatement(line);
+  }
+
+  private Statement ParseTemplateUpdateStatement(string line)
+  {
+    // Handle template.update() with parameters
+    if (line.StartsWith("template.update(") && line.EndsWith(");"))
+    {
+      var paramStart = line.IndexOf('(') + 1;
+      var paramEnd = line.LastIndexOf(')');
+      var parametersStr = line.Substring(paramStart, paramEnd - paramStart).Trim();
+
+      // Parse the parameters - expecting: sourceFilePath, targetFilePath
+      var parameters = ParseFunctionParameters(parametersStr);
+
+      if (parameters.Count != 2)
+        throw new Exception("template.update() requires exactly 2 parameters: sourceFilePath, targetFilePath");
+
+      var sourceFilePathExpr = ParseExpression(parameters[0]);
+      var targetFilePathExpr = ParseExpression(parameters[1]);
+
+      return new TemplateUpdateStatement(sourceFilePathExpr, targetFilePathExpr);
     }
 
     return new RawStatement(line);

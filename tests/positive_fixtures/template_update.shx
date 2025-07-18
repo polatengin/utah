@@ -1,0 +1,15 @@
+#!/usr/bin/env utah
+
+// Test template.update() function
+// This tests the template update functionality with environment variables
+
+// Set up environment variables for testing
+export NAME="Utah"
+export VERSION="1.0.0"
+
+// Test template.update() as a statement
+template.update("template.txt", "output.txt");
+
+// Test template.update() as an expression
+let result = template.update("template.txt", "output2.txt");
+console.log("Template update result: " + result);

@@ -522,6 +522,12 @@ public partial class Compiler
         var content = CompileExpression(fws.Content);
         lines.Add($"echo {content} > {filePath}");
         break;
+
+      case TemplateUpdateStatement templateUpdate:
+        var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
+        var targetFile = CompileExpression(templateUpdate.TargetFilePath);
+        lines.Add($"envsubst < {sourceFile} > {targetFile}");
+        break;
     }
 
     return lines;
