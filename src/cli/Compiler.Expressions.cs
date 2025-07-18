@@ -106,6 +106,14 @@ public partial class Compiler
         return CompileOsGetOSExpression(osGetOS);
       case UtilityRandomExpression rand:
         return CompileUtilityRandomExpression(rand);
+      case UtilityUuidExpression uuid:
+        return CompileUtilityUuidExpression(uuid);
+      case UtilityHashExpression hash:
+        return CompileUtilityHashExpression(hash);
+      case UtilityBase64EncodeExpression base64Encode:
+        return CompileUtilityBase64EncodeExpression(base64Encode);
+      case UtilityBase64DecodeExpression base64Decode:
+        return CompileUtilityBase64DecodeExpression(base64Decode);
       case WebGetExpression webGet:
         return CompileWebGetExpression(webGet);
       case ArrayJoinExpression arrayJoin:
@@ -442,6 +450,32 @@ public partial class Compiler
     }
 
     return lines;
+  }
+
+  private string CompileUtilityUuidExpression(UtilityUuidExpression uuid)
+  {
+    // Generate UUID using uuidgen or fallback to other methods
+    return "$(if command -v uuidgen >/dev/null 2>&1; then uuidgen; elif command -v python3 >/dev/null 2>&1; then python3 -c \"import uuid; print(uuid.uuid4())\"; else echo \"$(date +%s)-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))\"; fi)";
+  }
+
+  private string CompileUtilityHashExpression(UtilityHashExpression hash)
+  {
+    var text = CompileExpression(hash.Text);
+    var algorithm = hash.Algorithm != null ? CompileExpression(hash.Algorithm) : "\"sha256\"";
+    
+    return $"$(echo -n {text} | case {algorithm} in \"md5\") md5sum | cut -d' ' -f1 ;; \"sha1\") sha1sum | cut -d' ' -f1 ;; \"sha256\") sha256sum | cut -d' ' -f1 ;; \"sha512\") sha512sum | cut -d' ' -f1 ;; *) echo \"Error: Unsupported hash algorithm: {algorithm}\" >&2; exit 1 ;; esac)";
+  }
+
+  private string CompileUtilityBase64EncodeExpression(UtilityBase64EncodeExpression base64Encode)
+  {
+    var text = CompileExpression(base64Encode.Text);
+    return $"$(echo -n {text} | base64 -w 0)";
+  }
+
+  private string CompileUtilityBase64DecodeExpression(UtilityBase64DecodeExpression base64Decode)
+  {
+    var text = CompileExpression(base64Decode.Text);
+    return $"$(echo -n {text} | base64 -d)";
   }
 
   private string CompileLiteralExpression(LiteralExpression lit)

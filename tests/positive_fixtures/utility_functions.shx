@@ -1,0 +1,69 @@
+// Test utility functions for UUID, hash, and base64 encoding/decoding
+
+// Test utility.uuid() function
+let uuid1: string = utility.uuid();
+let uuid2: string = utility.uuid();
+console.log("UUID 1: " + uuid1);
+console.log("UUID 2: " + uuid2);
+console.log("UUIDs are different: " + (uuid1 !== uuid2));
+
+// Test utility.hash() function with default algorithm (SHA256)
+let text: string = "Hello, World!";
+let hash1: string = utility.hash(text);
+console.log("Text: " + text);
+console.log("SHA256 hash: " + hash1);
+
+// Test utility.hash() with different algorithms
+let md5Hash: string = utility.hash(text, "md5");
+let sha1Hash: string = utility.hash(text, "sha1");
+let sha256Hash: string = utility.hash(text, "sha256");
+let sha512Hash: string = utility.hash(text, "sha512");
+
+console.log("MD5 hash: " + md5Hash);
+console.log("SHA1 hash: " + sha1Hash);
+console.log("SHA256 hash: " + sha256Hash);
+console.log("SHA512 hash: " + sha512Hash);
+
+// Test utility.base64Encode() function
+let originalText: string = "Hello, Utah!";
+let encoded: string = utility.base64Encode(originalText);
+console.log("Original text: " + originalText);
+console.log("Base64 encoded: " + encoded);
+
+// Test utility.base64Decode() function
+let decoded: string = utility.base64Decode(encoded);
+console.log("Base64 decoded: " + decoded);
+console.log("Round-trip successful: " + (originalText === decoded));
+
+// Test with different text
+let complexText: string = "This is a test with special characters: !@#$%^&*()_+-=[]{}|;':\",./<>?";
+let complexEncoded: string = utility.base64Encode(complexText);
+let complexDecoded: string = utility.base64Decode(complexEncoded);
+console.log("Complex text: " + complexText);
+console.log("Complex encoded: " + complexEncoded);
+console.log("Complex decoded: " + complexDecoded);
+console.log("Complex round-trip: " + (complexText === complexDecoded));
+
+// Test with variables
+let secretMessage: string = "This is a secret message";
+let secretHash: string = utility.hash(secretMessage);
+let secretEncoded: string = utility.base64Encode(secretMessage);
+console.log("Secret message hash: " + secretHash);
+console.log("Secret message encoded: " + secretEncoded);
+
+// Test empty string
+let emptyText: string = "";
+let emptyEncoded: string = utility.base64Encode(emptyText);
+let emptyDecoded: string = utility.base64Decode(emptyEncoded);
+console.log("Empty text encoded: " + emptyEncoded);
+console.log("Empty text decoded: " + emptyDecoded);
+console.log("Empty round-trip: " + (emptyText === emptyDecoded));
+
+// Test UUID uniqueness (generate multiple UUIDs)
+let uuid3: string = utility.uuid();
+let uuid4: string = utility.uuid();
+let uuid5: string = utility.uuid();
+console.log("UUID 3: " + uuid3);
+console.log("UUID 4: " + uuid4);
+console.log("UUID 5: " + uuid5);
+console.log("All UUIDs unique: " + (uuid3 !== uuid4 && uuid4 !== uuid5 && uuid3 !== uuid5));

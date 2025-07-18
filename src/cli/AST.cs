@@ -16,6 +16,10 @@ public record ParallelFunctionCall(string Name, List<Expression> Arguments) : Ex
 public record ConsoleIsSudoExpression() : Expression;
 public record ConsolePromptYesNoExpression(Expression PromptText) : Expression;
 public record UtilityRandomExpression(Expression? MinValue, Expression? MaxValue) : Expression;
+public record UtilityUuidExpression() : Expression;
+public record UtilityHashExpression(Expression Text, Expression? Algorithm) : Expression;
+public record UtilityBase64EncodeExpression(Expression Text) : Expression;
+public record UtilityBase64DecodeExpression(Expression Text) : Expression;
 public record ArrayLiteral(List<Expression> Elements, string ElementType) : Expression;
 public record ArrayAccess(Expression Array, Expression Index) : Expression;
 public record ArrayLength(Expression Array) : Expression;

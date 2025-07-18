@@ -1643,6 +1643,107 @@ let result: number = utility.random(min, max); // Will exit with code 100
 - **Security**: Random timeouts and delays (not cryptographically secure)
 - **User Experience**: Random tips, messages, or content selection
 
+#### UUID Generation
+
+- `utility.uuid()` - Generate a universally unique identifier (UUID)
+
+#### Text Hashing
+
+- `utility.hash(text, algorithm?)` - Generate hash of text using specified algorithm (default: sha256)
+
+#### Base64 Encoding/Decoding
+
+- `utility.base64Encode(text)` - Encode text to Base64
+- `utility.base64Decode(text)` - Decode Base64 text
+
+### Additional Utility Functions Usage
+
+```typescript
+// Generate UUIDs
+let sessionId: string = utility.uuid();
+let requestId: string = utility.uuid();
+console.log(`Session ID: ${sessionId}`);
+console.log(`Request ID: ${requestId}`);
+
+// Hash text with different algorithms
+let text: string = "Hello, World!";
+let md5Hash: string = utility.hash(text, "md5");
+let sha1Hash: string = utility.hash(text, "sha1");
+let sha256Hash: string = utility.hash(text, "sha256");
+let sha512Hash: string = utility.hash(text, "sha512");
+
+// Default algorithm is sha256
+let defaultHash: string = utility.hash(text);
+
+console.log(`Original text: ${text}`);
+console.log(`MD5 hash: ${md5Hash}`);
+console.log(`SHA1 hash: ${sha1Hash}`);
+console.log(`SHA256 hash: ${sha256Hash}`);
+console.log(`SHA512 hash: ${sha512Hash}`);
+console.log(`Default hash: ${defaultHash}`);
+
+// Base64 encoding and decoding
+let original: string = "Hello, Utah!";
+let encoded: string = utility.base64Encode(original);
+let decoded: string = utility.base64Decode(encoded);
+
+console.log(`Original: ${original}`);
+console.log(`Encoded: ${encoded}`);
+console.log(`Decoded: ${decoded}`);
+
+// Working with secrets
+let secret: string = "This is a secret message";
+let secretHash: string = utility.hash(secret, "sha256");
+let secretEncoded: string = utility.base64Encode(secret);
+
+console.log(`Secret hash: ${secretHash}`);
+console.log(`Secret encoded: ${secretEncoded}`);
+```
+
+### Generated Bash Code for New Utility Functions
+
+```bash
+#!/bin/bash
+
+# utility.uuid() - generates UUID with fallbacks
+sessionId=$(if command -v uuidgen >/dev/null 2>&1; then uuidgen; elif command -v python3 >/dev/null 2>&1; then python3 -c "import uuid; print(uuid.uuid4())"; else echo "$(date +%s)-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))"; fi)
+
+# utility.hash(text, algorithm) - generates hash using specified algorithm
+md5Hash=$(echo -n ${text} | case "md5" in "md5") md5sum | cut -d' ' -f1 ;; "sha1") sha1sum | cut -d' ' -f1 ;; "sha256") sha256sum | cut -d' ' -f1 ;; "sha512") sha512sum | cut -d' ' -f1 ;; *) echo "Error: Unsupported hash algorithm: "md5"" >&2; exit 1 ;; esac)
+
+# utility.base64Encode(text) - encodes text to Base64
+encoded=$(echo -n ${original} | base64 -w 0)
+
+# utility.base64Decode(text) - decodes Base64 text
+decoded=$(echo -n ${encoded} | base64 -d)
+```
+
+### Utility Functions Use Cases
+
+#### UUID Generation Use Cases
+
+- **Session Management**: Unique session identifiers
+- **Request Tracking**: Unique request IDs for logging and monitoring
+- **File Naming**: Unique file names to prevent conflicts
+- **Database Keys**: Primary keys for database records
+- **API Keys**: Temporary API keys and tokens
+
+#### Text Hashing Use Cases
+
+- **Data Integrity**: Verify file integrity with checksums
+- **Password Hashing**: Hash passwords before storage (use with salt)
+- **Content Fingerprinting**: Generate unique fingerprints for content
+- **Cache Keys**: Generate cache keys from content
+- **Data Deduplication**: Identify duplicate content
+
+#### Base64 Encoding Use Cases
+
+- **Data Transmission**: Encode binary data for text-based protocols
+- **Configuration Files**: Store binary data in text configuration files
+- **API Communication**: Encode payloads for API requests
+- **Email Attachments**: Encode files for email transmission
+- **Web Development**: Data URIs for embedded resources
+
 ## 🌐 Web Functions
 
 Utah provides web functions for making HTTP requests and interacting with web APIs and resources.

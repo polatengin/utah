@@ -457,6 +457,17 @@ public class FormatterVisitor
           return $"utility.random({VisitExpression(utilityRandom.MaxValue)})";
         else
           return "utility.random()";
+      case UtilityUuidExpression:
+        return "utility.uuid()";
+      case UtilityHashExpression utilityHash:
+        if (utilityHash.Algorithm != null)
+          return $"utility.hash({VisitExpression(utilityHash.Text)}, {VisitExpression(utilityHash.Algorithm)})";
+        else
+          return $"utility.hash({VisitExpression(utilityHash.Text)})";
+      case UtilityBase64EncodeExpression utilityBase64Encode:
+        return $"utility.base64Encode({VisitExpression(utilityBase64Encode.Text)})";
+      case UtilityBase64DecodeExpression utilityBase64Decode:
+        return $"utility.base64Decode({VisitExpression(utilityBase64Decode.Text)})";
       case OsIsInstalledExpression osIsInstalled:
         return $"os.isInstalled({VisitExpression(osIsInstalled.AppName)})";
       case OsGetOSExpression:

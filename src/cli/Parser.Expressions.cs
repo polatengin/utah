@@ -723,6 +723,67 @@ public partial class Parser
         }
       }
 
+      // Special handling for utility.uuid()
+      if (functionName == "utility.uuid" && string.IsNullOrEmpty(argsContent))
+      {
+        return new UtilityUuidExpression();
+      }
+
+      // Special handling for utility.hash()
+      if (functionName == "utility.hash")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("utility.hash() requires at least one argument (text)");
+        }
+        
+        var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                              .Select(arg => arg.Trim())
+                              .ToList();
+        
+        if (args.Count == 1)
+        {
+          // One argument: utility.hash(text) - defaults to SHA256
+          var textExpr = ParseExpression(args[0]);
+          return new UtilityHashExpression(textExpr, null);
+        }
+        else if (args.Count == 2)
+        {
+          // Two arguments: utility.hash(text, algorithm)
+          var textExpr = ParseExpression(args[0]);
+          var algorithmExpr = ParseExpression(args[1]);
+          return new UtilityHashExpression(textExpr, algorithmExpr);
+        }
+        else
+        {
+          throw new InvalidOperationException($"utility.hash() accepts 1 or 2 arguments, got {args.Count}");
+        }
+      }
+
+      // Special handling for utility.base64Encode()
+      if (functionName == "utility.base64Encode")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("utility.base64Encode() requires one argument (text)");
+        }
+        
+        var textExpr = ParseExpression(argsContent);
+        return new UtilityBase64EncodeExpression(textExpr);
+      }
+
+      // Special handling for utility.base64Decode()
+      if (functionName == "utility.base64Decode")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("utility.base64Decode() requires one argument (text)");
+        }
+        
+        var textExpr = ParseExpression(argsContent);
+        return new UtilityBase64DecodeExpression(textExpr);
+      }
+
       // Special handling for git.undoLastCommit()
       if (functionName == "git.undoLastCommit" && string.IsNullOrEmpty(argsContent))
       {
