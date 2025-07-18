@@ -40,7 +40,7 @@ if (args.Length > 0)
       }
       else if (!args[1].EndsWith(".shx"))
       {
-        Console.WriteLine("Usage: utah format [file.shx] [-o <output.shx>] [--in-place] [--check]");
+        Console.WriteLine("Usage: utah format [file.shx] [-o, --output <output.shx>] [--in-place] [--check]");
         Console.WriteLine("       utah format                   # Format all .shx files recursively");
         return;
       }
@@ -185,6 +185,7 @@ static void FormatFile(string[] args)
     switch (args[i])
     {
       case "-o":
+      case "--output":
         if (i + 1 < args.Length)
         {
           outputPath = args[i + 1];
@@ -271,7 +272,8 @@ static void FormatAllFiles(string[] args)
         checkOnly = true;
         break;
       case "-o":
-        Console.WriteLine("❌ -o option is not supported when formatting all files. Use --in-place instead.");
+      case "--output":
+        Console.WriteLine("❌ -o/--output option is not supported when formatting all files. Use --in-place instead.");
         Environment.Exit(1);
         return;
     }
@@ -446,9 +448,9 @@ static void PrintUsage()
   Console.WriteLine("  format [file.shx]        Format .shx file(s) according to EditorConfig rules.");
   Console.WriteLine("    Options:");
   Console.WriteLine("      (no file)            Format all .shx files recursively from current directory.");
-  Console.WriteLine("      -o <output.shx>      Write formatted output to a specific file (single file only).");
-  Console.WriteLine("      --in-place          Format the file(s) in place (overwrite original).");
-  Console.WriteLine("      --check             Check if file(s) are formatted (exit 1 if not).");
+  Console.WriteLine("      -o, --output <file>  Write formatted output to a specific file (single file only).");
+  Console.WriteLine("      --in-place           Format the file(s) in place (overwrite original).");
+  Console.WriteLine("      --check              Check if file(s) are formatted (exit 1 if not).");
   Console.WriteLine("  lsp                      Run the language server.");
   Console.WriteLine("  version (--version, -v)  Show version information.");
 }

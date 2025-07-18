@@ -77,18 +77,19 @@ Formats Utah source code according to EditorConfig rules:
 
 ```bash
 utah format                               # Format all .shx files recursively
-utah format --in-place                   # Format all files in place
-utah format --check                      # Check all files formatting
-utah format script.shx                   # Creates script.formatted.shx
-utah format script.shx -o clean.shx      # Creates clean.shx
-utah format script.shx --in-place        # Overwrites script.shx
-utah format script.shx --check           # Exit 1 if not formatted
+utah format --in-place                    # Format all files in place
+utah format --check                       # Check all files formatting
+utah format script.shx                    # Creates script.formatted.shx
+utah format script.shx -o clean.shx       # Creates clean.shx
+utah format script.shx --output clean.shx # Creates clean.shx (long form)
+utah format script.shx --in-place         # Overwrites script.shx
+utah format script.shx --check            # Exit 1 if not formatted
 ```
 
 **Options:**
 
 - No file specified: Format all `.shx` files recursively
-- `-o <file>`: Specify output file (single file only)
+- `-o, --output <file>`: Specify output file (single file only)
 - `--in-place`: Overwrite original file(s)
 - `--check`: Check formatting without modifying
 

@@ -18,7 +18,7 @@ utah format [file.shx] [options]
 | Option | Description | Example |
 |--------|-------------|---------|
 | (no file) | Format all .shx files recursively | `utah format` |
-| `-o <file>` | Output to specific file (single file only) | `utah format script.shx -o clean.shx` |
+| `-o, --output <file>` | Output to specific file (single file only) | `utah format script.shx -o clean.shx` |
 | `--in-place` | Overwrite original file(s) | `utah format script.shx --in-place` |
 | `--check` | Check formatting only | `utah format script.shx --check` |
 
@@ -74,7 +74,13 @@ Exits with code 1 if file needs formatting, 0 if already formatted.
 utah format messy-script.shx -o clean-script.shx
 ```
 
-Creates formatted version with custom name.
+Creates formatted version with custom name using short option.
+
+```bash
+utah format messy-script.shx --output clean-script.shx
+```
+
+Creates formatted version with custom name using long option.
 
 ## Formatting Rules
 

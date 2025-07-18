@@ -3463,6 +3463,7 @@ utah format script.shx
 
 # Format with custom output path
 utah format script.shx -o formatted_script.shx
+utah format script.shx --output formatted_script.shx
 
 # Format in place (overwrite original)
 utah format script.shx --in-place
@@ -3486,7 +3487,7 @@ utah format --check
 - `utah format --in-place` - Formats all files in place
 - `utah format --check` - Checks all files and exits with code 1 if any need formatting
 
-**Note**: The `-o` option is not supported when formatting multiple files recursively.
+**Note**: The `-o`/`--output` option is not supported when formatting multiple files recursively.
 
 The formatter honors these EditorConfig properties:
 
