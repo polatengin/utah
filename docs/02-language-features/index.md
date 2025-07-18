@@ -131,7 +131,7 @@ Seamlessly use Utah's rich function library:
 // File operations
 if (fs.exists("config.json")) {
   let config: string = fs.readFile("config.json");
-  
+
   // JSON processing
   if (json.isValid(config)) {
     let configObj: object = json.parse(config);
@@ -324,11 +324,11 @@ for (let file: string in inputFiles) {
     try {
       let content: string = fs.readFile(file);
       let data: object = json.parse(content);
-      
+
       // Process data
       let processed: object = json.set(data, ".processed", true);
       processed = json.set(processed, ".timestamp", timer.current());
-      
+
       results[results.length] = processed;
       console.log(`Processed: ${file}`);
     }

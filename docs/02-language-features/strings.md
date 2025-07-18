@@ -202,23 +202,23 @@ function isValidEmail(email: string): boolean {
   if (!string.contains(email, "@")) {
     return false;
   }
-  
+
   if (!string.contains(email, ".")) {
     return false;
   }
-  
+
   let emailParts: string[] = string.split(email, "@");
   if (array.length(emailParts) != 2) {
     return false;
   }
-  
+
   let localPart: string = emailParts[0];
   let domainPart: string = emailParts[1];
-  
+
   if (string.length(localPart) == 0 || string.length(domainPart) == 0) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -241,7 +241,7 @@ if (array.length(parts) >= 4) {
   let time: string = parts[1];
   let level: string = parts[2];
   let message: string = string.join(array.slice(parts, 3), " ");
-  
+
   console.log(`Date: ${date}, Time: ${time}, Level: ${level}`);
   console.log(`Message: ${message}`);
 }
