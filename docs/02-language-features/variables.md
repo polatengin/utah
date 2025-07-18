@@ -563,4 +563,4 @@ Now that you understand variables and types in Utah:
 1. **[Learn about functions](functions.md)** - Function declarations and parameters
 2. **[Explore control flow](control-flow.md)** - Conditionals, loops, and logic
 3. **[Study arrays and strings](arrays-strings.md)** - Advanced data manipulation
-4. **[Discover built-in functions](../functions/)** - Leverage Utah's function library
+4. **[Discover built-in functions](../03-builtin-functions/index.md)** - Leverage Utah's function library

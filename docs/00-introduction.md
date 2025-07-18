@@ -1,9 +1,10 @@
 ---
 layout: default
-title: Home
+title: Introduction
 nav_order: 1
 description: "Utah Language - Write shell scripts in TypeScript-like syntax"
 permalink: /
+slug: /
 ---
 
 **Utah** is a tool that allows you to write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
@@ -150,46 +151,45 @@ fi
 
 ### Getting Started
 
-- [Installation Guide](./getting-started/installation.md)
-- [Your First Script](./getting-started/first-script.md)
-- [Basic Syntax](./getting-started/syntax.md)
+- [Installation Guide](./01-getting-started/installation.md)
+- [Your First Script](./01-getting-started/first-script.md)
+- [Basic Syntax](./01-getting-started/syntax.md)
 
 ### Language Features
 
-- [Variables and Types](./language-features/variables.md)
-- [Control Flow](./language-features/control-flow.md)
-- [Functions](./language-features/functions.md)
-- [Arrays and Strings](./language-features/arrays-strings.md)
-- [Import System](./language-features/imports.md)
-- [Error Handling](./language-features/error-handling.md)
+- [Variables and Types](./02-language-features/variables.md)
+- [Control Flow](./02-language-features/control-flow.md)
+- [Functions](./02-language-features/functions.md)
+- [Arrays and Strings](./02-language-features/arrays-strings.md)
+- [Import System](./02-language-features/imports.md)
+- [Error Handling](./02-language-features/error-handling.md)
 
 ### Built-in Functions
 
-- [File System](./functions/filesystem.md)
-- [JSON/YAML Processing](./functions/json-yaml.md)
-- [Console and User Interaction](./functions/console.md)
-- [Operating System](./functions/operating-system.md)
-- [Web and API](./functions/web.md)
-- [System and Process](./functions/system.md)
-- [Utilities](./functions/utilities.md)
+- [File System](./03-builtin-functions/filesystem.md)
+- [JSON/YAML Processing](./03-builtin-functions/json-yaml.md)
+- [Console and User Interaction](./03-builtin-functions/console.md)
+- [Operating System](./03-builtin-functions/operating-system.md)
+- [Web and API](./03-builtin-functions/web.md)
+- [System and Process](./03-builtin-functions/system.md)
+- [Utilities](./03-builtin-functions/utilities.md)
 
 ### CLI Reference
 
-- [Overview](./cli/index.md)
-- [Compile Command](./cli/compile.md)
-- [Run Command](./cli/run.md)
-- [Format Command](./cli/format.md)
-- [VS Code Extension](./cli/vscode-extension.md)
+- [Overview](./05-cli/index.md)
+- [Compile Command](./05-cli/compile.md)
+- [Run Command](./05-cli/run.md)
+- [Format Command](./05-cli/format.md)
+- [VS Code Extension](./05-cli/vscode-extension.md)
 
 ### Advanced Guides
 
-- [Development Guides](./guides/index.md)
-- [Parallel Execution](./guides/parallel.md)
-- [Testing Scripts](./guides/testing.md)
-- [CI/CD Integration](./guides/cicd.md)
-- [DevOps Automation](./guides/devops.md)
-- [Testing Scripts](./guides/testing.md)
-- [Best Practices](./guides/best-practices.md)
+- [Development Guides](./04-guides/index.md)
+- [Parallel Execution](./04-guides/parallel.md)
+- [Testing Scripts](./04-guides/testing.md)
+- [CI/CD Integration](./04-guides/cicd.md)
+- [DevOps Automation](./04-guides/devops.md)
+- [Best Practices](./04-guides/best-practices.md)
 
 ## Community and Support
 
