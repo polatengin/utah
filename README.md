@@ -3436,6 +3436,37 @@ echo "Script will continue even if commands fail"
 - All functions compile to standard POSIX shell `set` commands
 - No performance impact - these are shell built-in commands
 
+## CLI Commands
+
+### Running Utah Code
+
+Execute Utah (.shx) files or commands directly:
+
+```bash
+# Run a .shx file
+utah run script.shx
+
+# Run a single command directly
+utah run -c "console.log('Hello, World!')"
+utah run --command "json.installDependencies()"
+
+# More command examples
+utah run -c "os.isInstalled('git')"
+utah run --command "fs.exists('/path/to/file')"
+```
+
+### Compiling
+
+Compile .shx files to bash scripts:
+
+```bash
+# Compile to .sh file
+utah compile script.shx
+
+# Compile with custom output
+utah compile script.shx -o custom-name.sh
+```
+
 ## Development
 
 ### Building

@@ -20,12 +20,36 @@ if (args.Length > 0)
       CompileFile(inputPath, outputPath);
       break;
     case "run":
-      if (args.Length != 2 || !args[1].EndsWith(".shx"))
+      if (args.Length < 2)
       {
         Console.WriteLine("Usage: utah run <file.shx>");
+        Console.WriteLine("       utah run -c <command>");
+        Console.WriteLine("       utah run --command <command>");
         return;
       }
-      RunFile(args[1]);
+
+      if (args[1] == "-c" || args[1] == "--command")
+      {
+        if (args.Length < 3)
+        {
+          Console.WriteLine("Usage: utah run -c <command>");
+          Console.WriteLine("       utah run --command <command>");
+          return;
+        }
+        var command = string.Join(" ", args.Skip(2));
+        RunCommand(command);
+      }
+      else if (args.Length == 2 && args[1].EndsWith(".shx"))
+      {
+        RunFile(args[1]);
+      }
+      else
+      {
+        Console.WriteLine("Usage: utah run <file.shx>");
+        Console.WriteLine("       utah run -c <command>");
+        Console.WriteLine("       utah run --command <command>");
+        return;
+      }
       break;
     case "format":
       if (args.Length < 2)
@@ -130,6 +154,57 @@ static void RunFile(string inputPath)
   {
     var input = ResolveImports(inputPath);
     var parser = new Parser(input);
+    var ast = parser.Parse();
+    var compiler = new Compiler();
+    var output = compiler.Compile(ast);
+
+    var tempFile = Path.GetTempFileName();
+    File.WriteAllText(tempFile, output);
+
+    var process = new Process
+    {
+      StartInfo = new ProcessStartInfo
+      {
+        FileName = "/bin/bash",
+        Arguments = tempFile,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+      }
+    };
+
+    process.OutputDataReceived += (sender, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+    process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+
+    process.Start();
+    process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
+    process.WaitForExit();
+
+    File.Delete(tempFile);
+  }
+  catch (InvalidOperationException ex)
+  {
+    Console.WriteLine($"❌ Compilation failed: {ex.Message}");
+    Environment.Exit(1);
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"❌ Unexpected error: {ex.Message}");
+    Environment.Exit(1);
+  }
+}
+
+static void RunCommand(string command)
+{
+  try
+  {
+    // Create a temporary .shx content with the command
+    var shxContent = command;
+
+    // Parse and compile the command
+    var parser = new Parser(shxContent);
     var ast = parser.Parse();
     var compiler = new Compiler();
     var output = compiler.Compile(ast);
@@ -443,16 +518,19 @@ static void PrintUsage()
 {
   Console.WriteLine("Usage: utah <command>");
   Console.WriteLine("Commands:");
-  Console.WriteLine("  run <file.shx>           Compile and run a .shx file.");
-  Console.WriteLine("  compile <file.shx>       Compile a .shx file to a .sh file.");
-  Console.WriteLine("  format [file.shx]        Format .shx file(s) according to EditorConfig rules.");
+  Console.WriteLine("  run <file.shx>               Compile and run a .shx file.");
+  Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
+  Console.WriteLine("  compile <file.shx>           Compile a .shx file to a .sh file.");
   Console.WriteLine("    Options:");
-  Console.WriteLine("      (no file)            Format all .shx files recursively from current directory.");
-  Console.WriteLine("      -o, --output <file>  Write formatted output to a specific file (single file only).");
-  Console.WriteLine("      --in-place           Format the file(s) in place (overwrite original).");
-  Console.WriteLine("      --check              Check if file(s) are formatted (exit 1 if not).");
-  Console.WriteLine("  lsp                      Run the language server.");
-  Console.WriteLine("  version (--version, -v)  Show version information.");
+  Console.WriteLine("      -o <file>                Write formatted output to a specific file (single file only).");
+  Console.WriteLine("  format [file.shx]            Format .shx file(s) according to EditorConfig rules.");
+  Console.WriteLine("    Options:");
+  Console.WriteLine("      (no file)                Format all .shx files recursively from current directory.");
+  Console.WriteLine("      -o, --output <file>      Write formatted output to a specific file (single file only).");
+  Console.WriteLine("      --in-place               Format the file(s) in place (overwrite original).");
+  Console.WriteLine("      --check                  Check if file(s) are formatted (exit 1 if not).");
+  Console.WriteLine("  lsp                          Run the language server.");
+  Console.WriteLine("  version (--version, -v)      Show version information.");
 }
 
 static void PrintVersion()

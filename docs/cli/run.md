@@ -5,20 +5,44 @@ parent: CLI Reference
 nav_order: 2
 ---
 
-The `utah run` command compiles and immediately executes Utah (.shx) scripts without creating persistent .sh files. This is ideal for development, testing, and one-off script execution.
+The `utah run` command compiles and immediately executes Utah (.shx) scripts or individual commands without creating persistent .sh files. This is ideal for development, testing, one-off script execution, and quick command testing.
 
 ## Basic Usage
 
 ```bash
+# Run a .shx file
 utah run <file.shx>
+
+# Run a single command directly
+utah run -c <command>
+utah run --command <command>
 ```
 
 ## Examples
 
-### Simple Execution
+### File Execution
 
 ```bash
 utah run hello.shx
+```
+
+### Direct Command Execution
+
+```bash
+# Simple console output
+utah run -c "console.log('Hello, World!')"
+
+# Check if a package is installed
+utah run --command "os.isInstalled('git')"
+
+# File operations
+utah run -c "console.log(fs.exists('/etc/passwd'))"
+
+# JSON operations
+utah run --command "json.installDependencies()"
+
+# Multiple statements (use quotes to wrap the entire command)
+utah run -c "let name: string = 'Utah'; console.log(\`Hello from \${name}!\`);"
 ```
 
 ### With Arguments
@@ -51,6 +75,51 @@ Output:
 Hello, Alice!
 Hello, Alice!
 Hello, Alice!
+```
+
+### Direct Command Benefits
+
+The `-c`/`--command` option is particularly useful for:
+
+**Quick Testing:**
+
+```bash
+# Test a function before adding to a script
+utah run -c "console.log(os.platform())"
+
+# Verify file operations
+utah run --command "console.log(fs.dirname('/path/to/file.txt'))"
+```
+
+**One-liners:**
+
+```bash
+# Quick system checks
+utah run -c "console.log(os.isInstalled('docker') ? 'Docker available' : 'Docker not found')"
+
+# Inline calculations
+utah run --command "console.log(utility.random(1, 100))"
+```
+
+**Scripting Integration:**
+
+```bash
+# Use in shell scripts or CI/CD
+if utah run -c "os.isInstalled('node')" | grep -q "true"; then
+  echo "Node.js is installed"
+fi
+```
+
+**Development Workflow:**
+
+```bash
+# Quick prototyping without creating files
+utah run -c "
+let data: string[] = ['apple', 'banana', 'cherry'];
+for (let item of data) {
+  console.log(item.toUpperCase());
+}
+"
 ```
 
 ## How It Works

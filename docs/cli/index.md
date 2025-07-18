@@ -31,7 +31,7 @@ utah format --in-place
 | Command | Description | Usage |
 |---------|-------------|-------|
 | `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o <output.sh>]` |
-| `run` | Compile and execute | `utah run <file.shx>` |
+| `run` | Compile and execute | `utah run <file.shx>` or `utah run -c <command>` |
 | `format` | Format source code | `utah format [file.shx] [options]` |
 | `lsp` | Language server | `utah lsp` |
 | `version` | Show version info | `utah version` |
@@ -58,18 +58,35 @@ utah compile script.shx -o custom.sh   # Creates custom.sh
 
 ### Run Command
 
-Compiles and immediately executes Utah scripts:
+Compiles and immediately executes Utah scripts or commands:
 
 ```bash
+# Run a .shx file
 utah run script.shx
+
+# Run a single command directly
+utah run -c "console.log('Hello, World!')"
+utah run --command "json.installDependencies()"
+
+# More command examples
+utah run -c "os.isInstalled('git')"
+utah run --command "fs.exists('/path/to/file')"
 ```
 
 **Features:**
 
-- Temporary compilation (no .sh file created)
+- Execute .shx files directly
+- Run single commands without creating files
+- Temporary compilation (no .sh file created for direct commands)
 - Real-time output streaming
 - Error propagation from bash execution
 - Automatic cleanup of temporary files
+
+**Options:**
+
+- `utah run <file.shx>`: Execute a .shx file
+- `utah run -c <command>`: Execute a single command directly
+- `utah run --command <command>`: Execute a single command directly (long form)
 
 ### Format Command
 
