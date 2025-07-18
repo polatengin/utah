@@ -150,46 +150,46 @@ fi
 
 ### Getting Started
 
-- [Installation Guide](getting-started/installation.md)
-- [Your First Script](getting-started/first-script.md)
-- [Basic Syntax](getting-started/syntax.md)
+- [Installation Guide](./getting-started/installation.md)
+- [Your First Script](./getting-started/first-script.md)
+- [Basic Syntax](./getting-started/syntax.md)
 
 ### Language Features
 
-- [Variables and Types](language-features/variables.md)
-- [Control Flow](language-features/control-flow.md)
-- [Functions](language-features/functions.md)
-- [Arrays and Strings](language-features/arrays-strings.md)
-- [Import System](language-features/imports.md)
-- [Error Handling](language-features/error-handling.md)
+- [Variables and Types](./language-features/variables.md)
+- [Control Flow](./language-features/control-flow.md)
+- [Functions](./language-features/functions.md)
+- [Arrays and Strings](./language-features/arrays-strings.md)
+- [Import System](./language-features/imports.md)
+- [Error Handling](./language-features/error-handling.md)
 
 ### Built-in Functions
 
-- [File System](functions/filesystem.md)
-- [JSON/YAML Processing](functions/json-yaml.md)
-- [Console and User Interaction](functions/console.md)
-- [Operating System](functions/operating-system.md)
-- [Web and API](functions/web.md)
-- [System and Process](functions/system.md)
-- [Utilities](functions/utilities.md)
+- [File System](./functions/filesystem.md)
+- [JSON/YAML Processing](./functions/json-yaml.md)
+- [Console and User Interaction](./functions/console.md)
+- [Operating System](./functions/operating-system.md)
+- [Web and API](./functions/web.md)
+- [System and Process](./functions/system.md)
+- [Utilities](./functions/utilities.md)
 
 ### CLI Reference
 
-- [Overview](cli/index.md)
-- [Compile Command](cli/compile.md)
-- [Run Command](cli/run.md)
-- [Format Command](cli/format.md)
-- [VS Code Extension](cli/vscode-extension.md)
+- [Overview](./cli/index.md)
+- [Compile Command](./cli/compile.md)
+- [Run Command](./cli/run.md)
+- [Format Command](./cli/format.md)
+- [VS Code Extension](./cli/vscode-extension.md)
 
 ### Advanced Guides
 
-- [Development Guides](guides/index.md)
-- [Parallel Execution](guides/parallel.md)
-- [Testing Scripts](guides/testing.md)
-- [CI/CD Integration](guides/cicd.md)
-- [DevOps Automation](guides/devops.md)
-- [Testing Scripts](guides/testing.md)
-- [Best Practices](guides/best-practices.md)
+- [Development Guides](./guides/index.md)
+- [Parallel Execution](./guides/parallel.md)
+- [Testing Scripts](./guides/testing.md)
+- [CI/CD Integration](./guides/cicd.md)
+- [DevOps Automation](./guides/devops.md)
+- [Testing Scripts](./guides/testing.md)
+- [Best Practices](./guides/best-practices.md)
 
 ## Community and Support
 
