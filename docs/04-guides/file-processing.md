@@ -62,17 +62,17 @@ let files: string[] = `$(find . -name "*.txt" -type f)`.split("\n");
 for (let file: string in files) {
   if (file.trim() != "") {
     console.log(`Processing: ${file}`);
-    
+
     // Read file content
     let content: string = fs.readFile(file);
-    
+
     // Transform content (example: uppercase)
     let transformed: string = content.toUpperCase();
-    
+
     // Write to new file
     let outputFile: string = file.replace(".txt", "-processed.txt");
     fs.writeFile(outputFile, transformed);
-    
+
     console.log(`✅ Created: ${outputFile}`);
   }
 }
@@ -91,9 +91,9 @@ let entries: string[] = `$(ls -1 /path/to/directory)`.split("\n");
 // Process directory tree
 function processDirectory(dir: string): void {
   console.log(`Processing directory: ${dir}`);
-  
+
   let items: string[] = `$(find ${dir} -type f -name "*.log")`.split("\n");
-  
+
   for (let item: string in items) {
     if (item.trim() != "") {
       processLogFile(item);
@@ -105,13 +105,13 @@ function processLogFile(logFile: string): void {
   let content: string = fs.readFile(logFile);
   let lines: string[] = content.split("\n");
   let errorCount: number = 0;
-  
+
   for (let line: string in lines) {
     if (line.contains("ERROR")) {
       errorCount++;
     }
   }
-  
+
   console.log(`${logFile}: ${errorCount} errors found`);
 }
 ```
@@ -128,15 +128,15 @@ let jsonFile: string = "data.json";
 if (fs.exists(jsonFile)) {
   let content: string = fs.readFile(jsonFile);
   let data: object = json.parse(content);
-  
+
   // Transform data
   let users: object = json.get(data, ".users");
   let activeUsers: object = json.filter(users, ".active", true);
-  
+
   // Add metadata
   let result: object = json.set(data, ".metadata.processed_at", `$(date -Iseconds)`);
   result = json.set(result, ".metadata.active_count", json.length(activeUsers));
-  
+
   // Save processed data
   fs.writeFile("processed-data.json", json.stringify(result, true));
   console.log("✅ JSON processing completed");
@@ -151,11 +151,11 @@ function processYamlConfig(configFile: string): void {
   if (fs.exists(configFile)) {
     let content: string = fs.readFile(configFile);
     let config: object = yaml.parse(content);
-    
+
     // Update configuration
     config = yaml.set(config, ".updated_at", `$(date -Iseconds)`);
     config = yaml.set(config, ".version", "2.0");
-    
+
     // Validate required fields
     let requiredFields: string[] = [".database.host", ".database.port", ".api.key"];
     for (let field: string in requiredFields) {
@@ -164,7 +164,7 @@ function processYamlConfig(configFile: string): void {
         exit(1);
       }
     }
-    
+
     // Save updated config
     let outputFile: string = configFile.replace(".yaml", "-updated.yaml");
     fs.writeFile(outputFile, yaml.stringify(config));
@@ -182,30 +182,30 @@ function processCsvFile(csvFile: string): void {
   if (fs.exists(csvFile)) {
     let content: string = fs.readFile(csvFile);
     let lines: string[] = content.split("\n");
-    
+
     // Skip header row
     let header: string = lines[0];
     console.log(`Processing CSV with headers: ${header}`);
-    
+
     let processedRows: string[] = [header]; // Keep header
-    
+
     for (let i: number = 1; i < lines.length; i++) {
       let line: string = lines[i];
       if (line.trim() != "") {
         // Split CSV row (simple comma split)
         let columns: string[] = line.split(",");
-        
+
         // Process columns (example: trim whitespace)
         let processedColumns: string[] = [];
         for (let column: string in columns) {
           processedColumns.push(column.trim());
         }
-        
+
         // Rejoin row
         processedRows.push(processedColumns.join(","));
       }
     }
-    
+
     // Save processed CSV
     let outputFile: string = csvFile.replace(".csv", "-processed.csv");
     fs.writeFile(outputFile, processedRows.join("\n"));
@@ -225,9 +225,9 @@ script.description("Filter and sort files by various criteria");
 function filterFilesBySize(directory: string, minSizeMB: number): string[] {
   let minSizeBytes: number = minSizeMB * 1024 * 1024;
   let largeFiles: string[] = [];
-  
+
   let allFiles: string[] = `$(find ${directory} -type f)`.split("\n");
-  
+
   for (let file: string in allFiles) {
     if (file.trim() != "") {
       let sizeBytes: string = `$(stat -f%z "${file}" 2>/dev/null || stat -c%s "${file}" 2>/dev/null)`;
@@ -236,24 +236,24 @@ function filterFilesBySize(directory: string, minSizeMB: number): string[] {
       }
     }
   }
-  
+
   return largeFiles;
 }
 
 // Filter files by date
 function filterFilesByDate(directory: string, daysSince: number): string[] {
   let recentFiles: string[] = [];
-  
+
   // Find files modified in the last N days
   let findCmd: string = `find ${directory} -type f -mtime -${daysSince}`;
   let files: string[] = `$(${findCmd})`.split("\n");
-  
+
   for (let file: string in files) {
     if (file.trim() != "") {
       recentFiles.push(file);
     }
   }
-  
+
   return recentFiles;
 }
 
@@ -274,16 +274,16 @@ script.description("Process multiple files in parallel");
 function processFilesParallel(files: string[]): void {
   let maxParallel: number = 4; // Process 4 files at once
   let currentBatch: string[] = [];
-  
+
   for (let file: string in files) {
     currentBatch.push(file);
-    
+
     if (currentBatch.length >= maxParallel) {
       processBatch(currentBatch);
       currentBatch = [];
     }
   }
-  
+
   // Process remaining files
   if (currentBatch.length > 0) {
     processBatch(currentBatch);
@@ -292,29 +292,29 @@ function processFilesParallel(files: string[]): void {
 
 function processBatch(batch: string[]): void {
   console.log(`Processing batch of ${batch.length} files...`);
-  
+
   // Start all processes in background
   let pids: string[] = [];
   for (let file: string in batch) {
     let pid: string = `$(processFileBackground "${file}" & echo $!)`;
     pids.push(pid);
   }
-  
+
   // Wait for all to complete
   for (let pid: string in pids) {
     `$(wait ${pid})`;
   }
-  
+
   console.log("✅ Batch processing completed");
 }
 
 function processFileBackground(file: string): void {
   // Your file processing logic here
   console.log(`Processing ${file} in background...`);
-  
+
   // Simulate processing time
   `$(sleep 2)`;
-  
+
   console.log(`✅ Completed ${file}`);
 }
 ```
@@ -338,7 +338,7 @@ fs.createDirectory(outputDir);
 if (fs.exists(logFile)) {
   let content: string = fs.readFile(logFile);
   let lines: string[] = content.split("\n");
-  
+
   // Initialize counters
   let stats: object = json.parse(`{
     "total_requests": 0,
@@ -347,27 +347,27 @@ if (fs.exists(logFile)) {
     "user_agents": {},
     "top_pages": {}
   }`);
-  
+
   for (let line: string in lines) {
     if (line.trim() != "") {
       // Parse Apache/Nginx common log format
       // Example: 127.0.0.1 - - [10/Oct/2000:13:55:36 -0700] "GET /index.html HTTP/1.0" 200 2326
-      
+
       // Extract IP address (first field)
       let fields: string[] = line.split(" ");
       if (fields.length >= 6) {
         let ip: string = fields[0];
         let statusCode: string = fields[8];
-        
+
         // Count total requests
         let currentTotal: number = json.getNumber(stats, ".total_requests");
         stats = json.set(stats, ".total_requests", currentTotal + 1);
-        
+
         // Count status codes
         let statusPath: string = `.status_codes.${statusCode}`;
         let statusCount: number = json.getNumber(stats, statusPath) || 0;
         stats = json.set(stats, statusPath, statusCount + 1);
-        
+
         // Count IP addresses
         let ipPath: string = `.ip_addresses.${ip}`;
         let ipCount: number = json.getNumber(stats, ipPath) || 0;
@@ -375,16 +375,16 @@ if (fs.exists(logFile)) {
       }
     }
   }
-  
+
   // Save analysis report
   let reportFile: string = `${outputDir}/access-log-analysis.json`;
   fs.writeFile(reportFile, json.stringify(stats, true));
-  
+
   // Generate summary
   let totalRequests: number = json.getNumber(stats, ".total_requests");
   let successfulRequests: number = json.getNumber(stats, ".status_codes.200") || 0;
   let errorRequests: number = json.getNumber(stats, ".status_codes.404") || 0;
-  
+
   let summaryFile: string = `${outputDir}/summary.txt`;
   let summary: string = `Log Analysis Summary
 ===================
@@ -395,9 +395,9 @@ Success Rate: ${Math.round((successfulRequests / totalRequests) * 100)}%
 
 Generated: $(date)
 `;
-  
+
   fs.writeFile(summaryFile, summary);
-  
+
   console.log(`✅ Analysis completed. Reports saved to ${outputDir}/`);
   console.log(`   - Detailed report: ${reportFile}`);
   console.log(`   - Summary: ${summaryFile}`);
@@ -452,19 +452,19 @@ if (inputFormat == "json") {
   let lines: string[] = content.split("\n");
   let headers: string[] = lines[0].split(",");
   let records: object[] = [];
-  
+
   for (let i: number = 1; i < lines.length; i++) {
     if (lines[i].trim() != "") {
       let values: string[] = lines[i].split(",");
       let record: object = {};
-      
+
       for (let j: number = 0; j < headers.length; j++) {
         record = json.set(record, `.${headers[j].trim()}`, values[j]?.trim() || "");
       }
       records.push(record);
     }
   }
-  
+
   data = json.set({}, ".records", records);
 }
 
@@ -482,9 +482,9 @@ if (outputFormat == "json") {
     // Get headers from first record
     let firstRecord: object = records[0];
     let headers: string[] = json.keys(firstRecord);
-    
+
     outputContent = headers.join(",") + "\n";
-    
+
     for (let record: object in records) {
       let values: string[] = [];
       for (let header: string in headers) {
@@ -515,13 +515,13 @@ function safeFileOperation(file: string): boolean {
     console.log(`❌ File not found: ${file}`);
     return false;
   }
-  
+
   // Check if file is readable
   if (`$(test -r "${file}"; echo $?)` != "0") {
     console.log(`❌ File not readable: ${file}`);
     return false;
   }
-  
+
   return true;
 }
 
@@ -543,20 +543,20 @@ function parseJsonSafely(content: string): object | null {
 function processLargeFile(file: string, chunkSize: number = 1000): void {
   let lineNumber: number = 0;
   let chunk: string[] = [];
-  
+
   // Read file line by line (using external tool for large files)
   let lines: string[] = `$(cat "${file}")`.split("\n");
-  
+
   for (let line: string in lines) {
     chunk.push(line);
     lineNumber++;
-    
+
     if (chunk.length >= chunkSize) {
       processChunk(chunk, lineNumber - chunkSize + 1);
       chunk = [];
     }
   }
-  
+
   // Process remaining lines
   if (chunk.length > 0) {
     processChunk(chunk, lineNumber - chunk.length + 1);
@@ -565,7 +565,7 @@ function processLargeFile(file: string, chunkSize: number = 1000): void {
 
 function processChunk(lines: string[], startLine: number): void {
   console.log(`Processing lines ${startLine} to ${startLine + lines.length - 1}`);
-  
+
   for (let line: string in lines) {
     // Process individual line
     processLine(line);
@@ -582,7 +582,7 @@ function safeFileModification(file: string, newContent: string): void {
   let backupFile: string = `${file}.backup.$(date +%Y%m%d_%H%M%S)`;
   fs.copy(file, backupFile);
   console.log(`📁 Backup created: ${backupFile}`);
-  
+
   try {
     // Modify file
     fs.writeFile(file, newContent);
@@ -612,17 +612,17 @@ let oldLogs: string[] = `$(find ${logDir} -name "*.log" -mtime +${maxDays})`.spl
 for (let logFile: string in oldLogs) {
   if (logFile.trim() != "") {
     console.log(`Processing old log: ${logFile}`);
-    
+
     // Compress the log file
     `$(gzip "${logFile}")`;
-    
+
     // Move to archive directory
     let archiveDir: string = `${logDir}/archive`;
     fs.createDirectory(archiveDir);
-    
+
     let compressedFile: string = `${logFile}.gz`;
     let archiveFile: string = `${archiveDir}/${fs.filename(compressedFile)}`;
-    
+
     fs.move(compressedFile, archiveFile);
     console.log(`✅ Archived: ${archiveFile}`);
   }
@@ -645,11 +645,11 @@ let configFiles: string[] = ["database.yaml", "api.yaml", "cache.yaml"];
 for (let configFile: string in configFiles) {
   let sourcePath: string = `${configDir}/templates/${configFile}`;
   let targetPath: string = `${configDir}/${environment}/${configFile}`;
-  
+
   if (fs.exists(sourcePath)) {
     let content: string = fs.readFile(sourcePath);
     let config: object = yaml.parse(content);
-    
+
     // Apply environment-specific settings
     if (environment == "prod") {
       config = yaml.set(config, ".debug", false);
@@ -658,13 +658,13 @@ for (let configFile: string in configFiles) {
       config = yaml.set(config, ".debug", true);
       config = yaml.set(config, ".log_level", "DEBUG");
     }
-    
+
     // Update timestamp
     config = yaml.set(config, ".updated_at", `$(date -Iseconds)`);
-    
+
     // Ensure target directory exists
     fs.createDirectory(fs.dirname(targetPath));
-    
+
     // Save environment-specific config
     fs.writeFile(targetPath, yaml.stringify(config));
     console.log(`✅ Updated ${targetPath}`);
