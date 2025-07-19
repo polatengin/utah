@@ -47,6 +47,9 @@ fs.copy("source.txt", "destination.txt");
 
 // Move/rename files
 fs.move("old-name.txt", "new-name.txt");
+
+// Delete files
+fs.delete("temporary.txt");
 ```
 
 ## Batch File Processing
@@ -627,6 +630,19 @@ for (let logFile: string in oldLogs) {
     console.log(`✅ Archived: ${archiveFile}`);
   }
 }
+
+// Clean up very old archives (older than 1 year)
+let veryOldArchives: string[] = `$(find ${archiveDir} -name "*.log.gz" -mtime +365)`.split("\n");
+for (let oldArchive: string in veryOldArchives) {
+  if (oldArchive.trim() != "") {
+    let deleteSuccess: boolean = fs.delete(oldArchive);
+    if (deleteSuccess) {
+      console.log(`🗑️  Deleted old archive: ${oldArchive}`);
+    } else {
+      console.log(`❌ Failed to delete: ${oldArchive}`);
+    }
+  }
+}
 ```
 
 ### 2. Configuration Management
@@ -670,6 +686,60 @@ for (let configFile: string in configFiles) {
     console.log(`✅ Updated ${targetPath}`);
   }
 }
+```
+
+### 3. Temporary File Cleanup
+
+```typescript
+script.description("Clean up temporary files and directories");
+
+function cleanupTempFiles(): void {
+  // Define temporary directories to clean
+  let tempDirs: string[] = ["/tmp", "./temp", "./cache", "./.utah-tmp"];
+
+  for (let tempDir: string in tempDirs) {
+    if (fs.exists(tempDir)) {
+      console.log(`🧹 Cleaning up ${tempDir}`);
+
+      // Delete files older than 1 day
+      let oldTempFiles: string[] = `$(find "${tempDir}" -type f -mtime +1)`.split("\n");
+      for (let tempFile: string in oldTempFiles) {
+        if (tempFile.trim() != "") {
+          let deleted: boolean = fs.delete(tempFile);
+          if (deleted) {
+            console.log(`   🗑️  Removed: ${fs.filename(tempFile)}`);
+          }
+        }
+      }
+
+      // Delete empty directories
+      let emptyDirs: string[] = `$(find "${tempDir}" -type d -empty)`.split("\n");
+      for (let emptyDir: string in emptyDirs) {
+        if (emptyDir.trim() != "" && emptyDir != tempDir) {
+          fs.delete(emptyDir);
+          console.log(`   📁 Removed empty directory: ${emptyDir}`);
+        }
+      }
+    }
+  }
+
+  // Clean up specific file patterns
+  let patterns: string[] = ["*.tmp", "*.temp", "*.cache", ".DS_Store"];
+  for (let pattern: string in patterns) {
+    let matchingFiles: string[] = `$(find . -name "${pattern}" -type f)`.split("\n");
+    for (let file: string in matchingFiles) {
+      if (file.trim() != "") {
+        fs.delete(file);
+        console.log(`🗑️  Removed ${pattern} file: ${file}`);
+      }
+    }
+  }
+
+  console.log("✅ Temporary file cleanup completed");
+}
+
+// Run cleanup
+cleanupTempFiles();
 ```
 
 ## Next Steps

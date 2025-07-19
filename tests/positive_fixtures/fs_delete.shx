@@ -1,0 +1,42 @@
+#!/usr/bin/env utah
+
+// Test fs.delete() as both expression and statement
+
+// Statement usage - delete a file
+fs.delete("temp.txt");
+
+// Statement usage with variables
+let filePath = "data/old-file.log";
+fs.delete(filePath);
+
+// Delete directory
+fs.delete("old-folder");
+
+// Expression usage - check if delete was successful
+let success = fs.delete("config.json");
+console.log(success);
+
+// Expression usage in conditional
+if (fs.delete("template.html")) {
+  console.log("File deleted successfully");
+} else {
+  console.log("File delete failed");
+}
+
+// Delete with nested paths
+fs.delete("logs/archive/old-data.csv");
+
+// Using expressions as paths
+let filename = "temporary.txt";
+let tempDir = "temp";
+fs.delete(tempDir + "/" + filename);
+
+// Delete with dynamic paths
+let timestamp = "2024-01-15";
+fs.delete("backups/backup-" + timestamp + ".tar.gz");
+
+// Complex path expressions
+let projectDir = "old-projects";
+let projectName = "deprecated";
+let fileExt = ".zip";
+fs.delete(projectDir + "/" + projectName + fileExt);

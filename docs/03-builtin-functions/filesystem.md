@@ -330,6 +330,80 @@ mv "${originalName}" "${prefix}${originalName}"
 - File: `tests/positive_fixtures/fs_rename.shx`
 - Tests file renaming, directory renaming, return values, and conditional logic
 
+### fs.delete()
+
+Delete a file or directory recursively. This function uses `rm -rf` to remove files and directories, making it suitable for both files and entire directory trees:
+
+```typescript
+// Simple file deletion
+fs.delete("temp.txt");
+
+// Delete directory and all contents
+fs.delete("old-folder");
+
+// Delete with variables
+let tempFile: string = "processing.tmp";
+fs.delete(tempFile);
+
+// Delete and check success
+let success: boolean = fs.delete("config.json");
+if (success) {
+  console.log("File deleted successfully");
+} else {
+  console.log("File delete failed");
+}
+
+// Conditional deletion based on file existence
+if (fs.exists("temp_data.csv")) {
+  let deleted: boolean = fs.delete("temp_data.csv");
+  if (!deleted) {
+    console.log("Warning: File deletion failed");
+  }
+}
+
+// Delete with dynamic paths
+let timestamp: string = "2024-01-15";
+fs.delete("backups/backup-" + timestamp + ".tar.gz");
+
+// Delete entire directory tree
+fs.delete("cache/user-sessions");
+```
+
+**Generated Bash:**
+
+```bash
+# Statement usage
+rm -rf "temp.txt"
+
+# Delete directory
+rm -rf "old-folder"
+
+# With variables
+tempFile="processing.tmp"
+rm -rf "${tempFile}"
+
+# Expression usage with return value
+success=$(rm -rf "config.json" && echo "true" || echo "false")
+if [ "${success}" = "true" ]; then
+  echo "File deleted successfully"
+else
+  echo "File delete failed"
+fi
+```
+
+**Key Features:**
+
+- **Recursive Deletion**: Uses `rm -rf` to delete files and directories recursively
+- **Return Values**: Returns boolean indicating success/failure when used as expression
+- **Safety**: No confirmation prompts - deletion is immediate and permanent
+- **Cross-platform**: Works consistently across different Unix-like systems
+- **Directory Support**: Can delete both individual files and entire directory trees
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_delete.shx`
+- Tests file deletion, directory deletion, return values, and dynamic path expressions
+
 ### fs.appendFile()
 
 Append content to a file:
@@ -843,6 +917,7 @@ function ensureDirectory(dirPath: string): void {
 | `fs.copy(source, target)` | Copy file/directory with directory creation | boolean | `fs.copy("src.txt", "dst.txt")` |
 | `fs.move(source, target)` | Move/rename file/directory with directory creation | boolean | `fs.move("old.txt", "new.txt")` |
 | `fs.rename(oldName, newName)` | Rename file/directory in place | boolean | `fs.rename("old.txt", "new.txt")` |
+| `fs.delete(path)` | Delete file/directory recursively | boolean | `fs.delete("temp.txt")` |
 | `fs.appendFile(path, content)` | Append to file | void | `fs.appendFile("log.txt", entry)` |
 | `fs.filename(path)` | Extract filename | string | `fs.filename("/path/file.txt")` |
 | `fs.dirname(path)` | Extract directory | string | `fs.dirname("/path/file.txt")` |

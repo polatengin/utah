@@ -266,6 +266,10 @@ public partial class Parser
       {
         return new FsRenameStatement(renameExpr.OldName, renameExpr.NewName);
       }
+      if (expression is FsDeleteExpression deleteExpr)
+      {
+        return new FsDeleteStatement(deleteExpr.Path);
+      }
       return new ExpressionStatement(expression);
     }
     catch

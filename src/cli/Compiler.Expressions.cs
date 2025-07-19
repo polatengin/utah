@@ -138,6 +138,8 @@ public partial class Compiler
         return CompileFsMoveExpression(fsMove);
       case FsRenameExpression fsRename:
         return CompileFsRenameExpression(fsRename);
+      case FsDeleteExpression fsDelete:
+        return CompileFsDeleteExpression(fsDelete);
       case StringToUpperCaseExpression stringUpper:
         return CompileStringToUpperCaseExpression(stringUpper);
       case StringToLowerCaseExpression stringLower:
@@ -1078,6 +1080,12 @@ public partial class Compiler
     var oldName = CompileExpression(fsRename.OldName);
     var newName = CompileExpression(fsRename.NewName);
     return $"$(mv {oldName} {newName} && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileFsDeleteExpression(FsDeleteExpression fsDelete)
+  {
+    var path = CompileExpression(fsDelete.Path);
+    return $"$(rm -rf {path} && echo \"true\" || echo \"false\")";
   }
 
   private string CompileFsParentDirNameExpression(FsParentDirNameExpression fsParentDirName)

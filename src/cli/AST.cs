@@ -50,6 +50,7 @@ public record FsWriteFileExpressionPlaceholder(Expression FilePath, Expression C
 public record FsCopyExpression(Expression SourcePath, Expression TargetPath) : Expression;
 public record FsMoveExpression(Expression SourcePath, Expression TargetPath) : Expression;
 public record FsRenameExpression(Expression OldName, Expression NewName) : Expression;
+public record FsDeleteExpression(Expression Path) : Expression;
 public record StringToUpperCaseExpression(Expression Target) : Expression;
 public record StringToLowerCaseExpression(Expression Target) : Expression;
 public record StringStartsWithExpression(Expression Target, Expression Prefix) : Expression;
@@ -128,6 +129,7 @@ public record FsWriteFileStatement(Expression FilePath, Expression Content) : St
 public record FsCopyStatement(Expression SourcePath, Expression TargetPath) : Statement;
 public record FsMoveStatement(Expression SourcePath, Expression TargetPath) : Statement;
 public record FsRenameStatement(Expression OldName, Expression NewName) : Statement;
+public record FsDeleteStatement(Expression Path) : Statement;
 public record TimerStartStatement() : Statement;
 public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;
 public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;

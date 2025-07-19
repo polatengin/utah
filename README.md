@@ -1170,6 +1170,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.copy(sourcePath, targetPath)` - Copy a file or directory from source to target path, creates directories if needed, returns boolean
 - `fs.move(sourcePath, targetPath)` - Move/rename a file or directory from source to target path, creates directories if needed, returns boolean
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
+- `fs.delete(path)` - Delete a file or directory recursively, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
 #### Path Manipulation Functions
@@ -1222,6 +1223,14 @@ if (renameSuccess) {
   console.log("File rename failed");
 }
 
+// Delete file and check if successful
+let deleteSuccess: boolean = fs.delete("temp.txt");
+if (deleteSuccess) {
+  console.log("File deleted successfully");
+} else {
+  console.log("File delete failed");
+}
+
 // Write variable content to file
 let logMessage: string = "Application started";
 fs.writeFile("app.log", logMessage);
@@ -1235,6 +1244,12 @@ fs.copy("app.log", "logs/backup/" + "app.log");
 
 // Move old log files to archive
 fs.move("app.log", "archive/logs/" + "app-" + utility.timestamp() + ".log");
+
+// Delete temporary files
+fs.delete("temp/processing.tmp");
+
+// Delete entire directory
+fs.delete("old-cache");
 
 // Check if files exist before operations
 let configExists: boolean = fs.exists("config.txt");
@@ -3959,14 +3974,17 @@ Current tests cover:
 - **env_get_ternary.shx** - Environment variable operations with ternary operators
 - **environment_variables.shx** - Environment variable operations
 - **for_in_loop.shx** - For-in loops with arrays
-- **fs_copyfile.shx** - File system copy operations with automatic directory creation
+- **fs_copy.shx** - File system copy operations with automatic directory creation and recursive directory support
+- **fs_delete.shx** - File system delete operations with recursive directory deletion and boolean return values
 - **fs_dirname.shx** - File system dirname function
 - **fs_exists.shx** - File system file/directory existence checking
 - **fs_extension.shx** - File system extension extraction
 - **fs_filename.shx** - File system filename extraction
 - **fs_functions.shx** - File system read/write operations
+- **fs_move.shx** - File system move/rename operations with automatic directory creation
 - **fs_parentdirname.shx** - File system parent directory name extraction
 - **fs_path.shx** - File system path manipulation
+- **fs_rename.shx** - File system rename operations within the same location
 - **function_declarations.shx** - Function definitions with typed parameters and return values
 - **git_undo_last_commit.shx** - Git undo last commit functionality
 - **if_elseif_else.shx** - If-else-if-else conditional statements with proper chaining
@@ -4000,6 +4018,8 @@ Current tests cover:
 - **simple_switch.shx** - Basic switch/case/default statements
 - **string_functions.shx** - String manipulation functions
 - **switch_case.shx** - Complex switch statements with fall-through cases
+- **template_update.shx** - Template file processing and environment variable substitution
+- **template_with_vars.shx** - Template processing with variable replacement and dynamic content
 - **ternary_operators.shx** - Ternary conditional operators
 - **timer_start_stop.shx** - Timer functions for performance measurement
 - **try_catch.shx** - Try/catch blocks for error handling and graceful failure recovery
@@ -4148,7 +4168,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Enhanced string manipulation functions
 
-- [x] File I/O operations (exists, read/write files, copy files, move files, rename files)
+- [x] File I/O operations (exists, read/write files, copy, move, rename)
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 

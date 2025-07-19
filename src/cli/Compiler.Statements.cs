@@ -543,6 +543,11 @@ public partial class Compiler
         lines.Add($"mv {oldNameStmt} {newNameStmt}");
         break;
 
+      case FsDeleteStatement fds:
+        var deletePathStmt = CompileExpression(fds.Path);
+        lines.Add($"rm -rf {deletePathStmt}");
+        break;
+
       case TemplateUpdateStatement templateUpdate:
         var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
         var targetFile = CompileExpression(templateUpdate.TargetFilePath);

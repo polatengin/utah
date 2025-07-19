@@ -600,6 +600,18 @@ public partial class Parser
         throw new InvalidOperationException("fs.rename() requires exactly 2 arguments (oldName, newName)");
       }
 
+      // Special handling for fs.delete()
+      if (functionName == "fs.delete")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          return new FsDeleteExpression(pathExpr);
+        }
+        throw new InvalidOperationException("fs.delete() requires exactly 1 argument (path)");
+      }
+
       // Special handling for fs.dirname()
       if (functionName == "fs.dirname")
       {
