@@ -1167,8 +1167,8 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 
 - `fs.readFile(filepath)` - Read the contents of a file into a string
 - `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
-- `fs.copyFile(sourcePath, targetPath)` - Copy a file from source to target path, creates directories if needed, returns boolean
-- `fs.moveFile(sourcePath, targetPath)` - Move/rename a file from source to target path, creates directories if needed, returns boolean
+- `fs.copy(sourcePath, targetPath)` - Copy a file or directory from source to target path, creates directories if needed, returns boolean
+- `fs.move(sourcePath, targetPath)` - Move/rename a file or directory from source to target path, creates directories if needed, returns boolean
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
@@ -1190,16 +1190,16 @@ let config: string = fs.readFile("config.txt");
 console.log("Config:", config);
 
 // Copy a file
-fs.copyFile("config.txt", "backup/config.txt");
+fs.copy("config.txt", "backup/config.txt");
 
 // Move/rename a file
-fs.moveFile("temp.txt", "archive/processed.txt");
+fs.move("temp.txt", "archive/processed.txt");
 
 // Rename a file in the same directory
 fs.rename("old-file.txt", "new-file.txt");
 
 // Copy file and check if successful
-let success: boolean = fs.copyFile("important.doc", "archive/important.doc");
+let success: boolean = fs.copy("important.doc", "archive/important.doc");
 if (success) {
   console.log("File copied successfully");
 } else {
@@ -1207,7 +1207,7 @@ if (success) {
 }
 
 // Move file and check if successful
-let moveSuccess: boolean = fs.moveFile("draft.md", "final/document.md");
+let moveSuccess: boolean = fs.move("draft.md", "final/document.md");
 if (moveSuccess) {
   console.log("File moved successfully");
 } else {
@@ -1231,10 +1231,10 @@ let logContent: string = fs.readFile("app.log");
 console.log("Log:", logContent);
 
 // Copy log file for backup
-fs.copyFile("app.log", "logs/backup/" + "app.log");
+fs.copy("app.log", "logs/backup/" + "app.log");
 
 // Move old log files to archive
-fs.moveFile("app.log", "archive/logs/" + "app-" + utility.timestamp() + ".log");
+fs.move("app.log", "archive/logs/" + "app-" + utility.timestamp() + ".log");
 
 // Check if files exist before operations
 let configExists: boolean = fs.exists("config.txt");

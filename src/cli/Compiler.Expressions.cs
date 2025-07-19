@@ -132,10 +132,10 @@ public partial class Compiler
         return CompileFsExistsExpression(fsExists);
       case FsReadFileExpression fsReadFile:
         return CompileFsReadFileExpression(fsReadFile);
-      case FsCopyFileExpression fsCopyFile:
-        return CompileFsCopyFileExpression(fsCopyFile);
-      case FsMoveFileExpression fsMoveFile:
-        return CompileFsMoveFileExpression(fsMoveFile);
+      case FsCopyExpression fsCopy:
+        return CompileFsCopyExpression(fsCopy);
+      case FsMoveExpression fsMove:
+        return CompileFsMoveExpression(fsMove);
       case FsRenameExpression fsRename:
         return CompileFsRenameExpression(fsRename);
       case StringToUpperCaseExpression stringUpper:
@@ -1059,17 +1059,17 @@ public partial class Compiler
     return $"$(cat {filePath})";
   }
 
-  private string CompileFsCopyFileExpression(FsCopyFileExpression fsCopyFile)
+  private string CompileFsCopyExpression(FsCopyExpression fsCopy)
   {
-    var sourcePath = CompileExpression(fsCopyFile.SourcePath);
-    var targetPath = CompileExpression(fsCopyFile.TargetPath);
-    return $"$(mkdir -p $(dirname {targetPath}) && cp {sourcePath} {targetPath} && echo \"true\" || echo \"false\")";
+    var sourcePath = CompileExpression(fsCopy.SourcePath);
+    var targetPath = CompileExpression(fsCopy.TargetPath);
+    return $"$(mkdir -p $(dirname {targetPath}) && cp -r {sourcePath} {targetPath} && echo \"true\" || echo \"false\")";
   }
 
-  private string CompileFsMoveFileExpression(FsMoveFileExpression fsMoveFile)
+  private string CompileFsMoveExpression(FsMoveExpression fsMove)
   {
-    var sourcePath = CompileExpression(fsMoveFile.SourcePath);
-    var targetPath = CompileExpression(fsMoveFile.TargetPath);
+    var sourcePath = CompileExpression(fsMove.SourcePath);
+    var targetPath = CompileExpression(fsMove.TargetPath);
     return $"$(mkdir -p $(dirname {targetPath}) && mv {sourcePath} {targetPath} && echo \"true\" || echo \"false\")";
   }
 

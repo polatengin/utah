@@ -43,10 +43,10 @@ fs.writeFile("output.txt", "Hello, Utah!");
 fs.appendFile("log.txt", "New log entry\n");
 
 // Copy files
-fs.copyFile("source.txt", "destination.txt");
+fs.copy("source.txt", "destination.txt");
 
 // Move/rename files
-fs.moveFile("old-name.txt", "new-name.txt");
+fs.move("old-name.txt", "new-name.txt");
 ```
 
 ## Batch File Processing
@@ -580,7 +580,7 @@ function processChunk(lines: string[], startLine: number): void {
 function safeFileModification(file: string, newContent: string): void {
   // Create backup
   let backupFile: string = `${file}.backup.$(date +%Y%m%d_%H%M%S)`;
-  fs.copyFile(file, backupFile);
+  fs.copy(file, backupFile);
   console.log(`📁 Backup created: ${backupFile}`);
   
   try {
@@ -590,7 +590,7 @@ function safeFileModification(file: string, newContent: string): void {
   } catch {
     // Restore from backup on error
     console.log("❌ Error occurred, restoring from backup...");
-    fs.copyFile(backupFile, file);
+    fs.copy(backupFile, file);
     console.log(`🔄 File restored from backup`);
   }
 }
@@ -623,7 +623,7 @@ for (let logFile: string in oldLogs) {
     let compressedFile: string = `${logFile}.gz`;
     let archiveFile: string = `${archiveDir}/${fs.filename(compressedFile)}`;
     
-    fs.moveFile(compressedFile, archiveFile);
+    fs.move(compressedFile, archiveFile);
     console.log(`✅ Archived: ${archiveFile}`);
   }
 }

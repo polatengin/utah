@@ -523,14 +523,14 @@ public partial class Compiler
         lines.Add($"echo {content} > {filePath}");
         break;
 
-      case FsCopyFileStatement fcs:
+      case FsCopyStatement fcs:
         var sourcePathStmt = CompileExpression(fcs.SourcePath);
         var targetPathStmt = CompileExpression(fcs.TargetPath);
         lines.Add($"mkdir -p $(dirname {targetPathStmt})");
-        lines.Add($"cp {sourcePathStmt} {targetPathStmt}");
+        lines.Add($"cp -r {sourcePathStmt} {targetPathStmt}");
         break;
 
-      case FsMoveFileStatement fms:
+      case FsMoveStatement fms:
         var sourceMovePathStmt = CompileExpression(fms.SourcePath);
         var targetMovePathStmt = CompileExpression(fms.TargetPath);
         lines.Add($"mkdir -p $(dirname {targetMovePathStmt})");

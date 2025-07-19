@@ -254,13 +254,13 @@ public partial class Parser
       {
         return new FsWriteFileStatement(placeholder.FilePath, placeholder.Content);
       }
-      if (expression is FsCopyFileExpression copyExpr)
+      if (expression is FsCopyExpression copyExpr)
       {
-        return new FsCopyFileStatement(copyExpr.SourcePath, copyExpr.TargetPath);
+        return new FsCopyStatement(copyExpr.SourcePath, copyExpr.TargetPath);
       }
-      if (expression is FsMoveFileExpression moveExpr)
+      if (expression is FsMoveExpression moveExpr)
       {
-        return new FsMoveFileStatement(moveExpr.SourcePath, moveExpr.TargetPath);
+        return new FsMoveStatement(moveExpr.SourcePath, moveExpr.TargetPath);
       }
       if (expression is FsRenameExpression renameExpr)
       {

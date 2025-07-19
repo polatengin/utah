@@ -871,7 +871,7 @@ function packageStage(): void {
   for (let file: string in compiledFiles) {
     if (file.trim() != "") {
       let destFile: string = `${distDir}/${fs.filename(file)}`;
-      fs.copyFile(file, destFile);
+      fs.copy(file, destFile);
       console.log(`📦 Packaged ${file} → ${destFile}`);
     }
   }

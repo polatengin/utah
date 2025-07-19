@@ -561,30 +561,30 @@ public partial class Parser
         throw new InvalidOperationException("fs.writeFile() requires exactly 2 arguments (filePath, content)");
       }
 
-      // Special handling for fs.copyFile()
-      if (functionName == "fs.copyFile")
+      // Special handling for fs.copy()
+      if (functionName == "fs.copy")
       {
         var args = SplitByComma(argsContent);
         if (args.Count == 2)
         {
           var sourcePathExpr = ParseExpression(args[0]);
           var targetPathExpr = ParseExpression(args[1]);
-          return new FsCopyFileExpression(sourcePathExpr, targetPathExpr);
+          return new FsCopyExpression(sourcePathExpr, targetPathExpr);
         }
-        throw new InvalidOperationException("fs.copyFile() requires exactly 2 arguments (sourcePath, targetPath)");
+        throw new InvalidOperationException("fs.copy() requires exactly 2 arguments (sourcePath, targetPath)");
       }
 
-      // Special handling for fs.moveFile()
-      if (functionName == "fs.moveFile")
+      // Special handling for fs.move()
+      if (functionName == "fs.move")
       {
         var args = SplitByComma(argsContent);
         if (args.Count == 2)
         {
           var sourcePathExpr = ParseExpression(args[0]);
           var targetPathExpr = ParseExpression(args[1]);
-          return new FsMoveFileExpression(sourcePathExpr, targetPathExpr);
+          return new FsMoveExpression(sourcePathExpr, targetPathExpr);
         }
-        throw new InvalidOperationException("fs.moveFile() requires exactly 2 arguments (sourcePath, targetPath)");
+        throw new InvalidOperationException("fs.move() requires exactly 2 arguments (sourcePath, targetPath)");
       }
 
       // Special handling for fs.rename()

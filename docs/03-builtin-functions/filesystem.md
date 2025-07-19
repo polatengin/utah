@@ -96,26 +96,29 @@ jsonData='{"name": "test", "value": 123}'
 echo "${jsonData}" > "data.json"
 ```
 
-### fs.copyFile()
+### fs.copy()
 
-Copy a file from source to target path, automatically creating directories if needed:
+Copy a file or directory from source to target path, automatically creating directories if needed. Uses recursive copying for directories:
 
 ```typescript
 // Simple file copy
-fs.copyFile("config.json", "backup/config.json");
+fs.copy("config.json", "backup/config.json");
 
 // Copy with variables
 let sourceFile: string = "important.doc";
 let targetDir: string = "archive";
-fs.copyFile(sourceFile, targetDir + "/" + sourceFile);
+fs.copy(sourceFile, targetDir + "/" + sourceFile);
 
 // Copy and check success
-let success: boolean = fs.copyFile("data.csv", "reports/data.csv");
+let success: boolean = fs.copy("data.csv", "reports/data.csv");
 if (success) {
   console.log("File copied successfully");
 } else {
   console.log("File copy failed");
 }
+
+// Copy entire directories
+fs.copy("source_dir", "backup/source_dir");
 ```
 
 **Generated Bash:**
@@ -142,27 +145,27 @@ fi
 
 **Test Coverage:**
 
-- File: `tests/positive_fixtures/fs_copyfile.shx`
-- Tests file copying with directory creation and boolean return values
+- File: `tests/positive_fixtures/fs_copy.shx`
+- Tests file and directory copying with directory creation and boolean return values
 
-### fs.moveFile()
+### fs.move()
 
-Move or rename a file from source to target path, automatically creating directories if needed. This function uses atomic move operations when possible:
+Move or rename a file or directory from source to target path, automatically creating directories if needed. This function uses atomic move operations when possible:
 
 ```typescript
 // Simple file move/rename
-fs.moveFile("temp.txt", "final.txt");
+fs.move("temp.txt", "final.txt");
 
 // Move to different directory
-fs.moveFile("draft.md", "archive/document.md");
+fs.move("draft.md", "archive/document.md");
 
 // Move with variables
 let oldFile: string = "report_draft.pdf";
 let newPath: string = "reports/final/report.pdf";
-fs.moveFile(oldFile, newPath);
+fs.move(oldFile, newPath);
 
 // Move and check success
-let success: boolean = fs.moveFile("data.csv", "processed/data_final.csv");
+let success: boolean = fs.move("data.csv", "processed/data_final.csv");
 if (success) {
   console.log("File moved successfully");
 } else {
@@ -171,10 +174,14 @@ if (success) {
 
 // Conditional move based on file existence
 if (fs.exists("temp_file.txt")) {
-  let moved: boolean = fs.moveFile("temp_file.txt", "archive/temp_file.txt");
+  let moved: boolean = fs.move("temp_file.txt", "archive/temp_file.txt");
   if (!moved) {
     console.log("Warning: File move failed");
   }
+}
+
+// Move entire directories
+fs.move("old_project", "archive/old_project");
 }
 ```
 
@@ -222,12 +229,12 @@ fi
 
 **Test Coverage:**
 
-- File: `tests/positive_fixtures/fs_movefile.shx`
-- Tests file moving, renaming, directory creation, and boolean return values
+- File: `tests/positive_fixtures/fs_move.shx`
+- Tests file and directory moving, renaming, directory creation, and boolean return values
 
 ### fs.rename()
 
-Rename a file or directory within the same location. This function is simpler than `fs.moveFile()` as it focuses on renaming operations without automatic directory creation:
+Rename a file or directory within the same location. This function is simpler than `fs.move()` as it focuses on renaming operations without automatic directory creation:
 
 ```typescript
 // Simple file rename
@@ -302,17 +309,17 @@ mv "${originalName}" "${prefix}${originalName}"
 **Key Features:**
 
 - **Simple Renaming**: Focused on renaming files and directories in place
-- **No Directory Creation**: Unlike `fs.moveFile()`, does not create target directories
+- **No Directory Creation**: Unlike `fs.move()`, does not create target directories
 - **Atomic Operations**: Uses `mv` command which is atomic within the same filesystem
 - **Return Values**: Returns boolean indicating success/failure when used as expression
 - **Same-Directory Focus**: Optimized for renaming within the same location
 - **Directory Support**: Works with both files and directories
 
-**Comparison with fs.moveFile():**
+**Comparison with fs.move():**
 
-| Aspect | `fs.moveFile()` | `fs.rename()` |
-|--------|-----------------|---------------|
-| **Purpose** | Move files between directories | Rename files/directories |
+| Aspect | `fs.move()` | `fs.rename()` |
+|--------|-------------|---------------|
+| **Purpose** | Move files/directories between locations | Rename files/directories |
 | **Directory Creation** | Yes (`mkdir -p`) | No |
 | **Typical Use** | Cross-directory moves | Same-directory renames |
 | **Parameter Names** | `sourcePath`, `targetPath` | `oldName`, `newName` |
@@ -833,7 +840,9 @@ function ensureDirectory(dirPath: string): void {
 | `fs.exists(path)` | Check existence | boolean | `fs.exists("file.txt")` |
 | `fs.readFile(path)` | Read file content | string | `fs.readFile("config.json")` |
 | `fs.writeFile(path, content)` | Write to file | void | `fs.writeFile("out.txt", data)` |
-| `fs.copyFile(source, target)` | Copy file with directory creation | boolean | `fs.copyFile("src.txt", "dst.txt")` |
+| `fs.copy(source, target)` | Copy file/directory with directory creation | boolean | `fs.copy("src.txt", "dst.txt")` |
+| `fs.move(source, target)` | Move/rename file/directory with directory creation | boolean | `fs.move("old.txt", "new.txt")` |
+| `fs.rename(oldName, newName)` | Rename file/directory in place | boolean | `fs.rename("old.txt", "new.txt")` |
 | `fs.appendFile(path, content)` | Append to file | void | `fs.appendFile("log.txt", entry)` |
 | `fs.filename(path)` | Extract filename | string | `fs.filename("/path/file.txt")` |
 | `fs.dirname(path)` | Extract directory | string | `fs.dirname("/path/file.txt")` |
