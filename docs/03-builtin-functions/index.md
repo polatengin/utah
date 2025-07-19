@@ -40,6 +40,8 @@ console.log("Hello, World!");
 // File operations
 let content: string = filesystem.readFile("file.txt");
 filesystem.writeFile("output.txt", content);
+filesystem.copyFile("source.txt", "backup/source.txt");
+filesystem.moveFile("temp.txt", "archive/processed.txt");
 
 // Template processing
 template.update("config.template", "config.yml");

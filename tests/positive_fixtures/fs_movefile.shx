@@ -1,0 +1,43 @@
+#!/usr/bin/env utah
+
+// Test fs.moveFile() as both expression and statement
+
+// Statement usage - move a file
+fs.moveFile("old/location/file.txt", "new/location/file.txt");
+
+// Statement usage with variables
+let sourcePath = "data/input.log";
+let targetPath = "processed/input.log";
+fs.moveFile(sourcePath, targetPath);
+
+// Expression usage - check if move was successful
+let success = fs.moveFile("config.json", "settings/config.json");
+console.log(success);
+
+// Expression usage in conditional
+if (fs.moveFile("template.html", "public/index.html")) {
+  console.log("File moved successfully");
+} else {
+  console.log("File move failed");
+}
+
+// Move to nested directory (auto-creates directories)
+fs.moveFile("README.md", "docs/project/README.md");
+
+// Rename file in same directory
+fs.moveFile("old-name.txt", "new-name.txt");
+
+// Using expressions as paths
+let filename = "important.txt";
+let archiveDir = "archive";
+fs.moveFile(filename, archiveDir + "/" + filename);
+
+// Move with timestamp
+let timestamp = "2024-01-15";
+fs.moveFile("temp/data.csv", "history/data-" + timestamp + ".csv");
+
+// Complex path expressions
+let sourceDir = "downloads";
+let targetDir = "organized";
+let fileExt = ".pdf";
+fs.moveFile(sourceDir + "/document" + fileExt, targetDir + "/documents/document" + fileExt);

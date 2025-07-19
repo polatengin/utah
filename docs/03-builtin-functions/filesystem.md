@@ -145,6 +145,86 @@ fi
 - File: `tests/positive_fixtures/fs_copyfile.shx`
 - Tests file copying with directory creation and boolean return values
 
+### fs.moveFile()
+
+Move or rename a file from source to target path, automatically creating directories if needed. This function uses atomic move operations when possible:
+
+```typescript
+// Simple file move/rename
+fs.moveFile("temp.txt", "final.txt");
+
+// Move to different directory
+fs.moveFile("draft.md", "archive/document.md");
+
+// Move with variables
+let oldFile: string = "report_draft.pdf";
+let newPath: string = "reports/final/report.pdf";
+fs.moveFile(oldFile, newPath);
+
+// Move and check success
+let success: boolean = fs.moveFile("data.csv", "processed/data_final.csv");
+if (success) {
+  console.log("File moved successfully");
+} else {
+  console.log("File move failed");
+}
+
+// Conditional move based on file existence
+if (fs.exists("temp_file.txt")) {
+  let moved: boolean = fs.moveFile("temp_file.txt", "archive/temp_file.txt");
+  if (!moved) {
+    console.log("Warning: File move failed");
+  }
+}
+```
+
+**Generated Bash:**
+
+```bash
+# Statement usage
+mkdir -p $(dirname "final.txt")
+mv "temp.txt" "final.txt"
+
+# Move to different directory
+mkdir -p $(dirname "archive/document.md")
+mv "draft.md" "archive/document.md"
+
+# With variables
+oldFile="report_draft.pdf"
+newPath="reports/final/report.pdf"
+mkdir -p $(dirname "${newPath}")
+mv "${oldFile}" "${newPath}"
+
+# Expression usage with return value
+success=$(mkdir -p $(dirname "processed/data_final.csv") && mv "data.csv" "processed/data_final.csv" && echo "true" || echo "false")
+if [ "${success}" = "true" ]; then
+  echo "File moved successfully"
+else
+  echo "File move failed"
+fi
+
+# Conditional move
+if [ -e "temp_file.txt" ]; then
+  moved=$(mkdir -p $(dirname "archive/temp_file.txt") && mv "temp_file.txt" "archive/temp_file.txt" && echo "true" || echo "false")
+  if [ "${moved}" != "true" ]; then
+    echo "Warning: File move failed"
+  fi
+fi
+```
+
+**Key Features:**
+
+- **Atomic Operations**: Uses `mv` command which is atomic within the same filesystem
+- **Directory Creation**: Automatically creates target directories using `mkdir -p`
+- **Return Values**: Returns boolean indicating success/failure when used as expression
+- **Cross-filesystem**: Works across different filesystems (though may not be atomic)
+- **Rename Support**: Can be used for simple file renaming in the same directory
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_movefile.shx`
+- Tests file moving, renaming, directory creation, and boolean return values
+
 ### fs.appendFile()
 
 Append content to a file:

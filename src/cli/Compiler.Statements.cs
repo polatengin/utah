@@ -530,6 +530,13 @@ public partial class Compiler
         lines.Add($"cp {sourcePathStmt} {targetPathStmt}");
         break;
 
+      case FsMoveFileStatement fms:
+        var sourceMovePathStmt = CompileExpression(fms.SourcePath);
+        var targetMovePathStmt = CompileExpression(fms.TargetPath);
+        lines.Add($"mkdir -p $(dirname {targetMovePathStmt})");
+        lines.Add($"mv {sourceMovePathStmt} {targetMovePathStmt}");
+        break;
+
       case TemplateUpdateStatement templateUpdate:
         var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
         var targetFile = CompileExpression(templateUpdate.TargetFilePath);

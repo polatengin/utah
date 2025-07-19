@@ -1168,6 +1168,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.readFile(filepath)` - Read the contents of a file into a string
 - `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
 - `fs.copyFile(sourcePath, targetPath)` - Copy a file from source to target path, creates directories if needed, returns boolean
+- `fs.moveFile(sourcePath, targetPath)` - Move/rename a file from source to target path, creates directories if needed, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
 #### Path Manipulation Functions
@@ -1190,12 +1191,23 @@ console.log("Config:", config);
 // Copy a file
 fs.copyFile("config.txt", "backup/config.txt");
 
+// Move/rename a file
+fs.moveFile("temp.txt", "archive/processed.txt");
+
 // Copy file and check if successful
 let success: boolean = fs.copyFile("important.doc", "archive/important.doc");
 if (success) {
   console.log("File copied successfully");
 } else {
   console.log("File copy failed");
+}
+
+// Move file and check if successful
+let moveSuccess: boolean = fs.moveFile("draft.md", "final/document.md");
+if (moveSuccess) {
+  console.log("File moved successfully");
+} else {
+  console.log("File move failed");
 }
 
 // Write variable content to file
@@ -1208,6 +1220,9 @@ console.log("Log:", logContent);
 
 // Copy log file for backup
 fs.copyFile("app.log", "logs/backup/" + "app.log");
+
+// Move old log files to archive
+fs.moveFile("app.log", "archive/logs/" + "app-" + utility.timestamp() + ".log");
 
 // Check if files exist before operations
 let configExists: boolean = fs.exists("config.txt");
@@ -4113,17 +4128,17 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Enhanced string manipulation functions
 
-- [x] File I/O operations (exists, read/write files, copy files)
+- [x] File I/O operations (exists, read/write files, copy files, move files)
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
-- [x] Template functions to update files with dynamic content
+- [x] Template functions to update files with dynamic content (`template.update()`)
 
 - [x] json parsing and manipulation functions
 
 - [x] yaml parsing and manipulation functions
 
-- [ ] File I/O operations (watch, delete, move, rename, permissions, etc.)
+- [ ] File I/O operations (watch, delete, rename, permissions, etc.)
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
