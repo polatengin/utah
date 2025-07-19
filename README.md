@@ -1169,6 +1169,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
 - `fs.copyFile(sourcePath, targetPath)` - Copy a file from source to target path, creates directories if needed, returns boolean
 - `fs.moveFile(sourcePath, targetPath)` - Move/rename a file from source to target path, creates directories if needed, returns boolean
+- `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
 #### Path Manipulation Functions
@@ -1194,6 +1195,9 @@ fs.copyFile("config.txt", "backup/config.txt");
 // Move/rename a file
 fs.moveFile("temp.txt", "archive/processed.txt");
 
+// Rename a file in the same directory
+fs.rename("old-file.txt", "new-file.txt");
+
 // Copy file and check if successful
 let success: boolean = fs.copyFile("important.doc", "archive/important.doc");
 if (success) {
@@ -1208,6 +1212,14 @@ if (moveSuccess) {
   console.log("File moved successfully");
 } else {
   console.log("File move failed");
+}
+
+// Rename file and check if successful
+let renameSuccess: boolean = fs.rename("report_draft.pdf", "report_final.pdf");
+if (renameSuccess) {
+  console.log("File renamed successfully");
+} else {
+  console.log("File rename failed");
 }
 
 // Write variable content to file
@@ -4098,7 +4110,15 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [ ] Typed return values and richer type checking
 
-- [x] `utility.*` functions (`random()` with min/max parameters)
+- [x] `utility.random()` function
+
+- [x] `utility.uuid()` function
+
+- [x] `utility.hash()` function
+
+- [x] `utility.base64Encode()` function
+
+- [x] `utility.base64Decode()` function
 
 - [x] Throw error if `min` is greater than `max` in `utility.random(<min>, <max>)` function
 
@@ -4114,7 +4134,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [ ] `git.*` functions (`undoLastCommit()` implemented, `mergePR()`, `forcePush()` coming soon)
 
-- [ ] `@decorator()` syntax for decorators for validation (`@notNullable()`, `@notEmpty()`, `@greaterThan()`, `@ipv4()`, `@numberOnly()`, `@alphaNumeric()`, `@email()`)
+- [ ] `validate.*` functions (`notNullable()`, `notEmpty()`, `greaterThan()`, `ipv4()`, `numberOnly()`, `alphaNumeric()`, `email()`)
 
 - [x] Error handling: try/catch, subshell
 
@@ -4128,7 +4148,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Enhanced string manipulation functions
 
-- [x] File I/O operations (exists, read/write files, copy files, move files)
+- [x] File I/O operations (exists, read/write files, copy files, move files, rename files)
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
@@ -4138,7 +4158,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] yaml parsing and manipulation functions
 
-- [ ] File I/O operations (watch, delete, rename, permissions, etc.)
+- [ ] File I/O operations (watch, delete, permissions, etc.)
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 

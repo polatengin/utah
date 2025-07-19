@@ -537,6 +537,12 @@ public partial class Compiler
         lines.Add($"mv {sourceMovePathStmt} {targetMovePathStmt}");
         break;
 
+      case FsRenameStatement frs:
+        var oldNameStmt = CompileExpression(frs.OldName);
+        var newNameStmt = CompileExpression(frs.NewName);
+        lines.Add($"mv {oldNameStmt} {newNameStmt}");
+        break;
+
       case TemplateUpdateStatement templateUpdate:
         var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
         var targetFile = CompileExpression(templateUpdate.TargetFilePath);

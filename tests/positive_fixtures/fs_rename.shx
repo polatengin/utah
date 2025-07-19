@@ -1,0 +1,77 @@
+// Test fs.rename() function for renaming files and directories
+
+console.log("Testing fs.rename() functionality");
+
+// 1. Simple file rename as statement
+fs.rename("old-file.txt", "new-file.txt");
+console.log("Simple rename executed");
+
+// 2. Rename with variables
+let oldFileName: string = "report_draft.pdf";
+let newFileName: string = "report_final.pdf";
+fs.rename(oldFileName, newFileName);
+console.log("Variable rename executed");
+
+// 3. Rename and check return value
+let success: boolean = fs.rename("temp.log", "archive.log");
+if (success) {
+  console.log("File renamed successfully");
+} else {
+  console.log("File rename failed");
+}
+
+// 4. Directory rename
+fs.rename("old-folder", "new-folder");
+console.log("Directory rename executed");
+
+// 5. Conditional rename with return value checking
+let renameResult: boolean = fs.rename("data.csv", "processed_data.csv");
+if (!renameResult) {
+  console.log("Warning: Rename operation failed");
+}
+
+// 6. Complex path expressions
+let timestamp: string = "20250119";
+let sourceFile: string = "backup.sql";
+let targetFile: string = "backup_" + timestamp + ".sql";
+fs.rename(sourceFile, targetFile);
+console.log("Complex path rename executed");
+
+// 7. Rename in conditional logic
+if (fs.exists("temporary_file.txt")) {
+  let renamed: boolean = fs.rename("temporary_file.txt", "permanent_file.txt");
+  if (renamed) {
+    console.log("Temporary file renamed to permanent");
+  }
+}
+
+// 8. Multiple renames with return value checking
+let rename1: boolean = fs.rename("file1.txt", "renamed1.txt");
+let rename2: boolean = fs.rename("file2.txt", "renamed2.txt");
+
+if (rename1 && rename2) {
+  console.log("Both files renamed successfully");
+} else {
+  console.log("One or more renames failed");
+}
+
+// 9. Rename with string concatenation
+let prefix: string = "processed_";
+let originalName: string = "document.pdf";
+fs.rename(originalName, prefix + originalName);
+console.log("Prefixed rename executed");
+
+// 10. Error handling with try/catch
+try {
+  let criticalRename: boolean = fs.rename("important.db", "important_backup.db");
+  if (criticalRename) {
+    console.log("Critical file renamed successfully");
+  } else {
+    console.log("Critical file rename failed");
+  }
+}
+catch {
+  console.log("Error during critical rename operation");
+}
+
+console.log("fs.rename() tests completed");

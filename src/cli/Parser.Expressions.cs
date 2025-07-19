@@ -587,6 +587,19 @@ public partial class Parser
         throw new InvalidOperationException("fs.moveFile() requires exactly 2 arguments (sourcePath, targetPath)");
       }
 
+      // Special handling for fs.rename()
+      if (functionName == "fs.rename")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var oldNameExpr = ParseExpression(args[0]);
+          var newNameExpr = ParseExpression(args[1]);
+          return new FsRenameExpression(oldNameExpr, newNameExpr);
+        }
+        throw new InvalidOperationException("fs.rename() requires exactly 2 arguments (oldName, newName)");
+      }
+
       // Special handling for fs.dirname()
       if (functionName == "fs.dirname")
       {

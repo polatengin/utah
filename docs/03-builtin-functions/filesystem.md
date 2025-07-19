@@ -225,6 +225,104 @@ fi
 - File: `tests/positive_fixtures/fs_movefile.shx`
 - Tests file moving, renaming, directory creation, and boolean return values
 
+### fs.rename()
+
+Rename a file or directory within the same location. This function is simpler than `fs.moveFile()` as it focuses on renaming operations without automatic directory creation:
+
+```typescript
+// Simple file rename
+fs.rename("old-file.txt", "new-file.txt");
+
+// Directory rename
+fs.rename("old-folder", "new-folder");
+
+// Rename with variables
+let oldFileName: string = "report_draft.pdf";
+let newFileName: string = "report_final.pdf";
+fs.rename(oldFileName, newFileName);
+
+// Rename and check success
+let success: boolean = fs.rename("temp.log", "archive.log");
+if (success) {
+  console.log("File renamed successfully");
+} else {
+  console.log("File rename failed");
+}
+
+// Conditional rename
+if (fs.exists("temporary_file.txt")) {
+  let renamed: boolean = fs.rename("temporary_file.txt", "permanent_file.txt");
+  if (renamed) {
+    console.log("Temporary file renamed to permanent");
+  }
+}
+
+// Rename with string operations
+let prefix: string = "processed_";
+let originalName: string = "document.pdf";
+fs.rename(originalName, prefix + originalName);
+```
+
+**Generated Bash:**
+
+```bash
+# Statement usage
+mv "old-file.txt" "new-file.txt"
+
+# Directory rename
+mv "old-folder" "new-folder"
+
+# With variables
+oldFileName="report_draft.pdf"
+newFileName="report_final.pdf"
+mv "${oldFileName}" "${newFileName}"
+
+# Expression usage with return value
+success=$(mv "temp.log" "archive.log" && echo "true" || echo "false")
+if [ "${success}" = "true" ]; then
+  echo "File renamed successfully"
+else
+  echo "File rename failed"
+fi
+
+# Conditional rename
+if [ -e "temporary_file.txt" ]; then
+  renamed=$(mv "temporary_file.txt" "permanent_file.txt" && echo "true" || echo "false")
+  if [ "${renamed}" = "true" ]; then
+    echo "Temporary file renamed to permanent"
+  fi
+fi
+
+# With string concatenation
+prefix="processed_"
+originalName="document.pdf"
+mv "${originalName}" "${prefix}${originalName}"
+```
+
+**Key Features:**
+
+- **Simple Renaming**: Focused on renaming files and directories in place
+- **No Directory Creation**: Unlike `fs.moveFile()`, does not create target directories
+- **Atomic Operations**: Uses `mv` command which is atomic within the same filesystem
+- **Return Values**: Returns boolean indicating success/failure when used as expression
+- **Same-Directory Focus**: Optimized for renaming within the same location
+- **Directory Support**: Works with both files and directories
+
+**Comparison with fs.moveFile():**
+
+| Aspect | `fs.moveFile()` | `fs.rename()` |
+|--------|-----------------|---------------|
+| **Purpose** | Move files between directories | Rename files/directories |
+| **Directory Creation** | Yes (`mkdir -p`) | No |
+| **Typical Use** | Cross-directory moves | Same-directory renames |
+| **Parameter Names** | `sourcePath`, `targetPath` | `oldName`, `newName` |
+| **Complexity** | Higher (directory handling) | Lower (direct rename) |
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_rename.shx`
+- Tests file renaming, directory renaming, return values, and conditional logic
+
 ### fs.appendFile()
 
 Append content to a file:

@@ -262,6 +262,10 @@ public partial class Parser
       {
         return new FsMoveFileStatement(moveExpr.SourcePath, moveExpr.TargetPath);
       }
+      if (expression is FsRenameExpression renameExpr)
+      {
+        return new FsRenameStatement(renameExpr.OldName, renameExpr.NewName);
+      }
       return new ExpressionStatement(expression);
     }
     catch

@@ -42,6 +42,7 @@ let content: string = filesystem.readFile("file.txt");
 filesystem.writeFile("output.txt", content);
 filesystem.copyFile("source.txt", "backup/source.txt");
 filesystem.moveFile("temp.txt", "archive/processed.txt");
+filesystem.rename("old-name.txt", "new-name.txt");
 
 // Template processing
 template.update("config.template", "config.yml");
