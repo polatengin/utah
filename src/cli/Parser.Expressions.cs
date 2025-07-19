@@ -561,6 +561,19 @@ public partial class Parser
         throw new InvalidOperationException("fs.writeFile() requires exactly 2 arguments (filePath, content)");
       }
 
+      // Special handling for fs.copyFile()
+      if (functionName == "fs.copyFile")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var sourcePathExpr = ParseExpression(args[0]);
+          var targetPathExpr = ParseExpression(args[1]);
+          return new FsCopyFileExpression(sourcePathExpr, targetPathExpr);
+        }
+        throw new InvalidOperationException("fs.copyFile() requires exactly 2 arguments (sourcePath, targetPath)");
+      }
+
       // Special handling for fs.dirname()
       if (functionName == "fs.dirname")
       {

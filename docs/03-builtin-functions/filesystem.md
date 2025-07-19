@@ -96,6 +96,55 @@ jsonData='{"name": "test", "value": 123}'
 echo "${jsonData}" > "data.json"
 ```
 
+### fs.copyFile()
+
+Copy a file from source to target path, automatically creating directories if needed:
+
+```typescript
+// Simple file copy
+fs.copyFile("config.json", "backup/config.json");
+
+// Copy with variables
+let sourceFile: string = "important.doc";
+let targetDir: string = "archive";
+fs.copyFile(sourceFile, targetDir + "/" + sourceFile);
+
+// Copy and check success
+let success: boolean = fs.copyFile("data.csv", "reports/data.csv");
+if (success) {
+  console.log("File copied successfully");
+} else {
+  console.log("File copy failed");
+}
+```
+
+**Generated Bash:**
+
+```bash
+# Statement usage
+mkdir -p $(dirname "backup/config.json")
+cp "config.json" "backup/config.json"
+
+# With variables
+sourceFile="important.doc"
+targetDir="archive"
+mkdir -p $(dirname "${targetDir}/${sourceFile}")
+cp "${sourceFile}" "${targetDir}/${sourceFile}"
+
+# Expression usage with return value
+success=$(mkdir -p $(dirname "reports/data.csv") && cp "data.csv" "reports/data.csv" && echo "true" || echo "false")
+if [ "${success}" = "true" ]; then
+  echo "File copied successfully"
+else
+  echo "File copy failed"
+fi
+```
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_copyfile.shx`
+- Tests file copying with directory creation and boolean return values
+
 ### fs.appendFile()
 
 Append content to a file:
@@ -606,6 +655,7 @@ function ensureDirectory(dirPath: string): void {
 | `fs.exists(path)` | Check existence | boolean | `fs.exists("file.txt")` |
 | `fs.readFile(path)` | Read file content | string | `fs.readFile("config.json")` |
 | `fs.writeFile(path, content)` | Write to file | void | `fs.writeFile("out.txt", data)` |
+| `fs.copyFile(source, target)` | Copy file with directory creation | boolean | `fs.copyFile("src.txt", "dst.txt")` |
 | `fs.appendFile(path, content)` | Append to file | void | `fs.appendFile("log.txt", entry)` |
 | `fs.filename(path)` | Extract filename | string | `fs.filename("/path/file.txt")` |
 | `fs.dirname(path)` | Extract directory | string | `fs.dirname("/path/file.txt")` |

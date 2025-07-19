@@ -132,6 +132,8 @@ public partial class Compiler
         return CompileFsExistsExpression(fsExists);
       case FsReadFileExpression fsReadFile:
         return CompileFsReadFileExpression(fsReadFile);
+      case FsCopyFileExpression fsCopyFile:
+        return CompileFsCopyFileExpression(fsCopyFile);
       case StringToUpperCaseExpression stringUpper:
         return CompileStringToUpperCaseExpression(stringUpper);
       case StringToLowerCaseExpression stringLower:
@@ -1051,6 +1053,13 @@ public partial class Compiler
   {
     var filePath = CompileExpression(fsReadFile.FilePath);
     return $"$(cat {filePath})";
+  }
+
+  private string CompileFsCopyFileExpression(FsCopyFileExpression fsCopyFile)
+  {
+    var sourcePath = CompileExpression(fsCopyFile.SourcePath);
+    var targetPath = CompileExpression(fsCopyFile.TargetPath);
+    return $"$(mkdir -p $(dirname {targetPath}) && cp {sourcePath} {targetPath} && echo \"true\" || echo \"false\")";
   }
 
   private string CompileFsParentDirNameExpression(FsParentDirNameExpression fsParentDirName)

@@ -254,6 +254,10 @@ public partial class Parser
       {
         return new FsWriteFileStatement(placeholder.FilePath, placeholder.Content);
       }
+      if (expression is FsCopyFileExpression copyExpr)
+      {
+        return new FsCopyFileStatement(copyExpr.SourcePath, copyExpr.TargetPath);
+      }
       return new ExpressionStatement(expression);
     }
     catch

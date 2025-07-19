@@ -523,6 +523,13 @@ public partial class Compiler
         lines.Add($"echo {content} > {filePath}");
         break;
 
+      case FsCopyFileStatement fcs:
+        var sourcePathStmt = CompileExpression(fcs.SourcePath);
+        var targetPathStmt = CompileExpression(fcs.TargetPath);
+        lines.Add($"mkdir -p $(dirname {targetPathStmt})");
+        lines.Add($"cp {sourcePathStmt} {targetPathStmt}");
+        break;
+
       case TemplateUpdateStatement templateUpdate:
         var sourceFile = CompileExpression(templateUpdate.SourceFilePath);
         var targetFile = CompileExpression(templateUpdate.TargetFilePath);

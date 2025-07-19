@@ -47,6 +47,7 @@ public record FsParentDirNameExpression(Expression Path) : Expression;
 public record FsExistsExpression(Expression Path) : Expression;
 public record FsReadFileExpression(Expression FilePath) : Expression;
 public record FsWriteFileExpressionPlaceholder(Expression FilePath, Expression Content) : Expression;
+public record FsCopyFileExpression(Expression SourcePath, Expression TargetPath) : Expression;
 public record StringToUpperCaseExpression(Expression Target) : Expression;
 public record StringToLowerCaseExpression(Expression Target) : Expression;
 public record StringStartsWithExpression(Expression Target, Expression Prefix) : Expression;
@@ -122,6 +123,7 @@ public record SwitchStatement(Expression Expression, List<CaseClause> Cases, Def
 public record BreakStatement() : Statement;
 public record ContinueStatement() : Statement;
 public record FsWriteFileStatement(Expression FilePath, Expression Content) : Statement;
+public record FsCopyFileStatement(Expression SourcePath, Expression TargetPath) : Statement;
 public record TimerStartStatement() : Statement;
 public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;
 public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;

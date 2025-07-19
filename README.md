@@ -1167,6 +1167,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 
 - `fs.readFile(filepath)` - Read the contents of a file into a string
 - `fs.writeFile(filepath, content)` - Write content to a file (overwrites existing content)
+- `fs.copyFile(sourcePath, targetPath)` - Copy a file from source to target path, creates directories if needed, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 
 #### Path Manipulation Functions
@@ -1186,6 +1187,17 @@ fs.writeFile("config.txt", "debug=true");
 let config: string = fs.readFile("config.txt");
 console.log("Config:", config);
 
+// Copy a file
+fs.copyFile("config.txt", "backup/config.txt");
+
+// Copy file and check if successful
+let success: boolean = fs.copyFile("important.doc", "archive/important.doc");
+if (success) {
+  console.log("File copied successfully");
+} else {
+  console.log("File copy failed");
+}
+
 // Write variable content to file
 let logMessage: string = "Application started";
 fs.writeFile("app.log", logMessage);
@@ -1193,6 +1205,9 @@ fs.writeFile("app.log", logMessage);
 // Read and process file content
 let logContent: string = fs.readFile("app.log");
 console.log("Log:", logContent);
+
+// Copy log file for backup
+fs.copyFile("app.log", "logs/backup/" + "app.log");
 
 // Check if files exist before operations
 let configExists: boolean = fs.exists("config.txt");
@@ -1239,6 +1254,17 @@ The file system functions transpile to efficient bash commands:
 echo "debug=true" > "config.txt"
 config=$(cat "config.txt")
 echo "Config: $config"
+
+# File copy operations:
+mkdir -p $(dirname "backup/config.txt")
+cp "config.txt" "backup/config.txt"
+
+success=$(mkdir -p $(dirname "archive/important.doc") && cp "important.doc" "archive/important.doc" && echo "true" || echo "false")
+if [ "$success" = "true" ]; then
+  echo "File copied successfully"
+else
+  echo "File copy failed"
+fi
 
 logMessage="Application started"
 echo "$logMessage" > "app.log"
@@ -3906,6 +3932,7 @@ Current tests cover:
 - **env_get_ternary.shx** - Environment variable operations with ternary operators
 - **environment_variables.shx** - Environment variable operations
 - **for_in_loop.shx** - For-in loops with arrays
+- **fs_copyfile.shx** - File system copy operations with automatic directory creation
 - **fs_dirname.shx** - File system dirname function
 - **fs_exists.shx** - File system file/directory existence checking
 - **fs_extension.shx** - File system extension extraction
@@ -4086,7 +4113,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Enhanced string manipulation functions
 
-- [x] File I/O operations (exists, read/write files)
+- [x] File I/O operations (exists, read/write files, copy files)
 
 - [x] File path manipulation functions (dirname, fileName, extension, parentDirName)
 
@@ -4096,7 +4123,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] yaml parsing and manipulation functions
 
-- [ ] File I/O operations (watch, delete, copy, move, rename, permissions, etc.)
+- [ ] File I/O operations (watch, delete, move, rename, permissions, etc.)
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
