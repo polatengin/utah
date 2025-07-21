@@ -12,7 +12,7 @@ class UtahApp
     if (args.Length > 0)
     {
       var argumentType = DetectArgumentType(args[0]);
-      
+
       switch (argumentType)
       {
         case ArgumentType.KnownCommand:
@@ -39,13 +39,13 @@ class UtahApp
   {
     // Known commands
     if (IsKnownCommand(firstArg)) return ArgumentType.KnownCommand;
-    
+
     // Command flags
     if (firstArg == "--command" || firstArg == "-c") return ArgumentType.InlineCommand;
-    
+
     // File detection
     if (firstArg.EndsWith(".shx") || File.Exists(firstArg)) return ArgumentType.File;
-    
+
     return ArgumentType.Unknown;
   }
 
@@ -148,7 +148,7 @@ class UtahApp
       Console.WriteLine("       utah --command <command>");
       return;
     }
-    
+
     var command = string.Join(" ", args.Skip(1));
     ExecuteInlineCommand(command);
   }
