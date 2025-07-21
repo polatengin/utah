@@ -32,14 +32,14 @@ jobs:
 
     - name: Run Deployment Script
       run: |
-        utah run scripts/deploy.shx
+        utah scripts/deploy.shx
       env:
         DEPLOY_ENV: production
         API_KEY: ${{ secrets.API_KEY }}
 
     - name: Health Check
       run: |
-        utah run scripts/health-check.shx
+        utah scripts/health-check.shx
 ```
 
 ### GitLab CI/CD
@@ -59,7 +59,7 @@ before_script:
 test:
   stage: test
   script:
-    - utah run test/run-tests.shx
+    - utah test/run-tests.shx
   artifacts:
     reports:
       junit: test-results.xml
@@ -67,7 +67,7 @@ test:
 deploy:
   stage: deploy
   script:
-    - utah run scripts/deploy.shx
+    - utah scripts/deploy.shx
   only:
     - main
   environment:
@@ -98,7 +98,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'utah run test/run-tests.shx'
+                sh 'utah test/run-tests.shx'
             }
             post {
                 always {
@@ -112,7 +112,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'utah run scripts/deploy.shx'
+                sh 'utah scripts/deploy.shx'
             }
         }
     }

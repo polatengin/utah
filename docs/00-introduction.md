@@ -38,7 +38,7 @@ Get started with Utah in seconds:
   > ... or **run directly:**
   >
   > ```bash
-  > utah run hello.shx
+  > utah hello.shx
   > ```
 
 ## Key Features

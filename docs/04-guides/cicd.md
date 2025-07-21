@@ -849,7 +849,7 @@ function testStage(): void {
   for (let testFile: string in testFiles) {
     if (testFile.trim() != "") {
       console.log(`Running ${testFile}...`);
-      `$(utah run ${testFile})`;
+      `$(utah ${testFile})`;
       console.log(`✅ ${testFile} passed`);
     }
   }

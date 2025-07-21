@@ -182,7 +182,7 @@ for (let testFile of testFiles) {
   console.log(`Running ${testFile}...`);
 
   try {
-    system.execute(`utah run ${testFile}`);
+    system.execute(`utah ${testFile}`);
     console.log(`✅ ${testFile} passed`);
     passed++;
   } catch (error) {
@@ -219,7 +219,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        utah run test/run-tests.shx
+        utah test/run-tests.shx
 ```
 
 ## Mocking and Stubbing

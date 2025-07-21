@@ -7,6 +7,21 @@ has_children: true
 
 Utah provides a comprehensive command-line interface for compiling, running, formatting, and managing Utah scripts. The CLI is built with .NET 9 and offers robust error handling and clear feedback.
 
+## Direct Execution ✨
+
+Utah supports direct execution of `.shx` files and commands without requiring explicit command prefixes:
+
+```bash
+# Run a .shx file directly (no 'run' command needed!)
+utah script.shx
+
+# Execute commands directly
+utah -c "echo('Hello, World!')"
+utah --command "os.isInstalled('git')"
+```
+
+This makes Utah feel more like traditional script interpreters (`python script.py`, `node script.js`, etc.) while maintaining full backward compatibility with the explicit `run` command.
+
 ## Quick Start
 
 ```bash
@@ -17,7 +32,10 @@ curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scrip
 utah compile script.shx
 
 # Run a script directly
-utah run script.shx
+utah script.shx
+
+# Run commands directly
+utah -c "echo('Hello from Utah!')"
 
 # Format a single script
 utah format script.shx
@@ -30,6 +48,8 @@ utah format --in-place
 
 | Command | Description | Usage |
 |---------|-------------|-------|
+| `<file.shx>` | **Direct execution** | `utah <file.shx>` |
+| `-c, --command` | **Direct command** | `utah -c <command>` |
 | `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o <output.sh>]` |
 | `run` | Compile and execute | `utah run <file.shx>` or `utah run -c <command>` |
 | `format` | Format source code | `utah format [file.shx] [options]` |
@@ -84,9 +104,12 @@ utah run --command "fs.exists('/path/to/file')"
 
 **Options:**
 
-- `utah run <file.shx>`: Execute a .shx file
-- `utah run -c <command>`: Execute a single command directly
-- `utah run --command <command>`: Execute a single command directly (long form)
+- `utah <file.shx>`: Execute a .shx file directly
+- `utah -c <command>`: Execute a single command directly
+- `utah --command <command>`: Execute a single command directly (long form)
+- `utah run <file.shx>`: Execute a .shx file (legacy)
+- `utah run -c <command>`: Execute a single command directly (legacy)
+- `utah run --command <command>`: Execute a single command directly (legacy long form)
 
 ### Format Command
 

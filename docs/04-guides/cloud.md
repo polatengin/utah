@@ -45,7 +45,7 @@ Deploy on EC2 with user data script:
 curl -fsSL https://get.utah.sh | sh
 
 # Deploy application
-utah run /app/deploy.shx
+utah /app/deploy.shx
 ```
 
 ### ECS Containers
@@ -280,7 +280,7 @@ jobs:
       run: utah compile src/main.shx
 
     - name: Deploy
-      run: utah run deploy/cloud.shx
+      run: utah deploy/cloud.shx
       env:
         CLOUD_API_KEY: ${{ secrets.CLOUD_API_KEY }}
 ```
@@ -298,7 +298,7 @@ deploy:
     - curl -fsSL https://get.utah.sh | sh
 
   script:
-    - utah run deploy/cloud.shx
+    - utah deploy/cloud.shx
 
   environment:
     name: production

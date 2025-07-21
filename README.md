@@ -3814,16 +3814,19 @@ echo "Script will continue even if commands fail"
 Execute Utah (.shx) files or commands directly:
 
 ```bash
-# Run a .shx file
-utah run script.shx
+# Direct execution (recommended)
+utah script.shx
+utah -c "console.log('Hello, World!')"
+utah --command "json.installDependencies()"
 
-# Run a single command directly
+# Or using explicit 'run' command
+utah run script.shx
 utah run -c "console.log('Hello, World!')"
 utah run --command "json.installDependencies()"
 
-# More command examples
-utah run -c "os.isInstalled('git')"
-utah run --command "fs.exists('/path/to/file')"
+# More inline command examples
+utah -c "os.isInstalled('git')"
+utah --command "fs.exists('/path/to/file')"
 ```
 
 ### Compiling

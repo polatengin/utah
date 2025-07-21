@@ -7,6 +7,8 @@ nav_order: 2
 
 The `utah run` command compiles and immediately executes Utah (.shx) scripts or individual commands without creating persistent .sh files. This is ideal for development, testing, one-off script execution, and quick command testing.
 
+> You can now run .shx files and commands directly without the `run` command! See [Direct Execution](index.md#direct-execution) for details.
+
 ## Basic Usage
 
 ```bash
@@ -16,6 +18,11 @@ utah run <file.shx>
 # Run a single command directly
 utah run -c <command>
 utah run --command <command>
+
+# Direct execution (new, shorter syntax)
+utah <file.shx>
+utah -c <command>
+utah --command <command>
 ```
 
 ## Examples
@@ -23,26 +30,33 @@ utah run --command <command>
 ### File Execution
 
 ```bash
+# Traditional syntax
 utah run hello.shx
+
+# New direct execution syntax
+utah hello.shx
 ```
 
 ### Direct Command Execution
 
 ```bash
-# Simple console output
+# Traditional syntax
 utah run -c "console.log('Hello, World!')"
 
+# New direct execution syntax
+utah -c "console.log('Hello, World!')"
+
 # Check if a package is installed
-utah run --command "os.isInstalled('git')"
+utah --command "os.isInstalled('git')"
 
 # File operations
-utah run -c "console.log(fs.exists('/etc/passwd'))"
+utah -c "console.log(fs.exists('/etc/passwd'))"
 
 # JSON operations
-utah run --command "json.installDependencies()"
+utah --command "json.installDependencies()"
 
 # Multiple statements (use quotes to wrap the entire command)
-utah run -c "let name: string = 'Utah'; console.log(\`Hello from \${name}!\`);"
+utah -c "let name: string = 'Utah'; console.log(\`Hello from \${name}!\`);"
 ```
 
 ### With Arguments
