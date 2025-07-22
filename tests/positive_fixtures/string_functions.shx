@@ -1,7 +1,7 @@
 let text: string = "Hello World";
-let length: number = text.length();
-let upper: string = text.toUpperCase();
-let lower: string = text.toLowerCase();
+let length: number = string.length(text);
+let upper: string = string.toUpperCase(text);
+let lower: string = string.toLowerCase(text);
 console.log("Text: " + text);
 console.log("Length: " + length);
 console.log("Upper: " + upper);
@@ -10,11 +10,11 @@ console.log("Lower: " + lower);
 let logPath: string = "/var/log/nginx.log";
 console.log(logPath);
 
-if (logPath.startsWith("/var")) {
+if (string.startsWith(logPath, "/var")) {
   console.log("Log is in var directory");
 }
 
 let filename: string = "test.txt";
-if (filename.endsWith(".txt")) {
+if (string.endsWith(filename, ".txt")) {
   console.log("Text file detected");
 }

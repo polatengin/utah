@@ -339,6 +339,21 @@ public partial class Parser
         }
       }
 
+      // Special case for string.* namespace functions
+      if (objectName == "string" && methodPart.Contains("(") && methodPart.EndsWith(")"))
+      {
+        var parenIndex = methodPart.IndexOf('(');
+        var stringFunctionName = methodPart.Substring(0, parenIndex).Trim();
+        var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
+        
+        var arguments = new List<Expression>();
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
+        }
+        return new StringNamespaceCallExpression(stringFunctionName, arguments);
+      }
+
       // Handle .length property
       if (methodPart == "length" || methodPart == "length()")
       {
@@ -1154,6 +1169,18 @@ public partial class Parser
           return new SchedulerCronExpression(cronPatternExpr, lambdaExpr);
         }
         throw new InvalidOperationException("scheduler.cron() requires exactly 2 arguments: (cronPattern, lambda)");
+      }
+
+      // Special handling for string.* namespace functions
+      if (functionName.StartsWith("string."))
+      {
+        var stringFunctionName = functionName.Substring(7); // Remove "string." prefix
+        var arguments = new List<Expression>();
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
+        }
+        return new StringNamespaceCallExpression(stringFunctionName, arguments);
       }
 
       // Check for parallel keyword

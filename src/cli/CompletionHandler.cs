@@ -33,7 +33,18 @@ public class CompletionHandler : ICompletionHandler
 
     if (isDotTriggered)
     {
-      // Show only methods and properties when triggered by dot
+      // Get context by reading the document and analyzing what comes before the dot
+      var context = await AnalyzeCompletionContext(request, cancellationToken);
+      await Console.Error.WriteLineAsync($"[LSP] Detected context: {context}");
+      
+      if (context == "string")
+      {
+        // Show only string.* function completions
+        completionItems.AddRange(GetStringNamespaceCompletions());
+      }
+      else
+      {
+        // Show all method completions for backward compatibility
       completionItems.AddRange(new List<CompletionItem>
       {
         // Console methods
@@ -202,6 +213,7 @@ public class CompletionHandler : ICompletionHandler
           Documentation = "Remove and return last item from array"
         }
       });
+      }
     }
     else
     {
@@ -391,5 +403,185 @@ public class CompletionHandler : ICompletionHandler
 
     await Console.Error.WriteLineAsync($"[LSP] Returning {completionItems.Count} completion items");
     return new CompletionList(completionItems);
+  }
+
+  private async Task<string> AnalyzeCompletionContext(CompletionParams request, CancellationToken cancellationToken)
+  {
+    try
+    {
+      // Read the document content
+      var documentPath = request.TextDocument.Uri.GetFileSystemPath();
+      if (!File.Exists(documentPath))
+      {
+        return "";
+      }
+
+      var documentText = await File.ReadAllTextAsync(documentPath, cancellationToken);
+      var lines = documentText.Split('\n');
+      
+      if (request.Position.Line >= lines.Length)
+      {
+        return "";
+      }
+
+      var line = lines[(int)request.Position.Line];
+      if (request.Position.Character > line.Length)
+      {
+        return "";
+      }
+
+      var textBeforeCursor = line.Substring(0, (int)request.Position.Character);
+      
+      // Look for the pattern: word followed by dot at the end
+      var match = System.Text.RegularExpressions.Regex.Match(textBeforeCursor, @"(\w+)\.$");
+      return match.Success ? match.Groups[1].Value : "";
+    }
+    catch (Exception ex)
+    {
+      await Console.Error.WriteLineAsync($"[LSP] Error analyzing context: {ex.Message}");
+      return "";
+    }
+  }
+
+  private List<CompletionItem> GetStringNamespaceCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      // Core string functions
+      new CompletionItem
+      {
+        Label = "length",
+        Kind = CompletionItemKind.Method,
+        Detail = "length(value: string): number",
+        Documentation = "Get the length of a string"
+      },
+      new CompletionItem
+      {
+        Label = "trim",
+        Kind = CompletionItemKind.Method,
+        Detail = "trim(value: string): string",
+        Documentation = "Remove whitespace from both ends of a string"
+      },
+      new CompletionItem
+      {
+        Label = "isEmpty",
+        Kind = CompletionItemKind.Method,
+        Detail = "isEmpty(value: string): boolean", 
+        Documentation = "Check if string is empty or contains only whitespace"
+      },
+
+      // Case operations
+      new CompletionItem
+      {
+        Label = "toUpperCase",
+        Kind = CompletionItemKind.Method,
+        Detail = "toUpperCase(value: string): string",
+        Documentation = "Convert string to uppercase"
+      },
+      new CompletionItem
+      {
+        Label = "toLowerCase",
+        Kind = CompletionItemKind.Method,
+        Detail = "toLowerCase(value: string): string",
+        Documentation = "Convert string to lowercase"
+      },
+      new CompletionItem
+      {
+        Label = "capitalize",
+        Kind = CompletionItemKind.Method,
+        Detail = "capitalize(value: string): string",
+        Documentation = "Capitalize the first letter of a string"
+      },
+
+      // Search and test operations
+      new CompletionItem
+      {
+        Label = "startsWith",
+        Kind = CompletionItemKind.Method,
+        Detail = "startsWith(value: string, prefix: string): boolean",
+        Documentation = "Check if string starts with the specified prefix"
+      },
+      new CompletionItem
+      {
+        Label = "endsWith",
+        Kind = CompletionItemKind.Method,
+        Detail = "endsWith(value: string, suffix: string): boolean",
+        Documentation = "Check if string ends with the specified suffix"
+      },
+      new CompletionItem
+      {
+        Label = "includes",
+        Kind = CompletionItemKind.Method,
+        Detail = "includes(value: string, searchValue: string): boolean",
+        Documentation = "Check if string contains the specified substring"
+      },
+      new CompletionItem
+      {
+        Label = "indexOf",
+        Kind = CompletionItemKind.Method,
+        Detail = "indexOf(value: string, searchValue: string): number",
+        Documentation = "Find the index of the first occurrence of a substring"
+      },
+
+      // Extraction and manipulation operations
+      new CompletionItem
+      {
+        Label = "substring",
+        Kind = CompletionItemKind.Method,
+        Detail = "substring(value: string, start: number, length?: number): string",
+        Documentation = "Extract a substring starting at the specified index"
+      },
+      new CompletionItem
+      {
+        Label = "slice",
+        Kind = CompletionItemKind.Method,
+        Detail = "slice(value: string, start: number, end?: number): string",
+        Documentation = "Extract a section of the string between start and end indices"
+      },
+      new CompletionItem
+      {
+        Label = "replace",
+        Kind = CompletionItemKind.Method,
+        Detail = "replace(value: string, searchValue: string, replaceValue: string): string",
+        Documentation = "Replace the first occurrence of a substring"
+      },
+      new CompletionItem
+      {
+        Label = "replaceAll",
+        Kind = CompletionItemKind.Method,
+        Detail = "replaceAll(value: string, searchValue: string, replaceValue: string): string",
+        Documentation = "Replace all occurrences of a substring"
+      },
+      new CompletionItem
+      {
+        Label = "split",
+        Kind = CompletionItemKind.Method,
+        Detail = "split(value: string, separator: string): string[]",
+        Documentation = "Split a string into an array using the specified separator"
+      },
+
+      // Advanced operations
+      new CompletionItem
+      {
+        Label = "padStart",
+        Kind = CompletionItemKind.Method,
+        Detail = "padStart(value: string, length: number, pad?: string): string",
+        Documentation = "Pad the string from the start to reach the specified length"
+      },
+      new CompletionItem
+      {
+        Label = "padEnd",
+        Kind = CompletionItemKind.Method,
+        Detail = "padEnd(value: string, length: number, pad?: string): string",
+        Documentation = "Pad the string from the end to reach the specified length"
+      },
+      new CompletionItem
+      {
+        Label = "repeat",
+        Kind = CompletionItemKind.Method,
+        Detail = "repeat(value: string, count: number): string",
+        Documentation = "Repeat the string the specified number of times"
+      }
+    };
   }
 }

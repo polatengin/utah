@@ -1,0 +1,111 @@
+// Comprehensive String Functions Test
+// Tests all string.* namespace functions
+
+// Core utilities
+let text: string = "  Hello World  ";
+let name: string = "john";
+let emptyText: string = "";
+
+let trimmed: string = string.trim(text);
+let length: number = string.length(text);
+let isEmptyText: boolean = string.isEmpty(emptyText);
+let isEmptyTrimmed: boolean = string.isEmpty(trimmed);
+
+console.log("=== Core Utilities ===");
+console.log("Original: '" + text + "'");
+console.log("Trimmed: '" + trimmed + "'");
+console.log("Length: " + length);
+console.log("Empty text is empty: " + isEmptyText);
+console.log("Trimmed is empty: " + isEmptyTrimmed);
+
+// Case operations
+let testString: string = "hello WORLD";
+let upperCase: string = string.toUpperCase(testString);
+let lowerCase: string = string.toLowerCase(testString);
+let capitalized: string = string.capitalize(testString);
+let nameCapitalized: string = string.capitalize(name);
+
+console.log("=== Case Operations ===");
+console.log("Original: " + testString);
+console.log("Upper: " + upperCase);
+console.log("Lower: " + lowerCase);
+console.log("Capitalized: " + capitalized);
+console.log("Capitalized name: " + nameCapitalized);
+
+// Search and test operations
+let searchText: string = "The quick brown fox";
+let startsWithThe: boolean = string.startsWith(searchText, "The");
+let endsWithFox: boolean = string.endsWith(searchText, "fox");
+let containsQuick: boolean = string.includes(searchText, "quick");
+let indexOfBrown: number = string.indexOf(searchText, "brown");
+
+// Additional search tests
+let starts: boolean = string.startsWith(text, "  Hello");
+let ends: boolean = string.endsWith(text, "  ");
+let includes: boolean = string.includes(text, "World");
+let index: number = string.indexOf(text, "World");
+
+console.log("=== Search and Test Operations ===");
+console.log("Text: " + searchText);
+console.log("Starts with 'The': " + startsWithThe);
+console.log("Ends with 'fox': " + endsWithFox);
+console.log("Contains 'quick': " + containsQuick);
+console.log("Index of 'brown': " + indexOfBrown);
+console.log("Text starts with '  Hello': " + starts);
+console.log("Text ends with '  ': " + ends);
+console.log("Text contains 'World': " + includes);
+console.log("Index of 'World' in text: " + index);
+
+// Extraction and manipulation
+let extractText: string = "JavaScript";
+let substring: string = string.substring(extractText, 0, 4);
+let substr: string = string.substring(text, 2, 5);
+let slice: string = string.slice(extractText, 4, 10);
+let replaced: string = string.replace(extractText, "Script", "Code");
+let replaced2: string = string.replace(text, "World", "Utah");
+let replaceAll: string = string.replaceAll("hello hello hello", "hello", "hi");
+
+// Advanced slice test
+let multiword: string = "hello hello world";
+let allReplaced: string = string.replaceAll(multiword, "hello", "hi");
+let sliced: string = string.slice("Hello World", 6, 11);
+
+console.log("=== Extraction and Manipulation ===");
+console.log("Original: " + extractText);
+console.log("Substring(0,4): " + substring);
+console.log("Substring from text(2,5): '" + substr + "'");
+console.log("Slice(4,10): " + slice);
+console.log("Replace 'Script' with 'Code': " + replaced);
+console.log("Replace 'World' with 'Utah': " + replaced2);
+console.log("Replace all 'hello' with 'hi': " + replaceAll);
+console.log("Advanced replace all: " + allReplaced);
+console.log("Sliced: " + sliced);
+
+// Split operation
+let csvText: string = "apple,banana,cherry";
+let fruits: string[] = string.split(csvText, ",");
+let words: string[] = string.split(text, " ");
+
+console.log("=== Split Operations ===");
+console.log("CSV: " + csvText);
+console.log("Split result: " + fruits);
+
+// Advanced operations
+let padText: string = "42";
+let padStartResult: string = string.padStart(padText, 5, "0");
+let padEndResult: string = string.padEnd(padText, 5, "-");
+let repeatResult: string = string.repeat("abc", 3);
+
+// Additional padding tests
+let paddedStart: string = string.padStart("42", 5, "0");
+let paddedEnd: string = string.padEnd("42", 5, "-");
+let repeated: string = string.repeat("abc", 3);
+
+console.log("=== Advanced Operations ===");
+console.log("Pad text: " + padText);
+console.log("Pad start (5, '0'): " + padStartResult);
+console.log("Pad end (5, '-'): " + padEndResult);
+console.log("Repeat 'abc' 3 times: " + repeatResult);
+console.log("Additional padded start: " + paddedStart);
+console.log("Additional padded end: " + paddedEnd);
+console.log("Additional repeated: " + repeated);

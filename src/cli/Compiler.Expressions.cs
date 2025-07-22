@@ -214,6 +214,8 @@ public partial class Compiler
         throw new InvalidOperationException("FsWriteFileExpressionPlaceholder should have been converted to a statement.");
       case TemplateUpdateExpression templateUpdate:
         return CompileTemplateUpdateExpression(templateUpdate);
+      case StringNamespaceCallExpression stringNamespaceCall:
+        return CompileStringNamespaceCallExpression(stringNamespaceCall);
       default:
         throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
     }
@@ -1297,6 +1299,304 @@ public partial class Compiler
     // Use bash case pattern matching to check if string contains substring
     // Returns "true" if found, "false" if not found
     return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
+  }
+
+  private string CompileStringNamespaceCallExpression(StringNamespaceCallExpression stringCall)
+  {
+    var functionName = stringCall.FunctionName;
+    var args = stringCall.Arguments.Select(CompileExpression).ToList();
+
+    return functionName switch
+    {
+      "length" => CompileStringLengthFunction(args),
+      "trim" => CompileStringTrimFunction(args),
+      "toUpperCase" => CompileStringToUpperCaseFunction(args),
+      "toLowerCase" => CompileStringToLowerCaseFunction(args),
+      "startsWith" => CompileStringStartsWithFunction(args),
+      "endsWith" => CompileStringEndsWithFunction(args),
+      "includes" => CompileStringIncludesFunction(args),
+      "replace" => CompileStringReplaceFunction(args),
+      "replaceAll" => CompileStringReplaceAllFunction(args),
+      "split" => CompileStringSplitFunction(args),
+      "substring" => CompileStringSubstringFunction(args),
+      "slice" => CompileStringSliceFunction(args),
+      "indexOf" => CompileStringIndexOfFunction(args),
+      "padStart" => CompileStringPadStartFunction(args),
+      "padEnd" => CompileStringPadEndFunction(args),
+      "repeat" => CompileStringRepeatFunction(args),
+      "capitalize" => CompileStringCapitalizeFunction(args),
+      "isEmpty" => CompileStringIsEmptyFunction(args),
+      _ => throw new NotSupportedException($"String function '{functionName}' is not supported")
+    };
+  }
+
+  private string CompileStringLengthFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.length() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"\"${{#{varName}}}\"";
+  }
+
+  private string CompileStringTrimFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.trim() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"\"$(echo \"${{{varName}}}\" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')\"";
+  }
+
+  private string CompileStringToUpperCaseFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.toUpperCase() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"\"${{{varName}^^}}\"";
+  }
+
+  private string CompileStringToLowerCaseFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.toLowerCase() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"\"${{{varName},,}}\"";
+  }
+
+  private string CompileStringStartsWithFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.startsWith() requires exactly 2 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var prefixStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    return $"$([[ \"${{{varName}}}\" == {prefixStr}* ]] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileStringEndsWithFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.endsWith() requires exactly 2 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var suffixStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    return $"$([[ \"${{{varName}}}\" == *{suffixStr} ]] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileStringIncludesFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.includes() requires exactly 2 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
+  }
+
+  private string CompileStringReplaceFunction(List<string> args)
+  {
+    if (args.Count != 3)
+      throw new InvalidOperationException("string.replace() requires exactly 3 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    var replaceStr = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+    return $"\"${{{varName}/{searchStr}/{replaceStr}}}\"";
+  }
+
+  private string CompileStringReplaceAllFunction(List<string> args)
+  {
+    if (args.Count != 3)
+      throw new InvalidOperationException("string.replaceAll() requires exactly 3 arguments");
+    
+    var target = args[0];
+    var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    var replaceStr = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+    
+    // If target is a string literal, we need to handle it differently
+    if (target.StartsWith("\"") && target.EndsWith("\""))
+    {
+      // For string literals, use sed or other bash tools
+      var literalValue = target[1..^1]; // Remove quotes
+      return $"\"$(echo \"{literalValue}\" | sed \"s/{searchStr}/{replaceStr}/g\")\"";
+    }
+    else
+    {
+      // For variables, use bash parameter expansion
+      var varName = ExtractVariableName(target);
+      return $"\"${{{varName}//{searchStr}/{replaceStr}}}\"";
+    }
+  }
+
+  private string GetStringValueForBashExpansion(string arg)
+  {
+    // If it's a string literal, return the literal content for direct bash expansion
+    if (arg.StartsWith("\"") && arg.EndsWith("\""))
+    {
+      return arg[1..^1]; // Remove quotes for bash parameter expansion
+    }
+    // If it's a variable reference, extract the variable name
+    else if (arg.StartsWith("${") && arg.EndsWith("}"))
+    {
+      var varName = arg[2..^1];
+      return varName; // Return just the variable name for ${var//search/replace} expansion
+    }
+    else
+    {
+      // Assume it's a variable name
+      return arg;
+    }
+  }
+
+  private string CompileStringSplitFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.split() requires exactly 2 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var separatorStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    return $"$(IFS='{separatorStr}'; read -ra SPLIT_ARRAY <<< \"${{{varName}}}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
+  }
+
+  private string CompileStringSubstringFunction(List<string> args)
+  {
+    if (args.Count < 2 || args.Count > 3)
+      throw new InvalidOperationException("string.substring() requires 2 or 3 arguments");
+    
+    var target = args[0];
+    var startValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    
+    // Handle string literals vs variables
+    if (target.StartsWith("\"") && target.EndsWith("\""))
+    {
+      var literalValue = target[1..^1]; // Remove quotes
+      if (args.Count == 2)
+      {
+        return $"\"$(echo \"{literalValue}\" | cut -c{startValue}-)\"";
+      }
+      else
+      {
+        var lengthValue = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+        var endPos = $"$(({startValue} + {lengthValue} - 1))";
+        return $"\"$(echo \"{literalValue}\" | cut -c{startValue}-{endPos})\"";
+      }
+    }
+    else
+    {
+      var varName = ExtractVariableName(target);
+      if (args.Count == 2)
+      {
+        return $"\"${{{varName}:{startValue}}}\"";
+      }
+      else
+      {
+        var lengthValue = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+        return $"\"${{{varName}:{startValue}:{lengthValue}}}\"";
+      }
+    }
+  }
+
+  private string CompileStringSliceFunction(List<string> args)
+  {
+    if (args.Count < 2 || args.Count > 3)
+      throw new InvalidOperationException("string.slice() requires 2 or 3 arguments");
+    
+    var target = args[0];
+    var startValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    
+    // Handle string literals vs variables
+    if (target.StartsWith("\"") && target.EndsWith("\""))
+    {
+      var literalValue = target[1..^1]; // Remove quotes
+      if (args.Count == 2)
+      {
+        return $"\"$(echo \"{literalValue}\" | cut -c{startValue}-)\"";
+      }
+      else
+      {
+        var endValue = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+        return $"\"$(echo \"{literalValue}\" | cut -c{startValue}-{endValue})\"";
+      }
+    }
+    else
+    {
+      var varName = ExtractVariableName(target);
+      if (args.Count == 2)
+      {
+        return $"\"${{{varName}:{startValue}}}\"";
+      }
+      else
+      {
+        var endValue = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
+        return $"\"$(echo \"${{{varName}}}\" | cut -c{startValue}-{endValue})\"";
+      }
+    }
+  }
+
+  private string CompileStringIndexOfFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.indexOf() requires exactly 2 arguments");
+    
+    var varName = ExtractVariableName(args[0]);
+    var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    return $"$(temp=\"${{{varName}}}\"; pos=${{temp%%{searchStr}*}}; [[ \"$pos\" == \"${{{varName}}}\" ]] && echo \"-1\" || echo \"${{#pos}}\")";
+  }
+
+  private string CompileStringPadStartFunction(List<string> args)
+  {
+    if (args.Count < 2 || args.Count > 3)
+      throw new InvalidOperationException("string.padStart() requires 2 or 3 arguments");
+    
+    var targetValue = args[0];
+    var lengthValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    var padChar = args.Count == 3 ? (args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2]) : " ";
+    
+    return $"\"$(printf \"%*s\" {lengthValue} {targetValue} | sed \"s/ /{padChar}/g\")\"";
+  }
+
+  private string CompileStringPadEndFunction(List<string> args)
+  {
+    if (args.Count < 2 || args.Count > 3)
+      throw new InvalidOperationException("string.padEnd() requires 2 or 3 arguments");
+    
+    var targetValue = args[0];
+    var lengthValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    var padChar = args.Count == 3 ? (args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2]) : " ";
+    
+    return $"\"$(printf \"%-*s\" {lengthValue} {targetValue} | sed \"s/ /{padChar}/g\")\"";
+  }
+
+  private string CompileStringRepeatFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("string.repeat() requires exactly 2 arguments");
+    
+    var targetValue = args[0];
+    var countValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
+    
+    return $"\"$(for ((i=0; i<{countValue}; i++)); do printf \"%s\" {targetValue}; done)\"";
+  }
+
+  private string CompileStringCapitalizeFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.capitalize() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"\"$(echo \"${{{varName}}}\" | sed 's/^./\\U&/')\"";
+  }
+
+  private string CompileStringIsEmptyFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("string.isEmpty() requires exactly 1 argument");
+    
+    var varName = ExtractVariableName(args[0]);
+    return $"$([[ -z \"$(echo \"${{{varName}}}\" | xargs)\" ]] && echo \"true\" || echo \"false\")";
   }
 
   private string EnsureQuoted(string value)

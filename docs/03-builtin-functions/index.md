@@ -37,6 +37,13 @@ Utah provides an extensive library of built-in functions organized into logical 
 // Console output
 console.log("Hello, World!");
 
+// String manipulation
+let text: string = "  Hello World  ";
+let trimmed: string = string.trim(text);
+let upper: string = string.toUpperCase(text);
+let words: string[] = string.split(text, " ");
+let length: number = string.length(text);
+
 // File operations
 let content: string = filesystem.readFile("file.txt");
 filesystem.writeFile("output.txt", content);

@@ -1084,28 +1084,40 @@ Utah supports a comprehensive set of string manipulation functions that are fami
 
 ### Available String Functions
 
-#### String Properties
+Utah provides a comprehensive set of string manipulation functions through the `string.*` namespace.
 
-- `string.length()` - Get the length of a string
+#### Core Utilities
 
-#### String Transformation
+- `string.length(value)` - Get the length of a string
+- `string.trim(value)` - Remove leading and trailing whitespace
+- `string.isEmpty(value)` - Check if string is empty or contains only whitespace
 
-- `string.slice(start, end?)` - Extract a substring
-- `string.toUpperCase()` - Convert to uppercase
-- `string.toLowerCase()` - Convert to lowercase
-- `string.trim()` - Remove leading and trailing whitespace
-- `string.replace(search, replacement)` - Replace first occurrence
-- `string.replaceAll(search, replacement)` - Replace all occurrences
+#### Case Conversion
 
-#### String Testing
+- `string.toUpperCase(value)` - Convert to uppercase
+- `string.toLowerCase(value)` - Convert to lowercase
+- `string.capitalize(value)` - Capitalize first letter
 
-- `string.startsWith(prefix)` - Check if string starts with prefix
-- `string.endsWith(suffix)` - Check if string ends with suffix
-- `string.includes(substring)` - Check if string contains substring
+#### Search and Testing
 
-#### String Splitting
+- `string.startsWith(value, prefix)` - Check if string starts with prefix
+- `string.endsWith(value, suffix)` - Check if string ends with suffix
+- `string.includes(value, substring)` - Check if string contains substring
+- `string.indexOf(value, substring)` - Find index of first occurrence
 
-- `string.split(delimiter)` - Split string into array
+#### Extraction and Manipulation
+
+- `string.substring(value, start, length?)` - Extract substring by position
+- `string.slice(value, start, end?)` - Extract portion between indices
+- `string.replace(value, search, replacement)` - Replace first occurrence
+- `string.replaceAll(value, search, replacement)` - Replace all occurrences
+- `string.split(value, delimiter)` - Split string into array
+
+#### Advanced Operations
+
+- `string.padStart(value, length, pad?)` - Pad string from start
+- `string.padEnd(value, length, pad?)` - Pad string from end
+- `string.repeat(value, count)` - Repeat string multiple times
 
 ### Example Usage
 
@@ -1113,26 +1125,31 @@ Utah supports a comprehensive set of string manipulation functions that are fami
 const message: string = "Hello, World!";
 const email: string = "  user@example.com  ";
 
-// Get string length
-let length: number = message.length();
-
-// Extract substring
-let greeting: string = message.slice(0, 5); // "Hello"
+// Core utilities
+let length: number = string.length(message);
+let cleaned: string = string.trim(email);
+let isEmpty: boolean = string.isEmpty("");
 
 // Case conversion
-let upper: string = message.toUpperCase(); // "HELLO, WORLD!"
-let lower: string = message.toLowerCase(); // "hello, world!"
+let upper: string = string.toUpperCase(message); // "HELLO, WORLD!"
+let lower: string = string.toLowerCase(message); // "hello, world!"
+let capitalized: string = string.capitalize("hello"); // "Hello"
 
-// Trim whitespace
-let cleanEmail: string = email.trim(); // "user@example.com"
+// Search and testing
+let startsWithHello: boolean = string.startsWith(message, "Hello"); // true
+let endsWithExclamation: boolean = string.endsWith(message, "!"); // true
+let containsWorld: boolean = string.includes(message, "World"); // true
+let worldIndex: number = string.indexOf(message, "World"); // 7
 
-// Replace text
-let newMsg: string = message.replace("World", "Universe"); // "Hello, Universe!"
+// Extraction and manipulation
+let greeting: string = string.substring(message, 0, 5); // "Hello"
+let portion: string = string.slice(message, 7, 12); // "World"
+let newMsg: string = string.replace(message, "World", "Universe");
+let parts: string[] = string.split("a,b,c", ","); // ["a", "b", "c"]
 
-// Boolean checks
-let startsWithHello: boolean = message.startsWith("Hello"); // true
-let endsWithExclamation: boolean = message.endsWith("!"); // true
-let containsWorld: boolean = message.includes("World"); // true
+// Advanced operations
+let padded: string = string.padStart("42", 5, "0"); // "00042"
+let repeated: string = string.repeat("Hi", 3); // "HiHiHi"
 ```
 
 ### Generated Bash Code for String Functions

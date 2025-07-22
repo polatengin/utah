@@ -529,6 +529,9 @@ public class FormatterVisitor
           bodyText = tempVisitor.Visit(tempProgram).Trim();
         }
         return $"({parameters}) => {{ {bodyText} }}";
+      case StringNamespaceCallExpression stringNamespaceCall:
+        var stringArgs = string.Join(", ", stringNamespaceCall.Arguments.Select(VisitExpression));
+        return $"string.{stringNamespaceCall.FunctionName}({stringArgs})";
       default:
         return expr.ToString() ?? "";
     }
