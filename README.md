@@ -4539,7 +4539,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `web.*` functions (`get()` implemented - `put()`, `speedtest()` coming soon)
 
-- [ ] `console.*` functions (`clear()` implemented, `drawWindow()`, `optionList()` coming soon)
+- [x] `console.*` functions
 
 - [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
 
@@ -4574,6 +4574,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
 - [x] Parallel execution
+
+- [x] Deferred execution
 
 - [x] `scheduler.cron()` - Cron job scheduling with persistent jobs
 
