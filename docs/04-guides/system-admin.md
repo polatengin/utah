@@ -79,7 +79,7 @@ script.description("Monitor and manage system processes");
 function findResourceIntensiveProcesses(): void {
   console.log("Top CPU consumers:");
   `$(ps aux --sort=-%cpu | head -10)`;
-  
+
   console.log("\nTop Memory consumers:");
   `$(ps aux --sort=-%mem | head -10)`;
 }
@@ -87,12 +87,12 @@ function findResourceIntensiveProcesses(): void {
 // Kill processes by pattern
 function killProcessesByPattern(pattern: string): void {
   let pids: string[] = `$(pgrep -f "${pattern}")`.split("\n");
-  
+
   for (let pid: string in pids) {
     if (pid.trim() != "") {
       console.log(`Killing process ${pid} (${pattern})`);
       `$(kill -TERM ${pid})`;
-      
+
       // Wait a moment, then force kill if still running
       `$(sleep 5)`;
       if (`$(kill -0 ${pid} 2>/dev/null; echo $?)` == "0") {
@@ -108,9 +108,9 @@ function checkProcessLimits(): void {
   let totalProcesses: number = parseInt(`$(ps aux | wc -l)`);
   let maxProcesses: number = parseInt(`$(ulimit -u)`);
   let usage: number = Math.round((totalProcesses / maxProcesses) * 100);
-  
+
   console.log(`Process usage: ${totalProcesses}/${maxProcesses} (${usage}%)`);
-  
+
   if (usage > 80) {
     console.log(`⚠️  High process usage detected`);
     findResourceIntensiveProcesses();
@@ -133,21 +133,21 @@ let autoCleanup: boolean = args.getBoolean("--cleanup");
 function checkDiskUsage(): string[] {
   let problematicMounts: string[] = [];
   let diskInfo: string[] = `$(df -h | grep -v Filesystem)`.split("\n");
-  
+
   console.log("Disk Usage Report:");
   console.log("Filesystem      Size  Used Avail Use% Mounted on");
-  
+
   for (let line: string in diskInfo) {
     if (line.trim() != "") {
       console.log(line);
-      
+
       // Extract usage percentage
       let fields: string[] = line.split(/\s+/);
       if (fields.length >= 5) {
         let usageStr: string = fields[4].replace("%", "");
         let usage: number = parseInt(usageStr);
         let mountPoint: string = fields[5];
-        
+
         if (usage > threshold) {
           problematicMounts.push(mountPoint);
           console.log(`⚠️  ${mountPoint} is ${usage}% full (threshold: ${threshold}%)`);
@@ -155,22 +155,22 @@ function checkDiskUsage(): string[] {
       }
     }
   }
-  
+
   return problematicMounts;
 }
 
 // Clean up common temporary files
 function performCleanup(mountPoint: string): void {
   console.log(`Performing cleanup on ${mountPoint}...`);
-  
+
   // Clean temporary files
   if (mountPoint == "/" || mountPoint == "/tmp") {
     console.log("Cleaning /tmp directory...");
     `$(find /tmp -type f -atime +7 -delete 2>/dev/null || true)`;
-    
+
     console.log("Cleaning old log files...");
     `$(find /var/log -name "*.log.*" -mtime +30 -delete 2>/dev/null || true)`;
-    
+
     console.log("Cleaning package manager cache...");
     if (os.isInstalled("apt")) {
       `$(apt-get clean 2>/dev/null || true)`;
@@ -179,11 +179,11 @@ function performCleanup(mountPoint: string): void {
       `$(yum clean all 2>/dev/null || true)`;
     }
   }
-  
+
   // Find and report large files
   console.log("Finding large files (>100MB)...");
   let largeFiles: string[] = `$(find ${mountPoint} -type f -size +100M 2>/dev/null | head -10)`.split("\n");
-  
+
   for (let file: string in largeFiles) {
     if (file.trim() != "") {
       let size: string = `$(du -h "${file}" | cut -f1)`;
@@ -200,7 +200,7 @@ if (problematicMounts.length > 0) {
     for (let mount: string in problematicMounts) {
       performCleanup(mount);
     }
-    
+
     // Re-check after cleanup
     console.log("\nDisk usage after cleanup:");
     checkDiskUsage();
@@ -231,14 +231,14 @@ function manageService(service: string, action: string): void {
     console.log("❌ systemctl not available");
     exit(1);
   }
-  
+
   console.log(`Performing ${action} on service ${service}...`);
-  
+
   if (action == "status") {
     `$(systemctl status ${service})`;
   } else if (action == "start") {
     `$(systemctl start ${service})`;
-    
+
     // Verify service started
     let status: string = `$(systemctl is-active ${service})`;
     if (status == "active") {
@@ -249,7 +249,7 @@ function manageService(service: string, action: string): void {
     }
   } else if (action == "stop") {
     `$(systemctl stop ${service})`;
-    
+
     // Verify service stopped
     let status: string = `$(systemctl is-active ${service})`;
     if (status == "inactive") {
@@ -260,7 +260,7 @@ function manageService(service: string, action: string): void {
     }
   } else if (action == "restart") {
     `$(systemctl restart ${service})`;
-    
+
     // Wait a moment and check status
     `$(sleep 3)`;
     let status: string = `$(systemctl is-active ${service})`;
@@ -308,7 +308,7 @@ function checkServiceHealth(service: string): boolean {
   if (!os.isInstalled("systemctl")) {
     return false;
   }
-  
+
   let status: string = `$(systemctl is-active ${service} 2>/dev/null || echo "inactive")`;
   return status == "active";
 }
@@ -316,15 +316,15 @@ function checkServiceHealth(service: string): boolean {
 function handleServiceFailure(service: string): void {
   let currentFailures: number = json.getNumber(failureCounts, `.${service}`) + 1;
   failureCounts = json.set(failureCounts, `.${service}`, currentFailures);
-  
+
   console.log(`❌ Service ${service} is down (failure count: ${currentFailures})`);
-  
+
   if (currentFailures >= maxFailures) {
     console.log(`🚨 Service ${service} has failed ${maxFailures} times, attempting restart...`);
-    
+
     `$(systemctl restart ${service})`;
     `$(sleep 5)`;
-    
+
     if (checkServiceHealth(service)) {
       console.log(`✅ Service ${service} restarted successfully`);
       failureCounts = json.set(failureCounts, `.${service}`, 0); // Reset failure count
@@ -342,9 +342,9 @@ console.log(`Check interval: ${checkInterval}s, Max failures: ${maxFailures}`);
 while (true) {
   let timestamp: string = `$(date '+%Y-%m-%d %H:%M:%S')`;
   console.log(`[${timestamp}] Checking services...`);
-  
+
   let healthyCount: number = 0;
-  
+
   for (let service: string in monitoredServices) {
     if (checkServiceHealth(service)) {
       healthyCount++;
@@ -354,9 +354,9 @@ while (true) {
       handleServiceFailure(service);
     }
   }
-  
+
   console.log(`Status: ${healthyCount}/${monitoredServices.length} services healthy`);
-  
+
   // Sleep before next check
   `$(sleep ${checkInterval})`;
 }
@@ -372,9 +372,9 @@ script.description("Monitor network connectivity and ports");
 // Check network connectivity
 function checkNetworkConnectivity(): void {
   let testHosts: string[] = ["8.8.8.8", "1.1.1.1", "google.com"];
-  
+
   console.log("Network Connectivity Check:");
-  
+
   for (let host: string in testHosts) {
     let result: string = `$(ping -c 1 -W 5 ${host} >/dev/null 2>&1 && echo "OK" || echo "FAIL")`;
     if (result.trim() == "OK") {
@@ -388,9 +388,9 @@ function checkNetworkConnectivity(): void {
 // Check open ports
 function checkOpenPorts(): void {
   let criticalPorts: number[] = [22, 80, 443, 3306];
-  
+
   console.log("\nPort Status Check:");
-  
+
   for (let port: number in criticalPorts) {
     let result: string = `$(netstat -tuln | grep ":${port} " >/dev/null && echo "OPEN" || echo "CLOSED")`;
     if (result.trim() == "OPEN") {
@@ -404,14 +404,14 @@ function checkOpenPorts(): void {
 // Monitor network interfaces
 function checkNetworkInterfaces(): void {
   console.log("\nNetwork Interfaces:");
-  
+
   let interfaces: string[] = `$(ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print $2}' | awk '{print $1}')`.split("\n");
-  
+
   for (let interface: string in interfaces) {
     if (interface.trim() != "" && interface != "lo") {
       let status: string = `$(ip link show ${interface} | grep -q "state UP" && echo "UP" || echo "DOWN")`;
       let ip: string = `$(ip addr show ${interface} | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)`;
-      
+
       if (status.trim() == "UP") {
         console.log(`✅ ${interface}: ${status} (${ip})`);
       } else {
@@ -434,10 +434,10 @@ script.description("Basic security audit and hardening checks");
 // Check for unauthorized users
 function checkUnauthorizedUsers(): void {
   console.log("User Account Audit:");
-  
+
   // Check for users with UID 0 (root privileges)
   let rootUsers: string[] = `$(awk -F: '$3 == 0 {print $1}' /etc/passwd)`.split("\n");
-  
+
   for (let user: string in rootUsers) {
     if (user.trim() != "") {
       if (user == "root") {
@@ -447,10 +447,10 @@ function checkUnauthorizedUsers(): void {
       }
     }
   }
-  
+
   // Check for users with empty passwords
   let emptyPasswordUsers: string[] = `$(awk -F: '$2 == "" {print $1}' /etc/shadow 2>/dev/null || echo "")`.split("\n");
-  
+
   for (let user: string in emptyPasswordUsers) {
     if (user.trim() != "") {
       console.log(`❌ User with empty password: ${user}`);
@@ -461,21 +461,21 @@ function checkUnauthorizedUsers(): void {
 // Check file permissions
 function checkCriticalFilePermissions(): void {
   console.log("\nCritical File Permissions:");
-  
+
   let criticalFiles: object = {
     "/etc/passwd": "644",
     "/etc/shadow": "640",
     "/etc/ssh/sshd_config": "600",
     "/etc/sudoers": "440"
   };
-  
+
   let fileList: string[] = json.keys(criticalFiles);
-  
+
   for (let file: string in fileList) {
     if (fs.exists(file)) {
       let currentPerms: string = `$(stat -c %a ${file})`;
       let expectedPerms: string = json.getString(criticalFiles, `.${file}`);
-      
+
       if (currentPerms == expectedPerms) {
         console.log(`✅ ${file}: ${currentPerms} (correct)`);
       } else {
@@ -490,12 +490,12 @@ function checkCriticalFilePermissions(): void {
 // Check for suspicious processes
 function checkSuspiciousProcesses(): void {
   console.log("\nProcess Security Check:");
-  
+
   // Check for processes running as root
   let rootProcesses: string[] = `$(ps aux | awk '$1 == "root" && $11 !~ /^\[/ {print $11}' | sort | uniq)`.split("\n");
-  
+
   let suspiciousPatterns: string[] = ["nc", "netcat", "telnet"];
-  
+
   for (let process: string in rootProcesses) {
     if (process.trim() != "") {
       for (let pattern: string in suspiciousPatterns) {
@@ -510,25 +510,25 @@ function checkSuspiciousProcesses(): void {
 // Check SSH configuration
 function checkSSHSecurity(): void {
   console.log("\nSSH Security Check:");
-  
+
   let sshConfig: string = "/etc/ssh/sshd_config";
   if (fs.exists(sshConfig)) {
     let content: string = fs.readFile(sshConfig);
-    
+
     // Check if root login is disabled
     if (content.contains("PermitRootLogin no")) {
       console.log("✅ Root SSH login disabled");
     } else {
       console.log("❌ Root SSH login may be enabled");
     }
-    
+
     // Check if password authentication is disabled
     if (content.contains("PasswordAuthentication no")) {
       console.log("✅ SSH password authentication disabled");
     } else {
       console.log("⚠️  SSH password authentication may be enabled");
     }
-    
+
     // Check SSH port
     let portLine: string = `$(grep -E '^Port' ${sshConfig} || echo "Port 22")`;
     if (portLine.contains("Port 22")) {
@@ -561,22 +561,22 @@ let analysisDays: number = args.getNumber("--days");
 // Analyze system logs for errors
 function analyzeSystemLogs(): void {
   console.log(`Analyzing system logs for the last ${analysisDays} days...`);
-  
+
   let logFiles: string[] = [`${logDir}/syslog`, `${logDir}/auth.log`, `${logDir}/kern.log`];
-  
+
   for (let logFile: string in logFiles) {
     if (fs.exists(logFile)) {
       console.log(`\nAnalyzing ${logFile}:`);
-      
+
       // Count error types
       let errors: number = parseInt(`$(grep -i error ${logFile} | wc -l)`);
       let warnings: number = parseInt(`$(grep -i warning ${logFile} | wc -l)`);
       let failed: number = parseInt(`$(grep -i failed ${logFile} | wc -l)`);
-      
+
       console.log(`  Errors: ${errors}`);
       console.log(`  Warnings: ${warnings}`);
       console.log(`  Failed: ${failed}`);
-      
+
       // Show recent critical errors
       if (errors > 0) {
         console.log("  Recent errors:");
@@ -589,16 +589,16 @@ function analyzeSystemLogs(): void {
 // Rotate and compress old logs
 function rotateLogFiles(): void {
   console.log(`\nRotating log files older than ${analysisDays} days...`);
-  
+
   let oldLogs: string[] = `$(find ${logDir} -name "*.log" -mtime +${analysisDays} -type f)`.split("\n");
-  
+
   for (let logFile: string in oldLogs) {
     if (logFile.trim() != "") {
       let compressedFile: string = `${logFile}.gz`;
-      
+
       console.log(`Compressing ${logFile}...`);
       `$(gzip "${logFile}")`;
-      
+
       if (fs.exists(compressedFile)) {
         console.log(`✅ Compressed: ${compressedFile}`);
       } else {
@@ -611,11 +611,11 @@ function rotateLogFiles(): void {
 // Clean up very old compressed logs
 function cleanOldLogs(): void {
   let retentionDays: number = analysisDays * 4; // Keep compressed logs 4x longer
-  
+
   console.log(`\nCleaning logs older than ${retentionDays} days...`);
-  
+
   let veryOldLogs: string[] = `$(find ${logDir} -name "*.gz" -mtime +${retentionDays} -type f)`.split("\n");
-  
+
   for (let logFile: string in veryOldLogs) {
     if (logFile.trim() != "") {
       console.log(`Removing old log: ${logFile}`);
@@ -680,12 +680,12 @@ console.log(`Running backup command...`);
 if (fs.exists(`${backupPath}.tar.gz`)) {
   let backupSize: string = `$(du -h "${backupPath}.tar.gz" | cut -f1)`;
   console.log(`✅ Backup created successfully: ${backupPath}.tar.gz (${backupSize})`);
-  
+
   // Create checksum
   let checksumFile: string = `${backupPath}.sha256`;
   `$(sha256sum "${backupPath}.tar.gz" > "${checksumFile}")`;
   console.log(`✅ Checksum created: ${checksumFile}`);
-  
+
   // Log backup info
   let backupInfo: object = {
     "timestamp": timestamp,
@@ -695,7 +695,7 @@ if (fs.exists(`${backupPath}.tar.gz`)) {
     "excluded_patterns": excludePatterns,
     "size": backupSize
   };
-  
+
   let infoFile: string = `${backupPath}.json`;
   fs.writeFile(infoFile, json.stringify(backupInfo, true));
   console.log(`📋 Backup info saved: ${infoFile}`);
@@ -716,7 +716,7 @@ script.description("Collect and analyze system performance metrics");
 function collectCPUMetrics(): object {
   let loadAvg: string = `$(uptime | awk -F'load average:' '{print $2}' | sed 's/^ *//')`;
   let cpuUsage: string = `$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)`;
-  
+
   return {
     "load_average": loadAvg.trim(),
     "cpu_usage_percent": parseFloat(cpuUsage) || 0
@@ -726,12 +726,12 @@ function collectCPUMetrics(): object {
 // Collect memory metrics
 function collectMemoryMetrics(): object {
   let memInfo: string[] = `$(free -m | grep Mem)`.split(/\s+/);
-  
+
   if (memInfo.length >= 4) {
     let total: number = parseInt(memInfo[1]);
     let used: number = parseInt(memInfo[2]);
     let available: number = parseInt(memInfo[6] || memInfo[3]);
-    
+
     return {
       "total_mb": total,
       "used_mb": used,
@@ -739,7 +739,7 @@ function collectMemoryMetrics(): object {
       "usage_percent": Math.round((used / total) * 100)
     };
   }
-  
+
   return {};
 }
 
@@ -747,7 +747,7 @@ function collectMemoryMetrics(): object {
 function collectDiskMetrics(): object[] {
   let diskInfo: string[] = `$(df -h | grep -v Filesystem | grep -v tmpfs)`.split("\n");
   let disks: object[] = [];
-  
+
   for (let line: string in diskInfo) {
     if (line.trim() != "") {
       let fields: string[] = line.split(/\s+/);
@@ -764,7 +764,7 @@ function collectDiskMetrics(): object[] {
       }
     }
   }
-  
+
   return disks;
 }
 
@@ -772,19 +772,19 @@ function collectDiskMetrics(): object[] {
 function collectNetworkMetrics(): object {
   let interfaces: string[] = `$(ip link show | grep -E '^[0-9]+:' | awk -F': ' '{print $2}' | awk '{print $1}')`.split("\n");
   let interfaceStats: object = {};
-  
+
   for (let interface: string in interfaces) {
     if (interface.trim() != "" && interface != "lo") {
       let rxBytes: string = `$(cat /sys/class/net/${interface}/statistics/rx_bytes 2>/dev/null || echo "0")`;
       let txBytes: string = `$(cat /sys/class/net/${interface}/statistics/tx_bytes 2>/dev/null || echo "0")`;
-      
+
       interfaceStats = json.set(interfaceStats, `.${interface}`, {
         "rx_bytes": parseInt(rxBytes),
         "tx_bytes": parseInt(txBytes)
       });
     }
   }
-  
+
   return interfaceStats;
 }
 
@@ -825,7 +825,7 @@ for (let disk: object in disks) {
   let mountPoint: string = json.getString(disk, ".mount_point");
   let usage: number = json.getNumber(disk, ".usage_percent");
   console.log(`Disk ${mountPoint}: ${usage}%`);
-  
+
   if (usage > 85) {
     console.log(`⚠️  High disk usage on ${mountPoint}`);
   }
@@ -844,7 +844,7 @@ function logAdminAction(action: string, details: string): void {
   let timestamp: string = `$(date -Iseconds)`;
   let user: string = `$(whoami)`;
   let logEntry: string = `[${timestamp}] ${user}: ${action} - ${details}`;
-  
+
   fs.appendFile("/var/log/admin-actions.log", logEntry + "\n");
   console.log(`Logged: ${action}`);
 }
@@ -857,7 +857,7 @@ function validatePrerequisites(): boolean {
     console.log("❌ This script requires root or admin privileges");
     return false;
   }
-  
+
   // Check required tools
   let requiredTools: string[] = ["systemctl", "ps", "df", "free"];
   for (let tool: string in requiredTools) {
@@ -866,7 +866,7 @@ function validatePrerequisites(): boolean {
       return false;
     }
   }
-  
+
   return true;
 }
 ```
@@ -878,13 +878,13 @@ function validatePrerequisites(): boolean {
 function monitorResourceUsage(): void {
   let startTime: number = parseInt(`$(date +%s)`);
   let scriptPid: string = `$$`;
-  
+
   // Monitor memory usage periodically
   function checkMemoryUsage(): void {
     let memUsage: string = `$(ps -o pid,vsz,rss,comm -p ${scriptPid} | tail -1)`;
     console.log(`Memory usage: ${memUsage}`);
   }
-  
+
   // Set up cleanup on exit
   `$(trap 'echo "Script completed in $(($(date +%s) - ${startTime})) seconds"' EXIT)`;
 }

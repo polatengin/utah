@@ -24,7 +24,7 @@ script.description("Prevent command injection vulnerabilities");
 // Unsafe: Direct command construction with user input
 function unsafeCommandExecution(userInput: string): void {
   console.log("❌ UNSAFE: Direct command construction");
-  
+
   // This is vulnerable to command injection
   // let result: string = `$(ls ${userInput})`;
   console.log("This would be vulnerable if executed");
@@ -33,16 +33,16 @@ function unsafeCommandExecution(userInput: string): void {
 // Safe: Input validation and sanitization
 function safeCommandExecution(userInput: string): void {
   console.log("✅ SAFE: Validated command execution");
-  
+
   // Validate input format
   if (!isValidPath(userInput)) {
     console.log("❌ Invalid path format");
     exit(1);
   }
-  
+
   // Sanitize input
   let sanitizedPath: string = sanitizePath(userInput);
-  
+
   // Use validated input
   if (fs.exists(sanitizedPath)) {
     let result: string = `$(ls "${sanitizedPath}")`;
@@ -56,57 +56,57 @@ function safeCommandExecution(userInput: string): void {
 function isValidPath(path: string): boolean {
   // Check for dangerous characters
   let dangerousChars: string[] = [";", "&", "|", "`", "$", "(", ")", "<", ">"];
-  
+
   for (let char: string in dangerousChars) {
     if (path.contains(char)) {
       console.log(`❌ Dangerous character detected: ${char}`);
       return false;
     }
   }
-  
+
   // Check for directory traversal
   if (path.contains("..") || path.contains("./")) {
     console.log("❌ Directory traversal attempt detected");
     return false;
   }
-  
+
   // Check path length
   if (path.length > 255) {
     console.log("❌ Path too long");
     return false;
   }
-  
+
   // Check for absolute path outside allowed directories
   if (path.startsWith("/") && !isAllowedAbsolutePath(path)) {
     console.log("❌ Absolute path not allowed");
     return false;
   }
-  
+
   return true;
 }
 
 function sanitizePath(path: string): string {
   // Remove any remaining dangerous characters
   let sanitized: string = path.replace(/[;&|`$()<>]/g, "");
-  
+
   // Normalize path separators
   sanitized = sanitized.replace(/\/+/g, "/");
-  
+
   // Remove leading/trailing whitespace
   sanitized = sanitized.trim();
-  
+
   return sanitized;
 }
 
 function isAllowedAbsolutePath(path: string): boolean {
   let allowedPrefixes: string[] = ["/tmp/", "/var/tmp/", "/home/", "/opt/myapp/"];
-  
+
   for (let prefix: string in allowedPrefixes) {
     if (path.startsWith(prefix)) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -136,17 +136,17 @@ class SecureFileHandler {
   private allowedDirectories: string[];
   private maxFileSize: number; // bytes
   private allowedExtensions: string[];
-  
+
   constructor(allowedDirs: string[], maxSize: number, allowedExts: string[]) {
     this.allowedDirectories = allowedDirs;
     this.maxFileSize = maxSize;
     this.allowedExtensions = allowedExts;
   }
-  
+
   validateFilePath(filePath: string): boolean {
     // Resolve absolute path
     let absolutePath: string = fs.path(filePath);
-    
+
     // Check if path is within allowed directories
     let isAllowed: boolean = false;
     for (let allowedDir: string in this.allowedDirectories) {
@@ -155,19 +155,19 @@ class SecureFileHandler {
         break;
       }
     }
-    
+
     if (!isAllowed) {
       console.log(`❌ File path not in allowed directories: ${absolutePath}`);
       return false;
     }
-    
+
     // Check file extension
     let extension: string = fs.extension(filePath).toLowerCase();
     if (this.allowedExtensions.length > 0 && !this.allowedExtensions.contains(extension)) {
       console.log(`❌ File extension not allowed: ${extension}`);
       return false;
     }
-    
+
     // Check if file exists and get size
     if (fs.exists(absolutePath)) {
       let fileSize: number = parseInt(`$(stat -c%s "${absolutePath}" 2>/dev/null || echo "0")`);
@@ -176,17 +176,17 @@ class SecureFileHandler {
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   secureReadFile(filePath: string): string | null {
     if (!this.validateFilePath(filePath)) {
       return null;
     }
-    
+
     let absolutePath: string = fs.path(filePath);
-    
+
     try {
       let content: string = fs.readFile(absolutePath);
       console.log(`✅ Securely read file: ${absolutePath}`);
@@ -196,27 +196,27 @@ class SecureFileHandler {
       return null;
     }
   }
-  
+
   secureWriteFile(filePath: string, content: string): boolean {
     if (!this.validateFilePath(filePath)) {
       return false;
     }
-    
+
     let absolutePath: string = fs.path(filePath);
-    
+
     // Additional check for write operations
     if (content.length > this.maxFileSize) {
       console.log(`❌ Content too large: ${content.length} bytes`);
       return false;
     }
-    
+
     // Create backup if file exists
     if (fs.exists(absolutePath)) {
       let backupPath: string = `${absolutePath}.backup.$(date +%s)`;
       fs.copyFile(absolutePath, backupPath);
       console.log(`📁 Created backup: ${backupPath}`);
     }
-    
+
     try {
       fs.writeFile(absolutePath, content);
       console.log(`✅ Securely wrote file: ${absolutePath}`);
@@ -246,10 +246,10 @@ let testFiles: string[] = [
 
 for (let testFile: string in testFiles) {
   console.log(`\nTesting file: ${testFile}`);
-  
+
   // Test read operation
   let content: string | null = fileHandler.secureReadFile(testFile);
-  
+
   if (content !== null) {
     // Test write operation
     let success: boolean = fileHandler.secureWriteFile(testFile, "Secure content");
@@ -269,65 +269,65 @@ script.description("Secure handling of credentials and secrets");
 class CredentialManager {
   private credentialFile: string;
   private encryptionKey: string;
-  
+
   constructor(credFile: string) {
     this.credentialFile = credFile;
     this.encryptionKey = this.getEncryptionKey();
   }
-  
+
   private getEncryptionKey(): string {
     // Try to get encryption key from environment
     let key: string = env.get("CREDENTIAL_ENCRYPTION_KEY") || "";
-    
+
     if (key == "") {
       // Generate key from system information (not recommended for production)
       let hostname: string = `$(hostname)`;
       let user: string = `$(whoami)`;
       key = `${hostname}-${user}-default-key`;
-      
+
       console.log("⚠️  Using default encryption key. Set CREDENTIAL_ENCRYPTION_KEY environment variable.");
     }
-    
+
     return key;
   }
-  
+
   private encryptCredential(credential: string): string {
     // Simple XOR encryption (use proper encryption in production)
     let encrypted: string = "";
     let key: string = this.encryptionKey;
-    
+
     for (let i: number = 0; i < credential.length; i++) {
       let charCode: number = credential.charCodeAt(i);
       let keyChar: number = key.charCodeAt(i % key.length);
       encrypted += String.fromCharCode(charCode ^ keyChar);
     }
-    
+
     // Base64 encode the result
     return `$(echo -n "${encrypted}" | base64 -w 0)`;
   }
-  
+
   private decryptCredential(encryptedCredential: string): string {
     // Decode from base64
     let encrypted: string = `$(echo "${encryptedCredential}" | base64 -d)`;
-    
+
     // Simple XOR decryption
     let decrypted: string = "";
     let key: string = this.encryptionKey;
-    
+
     for (let i: number = 0; i < encrypted.length; i++) {
       let charCode: number = encrypted.charCodeAt(i);
       let keyChar: number = key.charCodeAt(i % key.length);
       decrypted += String.fromCharCode(charCode ^ keyChar);
     }
-    
+
     return decrypted;
   }
-  
+
   storeCredential(name: string, credential: string): boolean {
     console.log(`Storing credential: ${name}`);
-    
+
     let encrypted: string = this.encryptCredential(credential);
-    
+
     let credentials: object = {};
     if (fs.exists(this.credentialFile)) {
       try {
@@ -337,60 +337,60 @@ class CredentialManager {
         console.log("⚠️  Could not read existing credentials file");
       }
     }
-    
+
     credentials = json.set(credentials, `.${name}`, {
       "encrypted_value": encrypted,
       "created_at": `$(date -Iseconds)`,
       "last_accessed": `$(date -Iseconds)`
     });
-    
+
     // Set secure file permissions
     fs.writeFile(this.credentialFile, json.stringify(credentials, true));
     `$(chmod 600 "${this.credentialFile}")`;
-    
+
     console.log(`✅ Credential stored securely: ${name}`);
     return true;
   }
-  
+
   getCredential(name: string): string | null {
     if (!fs.exists(this.credentialFile)) {
       console.log("❌ Credentials file not found");
       return null;
     }
-    
+
     try {
       let content: string = fs.readFile(this.credentialFile);
       let credentials: object = json.parse(content);
-      
+
       if (!json.has(credentials, `.${name}`)) {
         console.log(`❌ Credential not found: ${name}`);
         return null;
       }
-      
+
       let credData: object = json.get(credentials, `.${name}`);
       let encrypted: string = json.getString(credData, ".encrypted_value");
-      
+
       // Update last accessed time
       credData = json.set(credData, ".last_accessed", `$(date -Iseconds)`);
       credentials = json.set(credentials, `.${name}`, credData);
       fs.writeFile(this.credentialFile, json.stringify(credentials, true));
-      
+
       let decrypted: string = this.decryptCredential(encrypted);
       console.log(`✅ Retrieved credential: ${name}`);
-      
+
       return decrypted;
-      
+
     } catch {
       console.log(`❌ Error retrieving credential: ${name}`);
       return null;
     }
   }
-  
+
   listCredentials(): string[] {
     if (!fs.exists(this.credentialFile)) {
       return [];
     }
-    
+
     try {
       let content: string = fs.readFile(this.credentialFile);
       let credentials: object = json.parse(content);
@@ -399,28 +399,28 @@ class CredentialManager {
       return [];
     }
   }
-  
+
   deleteCredential(name: string): boolean {
     if (!fs.exists(this.credentialFile)) {
       console.log("❌ Credentials file not found");
       return false;
     }
-    
+
     try {
       let content: string = fs.readFile(this.credentialFile);
       let credentials: object = json.parse(content);
-      
+
       if (!json.has(credentials, `.${name}`)) {
         console.log(`❌ Credential not found: ${name}`);
         return false;
       }
-      
+
       credentials = json.delete(credentials, `.${name}`);
       fs.writeFile(this.credentialFile, json.stringify(credentials, true));
-      
+
       console.log(`✅ Credential deleted: ${name}`);
       return true;
-      
+
     } catch {
       console.log(`❌ Error deleting credential: ${name}`);
       return false;
@@ -461,31 +461,31 @@ script.description("Secure environment variable handling");
 // Secure environment variable manager
 function secureEnvSetup(): void {
   console.log("Setting up secure environment...");
-  
+
   // Check for sensitive data in environment
   let sensitivePatterns: string[] = [
     "password", "secret", "key", "token", "credential",
     "passwd", "pwd", "auth", "private"
   ];
-  
+
   console.log("Scanning environment for potentially sensitive variables:");
-  
+
   let envVars: string[] = `$(env | cut -d'=' -f1)`.split("\n");
-  
+
   for (let varName: string in envVars) {
     if (varName.trim() != "") {
       let lowerName: string = varName.toLowerCase();
-      
+
       for (let pattern: string in sensitivePatterns) {
         if (lowerName.contains(pattern)) {
           console.log(`⚠️  Potentially sensitive environment variable: ${varName}`);
-          
+
           // Check if it's properly protected
           let value: string = env.get(varName) || "";
           if (value.length < 20) {
             console.log(`   Warning: Short value might not be secure`);
           }
-          
+
           break;
         }
       }
@@ -497,30 +497,30 @@ function secureEnvSetup(): void {
 function maskSensitiveOutput(output: string): string {
   let sensitivePatterns: string[] = [
     "password=\\S+",
-    "secret=\\S+", 
+    "secret=\\S+",
     "key=\\S+",
     "token=\\S+",
     "Bearer \\S+",
     "Basic \\S+"
   ];
-  
+
   let masked: string = output;
-  
+
   for (let pattern: string in sensitivePatterns) {
     // Replace sensitive data with asterisks
     masked = `$(echo "${masked}" | sed -E 's/${pattern}/[REDACTED]/g')`;
   }
-  
+
   return masked;
 }
 
 // Secure command execution with output masking
 function secureCommandExecution(command: string, description: string): void {
   console.log(`Executing: ${description}`);
-  
+
   let output: string = `$(${command} 2>&1)`;
   let maskedOutput: string = maskSensitiveOutput(output);
-  
+
   console.log(`Output: ${maskedOutput}`);
 }
 
@@ -548,16 +548,16 @@ script.description("Secure file permission management");
 
 // Secure file permission class
 class FilePermissionManager {
-  
+
   // Set secure permissions for different file types
   setSecurePermissions(filePath: string, fileType: string): boolean {
     if (!fs.exists(filePath)) {
       console.log(`❌ File not found: ${filePath}`);
       return false;
     }
-    
+
     let permissions: string = "";
-    
+
     switch (fileType) {
       case "config":
         permissions = "640";  // Owner read/write, group read
@@ -578,9 +578,9 @@ class FilePermissionManager {
         console.log(`❌ Unknown file type: ${fileType}`);
         return false;
     }
-    
+
     `$(chmod ${permissions} "${filePath}")`;
-    
+
     // Verify permissions were set correctly
     let actualPerms: string = `$(stat -c %a "${filePath}")`;
     if (actualPerms == permissions) {
@@ -591,11 +591,11 @@ class FilePermissionManager {
       return false;
     }
   }
-  
+
   // Audit file permissions
   auditPermissions(directory: string): object {
     console.log(`Auditing permissions in: ${directory}`);
-    
+
     let audit: object = {
       "directory": directory,
       "timestamp": `$(date -Iseconds)`,
@@ -606,28 +606,28 @@ class FilePermissionManager {
         "insecure_files": 0
       }
     };
-    
+
     let files: string[] = `$(find "${directory}" -type f)`.split("\n");
-    
+
     for (let file: string in files) {
       if (file.trim() != "") {
         let perms: string = `$(stat -c %a "${file}")`;
         let owner: string = `$(stat -c %U "${file}")`;
         let group: string = `$(stat -c %G "${file}")`;
-        
+
         let totalFiles: number = json.getNumber(audit, ".summary.total_files") + 1;
         audit = json.set(audit, ".summary.total_files", totalFiles);
-        
+
         // Check for insecure permissions
         let isInsecure: boolean = false;
         let issues: string[] = [];
-        
+
         // Check for world-writable files
         if (perms.endsWith("2") || perms.endsWith("6") || perms.endsWith("7")) {
           isInsecure = true;
           issues.push("World-writable");
         }
-        
+
         // Check for executable files with broad permissions
         if ((perms.endsWith("5") || perms.endsWith("7")) && perms.startsWith("7")) {
           if (perms == "755" || perms == "777") {
@@ -635,7 +635,7 @@ class FilePermissionManager {
             issues.push("Broadly executable");
           }
         }
-        
+
         // Check for config files with loose permissions
         if (file.contains("config") || file.contains(".conf") || file.contains(".cfg")) {
           if (perms != "600" && perms != "640" && perms != "644") {
@@ -643,7 +643,7 @@ class FilePermissionManager {
             issues.push("Config file with loose permissions");
           }
         }
-        
+
         if (isInsecure) {
           let auditIssues: object[] = json.get(audit, ".issues");
           auditIssues.push({
@@ -654,7 +654,7 @@ class FilePermissionManager {
             "issues": issues
           });
           audit = json.set(audit, ".issues", auditIssues);
-          
+
           let insecureCount: number = json.getNumber(audit, ".summary.insecure_files") + 1;
           audit = json.set(audit, ".summary.insecure_files", insecureCount);
         } else {
@@ -663,23 +663,23 @@ class FilePermissionManager {
         }
       }
     }
-    
+
     return audit;
   }
-  
+
   // Fix common permission issues
   fixPermissionIssues(auditResults: object): void {
     console.log("Fixing permission issues...");
-    
+
     let issues: object[] = json.get(auditResults, ".issues");
-    
+
     for (let issue: object in issues) {
       let file: string = json.getString(issue, ".file");
       let currentPerms: string = json.getString(issue, ".permissions");
       let problemList: string[] = json.get(issue, ".issues");
-      
+
       console.log(`Fixing ${file} (current: ${currentPerms})`);
-      
+
       for (let problem: string in problemList) {
         if (problem == "World-writable") {
           // Remove world write permission
@@ -708,7 +708,7 @@ fs.createDirectory(testDir);
 
 let testFiles: object = {
   "config.txt": "config",
-  "secret.key": "secret", 
+  "secret.key": "secret",
   "script.sh": "script",
   "public.txt": "public",
   "private.data": "private"
@@ -719,10 +719,10 @@ let fileNames: string[] = json.keys(testFiles);
 for (let fileName: string in fileNames) {
   let filePath: string = `${testDir}/${fileName}`;
   let fileType: string = json.getString(testFiles, `.${fileName}`);
-  
+
   // Create test file
   fs.writeFile(filePath, `Test content for ${fileName}`);
-  
+
   // Set secure permissions
   permManager.setSecurePermissions(filePath, fileType);
 }
@@ -744,7 +744,7 @@ script.description("User and process security management");
 // Security context checker
 function checkSecurityContext(): object {
   console.log("Checking security context...");
-  
+
   let context: object = {
     "timestamp": `$(date -Iseconds)`,
     "user": {
@@ -761,7 +761,7 @@ function checkSecurityContext(): object {
     },
     "security_checks": {}
   };
-  
+
   // Check if running as root
   let isRoot: boolean = json.getBoolean(context, ".user.is_root");
   if (isRoot) {
@@ -771,7 +771,7 @@ function checkSecurityContext(): object {
     console.log("✅ Running as non-root user");
     context = json.set(context, ".security_checks.root_warning", false);
   }
-  
+
   // Check for sudo usage
   let sudoUser: string = env.get("SUDO_USER") || "";
   if (sudoUser != "") {
@@ -781,32 +781,32 @@ function checkSecurityContext(): object {
   } else {
     context = json.set(context, ".security_checks.sudo_usage", false);
   }
-  
+
   // Check umask
   let umask: string = `$(umask)`;
   context = json.set(context, ".security_checks.umask", umask);
-  
+
   if (umask != "0022" && umask != "0077") {
     console.log(`⚠️  Unusual umask detected: ${umask}`);
     context = json.set(context, ".security_checks.unusual_umask", true);
   } else {
     context = json.set(context, ".security_checks.unusual_umask", false);
   }
-  
+
   return context;
 }
 
 // Privilege escalation detection
 function detectPrivilegeEscalation(): void {
   console.log("Checking for privilege escalation attempts...");
-  
+
   // Check for SUID/SGID files in common locations
   let suspiciousPaths: string[] = ["/tmp", "/var/tmp", "/dev/shm"];
-  
+
   for (let path: string in suspiciousPaths) {
     if (fs.exists(path)) {
       let suidFiles: string[] = `$(find "${path}" -type f \\( -perm -4000 -o -perm -2000 \\) 2>/dev/null)`.split("\n");
-      
+
       for (let file: string in suidFiles) {
         if (file.trim() != "") {
           console.log(`⚠️  SUID/SGID file found in ${path}: ${file}`);
@@ -814,10 +814,10 @@ function detectPrivilegeEscalation(): void {
       }
     }
   }
-  
+
   // Check for unusual process ownership
   let processes: string[] = `$(ps -eo user,pid,ppid,command --no-headers)`.split("\n");
-  
+
   for (let process: string in processes) {
     if (process.trim() != "") {
       let fields: string[] = process.trim().split(/\s+/);
@@ -825,7 +825,7 @@ function detectPrivilegeEscalation(): void {
         let user: string = fields[0];
         let pid: string = fields[1];
         let command: string = fields.slice(3).join(" ");
-        
+
         // Check for processes running as different users
         if (user == "root" && command.contains("sudo")) {
           console.log(`ℹ️  Root process via sudo: ${command.substring(0, 50)}...`);
@@ -838,14 +838,14 @@ function detectPrivilegeEscalation(): void {
 // Secure process execution
 function executeSecurely(command: string, dropPrivileges: boolean = true): string {
   console.log(`Executing securely: ${command.substring(0, 50)}...`);
-  
+
   if (dropPrivileges && parseInt(`$(id -u)`) == 0) {
     console.log("⚠️  Dropping root privileges for command execution");
-    
+
     // Find a non-root user to run as
     let safeUser: string = "nobody";
     let userExists: string = `$(id ${safeUser} 2>/dev/null && echo "exists" || echo "missing")`;
-    
+
     if (userExists.trim() == "exists") {
       // Execute as safe user
       let result: string = `$(sudo -u ${safeUser} ${command} 2>&1)`;
@@ -855,7 +855,7 @@ function executeSecurely(command: string, dropPrivileges: boolean = true): strin
       console.log(`❌ Safe user ${safeUser} not found, executing as root`);
     }
   }
-  
+
   // Execute normally
   let result: string = `$(${command} 2>&1)`;
   return result;
@@ -893,23 +893,23 @@ class SecureHttpClient {
   private allowedHosts: string[];
   private timeout: number;
   private maxRetries: number;
-  
+
   constructor(allowedHosts: string[], timeoutSeconds: number = 30, maxRetries: number = 3) {
     this.allowedHosts = allowedHosts;
     this.timeout = timeoutSeconds;
     this.maxRetries = maxRetries;
   }
-  
+
   private validateUrl(url: string): boolean {
     // Check protocol
     if (!url.startsWith("https://")) {
       console.log("❌ Only HTTPS URLs are allowed");
       return false;
     }
-    
+
     // Extract hostname
     let hostname: string = url.replace("https://", "").split("/")[0].split(":")[0];
-    
+
     // Check against allowed hosts
     let isAllowed: boolean = false;
     for (let allowedHost: string in this.allowedHosts) {
@@ -918,31 +918,31 @@ class SecureHttpClient {
         break;
       }
     }
-    
+
     if (!isAllowed) {
       console.log(`❌ Host not in allowed list: ${hostname}`);
       return false;
     }
-    
+
     // Check for suspicious characters
     if (url.contains(" ") || url.contains("\n") || url.contains("\r")) {
       console.log("❌ URL contains suspicious characters");
       return false;
     }
-    
+
     return true;
   }
-  
+
   private sanitizeHeaders(headers: object): object {
     let sanitized: object = {};
     let headerNames: string[] = json.keys(headers);
-    
+
     for (let headerName: string in headerNames) {
       let headerValue: string = json.getString(headers, `.${headerName}`);
-      
+
       // Remove potential injection characters
       let cleanValue: string = headerValue.replace(/[\r\n]/g, "");
-      
+
       // Validate header name
       if (headerName.match(/^[a-zA-Z0-9-]+$/)) {
         sanitized = json.set(sanitized, `.${headerName}`, cleanValue);
@@ -950,13 +950,13 @@ class SecureHttpClient {
         console.log(`⚠️  Skipping invalid header name: ${headerName}`);
       }
     }
-    
+
     return sanitized;
   }
-  
+
   get(url: string, headers: object = {}): object {
     console.log(`Making secure GET request to: ${url}`);
-    
+
     if (!this.validateUrl(url)) {
       return {
         "success": false,
@@ -964,39 +964,39 @@ class SecureHttpClient {
         "status_code": 0
       };
     }
-    
+
     let sanitizedHeaders: object = this.sanitizeHeaders(headers);
-    
+
     // Build curl command with security options
     let curlCmd: string = `curl -s -L -k --max-time ${this.timeout} --max-redirs 3`;
-    
+
     // Add headers
     let headerNames: string[] = json.keys(sanitizedHeaders);
     for (let headerName: string in headerNames) {
       let headerValue: string = json.getString(sanitizedHeaders, `.${headerName}`);
       curlCmd += ` -H "${headerName}: ${headerValue}"`;
     }
-    
+
     // Add response format options
     curlCmd += ` -w '{"http_code":"%{http_code}","time_total":"%{time_total}","size_download":"%{size_download}"}' "${url}"`;
-    
+
     let attempt: number = 0;
     while (attempt < this.maxRetries) {
       attempt++;
-      
+
       console.log(`Attempt ${attempt}/${this.maxRetries}`);
-      
+
       let startTime: number = parseInt(`$(date +%s%3N)`);
       let result: string = `$(${curlCmd} 2>/dev/null || echo '{"http_code":"000","time_total":"0","size_download":"0"}')`;
       let endTime: number = parseInt(`$(date +%s%3N)`);
-      
+
       try {
         let metrics: object = json.parse(result.split('\n').pop() || "{}");
         let httpCode: string = json.getString(metrics, ".http_code");
-        
+
         if (httpCode.startsWith("2")) {
           console.log(`✅ Request successful: ${httpCode}`);
-          
+
           return {
             "success": true,
             "status_code": parseInt(httpCode),
@@ -1009,24 +1009,24 @@ class SecureHttpClient {
           console.log(`❌ Network error on attempt ${attempt}`);
         } else {
           console.log(`❌ HTTP error ${httpCode} on attempt ${attempt}`);
-          
+
           // Don't retry on client errors
           if (httpCode.startsWith("4")) {
             break;
           }
         }
-        
+
       } catch {
         console.log(`❌ Failed to parse response on attempt ${attempt}`);
       }
-      
+
       if (attempt < this.maxRetries) {
         let backoff: number = attempt * 2;
         console.log(`Waiting ${backoff} seconds before retry...`);
         `$(sleep ${backoff})`;
       }
     }
-    
+
     return {
       "success": false,
       "error": "All retry attempts failed",
@@ -1054,12 +1054,12 @@ let testUrls: string[] = [
 
 for (let url: string in testUrls) {
   console.log(`\n--- Testing URL: ${url} ---`);
-  
+
   let response: object = httpClient.get(url, {
     "User-Agent": "Utah-Secure-Client/1.0",
     "Accept": "application/json"
   });
-  
+
   console.log(`Result: ${json.stringify(response, true)}`);
 }
 ```
@@ -1074,7 +1074,7 @@ script.description("Comprehensive security checklist for Utah scripts");
 // Security audit function
 function performSecurityAudit(): object {
   console.log("Performing comprehensive security audit...");
-  
+
   let audit: object = {
     "timestamp": `$(date -Iseconds)`,
     "audit_version": "1.0",
@@ -1083,11 +1083,11 @@ function performSecurityAudit(): object {
     "score": 0,
     "max_score": 0
   };
-  
+
   let score: number = 0;
   let maxScore: number = 0;
   let recommendations: string[] = [];
-  
+
   // Check 1: User privileges
   maxScore++;
   if (parseInt(`$(id -u)`) != 0) {
@@ -1097,7 +1097,7 @@ function performSecurityAudit(): object {
     audit = json.set(audit, ".checks.non_root_execution", false);
     recommendations.push("Avoid running scripts as root when possible");
   }
-  
+
   // Check 2: File permissions
   maxScore++;
   let scriptFile: string = `$0`;
@@ -1111,7 +1111,7 @@ function performSecurityAudit(): object {
       recommendations.push("Set secure permissions (750/755) on script files");
     }
   }
-  
+
   // Check 3: Environment variable security
   maxScore++;
   let hasSecureEnv: boolean = env.get("SECURE_MODE") == "true";
@@ -1121,19 +1121,19 @@ function performSecurityAudit(): object {
   } else {
     recommendations.push("Set SECURE_MODE=true environment variable");
   }
-  
+
   // Check 4: Input validation
   maxScore++;
   // This would be checked by static analysis in a real implementation
   audit = json.set(audit, ".checks.input_validation", true);
   score++; // Assume good for this example
-  
+
   // Check 5: Error handling
   maxScore++;
   // Check if script.exitOnError is used
   audit = json.set(audit, ".checks.error_handling", true);
   score++; // Assume good for this example
-  
+
   // Check 6: Logging security
   maxScore++;
   let logDir: string = "/var/log";
@@ -1150,14 +1150,14 @@ function performSecurityAudit(): object {
     score++; // No logging directory, assume secure
     audit = json.set(audit, ".checks.secure_logging", true);
   }
-  
+
   // Calculate final score
   let percentage: number = Math.round((score / maxScore) * 100);
   audit = json.set(audit, ".score", score);
   audit = json.set(audit, ".max_score", maxScore);
   audit = json.set(audit, ".percentage", percentage);
   audit = json.set(audit, ".recommendations", recommendations);
-  
+
   return audit;
 }
 

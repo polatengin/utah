@@ -126,12 +126,12 @@ function processFile(filename: string): boolean {
     if (!fs.exists(filename)) {
       throw `File not found: ${filename}`;
     }
-    
+
     let content: string = fs.readFile(filename);
     if (string.length(content) == 0) {
       throw `File is empty: ${filename}`;
     }
-    
+
     // Process the file
     return true;
   }
@@ -169,12 +169,12 @@ function deployApplication(environment: string, version: string): void {
   if (!array.contains(validEnvs, environment)) {
     throw `Invalid environment: ${environment}`;
   }
-  
+
   // Validate version format
   if (!string.contains(version, ".")) {
     throw `Invalid version format: ${version}`;
   }
-  
+
   console.log(`Deploying ${version} to ${environment}`);
 }
 
@@ -192,7 +192,7 @@ catch (error) {
 ```typescript
 function ensureDependencies(): void {
   let requiredTools: string[] = ["docker", "kubectl", "helm"];
-  
+
   for (let tool: string in requiredTools) {
     if (!os.isInstalled(tool)) {
       throw `Required tool not found: ${tool}`;
@@ -231,7 +231,7 @@ function retryOperation(maxAttempts: number, operation: string): boolean {
       }
     }
   }
-  
+
   console.log("All retry attempts failed");
   return false;
 }
@@ -254,7 +254,7 @@ function getConfiguration(): object {
   catch {
     console.log("Primary config not found, trying backup");
   }
-  
+
   // Try backup config source
   try {
     let config: string = fs.readFile("/tmp/backup-config.json");
@@ -263,7 +263,7 @@ function getConfiguration(): object {
   catch {
     console.log("Backup config not found, using defaults");
   }
-  
+
   // Use default configuration
   return json.parse('{"timeout": 30, "retries": 3}');
 }
@@ -276,11 +276,11 @@ function getConfiguration(): object {
 ```typescript
 function processWithCleanup(inputFile: string): void {
   let tempFile: string = `/tmp/processing-${timer.current()}`;
-  
+
   try {
     // Create temporary file
     fs.writeFile(tempFile, "processing data");
-    
+
     // Process data
     let result: string = `$(process-data ${inputFile} ${tempFile})`;
     console.log("Processing completed");
@@ -308,7 +308,7 @@ function callExternalService(): boolean {
     console.log("Circuit breaker: service calls suspended");
     return false;
   }
-  
+
   try {
     let response: string = `$(curl -f --connect-timeout 10 https://api.service.com)`;
     failureCount = 0;  // Reset on success
@@ -345,7 +345,7 @@ script.description("Data processing with comprehensive error handling");
 function handleError(message: string): void {
   let timestamp: string = timer.current();
   let logFile: string = "/var/log/script-errors.log";
-  
+
   fs.appendFile(logFile, `[${timestamp}] ${message}\n`);
   console.log(`ERROR: ${message}`);
 }
@@ -383,7 +383,7 @@ function safeFileOperation(filename: string): boolean {
       console.log(`File not found: ${filename}`);
       return false;
     }
-    
+
     let content: string = fs.readFile(filename);
     // Process content
     return true;

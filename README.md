@@ -617,10 +617,10 @@ Utah supports the `defer` keyword for scheduling cleanup operations that execute
 function processFile(filename: string): void {
   defer console.log("Function cleanup completed");
   defer fs.delete("temp.txt");
-  
+
   console.log("Processing file...");
   fs.writeFile("temp.txt", "temporary data");
-  
+
   // Defer statements execute here when function ends
   // Order: fs.delete("temp.txt"), then console.log("Function cleanup completed")
 }
@@ -635,7 +635,7 @@ function demonstrateOrder(): void {
   defer console.log("First defer - executes LAST");
   defer console.log("Second defer - executes SECOND");
   defer console.log("Third defer - executes FIRST");
-  
+
   console.log("Function body executes normally");
 }
 
@@ -655,14 +655,14 @@ Defer statements execute even when functions exit early via return statements:
 function validateAndProcess(data: string): void {
   defer console.log("Cleanup always runs");
   defer fs.delete("temp.log");
-  
+
   fs.writeFile("temp.log", "Processing started");
-  
+
   if (data == "") {
     console.log("Invalid data - exiting early");
     return; // Defer statements still execute!
   }
-  
+
   console.log("Processing valid data");
   // Defer statements execute here too
 }
@@ -680,14 +680,14 @@ function backupAndProcess(): void {
   defer fs.delete("backup.tmp");
   defer fs.delete("processing.lock");
   defer console.log("Backup and processing complete");
-  
+
   // Create temporary files
   fs.writeFile("processing.lock", "locked");
   fs.copy("important.txt", "backup.tmp");
-  
+
   // Process files (might fail or exit early)
   console.log("Processing files...");
-  
+
   // Cleanup always happens via defer statements
 }
 ```
@@ -700,15 +700,15 @@ Use defer for rollback scenarios in deployment or configuration scripts:
 function deployApplication(): void {
   defer git.undoLastCommit(); // Rollback if deploy fails
   defer console.log("Deployment attempt finished");
-  
+
   console.log("Starting deployment...");
-  
+
   // Deploy application (multiple steps that might fail)
   if (someValidationFails()) {
     console.log("Validation failed - rolling back");
     return; // git.undoLastCommit() still executes
   }
-  
+
   console.log("Deployment successful");
 }
 ```
@@ -721,25 +721,25 @@ function processLogFiles(): void {
   defer fs.delete("processed.tmp");
   defer timer.stop();
   defer console.log("Log processing cleanup completed");
-  
+
   timer.start();
-  
+
   // Create temporary files
   fs.writeFile("temp.log", "Starting log analysis");
   fs.writeFile("processed.tmp", "");
-  
+
   // Process logs (might encounter errors)
   let logContent: string = fs.readFile("system.log");
-  
+
   if (logContent.length == 0) {
     console.log("No logs to process");
     return; // All cleanup still happens
   }
-  
+
   // Continue processing...
   fs.writeFile("processed.tmp", logContent);
   console.log("Log processing completed");
-  
+
   // Cleanup executes automatically
 }
 ```
@@ -789,7 +789,7 @@ processFile() {
 function processData(): void {
   defer fs.delete("data.tmp");
   defer fs.delete("results.tmp");
-  
+
   fs.writeFile("data.tmp", "processing...");
   // Process data
   fs.writeFile("results.tmp", "results");
@@ -802,7 +802,7 @@ function processData(): void {
 function timedOperation(): void {
   defer timer.stop();
   defer console.log("Operation completed");
-  
+
   timer.start();
   // Perform operation
 }
@@ -813,7 +813,7 @@ function timedOperation(): void {
 ```typescript
 function criticalSection(): void {
   defer fs.delete("process.lock");
-  
+
   fs.writeFile("process.lock", "locked");
   // Critical operations
 }

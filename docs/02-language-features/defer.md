@@ -15,12 +15,12 @@ The `defer` keyword provides automatic cleanup and resource management in Utah f
 function processFile(filename: string): void {
   let file = fs.openFile(filename);
   defer file.close();  // Always executes when function exits
-  
+
   // Process the file...
   if (someCondition) {
     return;  // file.close() still executes
   }
-  
+
   // More processing...
 }  // file.close() executes here too
 ```
@@ -31,16 +31,16 @@ function processFile(filename: string): void {
 processFile() {
   local filename="$1"
   local _utah_defer_commands_processFile=()
-  
+
   # Set up cleanup trap
   trap '_utah_cleanup_processFile' RETURN ERR EXIT
-  
+
   local file
   file=$(fs_openFile "${filename}")
-  
+
   # Register defer command
   _utah_defer_commands_processFile+=("file_close \"${file}\"")
-  
+
   # Function body...
   if [ "${someCondition}" = "true" ]; then
     return
@@ -66,7 +66,7 @@ function setupResources(): void {
   defer console.log("Cleanup step 1");
   defer console.log("Cleanup step 2");
   defer console.log("Cleanup step 3");
-  
+
   console.log("Function body");
 }
 ```
@@ -86,13 +86,13 @@ Cleanup step 1
 function complexCleanup(): void {
   let connection = db.connect();
   defer connection.close();
-  
+
   let tempDir = fs.createTempDir();
   defer fs.removeDir(tempDir);
-  
+
   let logFile = fs.openFile("process.log");
   defer logFile.close();
-  
+
   // Work with resources...
   if (errorCondition) {
     return;  // All three cleanup actions execute in reverse order
@@ -109,16 +109,16 @@ function downloadAndProcess(url: string, outputFile: string): void {
   // Create temporary directory
   let tempDir = fs.createTempDir();
   defer fs.removeDir(tempDir);
-  
+
   // Download file
   let downloadPath = `${tempDir}/download.tmp`;
   web.download(url, downloadPath);
   defer fs.removeFile(downloadPath);
-  
+
   // Open output file
   let output = fs.openFile(outputFile, "write");
   defer output.close();
-  
+
   // Process and write...
 }
 ```
@@ -128,11 +128,11 @@ function downloadAndProcess(url: string, outputFile: string): void {
 ```typescript
 function criticalSection(): void {
   let lockFile = "/tmp/process.lock";
-  
+
   // Acquire lock
   fs.createFile(lockFile);
   defer fs.removeFile(lockFile);
-  
+
   // Critical work that must be protected...
 }
 ```
@@ -143,10 +143,10 @@ function criticalSection(): void {
 function longRunningTask(): void {
   console.log("Starting long task...");
   defer console.log("Task completed!");
-  
+
   // Set up progress tracking
   defer console.log("Cleaning up progress tracking");
-  
+
   // Actual work...
   for (let i = 0; i < 100; i++) {
     // Process item i
@@ -162,7 +162,7 @@ function longRunningTask(): void {
 function robustProcessing(): void {
   let resource = acquireResource();
   defer resource.release();  // Always executes, even if exception occurs
-  
+
   try {
     // Risky operation
     processData(resource);
@@ -179,12 +179,12 @@ function robustProcessing(): void {
 function conditionalSetup(useBackup: boolean): void {
   let primaryResource = setupPrimary();
   defer primaryResource.cleanup();
-  
+
   if (useBackup) {
     let backupResource = setupBackup();
     defer backupResource.cleanup();  // Only executes if backup was created
   }
-  
+
   // Work with resources...
 }
 ```
@@ -199,7 +199,7 @@ Variables referenced in defer statements are captured by value at the time the d
 function variableCapture(): void {
   let message = "Initial";
   defer console.log(`Deferred: ${message}`);  // Captures "Initial"
-  
+
   message = "Modified";
   console.log(`Current: ${message}`);         // Prints "Modified"
 }
@@ -218,10 +218,10 @@ Deferred: Initial
 function complexCleanup(): void {
   let config = loadConfig();
   defer saveConfig(config);  // Function call with argument
-  
+
   let server = startServer(config.port);
   defer server.stop();       // Method call
-  
+
   // Server operations...
 }
 ```
@@ -235,16 +235,16 @@ function complexCleanup(): void {
 function goodPattern(): void {
   let file = fs.openFile("data.txt");
   defer file.close();  // Paired immediately
-  
+
   // Use file...
 }
 
 // Avoid: Defer far from acquisition
 function avoidPattern(): void {
   let file = fs.openFile("data.txt");
-  
+
   // Lots of code...
-  
+
   defer file.close();  // Easy to miss or forget
 }
 ```
@@ -256,11 +256,11 @@ function comprehensiveCleanup(): void {
   // File system cleanup
   let tempFile = fs.createTempFile();
   defer fs.removeFile(tempFile);
-  
+
   // Network cleanup
   let connection = net.connect("api.example.com");
   defer connection.close();
-  
+
   // Process cleanup
   let process = system.startBackground("worker");
   defer process.kill();
@@ -307,14 +307,14 @@ function limitations(): void {
   defer file.close();
   defer console.log("Done");
   defer cleanup();
-  
+
   // Invalid defer statements
   defer {  // Error: blocks not supported
     if (condition) {
       doCleanup();
     }
   }
-  
+
   defer for (let i = 0; i < 10; i++) {  // Error: loops not supported
     cleanup(i);
   }
@@ -328,7 +328,7 @@ Once declared, defer statements cannot be cancelled or modified:
 ```typescript
 function noModification(): void {
   defer cleanup();
-  
+
   // Cannot cancel or modify the defer
   // The cleanup() call will always execute
 }
