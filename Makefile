@@ -258,6 +258,7 @@ info: ## Show project information
 markdownlint: ## Run markdownlint on all markdown files
 	@echo "$(BLUE)📝 Running markdownlint on markdown files...$(NC)"
 	@echo "$(BLUE)Checking markdown files...$(NC)"
+	@find . -name "*.md" -exec sed -i -E 's/[[:space:]]+$$//' {} +
 	@if markdownlint --ignore-path .gitignore --ignore node_modules --ignore src/website/node_modules --ignore src/vscode-extension/node_modules "**/*.md"; then \
 		echo "$(GREEN)✅ All markdown files passed linting$(NC)"; \
 	else \
