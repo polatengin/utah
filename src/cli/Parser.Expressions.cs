@@ -345,7 +345,7 @@ public partial class Parser
         var parenIndex = methodPart.IndexOf('(');
         var stringFunctionName = methodPart.Substring(0, parenIndex).Trim();
         var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
-        
+
         var arguments = new List<Expression>();
         if (!string.IsNullOrEmpty(argsContent))
         {

@@ -34,9 +34,9 @@ public class CompletionHandler : ICompletionHandler
     if (isDotTriggered)
     {
       // Get context by reading the document and analyzing what comes before the dot
-      var context = await AnalyzeCompletionContext(request, cancellationToken);
+      var context = await AnalyzeCompletionContextAsync(request, cancellationToken);
       await Console.Error.WriteLineAsync($"[LSP] Detected context: {context}");
-      
+
       if (context == "string")
       {
         // Show only string.* function completions
@@ -45,7 +45,7 @@ public class CompletionHandler : ICompletionHandler
       else
       {
         // Show all method completions for backward compatibility
-      completionItems.AddRange(new List<CompletionItem>
+        completionItems.AddRange(new List<CompletionItem>
       {
         // Console methods
         new CompletionItem
@@ -405,7 +405,7 @@ public class CompletionHandler : ICompletionHandler
     return new CompletionList(completionItems);
   }
 
-  private async Task<string> AnalyzeCompletionContext(CompletionParams request, CancellationToken cancellationToken)
+  private async Task<string> AnalyzeCompletionContextAsync(CompletionParams request, CancellationToken cancellationToken)
   {
     try
     {
@@ -418,7 +418,7 @@ public class CompletionHandler : ICompletionHandler
 
       var documentText = await File.ReadAllTextAsync(documentPath, cancellationToken);
       var lines = documentText.Split('\n');
-      
+
       if (request.Position.Line >= lines.Length)
       {
         return "";
@@ -431,7 +431,7 @@ public class CompletionHandler : ICompletionHandler
       }
 
       var textBeforeCursor = line.Substring(0, (int)request.Position.Character);
-      
+
       // Look for the pattern: word followed by dot at the end
       var match = System.Text.RegularExpressions.Regex.Match(textBeforeCursor, @"(\w+)\.$");
       return match.Success ? match.Groups[1].Value : "";
@@ -466,7 +466,7 @@ public class CompletionHandler : ICompletionHandler
       {
         Label = "isEmpty",
         Kind = CompletionItemKind.Method,
-        Detail = "isEmpty(value: string): boolean", 
+        Detail = "isEmpty(value: string): boolean",
         Documentation = "Check if string is empty or contains only whitespace"
       },
 
