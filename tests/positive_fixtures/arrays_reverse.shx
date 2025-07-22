@@ -3,8 +3,8 @@ let numbers: number[] = [1, 2, 3, 4, 5];
 let names: string[] = ["Alice", "Bob", "Charlie"];
 
 // Test reverse() method
-let reversedNumbers: number[] = numbers.reverse();
-let reversedNames: string[] = names.reverse();
+let reversedNumbers: number[] = array.reverse(numbers);
+let reversedNames: string[] = array.reverse(names);
 
 console.log("Original numbers:");
 for (let num: number in numbers) {
@@ -28,10 +28,10 @@ for (let name: string in reversedNames) {
 
 // Test with empty array
 let empty: string[] = [];
-let reversedEmpty: string[] = empty.reverse();
+let reversedEmpty: string[] = array.reverse(empty);
 
 console.log("Empty array reversed length:");
-console.log(reversedEmpty.length);
+console.log(array.length(reversedEmpty));
 
 // Test reverse in assignment and condition
 let first: number = reversedNumbers[0];

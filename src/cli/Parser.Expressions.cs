@@ -354,6 +354,21 @@ public partial class Parser
         return new StringNamespaceCallExpression(stringFunctionName, arguments);
       }
 
+      // Special case for array.* namespace functions
+      if (objectName == "array" && methodPart.Contains("(") && methodPart.EndsWith(")"))
+      {
+        var parenIndex = methodPart.IndexOf('(');
+        var arrayFunctionName = methodPart.Substring(0, parenIndex).Trim();
+        var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
+
+        var arguments = new List<Expression>();
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
+        }
+        return new ArrayNamespaceCallExpression(arrayFunctionName, arguments);
+      }
+
       // Handle .length property
       if (methodPart == "length" || methodPart == "length()")
       {

@@ -8,7 +8,7 @@ let firstNumber: number = numbers[0];
 let secondName: string = names[1];
 
 // Test array methods
-let length: number = numbers.length;
+let length: number = array.length(numbers);
 
 // Test array iteration
 for (let num: number in numbers) {

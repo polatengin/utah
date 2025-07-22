@@ -89,7 +89,7 @@ console.log("Custom config: " + customConfig);
 
 // Test array of environment variables
 let envVars: string[] = ["HOME", "USER", "PATH", "SHELL"];
-for (let i = 0; i < envVars.length; i++) {
+for (let i = 0; i < array.length(envVars); i++) {
   let envVar: string = envVars[i];
   let value: string = env.get(envVar, "not set");
   console.log(envVar + ": " + value);

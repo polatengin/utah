@@ -4,7 +4,7 @@ numbers=(1 2 3 4 5)
 names=("Alice" "Bob" "Charlie")
 first="${numbers[0]}"
 second="${names[1]}"
-count="${#numbers[@]}"
+count=${#numbers[@]}
 echo "First number:"
 echo "${first}"
 echo "Second name:"

@@ -4,57 +4,57 @@
 let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6];
 
 // Test default sort (ascending)
-let numbersAsc: number[] = numbers.sort();
-console.log("Numbers ascending: " + numbersAsc.join(", "));
+let numbersAsc: number[] = array.sort(numbers);
+console.log("Numbers ascending: " + array.join(numbersAsc, ", "));
 
 // Test explicit ascending sort
-let numbersAscExplicit: number[] = numbers.sort("asc");
-console.log("Numbers ascending explicit: " + numbersAscExplicit.join(", "));
+let numbersAscExplicit: number[] = array.sort(numbers, "asc");
+console.log("Numbers ascending explicit: " + array.join(numbersAscExplicit, ", "));
 
 // Test descending sort
-let numbersDesc: number[] = numbers.sort("desc");
-console.log("Numbers descending: " + numbersDesc.join(", "));
+let numbersDesc: number[] = array.sort(numbers, "desc");
+console.log("Numbers descending: " + array.join(numbersDesc, ", "));
 
 // Test with string array
 let fruits: string[] = ["banana", "apple", "cherry", "date"];
 
 // Test default sort (ascending)
-let fruitsAsc: string[] = fruits.sort();
-console.log("Fruits ascending: " + fruitsAsc.join(", "));
+let fruitsAsc: string[] = array.sort(fruits);
+console.log("Fruits ascending: " + array.join(fruitsAsc, ", "));
 
 // Test descending sort
-let fruitsDesc: string[] = fruits.sort("desc");
-console.log("Fruits descending: " + fruitsDesc.join(", "));
+let fruitsDesc: string[] = array.sort(fruits, "desc");
+console.log("Fruits descending: " + array.join(fruitsDesc, ", "));
 
 // Test with boolean array
 let flags: boolean[] = [true, false, true, false, true];
 
 // Test default sort (ascending - false before true)
-let flagsAsc: boolean[] = flags.sort();
-console.log("Flags ascending: " + flagsAsc.join(", "));
+let flagsAsc: boolean[] = array.sort(flags);
+console.log("Flags ascending: " + array.join(flagsAsc, ", "));
 
 // Test descending sort
-let flagsDesc: boolean[] = flags.sort("desc");
-console.log("Flags descending: " + flagsDesc.join(", "));
+let flagsDesc: boolean[] = array.sort(flags, "desc");
+console.log("Flags descending: " + array.join(flagsDesc, ", "));
 
 // Test with empty array
 let empty: string[] = [];
-let emptySorted: string[] = empty.sort();
-console.log("Empty array sorted: " + emptySorted.join(", "));
+let emptySorted: string[] = array.sort(empty);
+console.log("Empty array sorted: " + array.join(emptySorted, ", "));
 
 // Test with single element
 let single: number[] = [42];
-let singleSorted: number[] = single.sort();
-console.log("Single element sorted: " + singleSorted.join(", "));
+let singleSorted: number[] = array.sort(single);
+console.log("Single element sorted: " + array.join(singleSorted, ", "));
 
 // Test using sorted result in expressions
-let numbersDescSorted: number[] = numbers.sort("desc");
+let numbersDescSorted: number[] = array.sort(numbers, "desc");
 let maxNumber: number = numbersDescSorted[0];
 console.log("Maximum number: " + maxNumber);
 
-let numbersAscSorted: number[] = numbers.sort("asc");
+let numbersAscSorted: number[] = array.sort(numbers, "asc");
 let minNumber: number = numbersAscSorted[0];
 console.log("Minimum number: " + minNumber);
 
 // Test that original array is unchanged
-console.log("Original numbers: " + numbers.join(", "));
+console.log("Original numbers: " + array.join(numbers, ", "));

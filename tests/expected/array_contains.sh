@@ -17,17 +17,17 @@ hasTrue=$(case " ${flags[@]} " in *" true "*) echo "true" ;; *) echo "false" ;; 
 hasFalse=$(case " ${flags[@]} " in *" false "*) echo "true" ;; *) echo "false" ;; esac)
 echo "Has true: ${hasTrue}"
 echo "Has false: ${hasFalse}"
-if [ "$(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac)" = "true" ]; then
+if [ $(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac) ]; then
   echo "Found apple in fruits array"
 fi
-if [ "$(case " ${numbers[@]} " in *" 99 "*) echo "true" ;; *) echo "false" ;; esac)" = "false" ]; then
+if [ ! $(case " ${numbers[@]} " in *" 99 "*) echo "true" ;; *) echo "false" ;; esac) ]; then
   echo "99 is not in the numbers array"
 fi
 searchFruit="cherry"
 searchNumber=2
-if [ "$(case " ${fruits[@]} " in *" ${searchFruit} "*) echo "true" ;; *) echo "false" ;; esac)" = "true" ]; then
+if [ $(case " ${fruits[@]} " in *" ${searchFruit} "*) echo "true" ;; *) echo "false" ;; esac) ]; then
   echo "Found ${searchFruit} in fruits"
 fi
-if [ "$(case " ${numbers[@]} " in *" ${searchNumber} "*) echo "true" ;; *) echo "false" ;; esac)" = "true" ]; then
+if [ $(case " ${numbers[@]} " in *" ${searchNumber} "*) echo "true" ;; *) echo "false" ;; esac) ]; then
   echo "Found ${searchNumber} in numbers"
 fi

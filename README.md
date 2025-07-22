@@ -820,51 +820,51 @@ let second: number = numbers[1];   // Gets 20
 
 ### Array Properties
 
-Get the length of an array using the `.length` property:
+Get the length of an array using the `array.length()` function:
 
 ```typescript
 let items: string[] = ["apple", "banana", "cherry"];
-let count: number = items.length;  // Gets 3
+let count: number = array.length(items);  // Gets 3
 ```
 
-Check if an array is empty using the `.isEmpty()` method:
+Check if an array is empty using the `array.isEmpty()` function:
 
 ```typescript
 let emptyArray: string[] = [];
 let filledArray: string[] = ["apple", "banana", "cherry"];
 
-let emptyCheck: boolean = emptyArray.isEmpty();  // Gets true
-let filledCheck: boolean = filledArray.isEmpty(); // Gets false
+let emptyCheck: boolean = array.isEmpty(emptyArray);  // Gets true
+let filledCheck: boolean = array.isEmpty(filledArray); // Gets false
 
 // Use in conditionals
-if (emptyArray.isEmpty()) {
+if (array.isEmpty(emptyArray)) {
   console.log("The array is empty");
 }
 
-if (!filledArray.isEmpty()) {
+if (!array.isEmpty(filledArray)) {
   console.log("The array has items");
 }
 ```
 
-Reverse an array using the `.reverse()` method:
+Reverse an array using the `array.reverse()` function:
 
 ```typescript
 let numbers: number[] = [1, 2, 3, 4, 5];
-let reversed: number[] = numbers.reverse();  // Gets [5, 4, 3, 2, 1]
+let reversed: number[] = array.reverse(numbers);  // Gets [5, 4, 3, 2, 1]
 
 let fruits: string[] = ["apple", "banana", "cherry"];
-let reversedFruits: string[] = fruits.reverse();  // Gets ["cherry", "banana", "apple"]
+let reversedFruits: string[] = array.reverse(fruits);  // Gets ["cherry", "banana", "apple"]
 
 // Use in assignments and conditionals
 let emptyArray: string[] = [];
-let reversedEmpty: string[] = emptyArray.reverse();  // Gets []
+let reversedEmpty: string[] = array.reverse(emptyArray);  // Gets []
 
-if (!numbers.reverse().isEmpty()) {
+if (!array.isEmpty(array.reverse(numbers))) {
   console.log("Reversed array is not empty");
 }
 ```
 
-Check if an array contains a specific element using the `.contains()` method:
+Check if an array contains a specific element using the `array.contains()` function:
 
 ```typescript
 let fruits: string[] = ["apple", "banana", "cherry"];
@@ -872,18 +872,18 @@ let numbers: number[] = [1, 2, 3, 4, 5];
 let flags: boolean[] = [true, false, true];
 
 // Check for specific values
-let hasApple: boolean = fruits.contains("apple");      // Gets true
-let hasGrape: boolean = fruits.contains("grape");      // Gets false
-let hasThree: boolean = numbers.contains(3);           // Gets true
-let hasTen: boolean = numbers.contains(10);            // Gets false
-let hasTrue: boolean = flags.contains(true);           // Gets true
+let hasApple: boolean = array.contains(fruits, "apple");      // Gets true
+let hasGrape: boolean = array.contains(fruits, "grape");      // Gets false
+let hasThree: boolean = array.contains(numbers, 3);           // Gets true
+let hasTen: boolean = array.contains(numbers, 10);            // Gets false
+let hasTrue: boolean = array.contains(flags, true);           // Gets true
 
 // Use in conditionals
-if (fruits.contains("apple")) {
+if (array.contains(fruits, "apple")) {
   console.log("Found apple in fruits array");
 }
 
-if (!numbers.contains(99)) {
+if (!array.contains(numbers, 99)) {
   console.log("99 is not in the numbers array");
 }
 
@@ -891,16 +891,16 @@ if (!numbers.contains(99)) {
 let searchFruit: string = "cherry";
 let searchNumber: number = 2;
 
-if (fruits.contains(searchFruit)) {
+if (array.contains(fruits, searchFruit)) {
   console.log(`Found ${searchFruit} in fruits`);
 }
 
-if (numbers.contains(searchNumber)) {
+if (array.contains(numbers, searchNumber)) {
   console.log(`Found ${searchNumber} in numbers`);
 }
 ```
 
-Join array elements into a string using the `.join()` method:
+Join array elements into a string using the `array.join()` function:
 
 ```typescript
 let fruits: string[] = ["apple", "banana", "cherry"];
@@ -908,38 +908,38 @@ let numbers: number[] = [1, 2, 3, 4, 5];
 let flags: boolean[] = [true, false, true];
 
 // Join with default separator (comma)
-let defaultJoin: string = fruits.join();           // Gets "apple,banana,cherry"
-let commaJoin: string = fruits.join(",");          // Gets "apple,banana,cherry"
+let defaultJoin: string = array.join(fruits);           // Gets "apple,banana,cherry"
+let commaJoin: string = array.join(fruits, ",");          // Gets "apple,banana,cherry"
 
 // Join with custom separators
-let pipeJoin: string = fruits.join(" | ");         // Gets "apple | banana | cherry"
-let dashJoin: string = fruits.join("-");           // Gets "apple-banana-cherry"
-let spaceJoin: string = fruits.join(" ");          // Gets "apple banana cherry"
-let noSeparator: string = fruits.join("");         // Gets "applebananacherry"
+let pipeJoin: string = array.join(fruits, " | ");         // Gets "apple | banana | cherry"
+let dashJoin: string = array.join(fruits, "-");           // Gets "apple-banana-cherry"
+let spaceJoin: string = array.join(fruits, " ");          // Gets "apple banana cherry"
+let noSeparator: string = array.join(fruits, "");         // Gets "applebananacherry"
 
 // Join different array types
-let numberString: string = numbers.join("-");      // Gets "1-2-3-4-5"
-let booleanString: string = flags.join(" & ");     // Gets "true & false & true"
+let numberString: string = array.join(numbers, "-");      // Gets "1-2-3-4-5"
+let booleanString: string = array.join(flags, " & ");     // Gets "true & false & true"
 
 // Use in string interpolation
-console.log(`Fruits: ${fruits.join(", ")}`);       // "Fruits: apple, banana, cherry"
-console.log(`Numbers: ${numbers.join(" -> ")}`);   // "Numbers: 1 -> 2 -> 3 -> 4 -> 5"
+console.log(`Fruits: ${array.join(fruits, ", ")}`);       // "Fruits: apple, banana, cherry"
+console.log(`Numbers: ${array.join(numbers, " -> ")}`);   // "Numbers: 1 -> 2 -> 3 -> 4 -> 5"
 
 // Edge cases
 let empty: string[] = [];
-let emptyJoin: string = empty.join(",");            // Gets ""
+let emptyJoin: string = array.join(empty, ",");            // Gets ""
 
 let single: string[] = ["only"];
-let singleJoin: string = single.join(",");          // Gets "only"
+let singleJoin: string = array.join(single, ",");          // Gets "only"
 
 // Use in conditionals and assignments
-let csvData: string = fruits.join(",");
+let csvData: string = array.join(fruits, ",");
 if (csvData.length > 0) {
   console.log(`CSV data: ${csvData}`);
 }
 ```
 
-Sort array elements using the `.sort()` method:
+Sort array elements using the `array.sort()` function:
 
 ```typescript
 let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6];
@@ -947,35 +947,35 @@ let fruits: string[] = ["banana", "apple", "cherry", "date"];
 let flags: boolean[] = [true, false, true, false];
 
 // Sort with default order (ascending)
-let numbersAsc: number[] = numbers.sort();         // Gets [1, 1, 2, 3, 4, 5, 6, 9]
-let fruitsAsc: string[] = fruits.sort();           // Gets ["apple", "banana", "cherry", "date"]
-let flagsAsc: boolean[] = flags.sort();            // Gets [false, false, true, true]
+let numbersAsc: number[] = array.sort(numbers);         // Gets [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAsc: string[] = array.sort(fruits);           // Gets ["apple", "banana", "cherry", "date"]
+let flagsAsc: boolean[] = array.sort(flags);            // Gets [false, false, true, true]
 
 // Sort with explicit ascending order
-let numbersAscExplicit: number[] = numbers.sort("asc");  // Gets [1, 1, 2, 3, 4, 5, 6, 9]
-let fruitsAscExplicit: string[] = fruits.sort("asc");   // Gets ["apple", "banana", "cherry", "date"]
+let numbersAscExplicit: number[] = array.sort(numbers, "asc");  // Gets [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAscExplicit: string[] = array.sort(fruits, "asc");   // Gets ["apple", "banana", "cherry", "date"]
 
 // Sort with descending order
-let numbersDesc: number[] = numbers.sort("desc");  // Gets [9, 6, 5, 4, 3, 2, 1, 1]
-let fruitsDesc: string[] = fruits.sort("desc");    // Gets ["date", "cherry", "banana", "apple"]
-let flagsDesc: boolean[] = flags.sort("desc");     // Gets [true, true, false, false]
+let numbersDesc: number[] = array.sort(numbers, "desc");  // Gets [9, 6, 5, 4, 3, 2, 1, 1]
+let fruitsDesc: string[] = array.sort(fruits, "desc");    // Gets ["date", "cherry", "banana", "apple"]
+let flagsDesc: boolean[] = array.sort(flags, "desc");     // Gets [true, true, false, false]
 
 // Use sorted arrays in expressions
-let maxNumber: number = numbers.sort("desc")[0];   // Gets the largest number
-let minNumber: number = numbers.sort("asc")[0];    // Gets the smallest number
-let lastFruit: string = fruits.sort("desc")[0];    // Gets the last fruit alphabetically
+let maxNumber: number = array.sort(numbers, "desc")[0];   // Gets the largest number
+let minNumber: number = array.sort(numbers, "asc")[0];    // Gets the smallest number
+let lastFruit: string = array.sort(fruits, "desc")[0];    // Gets the last fruit alphabetically
 
 // Original arrays remain unchanged
-console.log(`Original numbers: ${numbers.join(", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
-console.log(`Sorted ascending: ${numbersAsc.join(", ")}`);  // [1, 1, 2, 3, 4, 5, 6, 9]
-console.log(`Sorted descending: ${numbersDesc.join(", ")}`); // [9, 6, 5, 4, 3, 2, 1, 1]
+console.log(`Original numbers: ${array.join(numbers, ", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
+console.log(`Sorted ascending: ${array.join(numbersAsc, ", ")}`);  // [1, 1, 2, 3, 4, 5, 6, 9]
+console.log(`Sorted descending: ${array.join(numbersDesc, ", ")}`); // [9, 6, 5, 4, 3, 2, 1, 1]
 
 // Edge cases
 let empty: string[] = [];
-let emptySorted: string[] = empty.sort();          // Gets []
+let emptySorted: string[] = array.sort(empty);          // Gets []
 
 let single: number[] = [42];
-let singleSorted: number[] = single.sort();        // Gets [42]
+let singleSorted: number[] = array.sort(single);        // Gets [42]
 
 // Use in conditionals and string interpolation
 let sortedFruits: string[] = fruits.sort();

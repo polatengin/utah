@@ -76,19 +76,19 @@ Join array elements into a string with a separator:
 let fruits: string[] = ["apple", "banana", "cherry"];
 
 // Join with default separator (comma)
-let defaultJoin: string = fruits.join();           // "apple,banana,cherry"
+let defaultJoin: string = array.join(fruits);           // "apple,banana,cherry"
 
 // Join with custom separators
-let pipeJoin: string = fruits.join(" | ");         // "apple | banana | cherry"
-let dashJoin: string = fruits.join("-");           // "apple-banana-cherry"
-let spaceJoin: string = fruits.join(" ");          // "apple banana cherry"
+let pipeJoin: string = array.join(fruits, " | ");         // "apple | banana | cherry"
+let dashJoin: string = array.join(fruits, "-");           // "apple-banana-cherry"
+let spaceJoin: string = array.join(fruits, " ");          // "apple banana cherry"
 
 // Join different array types
 let numbers: number[] = [1, 2, 3, 4, 5];
-let numberString: string = numbers.join("-");      // "1-2-3-4-5"
+let numberString: string = array.join(numbers, "-");      // "1-2-3-4-5"
 
 // Use in string interpolation
-console.log(`Fruits: ${fruits.join(", ")}`);       // "Fruits: apple, banana, cherry"
+console.log(`Fruits: ${array.join(fruits, ", ")}`);       // "Fruits: apple, banana, cherry"
 ```
 
 #### `array.sort()`
@@ -101,20 +101,20 @@ let fruits: string[] = ["banana", "apple", "cherry", "date"];
 let flags: boolean[] = [true, false, true, false];
 
 // Sort with default order (ascending)
-let numbersAsc: number[] = numbers.sort();         // [1, 1, 2, 3, 4, 5, 6, 9]
-let fruitsAsc: string[] = fruits.sort();           // ["apple", "banana", "cherry", "date"]
-let flagsAsc: boolean[] = flags.sort();            // [false, false, true, true]
+let numbersAsc: number[] = array.sort(numbers);         // [1, 1, 2, 3, 4, 5, 6, 9]
+let fruitsAsc: string[] = array.sort(fruits);           // ["apple", "banana", "cherry", "date"]
+let flagsAsc: boolean[] = array.sort(flags);            // [false, false, true, true]
 
 // Sort with explicit ascending order
-let numbersAscExplicit: number[] = numbers.sort("asc");
+let numbersAscExplicit: number[] = array.sort(numbers, "asc");
 
 // Sort with descending order
-let numbersDesc: number[] = numbers.sort("desc");  // [9, 6, 5, 4, 3, 2, 1, 1]
-let fruitsDesc: string[] = fruits.sort("desc");    // ["date", "cherry", "banana", "apple"]
+let numbersDesc: number[] = array.sort(numbers, "desc");  // [9, 6, 5, 4, 3, 2, 1, 1]
+let fruitsDesc: string[] = array.sort(fruits, "desc");    // ["date", "cherry", "banana", "apple"]
 
 // Original arrays remain unchanged - sort() returns a new array
-console.log(`Original: ${numbers.join(", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
-console.log(`Sorted: ${numbersAsc.join(", ")}`);    // [1, 1, 2, 3, 4, 5, 6, 9]
+console.log(`Original: ${array.join(numbers, ", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
+console.log(`Sorted: ${array.join(numbersAsc, ", ")}`);    // [1, 1, 2, 3, 4, 5, 6, 9]
 
 // Use with different data types
 // - string[]: Lexicographic (alphabetical) sorting
@@ -123,13 +123,13 @@ console.log(`Sorted: ${numbersAsc.join(", ")}`);    // [1, 1, 2, 3, 4, 5, 6, 9]
 
 // Edge cases
 let empty: string[] = [];
-let emptySorted: string[] = empty.sort();          // []
+let emptySorted: string[] = array.sort(empty);          // []
 
 let single: number[] = [42];
-let singleSorted: number[] = single.sort();        // [42]
+let singleSorted: number[] = array.sort(single);        // [42]
 
 // Chain with other array methods
-let topThreeNumbers: string = numbers.sort("desc").join(", ");
+let topThreeNumbers: string = array.join(array.sort(numbers, "desc"), ", ");
 ```
 
 ### Array Iteration

@@ -7,7 +7,7 @@ let first: number = numbers[0];
 let second: string = names[1];
 
 // Test array length
-let count: number = numbers.length;
+let count: number = array.length(numbers);
 
 console.log("First number:");
 console.log(first);
@@ -43,5 +43,5 @@ let messages: string[] = [
   "Monitoring mission accomplished! 🏆"
 ];
 
-let randomIndex: number = utility.random(0, messages.length - 1);
+let randomIndex: number = utility.random(0, array.length(messages) - 1);
 let finalMessage: string = messages[randomIndex];

@@ -216,6 +216,8 @@ public partial class Compiler
         return CompileTemplateUpdateExpression(templateUpdate);
       case StringNamespaceCallExpression stringNamespaceCall:
         return CompileStringNamespaceCallExpression(stringNamespaceCall);
+      case ArrayNamespaceCallExpression arrayNamespaceCall:
+        return CompileArrayNamespaceCallExpression(arrayNamespaceCall);
       default:
         throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
     }
@@ -1330,6 +1332,24 @@ public partial class Compiler
     };
   }
 
+  private string CompileArrayNamespaceCallExpression(ArrayNamespaceCallExpression arrayCall)
+  {
+    var functionName = arrayCall.FunctionName;
+    var args = arrayCall.Arguments.Select(CompileExpression).ToList();
+
+    return functionName switch
+    {
+      "length" => CompileArrayLengthFunction(args),
+      "isEmpty" => CompileArrayIsEmptyFunction(args),
+      "contains" => CompileArrayContainsFunction(args),
+      "reverse" => CompileArrayReverseFunction(args),
+      "push" => CompileArrayPushFunction(args),
+      "join" => CompileArrayJoinFunction(args),
+      "sort" => CompileArraySortFunction(args),
+      _ => throw new NotSupportedException($"Array function '{functionName}' is not supported")
+    };
+  }
+
   private string CompileStringLengthFunction(List<string> args)
   {
     if (args.Count != 1)
@@ -2003,5 +2023,115 @@ fi
     var resultVar = $"_utah_template_result_{uniqueId}";
 
     return $"$({resultVar}=$(envsubst < {sourceFile} > {targetFile} && echo \"true\" || echo \"false\"); echo ${{{resultVar}}})";
+  }
+
+  // Array namespace function implementations
+  private string CompileArrayLengthFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("array.length() requires exactly 1 argument");
+
+    var varName = ExtractVariableName(args[0]);
+    return $"${{#{varName}[@]}}";
+  }
+
+  private string CompileArrayIsEmptyFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("array.isEmpty() requires exactly 1 argument");
+
+    var varName = ExtractVariableName(args[0]);
+    return $"$([ ${{#{varName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileArrayContainsFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("array.contains() requires exactly 2 arguments");
+
+    var varName = ExtractVariableName(args[0]);
+    var item = args[1];
+
+    // Remove quotes from item if it's a string literal for comparison
+    var itemValue = item.StartsWith("\"") && item.EndsWith("\"") ? item[1..^1] : item;
+
+    return $"$(case \" ${{{varName}[@]}} \" in *\" {itemValue} \"*) echo \"true\" ;; *) echo \"false\" ;; esac)";
+  }
+
+  private string CompileArrayReverseFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("array.reverse() requires exactly 1 argument");
+
+    var varName = ExtractVariableName(args[0]);
+    return $"($(for ((i=${{#{varName}[@]}}-1; i>=0; i--)); do echo \"${{{varName}[i]}}\"; done))";
+  }
+
+  private string CompileArrayPushFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("array.push() requires exactly 2 arguments");
+
+    var varName = ExtractVariableName(args[0]);
+    var item = args[1];
+
+    // array.push() modifies the original array in-place
+    return $"{varName}+=({item})";
+  }
+
+  private string CompileArrayJoinFunction(List<string> args)
+  {
+    if (args.Count < 1 || args.Count > 2)
+      throw new InvalidOperationException("array.join() requires 1 or 2 arguments");
+
+    var varName = ExtractVariableName(args[0]);
+    var separator = args.Count == 2 ? args[1] : "\",\"";  // Default to comma
+
+    // Remove quotes from separator if it's a string literal
+    if (separator.StartsWith("\"") && separator.EndsWith("\""))
+    {
+      separator = separator[1..^1];
+    }
+
+    if (string.IsNullOrEmpty(separator))
+    {
+      // No separator - concatenate directly
+      return $"$(printf '%s' \"${{{varName}[@]}}\")";
+    }
+    else if (separator == ",")
+    {
+      // Special case for comma - use printf with format
+      return $"$(IFS=','; printf '%s' \"${{{varName}[*]}}\")";
+    }
+    else
+    {
+      // For other separators, use printf with the separator
+      var escapedSeparator = separator.Replace("'", "'\"'\"'"); // Escape single quotes
+      return $"$(IFS='{escapedSeparator}'; printf '%s' \"${{{varName}[*]}}\")";
+    }
+  }
+
+  private string CompileArraySortFunction(List<string> args)
+  {
+    if (args.Count < 1 || args.Count > 2)
+      throw new InvalidOperationException("array.sort() requires 1 or 2 arguments");
+
+    var varName = ExtractVariableName(args[0]);
+    var sortOrder = args.Count == 2 ? args[1] : "\"asc\"";
+
+    // Remove quotes from sort order if it's a string literal
+    if (sortOrder.StartsWith("\"") && sortOrder.EndsWith("\""))
+    {
+      sortOrder = sortOrder[1..^1];
+    }
+
+    if (sortOrder == "desc")
+    {
+      return $"($(printf '%s\\n' \"${{{varName}[@]}}\" | sort -r))";
+    }
+    else
+    {
+      return $"($(printf '%s\\n' \"${{{varName}[@]}}\" | sort))";
+    }
   }
 }
