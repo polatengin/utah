@@ -20,7 +20,7 @@ for name in "${names[@]}"; do
   echo "${name}"
 done
 data="red,green,blue"
-colors=$(IFS=','; read -ra SPLIT_ARRAY <<< "${data}"; echo "${SPLIT_ARRAY[@]}")
+IFS=',' read -ra colors <<< "${data}"
 echo "Colors:"
 for color in "${colors[@]}"; do
   echo "${color}"

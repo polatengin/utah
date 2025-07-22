@@ -64,8 +64,8 @@ echo "Replace all 'hello' with 'hi': ${replaceAll}"
 echo "Advanced replace all: ${allReplaced}"
 echo "Sliced: ${sliced}"
 csvText="apple,banana,cherry"
-fruits=$(IFS=','; read -ra SPLIT_ARRAY <<< "${csvText}"; echo "${SPLIT_ARRAY[@]}")
-words=$(IFS=' '; read -ra SPLIT_ARRAY <<< "${text}"; echo "${SPLIT_ARRAY[@]}")
+IFS=',' read -ra fruits <<< "${csvText}"
+IFS=' ' read -ra words <<< "${text}"
 echo "=== Split Operations ==="
 echo "CSV: ${csvText}"
 echo "Split result: ${fruits}"

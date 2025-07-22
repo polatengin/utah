@@ -425,31 +425,6 @@ public class FormatterVisitor
         return $"{VisitExpression(arrayContains.Array)}.contains({VisitExpression(arrayContains.Item)})";
       case ArrayReverse arrayReverse:
         return $"{VisitExpression(arrayReverse.Array)}.reverse()";
-      case ArrayPushExpression arrayPush:
-        return $"{VisitExpression(arrayPush.Array)}.push({VisitExpression(arrayPush.Item)})";
-      case StringLengthExpression stringLength:
-        return $"{VisitExpression(stringLength.Target)}.length";
-      case StringSplitExpression stringSplit:
-        return $"{VisitExpression(stringSplit.Target)}.split({VisitExpression(stringSplit.Separator)})";
-      case StringToUpperCaseExpression stringUpper:
-        return $"{VisitExpression(stringUpper.Target)}.toUpperCase()";
-      case StringToLowerCaseExpression stringLower:
-        return $"{VisitExpression(stringLower.Target)}.toLowerCase()";
-      case StringStartsWithExpression stringStartsWith:
-        return $"{VisitExpression(stringStartsWith.Target)}.startsWith({VisitExpression(stringStartsWith.Prefix)})";
-      case StringEndsWithExpression stringEndsWith:
-        return $"{VisitExpression(stringEndsWith.Target)}.endsWith({VisitExpression(stringEndsWith.Suffix)})";
-      case StringIncludesExpression stringIncludes:
-        return $"{VisitExpression(stringIncludes.Target)}.includes({VisitExpression(stringIncludes.SearchValue)})";
-      case StringSubstringExpression stringSubstring:
-        if (stringSubstring.Length != null)
-          return $"{VisitExpression(stringSubstring.Target)}.substring({VisitExpression(stringSubstring.StartIndex)}, {VisitExpression(stringSubstring.Length)})";
-        else
-          return $"{VisitExpression(stringSubstring.Target)}.substring({VisitExpression(stringSubstring.StartIndex)})";
-      case StringIndexOfExpression stringIndexOf:
-        return $"{VisitExpression(stringIndexOf.Target)}.indexOf({VisitExpression(stringIndexOf.SearchValue)})";
-      case StringReplaceExpression stringReplace:
-        return $"{VisitExpression(stringReplace.Target)}.replace({VisitExpression(stringReplace.SearchValue)}, {VisitExpression(stringReplace.ReplaceValue)})";
       case UtilityRandomExpression utilityRandom:
         if (utilityRandom.MinValue != null && utilityRandom.MaxValue != null)
           return $"utility.random({VisitExpression(utilityRandom.MinValue)}, {VisitExpression(utilityRandom.MaxValue)})";

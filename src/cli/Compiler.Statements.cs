@@ -25,41 +25,27 @@ public partial class Compiler
         break;
 
       case VariableDeclaration v:
-        // Special handling for StringSplitExpression
-        if (v.Value is StringSplitExpression split)
+        // Special handling for string.split() in array variable declarations
+        if (v.Value is StringNamespaceCallExpression stringCall && stringCall.FunctionName == "split")
         {
+          var stringToSplit = CompileExpression(stringCall.Arguments[0]);
+          var separator = CompileExpression(stringCall.Arguments[1]);
+          
           string targetValue;
-          if (split.Target is VariableExpression varE2)
+          if (stringToSplit.StartsWith("\"") && stringToSplit.EndsWith("\""))
           {
-            targetValue = $"${{{varE2.Name}}}";
-          }
-          else if (split.Target is LiteralExpression literal && literal.Type == "string")
-          {
-            // For string literals, use the value directly without quotes since we'll add them back
-            targetValue = literal.Value;
+            // It's a literal string - remove quotes for the here-string
+            targetValue = stringToSplit[1..^1];
           }
           else
           {
-            // For other expressions, compile and extract the result
-            var compiled = CompileExpression(split.Target);
-            // If it's a quoted string, remove the quotes since we'll add them back
-            if (compiled.StartsWith("\"") && compiled.EndsWith("\""))
-            {
-              targetValue = compiled.Substring(1, compiled.Length - 2);
-            }
-            else
-            {
-              targetValue = $"${{{ExtractVariableName(compiled)}}}";
-            }
+            // It's a variable reference - use variable expansion
+            var varName = ExtractVariableName(stringToSplit);
+            targetValue = $"${{{varName}}}";
           }
-
-          var separator = CompileExpression(split.Separator);
-          // Remove quotes from separator if it's a string literal
-          if (separator.StartsWith("\"") && separator.EndsWith("\""))
-          {
-            separator = separator[1..^1];
-          }
-          lines.Add($"IFS='{separator}' read -ra {v.Name} <<< \"{targetValue}\"");
+          
+          var separatorStr = separator.StartsWith("\"") && separator.EndsWith("\"") ? separator[1..^1] : separator;
+          lines.Add($"IFS='{separatorStr}' read -ra {v.Name} <<< \"{targetValue}\"");
         }
         // Special handling for timer.stop() in variable declarations
         else if (v.Value is TimerStopExpression)

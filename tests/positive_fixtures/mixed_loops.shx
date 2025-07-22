@@ -1,4 +1,4 @@
-let items: string[] = "one,two,three".split(",");
+let items: string[] = string.split("one,two,three", ",");
 
 console.log("Using for-in loop:");
 for (let item: string in items) {

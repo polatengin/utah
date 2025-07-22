@@ -21,7 +21,7 @@ for (let name: string in names) {
 
 // Test array from split
 let csvData: string = "one,two,three";
-let items: string[] = csvData.split(",");
+let items: string[] = string.split(csvData, ",");
 
 for (let item: string in items) {
   console.log(item);

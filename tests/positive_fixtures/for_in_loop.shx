@@ -1,4 +1,4 @@
-let items: string[] = "apple,banana,cherry".split(",");
+let items: string[] = string.split("apple,banana,cherry", ",");
 
 for (let item: string in items) {
   console.log("Item: ${item}");

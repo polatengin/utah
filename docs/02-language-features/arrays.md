@@ -64,7 +64,7 @@ Reverse the order of elements:
 
 ```typescript
 let numbers: number[] = [1, 2, 3, 4, 5];
-let reversed: number[] = numbers.reverse();
+let reversed: number[] = array.reverse(numbers);
 // reversed is [5, 4, 3, 2, 1]
 ```
 

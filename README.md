@@ -255,7 +255,7 @@ For-in loops iterate over arrays created using the `split()` function:
 ```typescript
 // Split a comma-separated string
 let fruitString: string = "apple,banana,cherry";
-let fruits: string = fruitString.split(",");
+let fruits: string = string.split(fruitString, ",");
 
 for (let fruit: string in fruits) {
   console.log(`Fruit: ${fruit}`);
@@ -263,7 +263,7 @@ for (let fruit: string in fruits) {
 
 // Split by spaces
 let words: string = "hello world utah";
-let wordArray: string = words.split(" ");
+let wordArray: string = string.split(words, " ");
 
 for (let word: string in wordArray) {
   console.log(`Word: ${word}`);
@@ -271,7 +271,7 @@ for (let word: string in wordArray) {
 
 // Split by custom delimiter
 let data: string = "one|two|three|four";
-let items: string = data.split("|");
+let items: string = string.split(data, "|");
 
 for (let item: string in items) {
   console.log(`Item: ${item}`);

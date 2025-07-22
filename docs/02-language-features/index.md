@@ -329,7 +329,7 @@ for (let file: string in inputFiles) {
       let processed: object = json.set(data, ".processed", true);
       processed = json.set(processed, ".timestamp", timer.current());
 
-      results[results.length] = processed;
+      results[array.length(results)] = processed;
       console.log(`Processed: ${file}`);
     }
     catch {
@@ -338,7 +338,7 @@ for (let file: string in inputFiles) {
   }
 }
 
-console.log(`Processed ${results.length} files successfully`);
+console.log(`Processed ${array.length(results)} files successfully`);
 ```
 
 ## Next Steps

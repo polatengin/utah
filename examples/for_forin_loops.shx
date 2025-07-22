@@ -21,7 +21,7 @@ console.log("=== For-In Loops with Arrays ===");
 
 // Split comma-separated values
 let groceries: string = "milk,bread,eggs,cheese,butter";
-let groceryList: string = groceries.split(",");
+let groceryList: string = string.split(groceries, ",");
 
 for (let item: string in groceryList) {
   console.log(`Need to buy: ${item}`);
@@ -29,7 +29,7 @@ for (let item: string in groceryList) {
 
 // Split space-separated values
 let tools: string = "hammer screwdriver wrench pliers";
-let toolbox: string = tools.split(" ");
+let toolbox: string = string.split(tools, " ");
 
 for (let tool: string in toolbox) {
   console.log(`Tool: ${tool}`);
@@ -37,7 +37,7 @@ for (let tool: string in toolbox) {
 
 // Split with custom delimiter
 let scores: string = "95|87|92|78|88|91";
-let scoreArray: string = scores.split("|");
+let scoreArray: string = string.split(scores, "|");
 
 for (let score: string in scoreArray) {
   console.log(`Score: ${score}`);
@@ -45,7 +45,7 @@ for (let score: string in scoreArray) {
 
 // Split file extensions
 let files: string = "document.pdf|image.jpg|script.sh|data.csv";
-let fileList: string = files.split("|");
+let fileList: string = string.split(files, "|");
 
 for (let file: string in fileList) {
   console.log(`Processing: ${file}`);

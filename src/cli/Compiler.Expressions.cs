@@ -68,10 +68,6 @@ public partial class Compiler
         return CompileArrayContains(contains);
       case ArrayReverse reverse:
         return CompileArrayReverse(reverse);
-      case StringLengthExpression sl:
-        return CompileStringLengthExpression(sl);
-      case StringSplitExpression ss:
-        return CompileStringSplitExpression(ss);
       case FunctionCall func:
         return CompileFunctionCallExpression(func);
       case ConsoleIsSudoExpression sudo:
@@ -140,24 +136,6 @@ public partial class Compiler
         return CompileFsRenameExpression(fsRename);
       case FsDeleteExpression fsDelete:
         return CompileFsDeleteExpression(fsDelete);
-      case StringToUpperCaseExpression stringUpper:
-        return CompileStringToUpperCaseExpression(stringUpper);
-      case StringToLowerCaseExpression stringLower:
-        return CompileStringToLowerCaseExpression(stringLower);
-      case StringStartsWithExpression stringStartsWith:
-        return CompileStringStartsWithExpression(stringStartsWith);
-      case StringEndsWithExpression stringEndsWith:
-        return CompileStringEndsWithExpression(stringEndsWith);
-      case StringSubstringExpression stringSubstring:
-        return CompileStringSubstringExpression(stringSubstring);
-      case StringIndexOfExpression stringIndexOf:
-        return CompileStringIndexOfExpression(stringIndexOf);
-      case StringReplaceExpression stringReplace:
-        return CompileStringReplaceExpression(stringReplace);
-      case StringIncludesExpression stringIncludes:
-        return CompileStringIncludesExpression(stringIncludes);
-      case ArrayPushExpression arrayPush:
-        return CompileArrayPushExpression(arrayPush);
       case TimerCurrentExpression timerCurrent:
         return CompileTimerCurrentExpression(timerCurrent);
       case GitUndoLastCommitExpression:
@@ -770,12 +748,6 @@ public partial class Compiler
     return $"($(for ((i=${{#{arrayName}[@]}}-1; i>=0; i--)); do echo \"${{{arrayName}[i]}}\"; done))";
   }
 
-  private string CompileStringLengthExpression(StringLengthExpression sl)
-  {
-    var varName = sl.Target is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(sl.Target));
-    return $"${{#{varName}}}";
-  }
-
   private string CompileFunctionCallExpression(FunctionCall func)
   {
     // Special handling for env.get() function calls
@@ -1104,113 +1076,6 @@ public partial class Compiler
     return $"$([ -e {path} ] && echo \"true\" || echo \"false\")";
   }
 
-  private string CompileStringToUpperCaseExpression(StringToUpperCaseExpression stringUpper)
-  {
-    // Extract variable name if it's in ${var} format
-    var target = CompileExpression(stringUpper.Target);
-    var varName = ExtractVariableName(target);
-    return $"\"${{{varName}^^}}\"";
-  }
-
-  private string CompileStringToLowerCaseExpression(StringToLowerCaseExpression stringLower)
-  {
-    // Extract variable name if it's in ${var} format
-    var target = CompileExpression(stringLower.Target);
-    var varName = ExtractVariableName(target);
-    return $"\"${{{varName},,}}\"";
-  }
-
-  private string CompileStringStartsWithExpression(StringStartsWithExpression stringStartsWith)
-  {
-    var target = CompileExpression(stringStartsWith.Target);
-    var prefix = CompileExpression(stringStartsWith.Prefix);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from prefix if it's a literal string
-    var prefixValue = prefix.StartsWith("\"") && prefix.EndsWith("\"")
-      ? prefix[1..^1]
-      : prefix;
-
-    return $"[[ \"${{{varName}}}\" == {prefixValue}* ]]";
-  }
-
-  private string CompileStringEndsWithExpression(StringEndsWithExpression stringEndsWith)
-  {
-    var target = CompileExpression(stringEndsWith.Target);
-    var suffix = CompileExpression(stringEndsWith.Suffix);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from suffix if it's a literal string
-    var suffixValue = suffix.StartsWith("\"") && suffix.EndsWith("\"")
-      ? suffix[1..^1]
-      : suffix;
-
-    return $"[[ \"${{{varName}}}\" == *{suffixValue} ]]";
-  }
-
-  private string CompileStringSubstringExpression(StringSubstringExpression stringSubstring)
-  {
-    var target = CompileExpression(stringSubstring.Target);
-    var start = CompileExpression(stringSubstring.StartIndex);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from start index if it's a literal
-    var startValue = start.StartsWith("\"") && start.EndsWith("\"") ? start[1..^1] : start;
-
-    if (stringSubstring.Length != null)
-    {
-      var length = CompileExpression(stringSubstring.Length);
-      var lengthValue = length.StartsWith("\"") && length.EndsWith("\"") ? length[1..^1] : length;
-      return $"\"${{{varName}:{startValue}:{lengthValue}}}\"";
-    }
-    else
-    {
-      // If no length specified, get substring from start to end
-      return $"\"${{{varName}:{startValue}}}\"";
-    }
-  }
-
-  private string CompileStringIndexOfExpression(StringIndexOfExpression stringIndexOf)
-  {
-    var target = CompileExpression(stringIndexOf.Target);
-    var searchValue = CompileExpression(stringIndexOf.SearchValue);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from search value if it's a literal
-    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
-
-    // Simple approach using grep to find position (returns -1 if not found, 0-based index if found)
-    return $"$(echo \"${{{varName}}}\" | awk -v search=\"{searchStr}\" '{{ pos = index($0, search); print (pos > 0 ? pos - 1 : -1) }}')";
-  }
-
-  private string CompileArrayPushExpression(ArrayPushExpression arrayPush)
-  {
-    var array = arrayPush.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(arrayPush.Array));
-    var value = CompileExpression(arrayPush.Item);
-
-    // Remove quotes from value if it's a string literal
-    var valueStr = value.StartsWith("\"") && value.EndsWith("\"") ? value[1..^1] : value;
-
-    // In bash, to push to an array: array+=(value)
-    // Only return the length if this is used in an expression context that needs a value
-    // For most cases (statement context), we just want the push operation without echoing
-    return $"{array}+=({valueStr})";
-  }
-
-  private string CompileTimerCurrentExpression(TimerCurrentExpression timerCurrent)
-  {
-    // Current timer value is the time elapsed since timer start
-    return "$(( $(date +%s%3N) - _utah_timer_start ))";
-  }
-
   private string CompileStringInterpolationExpression(StringInterpolationExpression stringInterpolation)
   {
     var parts = new List<string>();
@@ -1234,25 +1099,16 @@ public partial class Compiler
     return $"\"{string.Join("", parts)}\"";
   }
 
-  private string CompileStringSplitExpression(StringSplitExpression split)
-  {
-    var target = CompileExpression(split.Target);
-    var separator = CompileExpression(split.Separator);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from separator if it's a literal
-    var sepValue = separator.StartsWith("\"") && separator.EndsWith("\"") ? separator[1..^1] : separator;
-
-    // In bash, we can use IFS to split a string into an array
-    return $"(IFS='{sepValue}' read -ra SPLIT_ARRAY <<< \"${{{varName}}}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
-  }
-
   private string CompileTimerStopExpression()
   {
     // timer.stop() generates the end timer, calculates elapsed time, and returns it
     return "(_utah_timer_end=$(date +%s%3N); echo $((_utah_timer_end - _utah_timer_start)))";
+  }
+
+  private string CompileTimerCurrentExpression(TimerCurrentExpression timerCurrent)
+  {
+    // Current timer value is the time elapsed since timer start
+    return "$(( $(date +%s%3N) - _utah_timer_start ))";
   }
 
   private string CompileArgsHasExpression(ArgsHasExpression argsHas)
@@ -1268,39 +1124,6 @@ public partial class Compiler
   private string CompileArgsAllExpression(ArgsAllExpression argsAll)
   {
     return "$(__utah_all_args \"$@\")";
-  }
-
-  private string CompileStringReplaceExpression(StringReplaceExpression stringReplace)
-  {
-    var target = CompileExpression(stringReplace.Target);
-    var searchValue = CompileExpression(stringReplace.SearchValue);
-    var replaceValue = CompileExpression(stringReplace.ReplaceValue);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from search and replace values if they're literals
-    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
-    var replaceStr = replaceValue.StartsWith("\"") && replaceValue.EndsWith("\"") ? replaceValue[1..^1] : replaceValue;
-
-    // Use bash parameter expansion for simple string replacement: ${var/search/replace}
-    return $"\"${{{varName}/{searchStr}/{replaceStr}}}\"";
-  }
-
-  private string CompileStringIncludesExpression(StringIncludesExpression stringIncludes)
-  {
-    var target = CompileExpression(stringIncludes.Target);
-    var searchValue = CompileExpression(stringIncludes.SearchValue);
-
-    // Extract variable name if it's in ${var} format
-    var varName = ExtractVariableName(target);
-
-    // Remove quotes from search value if it's a literal
-    var searchStr = searchValue.StartsWith("\"") && searchValue.EndsWith("\"") ? searchValue[1..^1] : searchValue;
-
-    // Use bash case pattern matching to check if string contains substring
-    // Returns "true" if found, "false" if not found
-    return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
   }
 
   private string CompileStringNamespaceCallExpression(StringNamespaceCallExpression stringCall)
@@ -1476,9 +1299,24 @@ public partial class Compiler
     if (args.Count != 2)
       throw new InvalidOperationException("string.split() requires exactly 2 arguments");
 
-    var varName = ExtractVariableName(args[0]);
+    // Handle the string to split - can be a literal or variable
+    var stringToSplit = args[0];
+    string targetValue;
+    
+    if (stringToSplit.StartsWith("\"") && stringToSplit.EndsWith("\""))
+    {
+      // It's a literal string - remove quotes for the here-string
+      targetValue = stringToSplit[1..^1];
+    }
+    else
+    {
+      // It's a variable reference - use variable expansion
+      var varName = ExtractVariableName(stringToSplit);
+      targetValue = $"${{{varName}}}";
+    }
+
     var separatorStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
-    return $"$(IFS='{separatorStr}'; read -ra SPLIT_ARRAY <<< \"${{{varName}}}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
+    return $"$(IFS='{separatorStr}'; read -ra SPLIT_ARRAY <<< \"{targetValue}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
   }
 
   private string CompileStringSubstringFunction(List<string> args)

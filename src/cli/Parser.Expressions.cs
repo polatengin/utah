@@ -373,13 +373,13 @@ public partial class Parser
       if (methodPart == "length" || methodPart == "length()")
       {
         var targetExpr = new VariableExpression(objectName);
-        // Heuristic to guess if it's an array or string.
-        // This should be improved with a symbol table in the future.
+        // Arrays should use array.length() namespace function
         if (IsLikelyArray(objectName))
         {
           return new ArrayLength(targetExpr);
         }
-        return new StringLengthExpression(targetExpr);
+        // Strings should use string.length() namespace function
+        throw new InvalidOperationException($"Use string.length({objectName}) instead of {objectName}.length()");
       }
 
       // Handle .isEmpty() method
@@ -434,113 +434,6 @@ public partial class Parser
         }
 
         return new ArraySortExpression(new VariableExpression(objectName), sortOrderExpr);
-      }
-
-      // Handle .split() method for strings
-      if (methodPart.StartsWith("split(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(6, methodPart.Length - 7).Trim();
-        var separatorExpr = ParseExpression(argsContent);
-        var targetExpr = ParseExpression(objectName);
-        return new StringSplitExpression(targetExpr, separatorExpr);
-      }
-
-      // Handle .toUpperCase() method for strings
-      if (methodPart == "toUpperCase()")
-      {
-        var targetExpr = ParseExpression(objectName);
-        return new StringToUpperCaseExpression(targetExpr);
-      }
-
-      // Handle .toLowerCase() method for strings
-      if (methodPart == "toLowerCase()")
-      {
-        var targetExpr = ParseExpression(objectName);
-        return new StringToLowerCaseExpression(targetExpr);
-      }
-
-      // Handle .startsWith() method for strings
-      if (methodPart.StartsWith("startsWith(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(11, methodPart.Length - 12).Trim();
-        var prefixExpr = ParseExpression(argsContent);
-        var targetExpr = ParseExpression(objectName);
-        return new StringStartsWithExpression(targetExpr, prefixExpr);
-      }
-
-      // Handle .endsWith() method for strings
-      if (methodPart.StartsWith("endsWith(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
-        var suffixExpr = ParseExpression(argsContent);
-        var targetExpr = ParseExpression(objectName);
-        return new StringEndsWithExpression(targetExpr, suffixExpr);
-      }
-
-      // Handle .substring() method for strings
-      if (methodPart.StartsWith("substring(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(10, methodPart.Length - 11).Trim();
-        var args = SplitByComma(argsContent);
-        var targetExpr = ParseExpression(objectName);
-
-        if (args.Count == 1)
-        {
-          var startIndexExpr = ParseExpression(args[0]);
-          return new StringSubstringExpression(targetExpr, startIndexExpr);
-        }
-        else if (args.Count == 2)
-        {
-          var startIndexExpr = ParseExpression(args[0]);
-          var lengthExpr = ParseExpression(args[1]);
-          return new StringSubstringExpression(targetExpr, startIndexExpr, lengthExpr);
-        }
-        else
-        {
-          throw new InvalidOperationException("substring() requires 1 or 2 arguments (startIndex, length)");
-        }
-      }
-
-      // Handle .indexOf() method for strings
-      if (methodPart.StartsWith("indexOf(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
-        var searchValueExpr = ParseExpression(argsContent);
-        var targetExpr = ParseExpression(objectName);
-        return new StringIndexOfExpression(targetExpr, searchValueExpr);
-      }
-
-      // Handle .replace() method for strings
-      if (methodPart.StartsWith("replace(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
-        var args = SplitByComma(argsContent);
-        if (args.Count != 2)
-        {
-          throw new InvalidOperationException("replace() requires exactly 2 arguments (searchValue, replaceValue)");
-        }
-        var searchValueExpr = ParseExpression(args[0]);
-        var replaceValueExpr = ParseExpression(args[1]);
-        var targetExpr = ParseExpression(objectName);
-        return new StringReplaceExpression(targetExpr, searchValueExpr, replaceValueExpr);
-      }
-
-      // Handle .includes() method for strings
-      if (methodPart.StartsWith("includes(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
-        var searchValueExpr = ParseExpression(argsContent);
-        var targetExpr = ParseExpression(objectName);
-        return new StringIncludesExpression(targetExpr, searchValueExpr);
-      }
-
-      // Handle .push() method for arrays
-      if (methodPart.StartsWith("push(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
-        var itemExpr = ParseExpression(argsContent);
-        var targetExpr = new VariableExpression(objectName);
-        return new ArrayPushExpression(targetExpr, itemExpr);
       }
 
       // Handle timer methods

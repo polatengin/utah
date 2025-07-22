@@ -9,7 +9,7 @@ console.log(greeting);
 
 // Test env.get without default (single argument)
 let path: string = env.get("PATH");
-console.log("PATH length: " + path.length);
+console.log("PATH length: " + string.length(path));
 
 // Test env.set with command substitution
 env.set("START_TIME", "$(date -Iseconds)");

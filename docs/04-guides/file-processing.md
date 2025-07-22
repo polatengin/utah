@@ -60,7 +60,7 @@ fs.delete("temporary.txt");
 script.description("Process all text files in a directory");
 
 // Get all .txt files in current directory
-let files: string[] = `$(find . -name "*.txt" -type f)`.split("\n");
+let files: string[] = string.split(`$(find . -name "*.txt" -type f)`, "\n");
 
 for (let file: string in files) {
   if (file.trim() != "") {
@@ -70,10 +70,10 @@ for (let file: string in files) {
     let content: string = fs.readFile(file);
 
     // Transform content (example: uppercase)
-    let transformed: string = content.toUpperCase();
+    let transformed: string = string.toUpperCase(content);
 
     // Write to new file
-    let outputFile: string = file.replace(".txt", "-processed.txt");
+    let outputFile: string = string.replace(file, ".txt", "-processed.txt");
     fs.writeFile(outputFile, transformed);
 
     console.log(`✅ Created: ${outputFile}`);
@@ -89,13 +89,13 @@ fs.createDirectory("output/processed");
 fs.createDirectory("logs/$(date +%Y-%m-%d)");
 
 // List directory contents
-let entries: string[] = `$(ls -1 /path/to/directory)`.split("\n");
+let entries: string[] = string.split(`$(ls -1 /path/to/directory)`, "\n");
 
 // Process directory tree
 function processDirectory(dir: string): void {
   console.log(`Processing directory: ${dir}`);
 
-  let items: string[] = `$(find ${dir} -type f -name "*.log")`.split("\n");
+  let items: string[] = string.split(`$(find ${dir} -type f -name "*.log")`, "\n");
 
   for (let item: string in items) {
     if (item.trim() != "") {
@@ -106,11 +106,11 @@ function processDirectory(dir: string): void {
 
 function processLogFile(logFile: string): void {
   let content: string = fs.readFile(logFile);
-  let lines: string[] = content.split("\n");
+  let lines: string[] = string.split(content, "\n");
   let errorCount: number = 0;
 
   for (let line: string in lines) {
-    if (line.contains("ERROR")) {
+    if (string.includes(line, "ERROR")) {
       errorCount++;
     }
   }
@@ -169,7 +169,7 @@ function processYamlConfig(configFile: string): void {
     }
 
     // Save updated config
-    let outputFile: string = configFile.replace(".yaml", "-updated.yaml");
+    let outputFile: string = string.replace(configFile, ".yaml", "-updated.yaml");
     fs.writeFile(outputFile, yaml.stringify(config));
     console.log(`✅ Updated config saved to ${outputFile}`);
   }
@@ -184,7 +184,7 @@ script.description("Process CSV data files");
 function processCsvFile(csvFile: string): void {
   if (fs.exists(csvFile)) {
     let content: string = fs.readFile(csvFile);
-    let lines: string[] = content.split("\n");
+    let lines: string[] = string.split(content, "\n");
 
     // Skip header row
     let header: string = lines[0];
@@ -192,26 +192,26 @@ function processCsvFile(csvFile: string): void {
 
     let processedRows: string[] = [header]; // Keep header
 
-    for (let i: number = 1; i < lines.length; i++) {
+    for (let i: number = 1; i < array.length(lines); i++) {
       let line: string = lines[i];
       if (line.trim() != "") {
         // Split CSV row (simple comma split)
-        let columns: string[] = line.split(",");
+        let columns: string[] = string.split(line, ",");
 
         // Process columns (example: trim whitespace)
         let processedColumns: string[] = [];
         for (let column: string in columns) {
-          processedColumns.push(column.trim());
+          array.push(processedColumns, column.trim());
         }
 
         // Rejoin row
-        processedRows.push(processedColumns.join(","));
+        array.push(processedRows, array.join(processedColumns, ","));
       }
     }
 
     // Save processed CSV
-    let outputFile: string = csvFile.replace(".csv", "-processed.csv");
-    fs.writeFile(outputFile, processedRows.join("\n"));
+    let outputFile: string = string.replace(csvFile, ".csv", "-processed.csv");
+    fs.writeFile(outputFile, array.join(processedRows, "\n"));
     console.log(`✅ Processed CSV saved to ${outputFile}`);
   }
 }
@@ -229,13 +229,13 @@ function filterFilesBySize(directory: string, minSizeMB: number): string[] {
   let minSizeBytes: number = minSizeMB * 1024 * 1024;
   let largeFiles: string[] = [];
 
-  let allFiles: string[] = `$(find ${directory} -type f)`.split("\n");
+  let allFiles: string[] = string.split(`$(find ${directory} -type f)`, "\n");
 
   for (let file: string in allFiles) {
     if (file.trim() != "") {
       let sizeBytes: string = `$(stat -f%z "${file}" 2>/dev/null || stat -c%s "${file}" 2>/dev/null)`;
       if (sizeBytes != "" && parseInt(sizeBytes) > minSizeBytes) {
-        largeFiles.push(file);
+        array.push(largeFiles, file);
       }
     }
   }
@@ -249,11 +249,11 @@ function filterFilesByDate(directory: string, daysSince: number): string[] {
 
   // Find files modified in the last N days
   let findCmd: string = `find ${directory} -type f -mtime -${daysSince}`;
-  let files: string[] = `$(${findCmd})`.split("\n");
+  let files: string[] = string.split(`$(${findCmd})`, "\n");
 
   for (let file: string in files) {
     if (file.trim() != "") {
-      recentFiles.push(file);
+      array.push(recentFiles, file);
     }
   }
 

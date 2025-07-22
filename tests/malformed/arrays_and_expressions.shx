@@ -6,7 +6,7 @@ for(let item in arr){
 console.log(item);
 }
 
-if(arr.length>0){
+if(array.length(arr)>0){
 console.log(`First: ${arr[0]}`);
 }
 
