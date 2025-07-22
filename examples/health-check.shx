@@ -211,7 +211,7 @@ reportData[3] = `Memory: ${currentMemory}%`;
 reportData[4] = `CPU: ${currentCPU}%`;
 reportData[5] = `Issues Found: ${issuesFound ? "Yes" : "No"}`;
 
-let reportContent: string = reportData.join("\n");
+let reportContent: string = array.join(reportData, "\n");
 fs.writeFile("/tmp/health-report.txt", reportContent);
 
 let executionTime: number = timer.stop();

@@ -27,7 +27,7 @@ for (let entry: string in logEntries) {
   if (entry.startsWith("ERROR:")) {
     errorCount = errorCount + 1;
     let errorMsg: string = entry.substring(7); // Remove "ERROR: " prefix
-    criticalErrors.push(errorMsg);
+    array.push(criticalErrors, errorMsg);
 
     // Pattern matching for critical issues
     if (errorMsg.indexOf("Database") >= 0 || errorMsg.indexOf("Service") >= 0) {
@@ -137,12 +137,12 @@ for (let host: string in testHosts) {
     let response: string = web.get("https://${host}");
     let endTime: number = timer.current();
     let latency: number = endTime - startTime;
-    latencies.push(latency);
+    array.push(latencies, latency);
     console.log(`   📍 ${host}: ${latency}ms`);
   }
   catch {
     console.log(`   ❌ ${host}: Unreachable`);
-    latencies.push(9999); // Timeout value
+    array.push(latencies, 9999); // Timeout value
   }
 }
 
@@ -199,19 +199,19 @@ let securityIssues: string[] = [];
 // Check for common security concerns
 if (!os.isInstalled("fail2ban")) {
   securityScore = securityScore - 15;
-  securityIssues.push("fail2ban not installed");
+  array.push(securityIssues, "fail2ban not installed");
 }
 
 if (!os.isInstalled("ufw")) {
   securityScore = securityScore - 10;
-  securityIssues.push("firewall not configured");
+  array.push(securityIssues, "firewall not configured");
 }
 
 // Simulated SSH config check
 let sshConfigSecure: boolean = utility.random(0, 1) == 1;
 if (!sshConfigSecure) {
   securityScore = securityScore - 20;
-  securityIssues.push("SSH configuration insecure");
+  array.push(securityIssues, "SSH configuration insecure");
 }
 
 console.log(`   🛡️  Security Score: ${securityScore}/100`);
@@ -246,7 +246,7 @@ let missingVars: string[] = [];
 for (let envVar: string in envVars) {
   let varValue: string = env.get(envVar);
   if (varValue == "") {
-    missingVars.push(envVar);
+    array.push(missingVars, envVar);
   } else {
     console.log(`   ✅ ${envVar}: Set`);
   }
