@@ -1,0 +1,29 @@
+#!/usr/bin/env utah run
+// Utah Dialog Demo - Comprehensive demonstration of console dialog functions
+
+// Display messages
+console.showMessage("Welcome", "Welcome to Utah Dialog Demo!");
+console.showInfo("Information", "This script demonstrates dialog capabilities");
+console.showWarning("Warning", "This is just a demo - no real warnings");
+console.showError("Error Demo", "This is just a demo error message");
+console.showSuccess("Success!", "All dialog functions are working properly");
+
+// Get user input
+let name = console.promptText("Your Name", "John Doe");
+console.log("Hello, " + name + "!");
+
+let age = console.promptNumber("Your Age", 18, 120, 25);
+console.log("You are " + age + " years old.");
+
+// Choice selection
+let favoriteColor = console.showChoice("Color Selection", "What's your favorite color?", "Red,Green,Blue,Yellow", 0);
+console.log("Your favorite color is: " + favoriteColor);
+
+// Confirmation
+let confirmed = console.showConfirm("Confirmation", "Do you want to continue with the demo?");
+
+if (confirmed) {
+  console.showSuccess("Great!", "Thanks for trying the Utah dialog functions!");
+} else {
+  console.showInfo("That's OK", "You can try the dialogs anytime!");
+}

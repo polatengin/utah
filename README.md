@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-84-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-98-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2793,6 +2793,146 @@ fi
 - Works consistently across all Unix-like systems (Linux, macOS, BSD)
 - Lightweight check with minimal performance impact
 
+## 🎯 Console Dialog Functions
+
+Utah provides a comprehensive set of dialog functions for creating interactive terminal user interfaces. These functions automatically detect and use the best available dialog system (`dialog`, `whiptail`, or fallback to basic prompts).
+
+### Message Display Functions
+
+```typescript
+// Show informational message
+console.showMessage("Welcome", "Welcome to Utah Dialog Demo!");
+
+// Show different types of messages
+console.showInfo("Information", "Process completed successfully");
+console.showWarning("Warning", "This action cannot be undone");
+console.showError("Error", "Failed to connect to server");
+console.showSuccess("Success", "File uploaded successfully");
+```
+
+### User Input Functions
+
+```typescript
+// Prompt for text input with default value
+let name: string = console.promptText("Enter your name", "John Doe");
+console.log("Hello, " + name);
+
+// Prompt for password (input is hidden)
+let password: string = console.promptPassword("Enter your password");
+
+// Prompt for numeric input with validation
+let age: number = console.promptNumber("Enter your age", 18, 120, 25);
+console.log("You are " + age + " years old");
+
+// File and directory selection
+let configFile: string = console.promptFile("Select config file", "*.json");
+let workDir: string = console.promptDirectory("Choose working directory", "/tmp");
+```
+
+### Choice and Confirmation Functions
+
+```typescript
+// Single choice selection
+let color: string = console.showChoice(
+  "Color Selection",
+  "Choose your favorite color:",
+  "Red,Green,Blue,Yellow",
+  0  // default selection index
+);
+console.log("Selected color: " + color);
+
+// Multi-choice selection
+let features: string = console.showMultiChoice(
+  "Features",
+  "Select features to enable:",
+  "Logging,Monitoring,Analytics,Backup",
+  "Logging,Monitoring"  // default selections
+);
+
+// Yes/No confirmation with custom default
+let confirmed: boolean = console.showConfirm(
+  "Confirm Action",
+  "Are you sure you want to continue?",
+  "yes"  // default button
+);
+
+if (confirmed) {
+  console.showSuccess("Confirmed", "Operation will proceed");
+} else {
+  console.showInfo("Cancelled", "Operation was cancelled");
+}
+```
+
+### Progress Display
+
+```typescript
+// Show progress bar (useful with background processes)
+console.showProgress("Processing", "Loading data...", 75, false);
+```
+
+### Dialog Function Parameters
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `console.showMessage(title, message)` | title: string, message: string | void | General message dialog |
+| `console.showInfo(title, message)` | title: string, message: string | void | Information message |
+| `console.showWarning(title, message)` | title: string, message: string | void | Warning message |
+| `console.showError(title, message)` | title: string, message: string | void | Error message |
+| `console.showSuccess(title, message)` | title: string, message: string | void | Success message |
+| `console.showChoice(title, message, options, defaultIndex?)` | title: string, message: string, options: string, defaultIndex?: number | string | Single choice menu |
+| `console.showMultiChoice(title, message, options, defaultSelected?)` | title: string, message: string, options: string, defaultSelected?: string | string | Multi-choice checklist |
+| `console.showConfirm(title, message, defaultButton?)` | title: string, message: string, defaultButton?: string | boolean | Yes/no confirmation |
+| `console.showProgress(title, message, percent, canCancel?)` | title: string, message: string, percent: number, canCancel?: boolean | void | Progress display |
+| `console.promptText(prompt, defaultValue?, validation?)` | prompt: string, defaultValue?: string, validation?: string | string | Text input |
+| `console.promptPassword(prompt)` | prompt: string | string | Password input (hidden) |
+| `console.promptNumber(prompt, min?, max?, defaultValue?)` | prompt: string, min?: number, max?: number, defaultValue?: number | number | Numeric input with validation |
+| `console.promptFile(prompt, filter?)` | prompt: string, filter?: string | string | File selection |
+| `console.promptDirectory(prompt, defaultPath?)` | prompt: string, defaultPath?: string | string | Directory selection |
+
+### Dialog System Compatibility
+
+The dialog functions automatically use the best available system:
+
+1. **Primary**: `dialog` command (full-featured TUI)
+2. **Secondary**: `whiptail` command (lightweight TUI)
+3. **Fallback**: Basic terminal prompts using `read` and `echo`
+
+This ensures your scripts work across different environments while providing the best possible user experience.
+
+### Interactive Script Example
+
+```typescript
+#!/usr/bin/env utah run
+
+// Welcome the user
+console.showMessage("Setup Wizard", "Welcome to the application setup!");
+
+// Get user information
+let userName: string = console.promptText("Your name", "User");
+let userEmail: string = console.promptText("Your email");
+
+// Choose installation type
+let installType: string = console.showChoice(
+  "Installation Type",
+  "Choose installation type:",
+  "Quick,Custom,Advanced",
+  0
+);
+
+// Confirm installation
+let confirmed: boolean = console.showConfirm(
+  "Confirm Setup",
+  `Install ${installType} setup for ${userName}?`
+);
+
+if (confirmed) {
+  console.showProgress("Installing", "Please wait...", 100);
+  console.showSuccess("Complete", "Setup completed successfully!");
+} else {
+  console.showInfo("Cancelled", "Setup was cancelled");
+}
+```
+
 ## 🧩 JSON Functions
 
 Utah provides comprehensive JSON parsing and manipulation functions that allow you to work with JSON data directly in your scripts. These functions use `jq` under the hood to provide powerful and efficient JSON operations with jq-style path syntax.
@@ -3990,6 +4130,20 @@ Current tests cover:
 - **console_clear.shx** - Console clear() function for clearing terminal screen
 - **console_issudo.shx** - Console system functions and privilege checking
 - **console_prompt_yesno.shx** - User interaction with yes/no prompts
+- **console_promptdirectory.shx** - Console directory selection dialog with default path
+- **console_promptfile.shx** - Console file selection dialog with filter support
+- **console_promptnumber.shx** - Console numeric input with validation and range checking
+- **console_promptpassword.shx** - Console password input with hidden text
+- **console_prompttext.shx** - Console text input dialog with default values
+- **console_showchoice.shx** - Console single choice menu with options and default selection
+- **console_showconfirm.shx** - Console yes/no confirmation dialog with default button
+- **console_showerror.shx** - Console error message dialog display
+- **console_showinfo.shx** - Console informational message dialog display
+- **console_showmessage.shx** - Console general message dialog display
+- **console_showmultichoice.shx** - Console multi-choice checklist with default selections
+- **console_showprogress.shx** - Console progress bar display with percentage and cancel option
+- **console_showsuccess.shx** - Console success message dialog display
+- **console_showwarning.shx** - Console warning message dialog display
 - **const_valid_assignment.shx** - Const variable declarations and immutability
 - **env_get_ternary.shx** - Environment variable operations with ternary operators
 - **environment_variables.shx** - Environment variable operations

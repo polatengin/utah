@@ -1,0 +1,2 @@
+let selections = console.showMultiChoice("Multi Select", "Choose multiple options:", "Red,Green,Blue", "Red,Blue");
+console.log("You selected: " + selections);

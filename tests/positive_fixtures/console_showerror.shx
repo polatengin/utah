@@ -1,0 +1,1 @@
+console.showError("Error", "This is an error message");

@@ -11,7 +11,7 @@ Utah provides an extensive library of built-in functions organized into logical 
 
 ### Core Functions
 
-- **[Console Functions](console.md)** - Output, logging, and user interaction
+- **[Console Functions](console.md)** - Output, logging, user interaction, and rich dialog interfaces
 - **[File System Functions](filesystem.md)** - File and directory operations
 - **[Template Functions](template.md)** - File templating and variable substitution
 - **[Operating System Functions](operating-system.md)** - System information and process management
@@ -36,6 +36,12 @@ Utah provides an extensive library of built-in functions organized into logical 
 ```typescript
 // Console output
 console.log("Hello, World!");
+
+// Rich dialog interfaces
+console.showMessage("Welcome", "Setup started!");
+let name: string = console.promptText("Enter your name", "User");
+let confirmed: boolean = console.showConfirm("Confirm", "Continue?", "yes");
+let choice: string = console.showChoice("Options", "Pick one:", "A,B,C", 0);
 
 // String manipulation
 let text: string = "  Hello World  ";

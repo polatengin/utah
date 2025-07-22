@@ -1,0 +1,2 @@
+let age = console.promptNumber("Enter your age", 18, 120, 25);
+console.log("You are " + age + " years old");

@@ -15,6 +15,21 @@ public record FunctionCall(string Name, List<Expression> Arguments) : Expression
 public record ParallelFunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ConsoleIsSudoExpression() : Expression;
 public record ConsolePromptYesNoExpression(Expression PromptText) : Expression;
+// Dialog expressions
+public record ConsoleShowMessageExpression(Expression Title, Expression Message) : Expression;
+public record ConsoleShowInfoExpression(Expression Title, Expression Message) : Expression;
+public record ConsoleShowWarningExpression(Expression Title, Expression Message) : Expression;
+public record ConsoleShowErrorExpression(Expression Title, Expression Message) : Expression;
+public record ConsoleShowSuccessExpression(Expression Title, Expression Message) : Expression;
+public record ConsoleShowChoiceExpression(Expression Title, Expression Message, Expression Options, Expression? DefaultIndex) : Expression;
+public record ConsoleShowMultiChoiceExpression(Expression Title, Expression Message, Expression Options, Expression? DefaultSelected) : Expression;
+public record ConsoleShowConfirmExpression(Expression Title, Expression Message, Expression? DefaultButton) : Expression;
+public record ConsoleShowProgressExpression(Expression Title, Expression Message, Expression Percent, Expression? CanCancel) : Expression;
+public record ConsolePromptTextExpression(Expression Prompt, Expression? DefaultValue, Expression? ValidationPattern) : Expression;
+public record ConsolePromptPasswordExpression(Expression Prompt) : Expression;
+public record ConsolePromptNumberExpression(Expression Prompt, Expression? MinValue, Expression? MaxValue, Expression? DefaultValue) : Expression;
+public record ConsolePromptFileExpression(Expression Prompt, Expression? Filter) : Expression;
+public record ConsolePromptDirectoryExpression(Expression Prompt, Expression? DefaultPath) : Expression;
 public record UtilityRandomExpression(Expression? MinValue, Expression? MaxValue) : Expression;
 public record UtilityUuidExpression() : Expression;
 public record UtilityHashExpression(Expression Text, Expression? Algorithm) : Expression;

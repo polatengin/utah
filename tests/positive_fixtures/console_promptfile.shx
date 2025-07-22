@@ -1,0 +1,2 @@
+let file = console.promptFile("Select a file", "*.txt");
+console.log("Selected file: " + file);

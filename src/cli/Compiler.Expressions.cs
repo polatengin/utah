@@ -74,6 +74,34 @@ public partial class Compiler
         return CompileConsoleIsSudoExpression(sudo);
       case ConsolePromptYesNoExpression prompt:
         return CompileConsolePromptYesNoExpression(prompt);
+      case ConsoleShowMessageExpression showMessage:
+        return CompileConsoleShowMessageExpression(showMessage);
+      case ConsoleShowInfoExpression showInfo:
+        return CompileConsoleShowInfoExpression(showInfo);
+      case ConsoleShowWarningExpression showWarning:
+        return CompileConsoleShowWarningExpression(showWarning);
+      case ConsoleShowErrorExpression showError:
+        return CompileConsoleShowErrorExpression(showError);
+      case ConsoleShowSuccessExpression showSuccess:
+        return CompileConsoleShowSuccessExpression(showSuccess);
+      case ConsoleShowChoiceExpression showChoice:
+        return CompileConsoleShowChoiceExpression(showChoice);
+      case ConsoleShowMultiChoiceExpression showMultiChoice:
+        return CompileConsoleShowMultiChoiceExpression(showMultiChoice);
+      case ConsoleShowConfirmExpression showConfirm:
+        return CompileConsoleShowConfirmExpression(showConfirm);
+      case ConsoleShowProgressExpression showProgress:
+        return CompileConsoleShowProgressExpression(showProgress);
+      case ConsolePromptTextExpression promptText:
+        return CompileConsolePromptTextExpression(promptText);
+      case ConsolePromptPasswordExpression promptPassword:
+        return CompileConsolePromptPasswordExpression(promptPassword);
+      case ConsolePromptNumberExpression promptNumber:
+        return CompileConsolePromptNumberExpression(promptNumber);
+      case ConsolePromptFileExpression promptFile:
+        return CompileConsolePromptFileExpression(promptFile);
+      case ConsolePromptDirectoryExpression promptDirectory:
+        return CompileConsolePromptDirectoryExpression(promptDirectory);
       case ArgsHasExpression argsHas:
         return CompileArgsHasExpression(argsHas);
       case ArgsGetExpression argsGet:
@@ -223,6 +251,165 @@ public partial class Compiler
     }
     // Generate bash code that prompts the user and returns true/false based on yes/no response
     return $"$(while true; do read -p \"{promptText} (y/n): \" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
+  }
+
+  private string CompileConsoleShowMessageExpression(ConsoleShowMessageExpression showMessage)
+  {
+    var title = CompileExpression(showMessage.Title);
+    var message = CompileExpression(showMessage.Message);
+
+    // Use a more robust approach that avoids very long single lines
+    return $"$({{ if command -v dialog >/dev/null 2>&1; then dialog --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; else echo {title}: {message}; read -p \"Press Enter...\"; fi; }} 2>/dev/null; echo \"\")";
+  }
+  private string CompileConsoleShowInfoExpression(ConsoleShowInfoExpression showInfo)
+  {
+    var title = CompileExpression(showInfo.Title);
+    var message = CompileExpression(showInfo.Message);
+    return $"$(if command -v dialog >/dev/null 2>&1; then dialog --title {title} --infobox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --infobox {message} 10 60 2>&1 >/dev/tty; else echo \"[INFO] \" {title} \": \" {message}; fi; echo \"\")";
+  }
+
+  private string CompileConsoleShowWarningExpression(ConsoleShowWarningExpression showWarning)
+  {
+    var title = CompileExpression(showWarning.Title);
+    var message = CompileExpression(showWarning.Message);
+    return $"$(if command -v dialog >/dev/null 2>&1; then dialog --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; else echo \"[WARNING] \" {title} \": \" {message}; read -p \"Press Enter to continue...\"; fi; echo \"\")";
+  }
+
+  private string CompileConsoleShowErrorExpression(ConsoleShowErrorExpression showError)
+  {
+    var title = CompileExpression(showError.Title);
+    var message = CompileExpression(showError.Message);
+    return $"$(if command -v dialog >/dev/null 2>&1; then dialog --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; else echo \"[ERROR] \" {title} \": \" {message} >&2; read -p \"Press Enter to continue...\"; fi; echo \"\")";
+  }
+
+  private string CompileConsoleShowSuccessExpression(ConsoleShowSuccessExpression showSuccess)
+  {
+    var title = CompileExpression(showSuccess.Title);
+    var message = CompileExpression(showSuccess.Message);
+    return $"$(if command -v dialog >/dev/null 2>&1; then dialog --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; else echo \"[SUCCESS] \" {title} \": \" {message}; read -p \"Press Enter to continue...\"; fi; echo \"\")";
+  }
+
+  private string CompileConsoleShowChoiceExpression(ConsoleShowChoiceExpression showChoice)
+  {
+    var title = CompileExpression(showChoice.Title);
+    var message = CompileExpression(showChoice.Message);
+    var options = CompileExpression(showChoice.Options);
+    var defaultIndex = showChoice.DefaultIndex != null ? CompileExpression(showChoice.DefaultIndex) : "0";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"_utah_choice_result=$(echo {options} | tr ',' '\\n' | nl -n ln | dialog --title {title} --default-item {defaultIndex} --menu {message} 15 60 10 --file - 2>&1 >/dev/tty); " +
+           $"echo {options} | cut -d',' -f$_utah_choice_result; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"_utah_choice_result=$(echo {options} | tr ',' '\\n' | nl -n ln | whiptail --title {title} --default-item {defaultIndex} --menu {message} 15 60 10 --file - 2>&1 >/dev/tty); " +
+           $"echo {options} | cut -d',' -f$_utah_choice_result; " +
+           $"else echo \"Choose from: \" {options}; read -p \"Enter your choice: \" _utah_fallback_choice; echo $_utah_fallback_choice; fi)";
+  }
+
+  private string CompileConsoleShowMultiChoiceExpression(ConsoleShowMultiChoiceExpression showMultiChoice)
+  {
+    var title = CompileExpression(showMultiChoice.Title);
+    var message = CompileExpression(showMultiChoice.Message);
+    var options = CompileExpression(showMultiChoice.Options);
+    var defaultSelected = showMultiChoice.DefaultSelected != null ? CompileExpression(showMultiChoice.DefaultSelected) : "\"\"";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"echo {options} | tr ',' '\\n' | nl -n ln | dialog --title {title} --checklist {message} 15 60 10 --file - 2>&1 >/dev/tty | tr '\\n' ','; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"echo {options} | tr ',' '\\n' | nl -n ln | whiptail --title {title} --checklist {message} 15 60 10 --file - 2>&1 >/dev/tty | tr '\\n' ','; " +
+           $"else echo \"Select from: \" {options}; read -p \"Enter your selections (comma-separated): \" _utah_multi_choice; echo $_utah_multi_choice; fi)";
+  }
+
+  private string CompileConsoleShowConfirmExpression(ConsoleShowConfirmExpression showConfirm)
+  {
+    var title = CompileExpression(showConfirm.Title);
+    var message = CompileExpression(showConfirm.Message);
+    var defaultButton = showConfirm.DefaultButton != null ? CompileExpression(showConfirm.DefaultButton) : "\"yes\"";
+
+    var defaultYes = $"[[ {defaultButton} == \"yes\" ]]";
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"if dialog --title {title} --yesno {message} 10 60 2>&1 >/dev/tty; then echo \"true\"; else echo \"false\"; fi; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"if whiptail --title {title} --yesno {message} 10 60 2>&1 >/dev/tty; then echo \"true\"; else echo \"false\"; fi; " +
+           $"else while true; do if {defaultYes}; then read -p {message} \" (Y/n): \" _utah_confirm; else read -p {message} \" (y/N): \" _utah_confirm; fi; " +
+           $"case $_utah_confirm in [Yy]*|'') echo \"true\"; break;; [Nn]*) echo \"false\"; break;; *) echo \"Please answer yes or no.\";; esac; done; fi)";
+  }
+
+  private string CompileConsoleShowProgressExpression(ConsoleShowProgressExpression showProgress)
+  {
+    var title = CompileExpression(showProgress.Title);
+    var message = CompileExpression(showProgress.Message);
+    var percent = CompileExpression(showProgress.Percent);
+    var canCancel = showProgress.CanCancel != null ? CompileExpression(showProgress.CanCancel) : "false";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"echo {percent} | dialog --title {title} --gauge {message} 10 60 0 2>&1 >/dev/tty; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"echo {percent} | whiptail --title {title} --gauge {message} 10 60 0 2>&1 >/dev/tty; " +
+           $"else echo \"[\" {percent} \"%] \" {title} \": \" {message}; fi; echo \"\")";
+  }
+
+  private string CompileConsolePromptTextExpression(ConsolePromptTextExpression promptText)
+  {
+    var prompt = CompileExpression(promptText.Prompt);
+    var defaultValue = promptText.DefaultValue != null ? CompileExpression(promptText.DefaultValue) : "\"\"";
+    var validation = promptText.ValidationPattern != null ? CompileExpression(promptText.ValidationPattern) : "\"\"";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"dialog --title \"Input\" --inputbox {prompt} 10 60 {defaultValue} 2>&1 >/dev/tty; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"whiptail --title \"Input\" --inputbox {prompt} 10 60 {defaultValue} 2>&1 >/dev/tty; " +
+           $"else if [[ -n {defaultValue} ]]; then read -p {prompt} \" [\" {defaultValue} \"]: \" _utah_input; echo ${{_utah_input:-{defaultValue}}}; else read -p {prompt} \": \" _utah_input; echo $_utah_input; fi; fi)";
+  }
+
+  private string CompileConsolePromptPasswordExpression(ConsolePromptPasswordExpression promptPassword)
+  {
+    var prompt = CompileExpression(promptPassword.Prompt);
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"dialog --title \"Password\" --passwordbox {prompt} 10 60 2>&1 >/dev/tty; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"whiptail --title \"Password\" --passwordbox {prompt} 10 60 2>&1 >/dev/tty; " +
+           $"else read -s -p {prompt} \": \" _utah_password; echo $_utah_password; fi)";
+  }
+
+  private string CompileConsolePromptNumberExpression(ConsolePromptNumberExpression promptNumber)
+  {
+    var prompt = CompileExpression(promptNumber.Prompt);
+    var minValue = promptNumber.MinValue != null ? CompileExpression(promptNumber.MinValue) : "\"\"";
+    var maxValue = promptNumber.MaxValue != null ? CompileExpression(promptNumber.MaxValue) : "\"\"";
+    var defaultValue = promptNumber.DefaultValue != null ? CompileExpression(promptNumber.DefaultValue) : "\"\"";
+
+    return $"$(while true; do " +
+           $"if [[ -n {defaultValue} ]]; then read -p {prompt} \" [\" {defaultValue} \"]: \" _utah_number; _utah_number=${{_utah_number:-{defaultValue}}}; else read -p {prompt} \": \" _utah_number; fi; " +
+           $"if [[ $_utah_number =~ ^-?[0-9]+$ ]]; then " +
+           $"_utah_valid=true; " +
+           $"if [[ -n {minValue} && $_utah_number -lt {minValue} ]]; then echo \"Value must be >= \" {minValue}; _utah_valid=false; fi; " +
+           $"if [[ -n {maxValue} && $_utah_number -gt {maxValue} ]]; then echo \"Value must be <= \" {maxValue}; _utah_valid=false; fi; " +
+           $"if [[ $_utah_valid == true ]]; then echo $_utah_number; break; fi; " +
+           $"else echo \"Please enter a valid number.\"; fi; done)";
+  }
+
+  private string CompileConsolePromptFileExpression(ConsolePromptFileExpression promptFile)
+  {
+    var prompt = CompileExpression(promptFile.Prompt);
+    var filter = promptFile.Filter != null ? CompileExpression(promptFile.Filter) : "\"*\"";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"dialog --title \"File Selection\" --fselect \"$(pwd)/\" 15 80 2>&1 >/dev/tty; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"whiptail --title \"File Selection\" --inputbox {prompt} \" (current dir: $(pwd))\" 10 60 2>&1 >/dev/tty; " +
+           $"else read -p {prompt} \": \" _utah_file; echo $_utah_file; fi)";
+  }
+
+  private string CompileConsolePromptDirectoryExpression(ConsolePromptDirectoryExpression promptDirectory)
+  {
+    var prompt = CompileExpression(promptDirectory.Prompt);
+    var defaultPath = promptDirectory.DefaultPath != null ? CompileExpression(promptDirectory.DefaultPath) : "\"$(pwd)\"";
+
+    return $"$(if command -v dialog >/dev/null 2>&1; then " +
+           $"dialog --title \"Directory Selection\" --dselect {defaultPath} 15 80 2>&1 >/dev/tty; " +
+           $"elif command -v whiptail >/dev/null 2>&1; then " +
+           $"whiptail --title \"Directory Selection\" --inputbox {prompt} \" [\" {defaultPath} \"]:\" 10 60 {defaultPath} 2>&1 >/dev/tty; " +
+           $"else if [[ -n {defaultPath} ]]; then read -p {prompt} \" [\" {defaultPath} \"]: \" _utah_dir; echo ${{_utah_dir:-{defaultPath}}}; else read -p {prompt} \": \" _utah_dir; echo $_utah_dir; fi; fi)";
   }
 
   private string CompileOsIsInstalledExpression(OsIsInstalledExpression osInstalled)

@@ -192,6 +192,31 @@ public partial class Compiler
         {
           lines.Add($"{preDecVar.Name}=$(({preDecVar.Name} - 1))");
         }
+        // Special handling for dialog expressions in statement context (remove the $() wrapper)
+        else if (exprStmt.Expression is ConsoleShowMessageExpression ||
+                 exprStmt.Expression is ConsoleShowInfoExpression ||
+                 exprStmt.Expression is ConsoleShowWarningExpression ||
+                 exprStmt.Expression is ConsoleShowErrorExpression ||
+                 exprStmt.Expression is ConsoleShowSuccessExpression ||
+                 exprStmt.Expression is ConsoleShowProgressExpression)
+        {
+          var dialogExpr = CompileExpression(exprStmt.Expression);
+          // Remove the $(...) wrapper for statement context
+          if (dialogExpr.StartsWith("$(") && dialogExpr.EndsWith(")"))
+          {
+            var innerCode = dialogExpr[2..^1]; // Remove $( and )
+            // The inner code should end with "; echo \"\"" - remove that part
+            if (innerCode.EndsWith("; echo \"\""))
+            {
+              innerCode = innerCode[0..^10]; // Remove the last 10 characters: "; echo \"\""
+            }
+            lines.Add(innerCode);
+          }
+          else
+          {
+            lines.Add(dialogExpr);
+          }
+        }
         else
         {
           lines.Add(CompileExpression(exprStmt.Expression));

@@ -453,6 +453,80 @@ public class FormatterVisitor
         return "console.isSudo()";
       case ConsolePromptYesNoExpression consolePrompt:
         return $"console.promptYesNo({VisitExpression(consolePrompt.PromptText)})";
+      case ConsoleShowMessageExpression showMessage:
+        return $"console.showMessage({VisitExpression(showMessage.Title)}, {VisitExpression(showMessage.Message)})";
+      case ConsoleShowInfoExpression showInfo:
+        return $"console.showInfo({VisitExpression(showInfo.Title)}, {VisitExpression(showInfo.Message)})";
+      case ConsoleShowWarningExpression showWarning:
+        return $"console.showWarning({VisitExpression(showWarning.Title)}, {VisitExpression(showWarning.Message)})";
+      case ConsoleShowErrorExpression showError:
+        return $"console.showError({VisitExpression(showError.Title)}, {VisitExpression(showError.Message)})";
+      case ConsoleShowSuccessExpression showSuccess:
+        return $"console.showSuccess({VisitExpression(showSuccess.Title)}, {VisitExpression(showSuccess.Message)})";
+      case ConsoleShowChoiceExpression showChoice:
+        {
+          var choiceArgs = $"{VisitExpression(showChoice.Title)}, {VisitExpression(showChoice.Message)}, {VisitExpression(showChoice.Options)}";
+          if (showChoice.DefaultIndex != null)
+            choiceArgs += $", {VisitExpression(showChoice.DefaultIndex)}";
+          return $"console.showChoice({choiceArgs})";
+        }
+      case ConsoleShowMultiChoiceExpression showMultiChoice:
+        {
+          var multiChoiceArgs = $"{VisitExpression(showMultiChoice.Title)}, {VisitExpression(showMultiChoice.Message)}, {VisitExpression(showMultiChoice.Options)}";
+          if (showMultiChoice.DefaultSelected != null)
+            multiChoiceArgs += $", {VisitExpression(showMultiChoice.DefaultSelected)}";
+          return $"console.showMultiChoice({multiChoiceArgs})";
+        }
+      case ConsoleShowConfirmExpression showConfirm:
+        {
+          var confirmArgs = $"{VisitExpression(showConfirm.Title)}, {VisitExpression(showConfirm.Message)}";
+          if (showConfirm.DefaultButton != null)
+            confirmArgs += $", {VisitExpression(showConfirm.DefaultButton)}";
+          return $"console.showConfirm({confirmArgs})";
+        }
+      case ConsoleShowProgressExpression showProgress:
+        {
+          var progressArgs = $"{VisitExpression(showProgress.Title)}, {VisitExpression(showProgress.Message)}, {VisitExpression(showProgress.Percent)}";
+          if (showProgress.CanCancel != null)
+            progressArgs += $", {VisitExpression(showProgress.CanCancel)}";
+          return $"console.showProgress({progressArgs})";
+        }
+      case ConsolePromptTextExpression promptText:
+        {
+          var textArgs = VisitExpression(promptText.Prompt);
+          if (promptText.DefaultValue != null)
+            textArgs += $", {VisitExpression(promptText.DefaultValue)}";
+          if (promptText.ValidationPattern != null)
+            textArgs += $", {VisitExpression(promptText.ValidationPattern)}";
+          return $"console.promptText({textArgs})";
+        }
+      case ConsolePromptPasswordExpression promptPassword:
+        return $"console.promptPassword({VisitExpression(promptPassword.Prompt)})";
+      case ConsolePromptNumberExpression promptNumber:
+        {
+          var numberArgs = VisitExpression(promptNumber.Prompt);
+          if (promptNumber.MinValue != null)
+            numberArgs += $", {VisitExpression(promptNumber.MinValue)}";
+          if (promptNumber.MaxValue != null)
+            numberArgs += $", {VisitExpression(promptNumber.MaxValue)}";
+          if (promptNumber.DefaultValue != null)
+            numberArgs += $", {VisitExpression(promptNumber.DefaultValue)}";
+          return $"console.promptNumber({numberArgs})";
+        }
+      case ConsolePromptFileExpression promptFile:
+        {
+          var fileArgs = VisitExpression(promptFile.Prompt);
+          if (promptFile.Filter != null)
+            fileArgs += $", {VisitExpression(promptFile.Filter)}";
+          return $"console.promptFile({fileArgs})";
+        }
+      case ConsolePromptDirectoryExpression promptDirectory:
+        {
+          var dirArgs = VisitExpression(promptDirectory.Prompt);
+          if (promptDirectory.DefaultPath != null)
+            dirArgs += $", {VisitExpression(promptDirectory.DefaultPath)}";
+          return $"console.promptDirectory({dirArgs})";
+        }
       case WebGetExpression webGet:
         return $"web.get({VisitExpression(webGet.Url)})";
       case ProcessIdExpression:

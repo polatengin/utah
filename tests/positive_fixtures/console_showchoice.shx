@@ -1,0 +1,2 @@
+let choice = console.showChoice("Choose Option", "Pick your favorite:", "Apple,Orange,Banana", 0);
+console.log("You chose: " + choice);

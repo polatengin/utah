@@ -1,0 +1,1 @@
+console.showInfo("Information", "This is an info message");

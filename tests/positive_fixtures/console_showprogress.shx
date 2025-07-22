@@ -1,0 +1,1 @@
+console.showProgress("Loading", "Please wait...", 75, false);

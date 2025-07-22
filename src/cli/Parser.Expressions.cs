@@ -609,6 +609,131 @@ public partial class Parser
         return new ConsolePromptYesNoExpression(promptTextExpr);
       }
 
+      // Dialog functions
+      if (functionName == "console.showMessage")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2) throw new InvalidOperationException("console.showMessage() requires exactly 2 arguments (title, message)");
+        return new ConsoleShowMessageExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+      }
+
+      if (functionName == "console.showInfo")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2) throw new InvalidOperationException("console.showInfo() requires exactly 2 arguments (title, message)");
+        return new ConsoleShowInfoExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+      }
+
+      if (functionName == "console.showWarning")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2) throw new InvalidOperationException("console.showWarning() requires exactly 2 arguments (title, message)");
+        return new ConsoleShowWarningExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+      }
+
+      if (functionName == "console.showError")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2) throw new InvalidOperationException("console.showError() requires exactly 2 arguments (title, message)");
+        return new ConsoleShowErrorExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+      }
+
+      if (functionName == "console.showSuccess")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 2) throw new InvalidOperationException("console.showSuccess() requires exactly 2 arguments (title, message)");
+        return new ConsoleShowSuccessExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+      }
+
+      if (functionName == "console.showChoice")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 3 || args.Count > 4) throw new InvalidOperationException("console.showChoice() requires 3 or 4 arguments (title, message, options, [defaultIndex])");
+        var title = ParseExpression(args[0]);
+        var message = ParseExpression(args[1]);
+        var options = ParseExpression(args[2]);
+        var defaultIndex = args.Count == 4 ? ParseExpression(args[3]) : null;
+        return new ConsoleShowChoiceExpression(title, message, options, defaultIndex);
+      }
+
+      if (functionName == "console.showMultiChoice")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 3 || args.Count > 4) throw new InvalidOperationException("console.showMultiChoice() requires 3 or 4 arguments (title, message, options, [defaultSelected])");
+        var title = ParseExpression(args[0]);
+        var message = ParseExpression(args[1]);
+        var options = ParseExpression(args[2]);
+        var defaultSelected = args.Count == 4 ? ParseExpression(args[3]) : null;
+        return new ConsoleShowMultiChoiceExpression(title, message, options, defaultSelected);
+      }
+
+      if (functionName == "console.showConfirm")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 2 || args.Count > 3) throw new InvalidOperationException("console.showConfirm() requires 2 or 3 arguments (title, message, [defaultButton])");
+        var title = ParseExpression(args[0]);
+        var message = ParseExpression(args[1]);
+        var defaultButton = args.Count == 3 ? ParseExpression(args[2]) : null;
+        return new ConsoleShowConfirmExpression(title, message, defaultButton);
+      }
+
+      if (functionName == "console.showProgress")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 3 || args.Count > 4) throw new InvalidOperationException("console.showProgress() requires 3 or 4 arguments (title, message, percent, [canCancel])");
+        var title = ParseExpression(args[0]);
+        var message = ParseExpression(args[1]);
+        var percent = ParseExpression(args[2]);
+        var canCancel = args.Count == 4 ? ParseExpression(args[3]) : null;
+        return new ConsoleShowProgressExpression(title, message, percent, canCancel);
+      }
+
+      if (functionName == "console.promptText")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 1 || args.Count > 3) throw new InvalidOperationException("console.promptText() requires 1 to 3 arguments (prompt, [defaultValue], [validationPattern])");
+        var prompt = ParseExpression(args[0]);
+        var defaultValue = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        var validation = args.Count == 3 ? ParseExpression(args[2]) : null;
+        return new ConsolePromptTextExpression(prompt, defaultValue, validation);
+      }
+
+      if (functionName == "console.promptPassword")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 1) throw new InvalidOperationException("console.promptPassword() requires exactly 1 argument (prompt)");
+        return new ConsolePromptPasswordExpression(ParseExpression(args[0]));
+      }
+
+      if (functionName == "console.promptNumber")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 1 || args.Count > 4) throw new InvalidOperationException("console.promptNumber() requires 1 to 4 arguments (prompt, [min], [max], [defaultValue])");
+        var prompt = ParseExpression(args[0]);
+        var minValue = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        var maxValue = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        var defaultValue = args.Count == 4 ? ParseExpression(args[3]) : null;
+        return new ConsolePromptNumberExpression(prompt, minValue, maxValue, defaultValue);
+      }
+
+      if (functionName == "console.promptFile")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 1 || args.Count > 2) throw new InvalidOperationException("console.promptFile() requires 1 or 2 arguments (prompt, [filter])");
+        var prompt = ParseExpression(args[0]);
+        var filter = args.Count == 2 ? ParseExpression(args[1]) : null;
+        return new ConsolePromptFileExpression(prompt, filter);
+      }
+
+      if (functionName == "console.promptDirectory")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 1 || args.Count > 2) throw new InvalidOperationException("console.promptDirectory() requires 1 or 2 arguments (prompt, [defaultPath])");
+        var prompt = ParseExpression(args[0]);
+        var defaultPath = args.Count == 2 ? ParseExpression(args[1]) : null;
+        return new ConsolePromptDirectoryExpression(prompt, defaultPath);
+      }
+
       // Special handling for args.has()
       if (functionName == "args.has" && !string.IsNullOrEmpty(argsContent))
       {

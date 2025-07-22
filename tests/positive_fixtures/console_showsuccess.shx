@@ -1,0 +1,1 @@
+console.showSuccess("Success", "This is a success message");
