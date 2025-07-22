@@ -29,7 +29,7 @@ for (let name: string in names) {
 
 // Test array from split
 let data: string = "red,green,blue";
-let colors: string[] = data.split(",");
+let colors: string[] = string.split(data, ",");
 
 console.log("Colors:");
 for (let color: string in colors) {

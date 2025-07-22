@@ -532,6 +532,9 @@ public class FormatterVisitor
       case StringNamespaceCallExpression stringNamespaceCall:
         var stringArgs = string.Join(", ", stringNamespaceCall.Arguments.Select(VisitExpression));
         return $"string.{stringNamespaceCall.FunctionName}({stringArgs})";
+      case ArrayNamespaceCallExpression arrayNamespaceCall:
+        var arrayArgs = string.Join(", ", arrayNamespaceCall.Arguments.Select(VisitExpression));
+        return $"array.{arrayNamespaceCall.FunctionName}({arrayArgs})";
       default:
         return expr.ToString() ?? "";
     }

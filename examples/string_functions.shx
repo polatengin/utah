@@ -5,33 +5,33 @@ const csvData: string = "apple,banana,cherry,date";
 const sentence: string = "Hello world from Utah";
 
 // String length
-let messageLength: number = message.length();
+let messageLength: number = string.length(message);
 
 // String slicing
-let greeting: string = message.slice(0, 5);
-let world: string = message.slice(7);
+let greeting: string = string.slice(message, 0, 5);
+let world: string = string.slice(message, 7);
 
 // String case conversion
-let upperMessage: string = message.toUpperCase();
-let lowerMessage: string = message.toLowerCase();
+let upperMessage: string = string.toUpperCase(message);
+let lowerMessage: string = string.toLowerCase(message);
 
 // String trimming
-let trimmedEmail: string = email.trim();
+let trimmedEmail: string = string.trim(email);
 
 // String replacement
-let newMessage: string = message.replace("World", "Universe");
-let allHs: string = message.replaceAll("l", "L");
+let newMessage: string = string.replace(message, "World", "Universe");
+let allHs: string = string.replaceAll(message, "l", "L");
 
 // String checking functions
-let startsWithHello: boolean = message.startsWith("Hello");
-let endsWithExclamation: boolean = message.endsWith("!");
-let containsWorld: boolean = message.includes("World");
+let startsWithHello: boolean = string.startsWith(message, "Hello");
+let endsWithExclamation: boolean = string.endsWith(message, "!");
+let containsWorld: boolean = string.includes(message, "World");
 
 // Split CSV data
-let fruits: string = csvData.split(",");
+let fruits: string = string.split(csvData, ",");
 
 // Split sentence by spaces
-let words: string = sentence.split(" ");
+let words: string = string.split(sentence, " ");
 
 function demonstrateStringFunctions(): void {
   console.log(`Original message: ${message}`);

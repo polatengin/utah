@@ -10,4 +10,4 @@ if(arr.length>0){
 console.log(`First: ${arr[0]}`);
 }
 
-let result=arr.contains("item1")?true:false;
+let result=array.contains(arr, "item1")?true:false;
