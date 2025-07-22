@@ -1,0 +1,8 @@
+function testMultipleDefers(): void {
+  defer console.log("third");
+  defer console.log("second");
+  defer console.log("first");
+  console.log("function body");
+}
+
+testMultipleDefers();

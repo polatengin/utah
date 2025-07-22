@@ -1,0 +1,6 @@
+function testBasicDefer(): void {
+  defer console.log("cleanup executed");
+  console.log("function body");
+}
+
+testBasicDefer();

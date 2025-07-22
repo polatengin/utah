@@ -1,0 +1,14 @@
+function testEarlyReturn(shouldReturn: boolean): void {
+  defer console.log("cleanup always runs");
+  console.log("starting function");
+
+  if (shouldReturn) {
+    console.log("early return");
+    return;
+  }
+
+  console.log("normal execution");
+}
+
+testEarlyReturn(true);
+testEarlyReturn(false);

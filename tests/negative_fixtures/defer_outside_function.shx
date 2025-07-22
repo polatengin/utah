@@ -1,0 +1,3 @@
+// This should fail - defer outside function
+defer console.log("this should fail");
+console.log("done");

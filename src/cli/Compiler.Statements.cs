@@ -224,15 +224,58 @@ public partial class Compiler
         break;
 
       case FunctionDeclaration f:
+        // Create function context for tracking defer statements
+        var functionContext = new FunctionContext { Name = f.Name };
+        _functionStack.Push(functionContext);
+
         lines.Add($"{f.Name}() {{");
+
+        // Add parameter declarations
         for (int j = 0; j < f.Parameters.Count; j++)
         {
           var (paramName, _) = f.Parameters[j];
           lines.Add($"  local {paramName}=\"${j + 1}\"");
         }
+
+        // Generate defer cleanup function if needed
+        _globalDeferCounter++;
+        var deferFunctionName = $"_utah_defer_cleanup_{f.Name}_{_globalDeferCounter}";
+
+        // Compile function body
         foreach (var b in f.Body)
-          lines.AddRange(CompileStatement(b).Select(l => "  " + l));
+        {
+          var bodyLines = CompileStatement(b);
+          lines.AddRange(bodyLines.Select(l => "  " + l));
+        }
+
+        // Generate defer cleanup function and trap if there are defer statements
+        if (functionContext.DeferStatements.Count > 0)
+        {
+          lines.Add("");
+          lines.Add($"  # Defer cleanup function");
+          lines.Add($"  {deferFunctionName}() {{");
+
+          // Execute defer statements in reverse order (LIFO)
+          for (int i = functionContext.DeferStatements.Count - 1; i >= 0; i--)
+          {
+            var deferStmt = functionContext.DeferStatements[i];
+            var deferLines = CompileStatement(deferStmt);
+            foreach (var deferLine in deferLines)
+            {
+              lines.Add($"    {deferLine} || true"); // Continue even if defer fails
+            }
+          }
+
+          lines.Add("  }");
+          lines.Add("");
+          lines.Add($"  # Set up trap to execute defer statements on function exit");
+          lines.Add($"  trap '{deferFunctionName}' RETURN");
+        }
+
         lines.Add("}");
+
+        // Pop function context
+        _functionStack.Pop();
         break;
 
       case ConsoleLog log:
@@ -557,6 +600,19 @@ public partial class Compiler
       case FsDeleteStatement fds:
         var deletePathStmt = CompileExpression(fds.Path);
         lines.Add($"rm -rf {deletePathStmt}");
+        break;
+
+      case DeferStatement defer:
+        // Defer statements are collected but not immediately compiled
+        // They are handled during function compilation
+        if (_functionStack.Count > 0)
+        {
+          _functionStack.Peek().DeferStatements.Add(defer.Statement);
+        }
+        else
+        {
+          throw new Exception("defer statements can only be used inside functions");
+        }
         break;
 
       case TemplateUpdateStatement templateUpdate:

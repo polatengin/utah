@@ -174,6 +174,9 @@ public class FormatterVisitor
       case RawStatement raw:
         WriteIndentedLine(raw.Content);
         break;
+      case DeferStatement defer:
+        VisitDeferStatement(defer);
+        break;
       default:
         // Handle unknown statement types
         WriteIndentedLine($"// Unknown statement: {statement.GetType().Name}");
@@ -587,6 +590,24 @@ public class FormatterVisitor
       default:
         return expr.ToString() ?? "";
     }
+  }
+
+  private void VisitDeferStatement(DeferStatement defer)
+  {
+    // Format as "defer <statement>"
+    var deferredStatement = FormatStatementInline(defer.Statement);
+    WriteIndentedLine($"defer {deferredStatement}");
+  }
+
+  private string FormatStatementInline(Statement statement)
+  {
+    // Create a temporary formatter to format the statement inline
+    var tempVisitor = new FormatterVisitor(_options);
+    tempVisitor.VisitStatement(statement);
+    var formatted = tempVisitor._output.ToString().Trim();
+
+    // Remove any indentation and return as a single line
+    return formatted.Replace("\n", " ").Replace("  ", " ").Trim();
   }
 
   private void VisitArgsDefineStatement(ArgsDefineStatement argsDefine)

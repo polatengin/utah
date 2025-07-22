@@ -51,6 +51,14 @@ Utah provides modern language features inspired by TypeScript, making shell scri
 - Graceful error recovery
 - Error propagation and logging
 
+### Resource Management
+
+- **[Defer Statements](defer.md)** - Automatic cleanup and resource management
+
+- LIFO execution order for cleanup operations
+- Automatic execution on all function exit paths
+- Resource acquisition and release patterns
+
 ### Module System
 
 - **[Import System](imports.md)** - Modular code organization

@@ -2,6 +2,17 @@ public partial class Compiler
 {
   private bool _hasArgsUsage = false;
 
+  // Function context tracking for defer statements
+  private class FunctionContext
+  {
+    public string Name { get; set; } = "";
+    public List<Statement> DeferStatements { get; set; } = new();
+    public int DeferCounter { get; set; } = 0;
+  }
+
+  private Stack<FunctionContext> _functionStack = new();
+  private int _globalDeferCounter = 0;
+
   public string Compile(ProgramNode program)
   {
     var lines = new List<string>

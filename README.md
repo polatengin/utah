@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-98-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-103-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -604,6 +604,218 @@ while (processing) {
   if (itemCount >= 10) {
     processing = false;
   }
+}
+```
+
+## 🏗️ Defer Statements: Cleanup and Resource Management
+
+Utah supports the `defer` keyword for scheduling cleanup operations that execute automatically when a function exits, regardless of how the function exits (normal return, early return, or error). This is inspired by Go's defer mechanism and provides a reliable way to handle resource cleanup, finalization tasks, and guaranteed execution of critical operations.
+
+### Basic Defer Syntax
+
+```typescript
+function processFile(filename: string): void {
+  defer console.log("Function cleanup completed");
+  defer fs.delete("temp.txt");
+  
+  console.log("Processing file...");
+  fs.writeFile("temp.txt", "temporary data");
+  
+  // Defer statements execute here when function ends
+  // Order: fs.delete("temp.txt"), then console.log("Function cleanup completed")
+}
+```
+
+### Defer Execution Order
+
+Defer statements execute in **LIFO (Last-In-First-Out)** order - the last defer statement declared executes first:
+
+```typescript
+function demonstrateOrder(): void {
+  defer console.log("First defer - executes LAST");
+  defer console.log("Second defer - executes SECOND");
+  defer console.log("Third defer - executes FIRST");
+  
+  console.log("Function body executes normally");
+}
+
+demonstrateOrder();
+// Output:
+// Function body executes normally
+// Third defer - executes FIRST
+// Second defer - executes SECOND
+// First defer - executes LAST
+```
+
+### Defer with Early Returns
+
+Defer statements execute even when functions exit early via return statements:
+
+```typescript
+function validateAndProcess(data: string): void {
+  defer console.log("Cleanup always runs");
+  defer fs.delete("temp.log");
+  
+  fs.writeFile("temp.log", "Processing started");
+  
+  if (data == "") {
+    console.log("Invalid data - exiting early");
+    return; // Defer statements still execute!
+  }
+  
+  console.log("Processing valid data");
+  // Defer statements execute here too
+}
+
+validateAndProcess(""); // Cleanup runs even with early return
+validateAndProcess("valid"); // Cleanup runs with normal exit
+```
+
+### Resource Management Pattern
+
+Defer is perfect for resource cleanup and ensuring operations always complete:
+
+```typescript
+function backupAndProcess(): void {
+  defer fs.delete("backup.tmp");
+  defer fs.delete("processing.lock");
+  defer console.log("Backup and processing complete");
+  
+  // Create temporary files
+  fs.writeFile("processing.lock", "locked");
+  fs.copy("important.txt", "backup.tmp");
+  
+  // Process files (might fail or exit early)
+  console.log("Processing files...");
+  
+  // Cleanup always happens via defer statements
+}
+```
+
+### Transaction-Style Operations
+
+Use defer for rollback scenarios in deployment or configuration scripts:
+
+```typescript
+function deployApplication(): void {
+  defer git.undoLastCommit(); // Rollback if deploy fails
+  defer console.log("Deployment attempt finished");
+  
+  console.log("Starting deployment...");
+  
+  // Deploy application (multiple steps that might fail)
+  if (someValidationFails()) {
+    console.log("Validation failed - rolling back");
+    return; // git.undoLastCommit() still executes
+  }
+  
+  console.log("Deployment successful");
+}
+```
+
+### File Processing with Guaranteed Cleanup
+
+```typescript
+function processLogFiles(): void {
+  defer fs.delete("temp.log");
+  defer fs.delete("processed.tmp");
+  defer timer.stop();
+  defer console.log("Log processing cleanup completed");
+  
+  timer.start();
+  
+  // Create temporary files
+  fs.writeFile("temp.log", "Starting log analysis");
+  fs.writeFile("processed.tmp", "");
+  
+  // Process logs (might encounter errors)
+  let logContent: string = fs.readFile("system.log");
+  
+  if (logContent.length == 0) {
+    console.log("No logs to process");
+    return; // All cleanup still happens
+  }
+  
+  // Continue processing...
+  fs.writeFile("processed.tmp", logContent);
+  console.log("Log processing completed");
+  
+  // Cleanup executes automatically
+}
+```
+
+### Generated Bash Code for Defer
+
+Defer statements compile to efficient bash using `trap` for automatic cleanup:
+
+```bash
+processFile() {
+  local filename="$1"
+  echo "Processing file..."
+  echo "temporary data" > "temp.txt"
+
+  # Defer cleanup function
+  _utah_defer_cleanup_processFile_1() {
+    echo "Function cleanup completed" || true
+    rm -rf "temp.txt" || true
+  }
+
+  # Set up trap to execute defer statements on function exit
+  trap '_utah_defer_cleanup_processFile_1' RETURN
+}
+```
+
+### Defer Best Practices
+
+1. **Use for cleanup operations**: File deletion, connection closing, lock releasing
+2. **Resource management**: Ensure temporary resources are always cleaned up
+3. **Logging and monitoring**: Guarantee completion messages and timing
+4. **Transaction rollback**: Undo operations when errors occur
+5. **Error resilience**: Individual defer failures don't stop other defers
+6. **LIFO order**: Remember that defers execute in reverse order of declaration
+
+### Defer Limitations
+
+- **Function-scoped only**: Defer statements can only be used inside function bodies
+- **No conditional registration**: Defer statements always register when encountered
+- **No parameters**: Defer statements capture values at registration time
+- **Error isolation**: Defer errors don't propagate to the main function
+
+### Common Defer Patterns
+
+#### Temporary File Management
+
+```typescript
+function processData(): void {
+  defer fs.delete("data.tmp");
+  defer fs.delete("results.tmp");
+  
+  fs.writeFile("data.tmp", "processing...");
+  // Process data
+  fs.writeFile("results.tmp", "results");
+}
+```
+
+#### Timing and Logging
+
+```typescript
+function timedOperation(): void {
+  defer timer.stop();
+  defer console.log("Operation completed");
+  
+  timer.start();
+  // Perform operation
+}
+```
+
+#### Lock Management
+
+```typescript
+function criticalSection(): void {
+  defer fs.delete("process.lock");
+  
+  fs.writeFile("process.lock", "locked");
+  // Critical operations
 }
 ```
 
@@ -4145,6 +4357,10 @@ Current tests cover:
 - **console_showsuccess.shx** - Console success message dialog display
 - **console_showwarning.shx** - Console warning message dialog display
 - **const_valid_assignment.shx** - Const variable declarations and immutability
+- **defer_basic.shx** - Basic defer statement functionality with cleanup execution
+- **defer_early_return.shx** - Defer statement execution with early function returns
+- **defer_multiple.shx** - Multiple defer statements with LIFO execution order
+- **defer_resources.shx** - Resource management and cleanup using defer statements
 - **env_get_ternary.shx** - Environment variable operations with ternary operators
 - **environment_variables.shx** - Environment variable operations
 - **for_in_loop.shx** - For-in loops with arrays
@@ -4215,6 +4431,7 @@ The negative test fixtures ensure that the compiler correctly handles and report
 
 - **array_type_mismatch.shx** - Boolean array with mixed types (string in boolean array)
 - **const_reassignment_test.shx** - Attempt to reassign a const variable after declaration
+- **defer_outside_function.shx** - Defer statement used outside function scope (should fail)
 - **import_missing_file.shx** - Import statement referencing a non-existent file
 
 ### Malformed Test Coverage

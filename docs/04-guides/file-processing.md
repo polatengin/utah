@@ -688,7 +688,74 @@ for (let configFile: string in configFiles) {
 }
 ```
 
-### 3. Temporary File Cleanup
+### 3. Resource Management with Defer
+
+```typescript
+script.description("Process files with automatic resource cleanup");
+
+function processFileWithCleanup(inputFile: string, outputFile: string): void {
+  // Create temporary directory
+  let tempDir = fs.createTempDir();
+  defer fs.removeDir(tempDir);  // Always cleanup temp directory
+  
+  // Open input file
+  let input = fs.openFile(inputFile, "read");
+  defer input.close();  // Always close input file
+  
+  // Create output file
+  let output = fs.openFile(outputFile, "write");
+  defer output.close();  // Always close output file
+  
+  // Setup logging
+  let logFile = `${tempDir}/processing.log`;
+  fs.createFile(logFile);
+  defer fs.removeFile(logFile);  // Cleanup log file
+  
+  console.log(`Processing ${inputFile} → ${outputFile}`);
+  
+  try {
+    // Process file - all resources automatically cleaned up
+    let content = input.readAll();
+    let processed = processContent(content);
+    output.write(processed);
+    
+    console.log("✅ Processing completed successfully");
+  } catch (error) {
+    console.log(`❌ Processing failed: ${error}`);
+    // defer statements still execute for cleanup
+    throw error;
+  }
+}
+
+function processLargeFileWithBackup(filename: string): void {
+  // Create backup before processing
+  let backupFile = `${filename}.backup.$(date +%Y%m%d_%H%M%S)`;
+  fs.copy(filename, backupFile);
+  defer fs.removeFile(backupFile);  // Remove backup when done
+  
+  // Create working directory
+  let workDir = fs.createTempDir();
+  defer fs.removeDir(workDir);
+  
+  // Process in working directory
+  let workFile = `${workDir}/working.tmp`;
+  fs.copy(filename, workFile);
+  
+  try {
+    // Process the file
+    processInPlace(workFile);
+    
+    // If successful, replace original
+    fs.copy(workFile, filename);
+    console.log("✅ File processed successfully");
+  } catch (error) {
+    console.log("❌ Processing failed, original file unchanged");
+    // Backup automatically removed by defer
+  }
+}
+```
+
+### 4. Traditional Cleanup (Without Defer)
 
 ```typescript
 script.description("Clean up temporary files and directories");

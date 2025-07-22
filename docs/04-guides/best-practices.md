@@ -168,6 +168,17 @@ try {
 ### Efficient Resource Usage
 
 ```typescript
+// Use defer for automatic cleanup
+function processFile(filename: string): void {
+  let file = fs.openFile(filename);
+  defer file.close();  // Automatically closes when function exits
+  
+  let tempDir = fs.createTempDir();
+  defer fs.removeDir(tempDir);  // Cleanup temp directory
+  
+  // Process file - cleanup happens automatically
+}
+
 // Use streams for large files
 function processLargeFile(filename: string): void {
   let stream: FileStream = filesystem.createReadStream(filename);

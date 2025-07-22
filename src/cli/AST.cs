@@ -143,3 +143,4 @@ public record ArgsShowHelpStatement() : Statement;
 public record ImportStatement(string FilePath) : Statement;
 public record TemplateUpdateExpression(Expression SourceFilePath, Expression TargetFilePath) : Expression;
 public record TemplateUpdateStatement(Expression SourceFilePath, Expression TargetFilePath) : Statement;
+public record DeferStatement(Statement Statement) : Statement;

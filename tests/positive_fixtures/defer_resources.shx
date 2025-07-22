@@ -1,0 +1,9 @@
+function processData(): void {
+  defer fs.delete("temp.txt");
+  defer console.log("processing complete");
+
+  fs.writeFile("temp.txt", "temporary data");
+  console.log("processing data");
+}
+
+processData();

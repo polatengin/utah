@@ -159,6 +159,10 @@ public partial class Parser
       var value = string.IsNullOrEmpty(valueStr) ? null : ParseExpression(valueStr);
       return new ReturnStatement(value);
     }
+    if (line == "return;")
+    {
+      return new ReturnStatement(null);
+    }
     if (line.StartsWith("exit "))
     {
       var codeStr = line.Substring(5).TrimEnd(';');
@@ -205,6 +209,10 @@ public partial class Parser
     if (line.StartsWith("template.update("))
     {
       return ParseTemplateUpdateStatement(line);
+    }
+    if (line.StartsWith("defer "))
+    {
+      return ParseDeferStatement(line);
     }
     if (line.StartsWith("scheduler.cron("))
     {
@@ -889,6 +897,28 @@ public partial class Parser
     }
 
     return new RawStatement(line);
+  }
+
+  private Statement ParseDeferStatement(string line)
+  {
+    // Extract the statement after "defer "
+    var deferredStatement = line.Substring(5).Trim(); // Remove "defer "
+
+    if (string.IsNullOrEmpty(deferredStatement))
+    {
+      throw new Exception("defer statement cannot be empty");
+    }
+
+    // Parse the deferred statement recursively
+    int tempIndex = 0;
+    var statement = ParseStatement(deferredStatement, ref tempIndex);
+
+    if (statement == null)
+    {
+      throw new Exception($"Invalid statement in defer: {deferredStatement}");
+    }
+
+    return new DeferStatement(statement);
   }
 
   private List<string> ParseFunctionParameters(string parametersStr)
