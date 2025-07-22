@@ -1334,7 +1334,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.length() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"\"${{#{varName}}}\"";
   }
@@ -1343,7 +1343,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.trim() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"\"$(echo \"${{{varName}}}\" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')\"";
   }
@@ -1352,7 +1352,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.toUpperCase() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"\"${{{varName}^^}}\"";
   }
@@ -1361,7 +1361,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.toLowerCase() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"\"${{{varName},,}}\"";
   }
@@ -1370,7 +1370,7 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.startsWith() requires exactly 2 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var prefixStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     return $"$([[ \"${{{varName}}}\" == {prefixStr}* ]] && echo \"true\" || echo \"false\")";
@@ -1380,7 +1380,7 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.endsWith() requires exactly 2 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var suffixStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     return $"$([[ \"${{{varName}}}\" == *{suffixStr} ]] && echo \"true\" || echo \"false\")";
@@ -1390,7 +1390,7 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.includes() requires exactly 2 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     return $"$(case \"${{{varName}}}\" in *{searchStr}*) echo \"true\";; *) echo \"false\";; esac)";
@@ -1400,7 +1400,7 @@ public partial class Compiler
   {
     if (args.Count != 3)
       throw new InvalidOperationException("string.replace() requires exactly 3 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     var replaceStr = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
@@ -1411,11 +1411,11 @@ public partial class Compiler
   {
     if (args.Count != 3)
       throw new InvalidOperationException("string.replaceAll() requires exactly 3 arguments");
-    
+
     var target = args[0];
     var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     var replaceStr = args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2];
-    
+
     // If target is a string literal, we need to handle it differently
     if (target.StartsWith("\"") && target.EndsWith("\""))
     {
@@ -1455,7 +1455,7 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.split() requires exactly 2 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var separatorStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     return $"$(IFS='{separatorStr}'; read -ra SPLIT_ARRAY <<< \"${{{varName}}}\"; echo \"${{SPLIT_ARRAY[@]}}\")";
@@ -1465,10 +1465,10 @@ public partial class Compiler
   {
     if (args.Count < 2 || args.Count > 3)
       throw new InvalidOperationException("string.substring() requires 2 or 3 arguments");
-    
+
     var target = args[0];
     var startValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
-    
+
     // Handle string literals vs variables
     if (target.StartsWith("\"") && target.EndsWith("\""))
     {
@@ -1503,10 +1503,10 @@ public partial class Compiler
   {
     if (args.Count < 2 || args.Count > 3)
       throw new InvalidOperationException("string.slice() requires 2 or 3 arguments");
-    
+
     var target = args[0];
     var startValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
-    
+
     // Handle string literals vs variables
     if (target.StartsWith("\"") && target.EndsWith("\""))
     {
@@ -1540,7 +1540,7 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.indexOf() requires exactly 2 arguments");
-    
+
     var varName = ExtractVariableName(args[0]);
     var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     return $"$(temp=\"${{{varName}}}\"; pos=${{temp%%{searchStr}*}}; [[ \"$pos\" == \"${{{varName}}}\" ]] && echo \"-1\" || echo \"${{#pos}}\")";
@@ -1550,11 +1550,11 @@ public partial class Compiler
   {
     if (args.Count < 2 || args.Count > 3)
       throw new InvalidOperationException("string.padStart() requires 2 or 3 arguments");
-    
+
     var targetValue = args[0];
     var lengthValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     var padChar = args.Count == 3 ? (args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2]) : " ";
-    
+
     return $"\"$(printf \"%*s\" {lengthValue} {targetValue} | sed \"s/ /{padChar}/g\")\"";
   }
 
@@ -1562,11 +1562,11 @@ public partial class Compiler
   {
     if (args.Count < 2 || args.Count > 3)
       throw new InvalidOperationException("string.padEnd() requires 2 or 3 arguments");
-    
+
     var targetValue = args[0];
     var lengthValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
     var padChar = args.Count == 3 ? (args[2].StartsWith("\"") && args[2].EndsWith("\"") ? args[2][1..^1] : args[2]) : " ";
-    
+
     return $"\"$(printf \"%-*s\" {lengthValue} {targetValue} | sed \"s/ /{padChar}/g\")\"";
   }
 
@@ -1574,10 +1574,10 @@ public partial class Compiler
   {
     if (args.Count != 2)
       throw new InvalidOperationException("string.repeat() requires exactly 2 arguments");
-    
+
     var targetValue = args[0];
     var countValue = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];
-    
+
     return $"\"$(for ((i=0; i<{countValue}; i++)); do printf \"%s\" {targetValue}; done)\"";
   }
 
@@ -1585,7 +1585,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.capitalize() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"\"$(echo \"${{{varName}}}\" | sed 's/^./\\U&/')\"";
   }
@@ -1594,7 +1594,7 @@ public partial class Compiler
   {
     if (args.Count != 1)
       throw new InvalidOperationException("string.isEmpty() requires exactly 1 argument");
-    
+
     var varName = ExtractVariableName(args[0]);
     return $"$([[ -z \"$(echo \"${{{varName}}}\" | xargs)\" ]] && echo \"true\" || echo \"false\")";
   }
