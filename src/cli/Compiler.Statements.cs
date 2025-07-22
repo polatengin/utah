@@ -30,7 +30,7 @@ public partial class Compiler
         {
           var stringToSplit = CompileExpression(stringCall.Arguments[0]);
           var separator = CompileExpression(stringCall.Arguments[1]);
-          
+
           string targetValue;
           if (stringToSplit.StartsWith("\"") && stringToSplit.EndsWith("\""))
           {
@@ -43,7 +43,7 @@ public partial class Compiler
             var varName = ExtractVariableName(stringToSplit);
             targetValue = $"${{{varName}}}";
           }
-          
+
           var separatorStr = separator.StartsWith("\"") && separator.EndsWith("\"") ? separator[1..^1] : separator;
           lines.Add($"IFS='{separatorStr}' read -ra {v.Name} <<< \"{targetValue}\"");
         }

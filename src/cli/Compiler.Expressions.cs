@@ -1302,7 +1302,7 @@ public partial class Compiler
     // Handle the string to split - can be a literal or variable
     var stringToSplit = args[0];
     string targetValue;
-    
+
     if (stringToSplit.StartsWith("\"") && stringToSplit.EndsWith("\""))
     {
       // It's a literal string - remove quotes for the here-string
