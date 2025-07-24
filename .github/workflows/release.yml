@@ -225,6 +225,57 @@ jobs:
           echo "❌ Tests failed!"
           exit 1
 
+      - name: Generate Release Notes
+        id: release_notes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "📝 Generating release notes..."
+
+          # Get the last tag, or use initial commit if no tags exist
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          echo "Last release: $LAST_TAG"
+
+          # Get commit messages since last release
+          COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:'%s' | tr '\n' ' ')
+          echo "Commits: $COMMITS"
+
+          if [ -n "$GEMINI_API_KEY" ] && [ -n "$COMMITS" ]; then
+            echo "Using Gemini API to generate release notes..."
+            RELEASE_NOTES=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent" \
+              -H "Content-Type: application/json" \
+              -H "X-Goog-Api-Key: ${GEMINI_API_KEY}" \
+              -d '{
+                "contents": [
+                  {
+                    "parts": [
+                      {
+                        "text": "You are a release assistant that summarizes git commit messages into a changelog for the Utah CLI transpiler project. Utah transpiles TypeScript-like .shx files to bash scripts.\n\nHere are the commits:\n\n'"$COMMITS"'\n\nGenerate a concise changelog in markdown format with sections like ## Features, ## Improvements, ## Bug Fixes, etc. Focus on user-facing changes."
+                      }
+                    ]
+                  }
+                ]
+              }' | jq -r ".candidates[0].content.parts[0].text" 2>/dev/null)
+
+            if [ $? -eq 0 ] && [ -n "$RELEASE_NOTES" ] && [ "$RELEASE_NOTES" != "null" ]; then
+              echo "✅ Generated release notes using Gemini API"
+              echo "$RELEASE_NOTES" > release_notes.md
+            else
+              echo "⚠️ Failed to generate release notes with Gemini API, using fallback"
+              RELEASE_NOTES="## Changes\n\nThis release includes the following commits:\n\n$(git log ${LAST_TAG}..HEAD --pretty=format:'- %s' | head -20)"
+              echo -e "$RELEASE_NOTES" > release_notes.md
+            fi
+          else
+            echo "⚠️ Gemini API key not available or no commits found, using fallback"
+            RELEASE_NOTES="## Changes\n\nThis release includes various improvements and bug fixes."
+            echo -e "$RELEASE_NOTES" > release_notes.md
+          fi
+
+          # Set output for use in create release step
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Publish
         run: |
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r linux-x64 -o ./publish/linux-x64
@@ -238,6 +289,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: |
+            ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+
             ## Installation Instructions
 
             To install the Utah CLI, run the following command:
