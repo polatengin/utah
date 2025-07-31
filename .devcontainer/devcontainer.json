@@ -34,5 +34,6 @@
         "ms-vscode.makefile-tools"
       ]
     }
-  }
+  },
+  "forwardPorts": [ 6274, 6277 ]
 }
