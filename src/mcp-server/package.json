@@ -5,8 +5,7 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "run-server": "npx ts-node index.ts",
-    "start": "npx concurrently \"npm run run-server\"",
+    "start": "npx ts-node index.ts",
     "build": "npx tsc",
     "inspector": "npx @modelcontextprotocol/inspector node dist/index.js",
     "dev": "npx concurrently \"npm run build\" \"npm run start\" \"npm run inspector\""
