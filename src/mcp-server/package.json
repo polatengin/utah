@@ -1,0 +1,35 @@
+{
+  "name": "utah-mcp",
+  "version": "1.0.0",
+  "description": "Utah MCP server using Model Context Protocol TypeScript SDK",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "run-server": "npx ts-node index.ts",
+    "start": "npx concurrently \"npm run run-server\"",
+    "build": "npx tsc",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "dev": "npx concurrently \"npm run build\" \"npm run start\" \"npm run inspector\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.12.1",
+    "express": "5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "concurrently": "9.1.2",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "utah",
+    "shell",
+    "script"
+  ],
+  "author": "polatengin",
+  "license": "MIT"
+}
