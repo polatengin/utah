@@ -12,11 +12,9 @@
     "dev": "npx concurrently \"npm run build\" \"npm run start\" \"npm run inspector\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.12.1",
-    "express": "5.1.0"
+    "@modelcontextprotocol/sdk": "1.12.1"
   },
   "devDependencies": {
-    "@types/express": "5.0.3",
     "concurrently": "9.1.2",
     "ts-node": "10.9.2",
     "typescript": "5.8.3"
