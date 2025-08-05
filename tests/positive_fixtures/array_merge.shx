@@ -1,0 +1,47 @@
+// Test array.merge() function with different array types
+
+// Test with string arrays
+let fruits: string[] = ["apple", "banana"];
+let vegetables: string[] = ["carrot", "broccoli"];
+let food: string[] = array.merge(fruits, vegetables);
+console.log("Merged fruits and vegetables:");
+for (let item: string in food) {
+  console.log("- " + item);
+}
+
+// Test with number arrays
+let numbers1: number[] = [1, 2, 3];
+let numbers2: number[] = [4, 5, 6];
+let allNumbers: number[] = array.merge(numbers1, numbers2);
+console.log("Merged numbers: " + array.join(allNumbers, ", "));
+
+// Test with boolean arrays
+let flags1: boolean[] = [true, false];
+let flags2: boolean[] = [true, true];
+let allFlags: boolean[] = array.merge(flags1, flags2);
+console.log("Merged flags: " + array.join(allFlags, ", "));
+
+// Test edge cases with empty arrays
+let empty: string[] = [];
+let items: string[] = ["item1", "item2"];
+let mergedWithEmpty1: string[] = array.merge(empty, items);
+let mergedWithEmpty2: string[] = array.merge(items, empty);
+let mergedBothEmpty: string[] = array.merge(empty, empty);
+
+console.log("Empty + items: " + array.join(mergedWithEmpty1, ", "));
+console.log("Items + empty: " + array.join(mergedWithEmpty2, ", "));
+console.log("Empty + empty: " + array.join(mergedBothEmpty, ", "));
+
+// Test with longer arrays
+let moreNumbers1: number[] = [10, 20];
+let moreNumbers2: number[] = [30, 40, 50];
+let combinedNumbers: number[] = array.merge(moreNumbers1, moreNumbers2);
+console.log("Combined longer arrays: " + array.join(combinedNumbers, " -> "));
+
+// Test variable merging
+let baseItems: string[] = ["base1", "base2"];
+let additionalItems: string[] = ["add1", "add2"];
+if (array.isEmpty(additionalItems) == false) {
+    let allItems: string[] = array.merge(baseItems, additionalItems);
+    console.log("All items: " + array.join(allItems, ", "));
+}

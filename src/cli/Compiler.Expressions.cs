@@ -144,6 +144,8 @@ public partial class Compiler
         return CompileArrayJoinExpression(arrayJoin);
       case ArraySortExpression arraySort:
         return CompileArraySortExpression(arraySort);
+      case ArrayMergeExpression arrayMerge:
+        return CompileArrayMergeExpression(arrayMerge);
       case FsDirnameExpression fsDirname:
         return CompileFsDirnameExpression(fsDirname);
       case FsFileNameExpression fsFileName:
@@ -1157,6 +1159,15 @@ public partial class Compiler
     return $"$({uniqueVar}=(); while IFS= read -r line; do {uniqueVar}+=(\"$line\"); done < <(printf '%s\\n' \"${{{arrayName}[@]}}\" | {sortCommand}); echo \"${{{uniqueVar}[@]}}\")";
   }
 
+  private string CompileArrayMergeExpression(ArrayMergeExpression arrayMerge)
+  {
+    var arrayName1 = ExtractVariableName(CompileExpression(arrayMerge.Array1));
+    var arrayName2 = ExtractVariableName(CompileExpression(arrayMerge.Array2));
+
+    // Create a new array by combining both arrays using printf to output each element
+    return $"($(printf '%s\\n' \"${{{arrayName1}[@]}}\" \"${{{arrayName2}[@]}}\"))";
+  }
+
   private string GetArrayType(string arrayName)
   {
     // For now, we'll use a simple heuristic based on common naming patterns
@@ -1356,6 +1367,7 @@ public partial class Compiler
       "push" => CompileArrayPushFunction(args),
       "join" => CompileArrayJoinFunction(args),
       "sort" => CompileArraySortFunction(args),
+      "merge" => CompileArrayMergeFunction(args),
       _ => throw new NotSupportedException($"Array function '{functionName}' is not supported")
     };
   }
@@ -2158,5 +2170,17 @@ fi
     {
       return $"($(printf '%s\\n' \"${{{varName}[@]}}\" | sort))";
     }
+  }
+
+  private string CompileArrayMergeFunction(List<string> args)
+  {
+    if (args.Count != 2)
+      throw new InvalidOperationException("array.merge() requires exactly 2 arguments");
+
+    var varName1 = ExtractVariableName(args[0]);
+    var varName2 = ExtractVariableName(args[1]);
+
+    // Create a new array by combining both arrays using printf to output each element
+    return $"($(printf '%s\\n' \"${{{varName1}[@]}}\" \"${{{varName2}[@]}}\"))";
   }
 }

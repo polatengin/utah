@@ -1199,6 +1199,47 @@ if (!sortedFruits.isEmpty()) {
 let topThree: string = numbers.sort("desc").join(", ");  // Gets first three highest numbers as string
 ```
 
+Merge two arrays into a new array using the `array.merge()` function:
+
+```typescript
+let fruits: string[] = ["apple", "banana"];
+let vegetables: string[] = ["carrot", "broccoli"];
+let food: string[] = array.merge(fruits, vegetables);  // Gets ["apple", "banana", "carrot", "broccoli"]
+
+let numbers1: number[] = [1, 2, 3];
+let numbers2: number[] = [4, 5, 6];
+let allNumbers: number[] = array.merge(numbers1, numbers2);  // Gets [1, 2, 3, 4, 5, 6]
+
+let flags1: boolean[] = [true, false];
+let flags2: boolean[] = [true, true];
+let allFlags: boolean[] = array.merge(flags1, flags2);  // Gets [true, false, true, true]
+
+// Order preservation: first array elements come first, then second array elements
+let priorityItems: string[] = ["urgent", "high"];
+let normalItems: string[] = ["medium", "low"];
+let allItems: string[] = array.merge(priorityItems, normalItems);  // Gets ["urgent", "high", "medium", "low"]
+
+// Edge cases with empty arrays
+let empty: string[] = [];
+let items: string[] = ["item1", "item2"];
+let mergedWithEmpty: string[] = array.merge(empty, items);  // Gets ["item1", "item2"]
+let mergedReversed: string[] = array.merge(items, empty);   // Gets ["item1", "item2"]
+let mergedBothEmpty: string[] = array.merge(empty, empty); // Gets []
+
+// Use with variables and conditionals
+let baseConfig: string[] = ["setting1", "setting2"];
+let additionalConfig: string[] = ["setting3", "setting4"];
+if (array.isEmpty(additionalConfig) == false) {
+  let fullConfig: string[] = array.merge(baseConfig, additionalConfig);
+  console.log(`Configuration: ${array.join(fullConfig, ", ")}`);
+}
+
+// Original arrays remain unchanged
+console.log(`Original fruits: ${array.join(fruits, ", ")}`);      // Still ["apple", "banana"]
+console.log(`Original vegetables: ${array.join(vegetables, ", ")}`); // Still ["carrot", "broccoli"]
+console.log(`Merged food: ${array.join(food, ", ")}`);            // ["apple", "banana", "carrot", "broccoli"]
+```
+
 ### Array Iteration
 
 Use for-in loops to iterate over arrays:
@@ -1275,6 +1316,19 @@ reversedEmpty=($(for ((i=${#emptyArray[@]}-1; i>=0; i--)); do echo "${emptyArray
 # Array contains() uses bash case statement for efficient searching:
 hasApple=$(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac)
 hasThree=$(case " ${numbers[@]} " in *" 3 "*) echo "true" ;; *) echo "false" ;; esac)
+
+# Array merge() combines arrays using printf for proper element handling:
+fruits=("apple" "banana")
+vegetables=("carrot" "broccoli")
+food=($(printf '%s\n' "${fruits[@]}" "${vegetables[@]}"))
+
+# Array merge() with empty arrays:
+empty=()
+items=("item1" "item2")
+mergedWithEmpty=($(printf '%s\n' "${empty[@]}" "${items[@]}"))  # Results in ("item1" "item2")
+
+# Array merge() preserves order - first array elements come first:
+merged=($(printf '%s\n' "${array1[@]}" "${array2[@]}"))
 
 # Array contains() in conditionals:
 if [ "$(case " ${fruits[@]} " in *" apple "*) echo "true" ;; *) echo "false" ;; esac)" = "true" ]; then
@@ -4513,7 +4567,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.sort()` function
 
-- [ ] `array.merge()` function
+- [x] `array.merge()` function
 
 - [ ] `array.shuffle()` function
 

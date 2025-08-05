@@ -132,6 +132,64 @@ let singleSorted: number[] = array.sort(single);        // [42]
 let topThreeNumbers: string = array.join(array.sort(numbers, "desc"), ", ");
 ```
 
+### Array Merging
+
+#### Basic Merging
+
+Combine two arrays of the same type:
+
+```typescript
+// String array merging
+let names: string[] = ["alice", "bob"];
+let moreNames: string[] = ["charlie", "diana"];
+let allNames: string[] = array.merge(names, moreNames);  // ["alice", "bob", "charlie", "diana"]
+
+// Number array merging
+let numbers1: number[] = [1, 2, 3];
+let numbers2: number[] = [4, 5, 6];
+let allNumbers: number[] = array.merge(numbers1, numbers2);  // [1, 2, 3, 4, 5, 6]
+
+// Boolean array merging
+let flags1: boolean[] = [true, false];
+let flags2: boolean[] = [false, true];
+let allFlags: boolean[] = array.merge(flags1, flags2);  // [true, false, false, true]
+```
+
+#### Edge Cases
+
+```typescript
+// Merging with empty arrays
+let letters: string[] = ["a", "b"];
+let empty: string[] = [];
+let result1: string[] = array.merge(letters, empty);    // ["a", "b"]
+let result2: string[] = array.merge(empty, letters);    // ["a", "b"]
+let result3: string[] = array.merge(empty, empty);      // []
+
+// Single element arrays
+let single1: number[] = [100];
+let single2: number[] = [200];
+let merged: number[] = array.merge(single1, single2);   // [100, 200]
+```
+
+#### Chaining with Other Array Methods
+
+```typescript
+// Merge then sort
+let list1: string[] = ["zebra", "apple"];
+let list2: string[] = ["banana", "cherry"];
+let sortedMerged: string[] = array.sort(array.merge(list1, list2));  // ["apple", "banana", "cherry", "zebra"]
+
+// Sort then merge (preserves sort order)
+let sorted1: number[] = array.sort([3, 1, 4]);         // [1, 3, 4]
+let sorted2: number[] = array.sort([2, 6, 5]);         // [2, 5, 6]
+let finalMerged: number[] = array.merge(sorted1, sorted2);  // [1, 3, 4, 2, 5, 6]
+
+// Complex chaining
+let words1: string[] = ["hello", "world"];
+let words2: string[] = ["utah", "lang"];
+let sentence: string = array.join(array.merge(words1, words2), " ");  // "hello world utah lang"
+```
+
 ### Array Iteration
 
 #### For-In Loops
