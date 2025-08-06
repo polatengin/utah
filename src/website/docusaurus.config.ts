@@ -72,11 +72,6 @@ const config: Config = {
           position: 'left',
         },
         {
-          label: 'Built-in Functions',
-          href: '/builtin-functions',
-          position: 'left',
-        },
-        {
           label: 'Guides',
           href: '/guides',
           position: 'left',

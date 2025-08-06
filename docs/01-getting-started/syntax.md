@@ -533,7 +533,7 @@ Now that you understand Utah's basic syntax:
 1. **Explore language features**: [Variables and Types](../02-language-features/variables.md)
 2. **Learn about functions**: [Function Guide](../02-language-features/functions.md)
 3. **Study control flow**: [Control Flow](../02-language-features/control-flow.md)
-4. **Discover built-ins**: [Built-in Functions](../03-builtin-functions/index.md)
+4. **Discover built-ins**: [Built-in Functions](../02-language-features/index.md)
 
 ## Common Syntax Errors
 

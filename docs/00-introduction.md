@@ -7,7 +7,22 @@ permalink: /
 slug: /
 ---
 
-**Utah** is a tool that allows you to write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
+**Utah** is a tool th### CLI Reference
+
+- [Overview](./04-cli/index.md)
+- [Compile Command](./04-cli/compile.md)
+- [Run Command](./04-cli/run.md)
+- [Format Command](./04-cli/format.md)
+- [VS Code Extension](./04-cli/vscode-extension.md)
+
+### Guides
+
+- [Development Guides](./03-guides/index.md)
+- [Parallel Execution](./03-guides/parallel.md)
+- [Testing Scripts](./03-guides/testing.md)
+- [CI/CD Integration](./03-guides/cicd.md)
+- [DevOps Automation](./03-guides/devops.md)
+- [Best Practices](./03-guides/best-practices.md) write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
 📦 **File Extension:** `.shx`
 
@@ -167,30 +182,30 @@ fi
 
 ### Built-in Functions
 
-- [File System](./03-builtin-functions/filesystem.md)
-- [JSON/YAML Processing](./03-builtin-functions/json-yaml.md)
-- [Console and User Interaction](./03-builtin-functions/console.md)
-- [Operating System](./03-builtin-functions/operating-system.md)
-- [Web and API](./03-builtin-functions/web.md)
-- [System and Process](./03-builtin-functions/system.md)
-- [Utilities](./03-builtin-functions/utilities.md)
+- [File System](./02-language-features/filesystem.md)
+- [JSON/YAML Processing](./02-language-features/json-yaml.md)
+- [Console and User Interaction](./02-language-features/console.md)
+- [Operating System](./02-language-features/operating-system.md)
+- [Web and API](./02-language-features/web.md)
+- [System and Process](./02-language-features/system.md)
+- [Utilities](./02-language-features/utilities.md)
 
 ### CLI Reference
 
-- [Overview](./05-cli/index.md)
-- [Compile Command](./05-cli/compile.md)
-- [Run Command](./05-cli/run.md)
-- [Format Command](./05-cli/format.md)
-- [VS Code Extension](./05-cli/vscode-extension.md)
+- [Overview](./04-cli/index.md)
+- [Compile Command](./04-cli/compile.md)
+- [Run Command](./04-cli/run.md)
+- [Format Command](./04-cli/format.md)
+- [VS Code Extension](./04-cli/vscode-extension.md)
 
 ### Advanced Guides
 
-- [Development Guides](./04-guides/index.md)
-- [Parallel Execution](./04-guides/parallel.md)
-- [Testing Scripts](./04-guides/testing.md)
-- [CI/CD Integration](./04-guides/cicd.md)
-- [DevOps Automation](./04-guides/devops.md)
-- [Best Practices](./04-guides/best-practices.md)
+- [Development Guides](./03-guides/index.md)
+- [Parallel Execution](./03-guides/parallel.md)
+- [Testing Scripts](./03-guides/testing.md)
+- [CI/CD Integration](./03-guides/cicd.md)
+- [DevOps Automation](./03-guides/devops.md)
+- [Best Practices](./03-guides/best-practices.md)
 
 ## Community and Support
 

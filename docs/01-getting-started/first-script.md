@@ -407,8 +407,8 @@ Now that you've created your first Utah script, you can:
 
 1. **Learn more syntax**: [Basic Syntax Guide](syntax.md)
 2. **Explore language features**: [Variables and Types](../02-language-features/variables.md)
-3. **Discover built-in functions**: [Function Reference](../03-builtin-functions/index.md)
-4. **Study advanced patterns**: [Best Practices Guide](../04-guides/best-practices.md)
+3. **Discover built-in functions**: [Function Reference](../02-language-features/index.md)
+4. **Study advanced patterns**: [Best Practices Guide](../03-guides/best-practices.md)
 
 ## Troubleshooting
 
@@ -447,5 +447,5 @@ Now that you've created your first Utah script, you can:
 ### Getting Help
 
 - **Utah CLI help**: `utah --help`
-- **Function reference**: [Built-in Functions](../03-builtin-functions/index.md)
+- **Function reference**: [Built-in Functions](../02-language-features/index.md)
 - **Community support**: [GitHub Discussions](https://github.com/polatengin/utah/discussions)

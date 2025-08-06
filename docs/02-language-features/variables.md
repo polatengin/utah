@@ -558,4 +558,4 @@ Now that you understand variables and types in Utah:
 2. **[Explore control flow](control-flow.md)** - Conditionals, loops, and logic
 3. **[Study arrays](arrays.md)** - Array manipulation and operations
 4. **[Study strings](strings.md)** - String processing and manipulation
-5. **[Discover built-in functions](../03-builtin-functions/index.md)** - Leverage Utah's function library
+5. **[Discover built-in functions](./index.md)** - Leverage Utah's function library

@@ -401,5 +401,5 @@ utah run
 
 - **[Installation Guide](../01-getting-started/installation.md)** - Setup and installation
 - **[Language Features](../02-language-features/index.md)** - Utah syntax and features
-- **[Functions Reference](../03-builtin-functions/index.md)** - Built-in function documentation
+- **[Functions Reference](../02-language-features/index.md)** - Built-in function documentation
 - **[VS Code Extension](vscode-extension.md)** - IDE integration details
