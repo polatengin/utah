@@ -190,6 +190,90 @@ let words2: string[] = ["utah", "lang"];
 let sentence: string = array.join(array.merge(words1, words2), " ");  // "hello world utah lang"
 ```
 
+### Array Shuffling
+
+#### Basic Shuffling
+
+Randomly shuffle array elements using the `array.shuffle()` function:
+
+```typescript
+// String array shuffling
+let names: string[] = ["alice", "bob", "charlie", "diana"];
+let shuffledNames: string[] = array.shuffle(names);  // Random order like ["charlie", "alice", "diana", "bob"]
+
+// Number array shuffling
+let numbers: number[] = [1, 2, 3, 4, 5];
+let shuffledNumbers: number[] = array.shuffle(numbers);  // Random order like [3, 1, 5, 2, 4]
+
+// Boolean array shuffling
+let flags: boolean[] = [true, false, true, false];
+let shuffledFlags: boolean[] = array.shuffle(flags);  // Random order like [false, true, false, true]
+```
+
+#### Shuffle Edge Cases
+
+```typescript
+// Shuffling empty arrays
+let empty: string[] = [];
+let shuffledEmpty: string[] = array.shuffle(empty);  // []
+
+// Single element arrays
+let single: number[] = [42];
+let shuffledSingle: number[] = array.shuffle(single);  // [42]
+
+// Two element arrays
+let pair: string[] = ["first", "second"];
+let shuffledPair: string[] = array.shuffle(pair);  // Either ["first", "second"] or ["second", "first"]
+```
+
+#### Practical Use Cases
+
+```typescript
+// Card shuffling for games
+let deck: string[] = ["A♠", "K♠", "Q♠", "J♠", "10♠", "9♠", "8♠", "7♠"];
+let shuffledDeck: string[] = array.shuffle(deck);
+console.log("Shuffled deck: " + array.join(shuffledDeck, ", "));
+
+// Random question order for quizzes
+let questions: string[] = ["What is 2+2?", "What is the capital of France?", "Who wrote Romeo and Juliet?"];
+let randomizedQuestions: string[] = array.shuffle(questions);
+
+// Random player order for games
+let players: string[] = ["Alice", "Bob", "Charlie", "Diana"];
+let gameOrder: string[] = array.shuffle(players);
+console.log("Player order: " + array.join(gameOrder, " -> "));
+
+// Random selection from pool
+let colors: string[] = ["red", "blue", "green", "yellow", "purple"];
+let shuffledColors: string[] = array.shuffle(colors);
+let randomColor: string = shuffledColors[0];  // First element of shuffled array
+console.log("Random color selected: " + randomColor);
+```
+
+#### Shuffle Chaining with Other Array Methods
+
+```typescript
+// Shuffle then take first N elements
+let items: string[] = ["item1", "item2", "item3", "item4", "item5"];
+let shuffledItems: string[] = array.shuffle(items);
+let randomThree: string = array.join([shuffledItems[0], shuffledItems[1], shuffledItems[2]], ", ");
+
+// Sort then shuffle (useful for testing)
+let sorted: number[] = array.sort([5, 1, 3, 2, 4]);  // [1, 2, 3, 4, 5]
+let shuffledSorted: number[] = array.shuffle(sorted);  // Random order of sorted elements
+
+// Multiple shuffles produce different results
+let originalDeck: string[] = ["A", "K", "Q", "J"];
+let shuffle1: string[] = array.shuffle(originalDeck);
+let shuffle2: string[] = array.shuffle(originalDeck);
+// shuffle1 and shuffle2 will likely have different orders
+
+// Use in conditionals
+if (!array.isEmpty(array.shuffle(numbers))) {
+  console.log("Shuffled array contains elements");
+}
+```
+
 ### Array Iteration
 
 #### For-In Loops

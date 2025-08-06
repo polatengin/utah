@@ -354,19 +354,24 @@ public partial class Parser
         return new StringNamespaceCallExpression(stringFunctionName, arguments);
       }
 
-      // Special case for array.* namespace functions
+      // Special case for array.* namespace functions (but not for functions with dedicated AST nodes)
       if (objectName == "array" && methodPart.Contains("(") && methodPart.EndsWith(")"))
       {
         var parenIndex = methodPart.IndexOf('(');
         var arrayFunctionName = methodPart.Substring(0, parenIndex).Trim();
-        var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
-
-        var arguments = new List<Expression>();
-        if (!string.IsNullOrEmpty(argsContent))
+        
+        // Skip functions that have dedicated AST node handling
+        if (arrayFunctionName != "sort" && arrayFunctionName != "shuffle")
         {
-          arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
+          var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
+
+          var arguments = new List<Expression>();
+          if (!string.IsNullOrEmpty(argsContent))
+          {
+            arguments.AddRange(SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())));
+          }
+          return new ArrayNamespaceCallExpression(arrayFunctionName, arguments);
         }
-        return new ArrayNamespaceCallExpression(arrayFunctionName, arguments);
       }
 
       // Handle .length property
@@ -421,7 +426,34 @@ public partial class Parser
         return new ArrayJoinExpression(new VariableExpression(objectName), separatorExpr);
       }
 
-      // Handle .sort() method
+      // Handle array.sort() namespace function calls
+      if (objectName == "array" && methodPart.StartsWith("sort(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
+        var args = SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())).ToList();
+        
+        Expression arrayExpr = args[0]; // First argument is the array
+        Expression? sortOrderExpr = args.Count > 1 ? args[1] : null; // Second argument is optional sort order
+        
+        return new ArraySortExpression(arrayExpr, sortOrderExpr);
+      }
+
+      // Handle array.shuffle() namespace function calls
+      if (objectName == "array" && methodPart == "shuffle()")
+      {
+        // This shouldn't happen since shuffle requires an argument, but handle empty case
+        throw new InvalidOperationException("array.shuffle() requires an array argument");
+      }
+      
+      if (objectName == "array" && methodPart.StartsWith("shuffle(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
+        var arrayExpr = ParseExpression(argsContent);
+        
+        return new ArrayShuffleExpression(arrayExpr);
+      }
+
+      // Handle .sort() method on variables (e.g., myArray.sort())
       if (methodPart.StartsWith("sort(") && methodPart.EndsWith(")"))
       {
         var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
@@ -434,6 +466,12 @@ public partial class Parser
         }
 
         return new ArraySortExpression(new VariableExpression(objectName), sortOrderExpr);
+      }
+
+      // Handle .shuffle() method on variables (e.g., myArray.shuffle())
+      if (methodPart == "shuffle()")
+      {
+        return new ArrayShuffleExpression(new VariableExpression(objectName));
       }
 
       // Handle timer methods

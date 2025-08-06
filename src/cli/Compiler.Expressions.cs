@@ -146,6 +146,8 @@ public partial class Compiler
         return CompileArraySortExpression(arraySort);
       case ArrayMergeExpression arrayMerge:
         return CompileArrayMergeExpression(arrayMerge);
+      case ArrayShuffleExpression arrayShuffle:
+        return CompileArrayShuffleExpression(arrayShuffle);
       case FsDirnameExpression fsDirname:
         return CompileFsDirnameExpression(fsDirname);
       case FsFileNameExpression fsFileName:
@@ -910,10 +912,30 @@ public partial class Compiler
 
   private string CompileArrayIsEmpty(ArrayIsEmpty isEmpty)
   {
-    var arrayName = isEmpty.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(isEmpty.Array));
-
-    // In bash, check if array length is zero: [ ${#arrayName[@]} -eq 0 ]
-    return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+    // Check if this is a simple variable or a complex expression
+    if (isEmpty.Array is VariableExpression varExpr)
+    {
+      // Simple variable reference
+      var arrayName = varExpr.Name;
+      return $"$([ ${{#{arrayName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+    }
+    else
+    {
+      // Complex expression - we need to handle the result as an array
+      var compiledArray = CompileExpression(isEmpty.Array);
+      var uniqueVar = $"_utah_isempty_{GetUniqueId()}";
+      
+      // For command substitutions, we need to capture the output as an array
+      if (compiledArray.StartsWith("$("))
+      {
+        return $"$({uniqueVar}=({compiledArray}); [ ${{#{uniqueVar}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+      }
+      else
+      {
+        // For array literals, assign directly
+        return $"$({uniqueVar}={compiledArray}; [ ${{#{uniqueVar}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+      }
+    }
   }
 
   private string CompileArrayContains(ArrayContains contains)
@@ -1107,11 +1129,10 @@ public partial class Compiler
 
   private string CompileArraySortExpression(ArraySortExpression arraySort)
   {
-    var arrayName = ExtractVariableName(CompileExpression(arraySort.Array));
-
+    var compiledArray = CompileExpression(arraySort.Array);
+    
     _sortCounter++;
     var uniqueVar = $"_utah_sort_{_sortCounter}";
-    var tempVar = $"_utah_temp_{_sortCounter}";
 
     // Determine sort order - default to ascending
     var sortOrder = "asc";
@@ -1129,34 +1150,54 @@ public partial class Compiler
       }
     }
 
-    // Generate bash code based on array type and sort order
-    var arrayType = GetArrayType(arrayName);
+    // Check if this is a literal array or a variable
+    if (arraySort.Array is VariableExpression varExpr)
+    {
+      // It's a variable reference
+      var arrayName = varExpr.Name;
+      var arrayType = GetArrayType(arrayName);
 
-    string sortCommand;
-    if (arrayType == "number")
-    {
-      // Numeric sort
-      sortCommand = sortOrder == "desc" ? "sort -nr" : "sort -n";
-    }
-    else if (arrayType == "boolean")
-    {
-      // Boolean sort: false (0) before true (1)
-      if (sortOrder == "desc")
+      string sortCommand;
+      if (arrayType == "number")
       {
-        sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -nr | sed 's/1/true/g; s/0/false/g'";
+        // Numeric sort
+        sortCommand = sortOrder == "desc" ? "sort -nr" : "sort -n";
+      }
+      else if (arrayType == "boolean")
+      {
+        // Boolean sort: false (0) before true (1)
+        if (sortOrder == "desc")
+        {
+          sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -nr | sed 's/1/true/g; s/0/false/g'";
+        }
+        else
+        {
+          sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -n | sed 's/1/true/g; s/0/false/g'";
+        }
       }
       else
       {
-        sortCommand = "sed 's/true/1/g; s/false/0/g' | sort -n | sed 's/1/true/g; s/0/false/g'";
+        // String sort (lexicographic)
+        sortCommand = sortOrder == "desc" ? "sort -r" : "sort";
       }
+
+      return $"$({uniqueVar}=(); while IFS= read -r line; do {uniqueVar}+=(\"$line\"); done < <(printf '%s\\n' \"${{{arrayName}[@]}}\" | {sortCommand}); echo \"${{{uniqueVar}[@]}}\")";
     }
     else
     {
-      // String sort (lexicographic)
-      sortCommand = sortOrder == "desc" ? "sort -r" : "sort";
+      // It's an array literal or expression result - use simple lexicographic sort
+      var sortCommand = sortOrder == "desc" ? "sort -r" : "sort";
+      
+      // If it's an array literal, we need to create a temporary array first
+      if (arraySort.Array is ArrayLiteral)
+      {
+        return $"$({uniqueVar}={compiledArray}; tmp=(); while IFS= read -r line; do tmp+=(\"$line\"); done < <(printf '%s\\n' \"${{{uniqueVar}[@]}}\" | {sortCommand}); echo \"${{tmp[@]}}\")";
+      }
+      else
+      {
+        return $"$({uniqueVar}=(); while IFS= read -r line; do {uniqueVar}+=(\"$line\"); done < <(printf '%s\\n' {compiledArray} | {sortCommand}); echo \"${{{uniqueVar}[@]}}\")";
+      }
     }
-
-    return $"$({uniqueVar}=(); while IFS= read -r line; do {uniqueVar}+=(\"$line\"); done < <(printf '%s\\n' \"${{{arrayName}[@]}}\" | {sortCommand}); echo \"${{{uniqueVar}[@]}}\")";
   }
 
   private string CompileArrayMergeExpression(ArrayMergeExpression arrayMerge)
@@ -1166,6 +1207,24 @@ public partial class Compiler
 
     // Create a new array by combining both arrays using printf to output each element
     return $"($(printf '%s\\n' \"${{{arrayName1}[@]}}\" \"${{{arrayName2}[@]}}\"))";
+  }
+
+  private string CompileArrayShuffleExpression(ArrayShuffleExpression arrayShuffle)
+  {
+    var compiledArray = CompileExpression(arrayShuffle.Array);
+    
+    // Check if this is a literal array or a variable
+    if (arrayShuffle.Array is VariableExpression varExpr)
+    {
+      // It's a variable reference
+      var arrayName = varExpr.Name;
+      return $"($(if command -v shuf &> /dev/null; then printf '%s\\n' \"${{{arrayName}[@]}}\" | shuf; else arr=(\"${{{arrayName}[@]}}\"); for ((i=${{#arr[@]}}-1; i>0; i--)); do j=$((RANDOM % (i+1))); temp=\"${{arr[i]}}\"; arr[i]=\"${{arr[j]}}\"; arr[j]=\"$temp\"; done; printf '%s\\n' \"${{arr[@]}}\"; fi))";
+    }
+    else
+    {
+      // It's an array literal or expression result
+      return $"($(arr={compiledArray}; if command -v shuf &> /dev/null; then printf '%s\\n' \"${{arr[@]}}\" | shuf; else for ((i=${{#arr[@]}}-1; i>0; i--)); do j=$((RANDOM % (i+1))); temp=\"${{arr[i]}}\"; arr[i]=\"${{arr[j]}}\"; arr[j]=\"$temp\"; done; printf '%s\\n' \"${{arr[@]}}\"; fi))";
+    }
   }
 
   private string GetArrayType(string arrayName)
@@ -1368,6 +1427,7 @@ public partial class Compiler
       "join" => CompileArrayJoinFunction(args),
       "sort" => CompileArraySortFunction(args),
       "merge" => CompileArrayMergeFunction(args),
+      "shuffle" => CompileArrayShuffleFunction(args),
       _ => throw new NotSupportedException($"Array function '{functionName}' is not supported")
     };
   }
@@ -2077,8 +2137,20 @@ fi
     if (args.Count != 1)
       throw new InvalidOperationException("array.isEmpty() requires exactly 1 argument");
 
-    var varName = ExtractVariableName(args[0]);
-    return $"$([ ${{#{varName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+    var arrayArg = args[0];
+    
+    // Handle command substitutions that generate arrays
+    if (arrayArg.StartsWith("$("))
+    {
+      var uniqueVar = $"_utah_isempty_{GetUniqueId()}";
+      return $"$({uniqueVar}=({arrayArg}); [ ${{#{uniqueVar}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+    }
+    else
+    {
+      // Handle regular variable names
+      var varName = ExtractVariableName(arrayArg);
+      return $"$([ ${{#{varName}[@]}} -eq 0 ] && echo \"true\" || echo \"false\")";
+    }
   }
 
   private string CompileArrayContainsFunction(List<string> args)
@@ -2182,5 +2254,16 @@ fi
 
     // Create a new array by combining both arrays using printf to output each element
     return $"($(printf '%s\\n' \"${{{varName1}[@]}}\" \"${{{varName2}[@]}}\"))";
+  }
+
+  private string CompileArrayShuffleFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("array.shuffle() requires exactly 1 argument");
+
+    var varName = ExtractVariableName(args[0]);
+    
+    // Use shuf command if available, otherwise fall back to Fisher-Yates shuffle using RANDOM
+    return $"($(if command -v shuf &> /dev/null; then printf '%s\\n' \"${{{varName}[@]}}\" | shuf; else arr=(\"${{{varName}[@]}}\"); for ((i=${{#arr[@]}}-1; i>0; i--)); do j=$((RANDOM % (i+1))); temp=\"${{arr[i]}}\"; arr[i]=\"${{arr[j]}}\"; arr[j]=\"$temp\"; done; printf '%s\\n' \"${{arr[@]}}\"; fi))";
   }
 }

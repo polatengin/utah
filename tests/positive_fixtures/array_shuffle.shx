@@ -1,0 +1,57 @@
+// Test array.shuffle() method with different data types and edge cases
+
+// Test with number array
+let numbers: number[] = [1, 2, 3, 4, 5];
+let shuffledNumbers: number[] = array.shuffle(numbers);
+console.log("Original numbers: " + array.join(numbers, ", "));
+console.log("Shuffled numbers: " + array.join(shuffledNumbers, ", "));
+
+// Test with string array
+let fruits: string[] = ["apple", "banana", "cherry", "date"];
+let shuffledFruits: string[] = array.shuffle(fruits);
+console.log("Original fruits: " + array.join(fruits, ", "));
+console.log("Shuffled fruits: " + array.join(shuffledFruits, ", "));
+
+// Test with boolean array
+let flags: boolean[] = [true, false, true, false];
+let shuffledFlags: boolean[] = array.shuffle(flags);
+console.log("Original flags: " + array.join(flags, ", "));
+console.log("Shuffled flags: " + array.join(shuffledFlags, ", "));
+
+// Test with empty array
+let empty: string[] = [];
+let shuffledEmpty: string[] = array.shuffle(empty);
+console.log("Empty array shuffled: " + array.join(shuffledEmpty, ", "));
+
+// Test with single element
+let single: number[] = [42];
+let shuffledSingle: number[] = array.shuffle(single);
+console.log("Single element shuffled: " + array.join(shuffledSingle, ", "));
+
+// Test that original arrays are unchanged
+console.log("Verify original numbers unchanged: " + array.join(numbers, ", "));
+console.log("Verify original fruits unchanged: " + array.join(fruits, ", "));
+console.log("Verify original flags unchanged: " + array.join(flags, ", "));
+
+// Test chaining with other array functions
+let sorted: number[] = array.sort([3, 1, 4, 1, 5]);
+let shuffledSorted: number[] = array.shuffle(sorted);
+console.log("Sorted then shuffled: " + array.join(shuffledSorted, ", "));
+
+// Test using shuffle result in conditionals
+let shuffledForCheck: number[] = array.shuffle(numbers);
+if (!array.isEmpty(shuffledForCheck)) {
+  console.log("Shuffled array is not empty");
+}
+
+// Test multiple shuffles (to show randomness)
+let deck: string[] = ["A", "K", "Q", "J"];
+let shuffle1: string[] = array.shuffle(deck);
+let shuffle2: string[] = array.shuffle(deck);
+console.log("Shuffle 1: " + array.join(shuffle1, ", "));
+console.log("Shuffle 2: " + array.join(shuffle2, ", "));
+
+// Test with longer array
+let moreNumbers: number[] = [10, 20, 30, 40, 50, 60];
+let shuffledMore: number[] = array.shuffle(moreNumbers);
+console.log("Longer array shuffled: " + array.join(shuffledMore, ", "));

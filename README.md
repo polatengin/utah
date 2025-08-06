@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-103-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-105-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1238,6 +1238,59 @@ if (array.isEmpty(additionalConfig) == false) {
 console.log(`Original fruits: ${array.join(fruits, ", ")}`);      // Still ["apple", "banana"]
 console.log(`Original vegetables: ${array.join(vegetables, ", ")}`); // Still ["carrot", "broccoli"]
 console.log(`Merged food: ${array.join(food, ", ")}`);            // ["apple", "banana", "carrot", "broccoli"]
+```
+
+Shuffle array elements randomly using the `array.shuffle()` function:
+
+```typescript
+// Basic shuffling with different types
+let numbers: number[] = [1, 2, 3, 4, 5];
+let shuffled: number[] = array.shuffle(numbers);  // Gets random order like [3, 1, 5, 2, 4]
+
+let fruits: string[] = ["apple", "banana", "cherry"];
+let shuffledFruits: string[] = array.shuffle(fruits);  // Gets random order like ["cherry", "apple", "banana"]
+
+let flags: boolean[] = [true, false, true, false];
+let shuffledFlags: boolean[] = array.shuffle(flags);  // Gets random order like [false, true, false, true]
+
+// Edge cases
+let emptyArray: string[] = [];
+let shuffledEmpty: string[] = array.shuffle(emptyArray);  // Gets []
+
+let single: number[] = [42];
+let shuffledSingle: number[] = array.shuffle(single);  // Gets [42]
+
+// Original array remains unchanged
+console.log(`Original: ${array.join(numbers, ", ")}`);    // Still [1, 2, 3, 4, 5]
+console.log(`Shuffled: ${array.join(shuffled, ", ")}`);   // Random order
+
+// Each shuffle produces different results
+let cards: string[] = ["A", "K", "Q", "J"];
+let deal1: string[] = array.shuffle(cards);
+let deal2: string[] = array.shuffle(cards);
+console.log(`Deal 1: ${array.join(deal1, ", ")}`);  // Random order like ["Q", "A", "J", "K"]
+console.log(`Deal 2: ${array.join(deal2, ", ")}`);  // Different random order
+
+// Chaining with other array functions
+let sorted: number[] = array.sort([3, 1, 4, 1, 5]);
+let shuffledSorted: number[] = array.shuffle(sorted);
+console.log(`Sorted then shuffled: ${array.join(shuffledSorted, ", ")}`);
+
+// Use in conditionals
+if (!array.isEmpty(array.shuffle(numbers))) {
+  console.log("Shuffled array is not empty");
+}
+
+// Gaming applications
+let deck: string[] = ["A♠", "K♠", "Q♠", "J♠", "10♠", "9♠", "8♠", "7♠"];
+let shuffledDeck: string[] = array.shuffle(deck);
+console.log(`Shuffled deck: ${array.join(shuffledDeck, ", ")}`);
+
+// Random selection from array
+let choices: string[] = ["red", "blue", "green", "yellow"];
+let randomized: string[] = array.shuffle(choices);
+let randomChoice: string = randomized[0];  // First element of shuffled array
+console.log(`Random choice: ${randomChoice}`);
 ```
 
 ### Array Iteration
@@ -4569,7 +4622,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.merge()` function
 
-- [ ] `array.shuffle()` function
+- [x] `array.shuffle()` function
 
 - [x] Add shebang (`#!/bin/bash`) to generated scripts
 
