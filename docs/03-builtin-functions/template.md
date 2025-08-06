@@ -96,8 +96,6 @@ server:
   environment: ${NODE_ENV:-production}
 ```
 
-The `${VARIABLE:-default}` syntax provides default values when variables are not set.
-
 ## Error Handling
 
 Template functions will fail if:
