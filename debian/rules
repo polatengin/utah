@@ -11,3 +11,6 @@ override_dh_auto_build:
 
 override_dh_auto_test:
 	make test
+
+override_dh_dwz:
+	# Skip dwz compression for .dotnet executables (no DWARF debug info)
