@@ -75,7 +75,7 @@ For new language features:
 ### 4. Update Documentation
 
 - Add examples to `examples/`
-- Update README.md if needed
+- Update [README.md](https://github.com/polatengin/utah/blob/main/README.md) if needed
 - Update function documentation in `docs/functions/`
 
 ### 5. Submit a Pull Request
