@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev markdownlint format
+.PHONY: help build build-extension build-debian build-debian-changelog test compile clean install info dev markdownlint format
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -241,6 +241,33 @@ build-debian: ## Build Debian package
 	@echo "$(BLUE)📦 Building Debian package...$(NC)"
 	@debuild -us -uc -b
 	@echo "$(GREEN)✅ Debian package build complete$(NC)"
+
+build-debian-changelog: ## Generate debian/changelog from git tags
+	@echo "$(BLUE)📝 Generating Debian changelog...$(NC)"
+	@bash -c ' \
+	PACKAGE_NAME="utah"; \
+	CHANGELOG_FILE="debian/changelog"; \
+	DEBFULLNAME="Engin Polat"; \
+	DEBEMAIL="polatengin@hotmail.com"; \
+	mapfile -t tags < <(git tag --sort=version:refname | grep "^v"); \
+	> "$$CHANGELOG_FILE"; \
+	for ((i=0; i<$${#tags[@]}-1; i++)); do \
+		current_tag="$${tags[$$i]}"; \
+		next_tag="$${tags[$$((i+1))]}"; \
+		version="$${next_tag#v}"; \
+		commits=$$(git log "$$current_tag..$$next_tag" --pretty=format:"  * %s" --no-merges); \
+		[[ -z "$$commits" ]] && continue; \
+		date_rfc=$$(git log -1 --format=%cD "$$next_tag"); \
+		{ \
+			echo "$$PACKAGE_NAME ($$version) unstable; urgency=medium"; \
+			echo; \
+			echo "$$commits"; \
+			echo; \
+			echo " -- $$DEBFULLNAME <$$DEBEMAIL>  $$date_rfc"; \
+			echo; \
+		} >> "$$CHANGELOG_FILE"; \
+	done'
+	@echo "$(GREEN)✅ Changelog generated at debian/changelog$(NC)"
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"

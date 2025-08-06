@@ -30,7 +30,7 @@ utah (0.1.1) unstable; urgency=medium
   * fix: update code blocks for clarity and consistency; move process information functions section
   * pinning github actions using full commit shas
 
- -- Engin Polat <polatengin@hotmail.com>  Tue, 08 Jul 2025 05:13:19 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Mon, 7 Jul 2025 22:13:19 -0700
 
 utah (0.1.2) unstable; urgency=medium
 
@@ -60,7 +60,7 @@ utah (0.1.2) unstable; urgency=medium
   * feat: enhance test command to support specific test execution and improved output
   * feat: enhance release workflow with test badge generation and detailed test results summary
 
- -- Engin Polat <polatengin@hotmail.com>  Tue, 08 Jul 2025 21:10:41 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 14:10:41 -0700
 
 utah (0.1.3) unstable; urgency=medium
 
@@ -70,7 +70,7 @@ utah (0.1.3) unstable; urgency=medium
   * refactor: remove unused using directives from parser files
   * refactor: split parsing methods to separate files
 
- -- Engin Polat <polatengin@hotmail.com>  Wed, 09 Jul 2025 01:48:51 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 18:48:51 -0700
 
 utah (0.1.4) unstable; urgency=medium
 
@@ -101,7 +101,7 @@ utah (0.1.4) unstable; urgency=medium
   * feat: improving os_isinstalled tests
   * feat: add OsIsInstalledExpression and implement parsing and compilation logic
 
- -- Engin Polat <polatengin@hotmail.com>  Fri, 11 Jul 2025 00:04:02 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 10 Jul 2025 17:04:02 -0700
 
 utah (0.1.5) unstable; urgency=medium
 
@@ -155,7 +155,7 @@ utah (0.1.5) unstable; urgency=medium
   * chore: update dependabot configuration for package ecosystems
   * refactor: clean up whitespace and comments in various files
 
- -- Engin Polat <polatengin@hotmail.com>  Wed, 16 Jul 2025 01:01:15 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 15 Jul 2025 18:01:15 -0700
 
 utah (0.1.6) unstable; urgency=medium
 
@@ -177,7 +177,7 @@ utah (0.1.6) unstable; urgency=medium
   * feat: update installation command to accept version tag
   * feat: enhance installation script with improved error handling and accepting version to install
 
- -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 14:01:51 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 07:01:51 -0700
 
 utah (0.1.7) unstable; urgency=medium
 
@@ -200,7 +200,7 @@ utah (0.1.7) unstable; urgency=medium
   * feat: add yml manipulation, parsing, and validation functions with corresponding tests and documentation
   * feat: add json manipulation, parsing, and validation functions with corresponding tests and documentation
 
- -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 21:04:48 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 14:04:48 -0700
 
 utah (0.1.8) unstable; urgency=medium
 
@@ -245,7 +245,7 @@ utah (0.1.8) unstable; urgency=medium
   * fix: correct wording for error handling in utility.random function
   * formatting document
 
- -- Engin Polat <polatengin@hotmail.com>  Fri, 18 Jul 2025 20:10:08 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Fri, 18 Jul 2025 13:10:08 -0700
 
 utah (0.1.9) unstable; urgency=medium
 
@@ -276,7 +276,7 @@ utah (0.1.9) unstable; urgency=medium
   * feat: separate arrays and strings into individual documentation files and update references
   * feat: update with new test coverage details and additional test files
 
- -- Engin Polat <polatengin@hotmail.com>  Tue, 22 Jul 2025 07:30:31 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 22 Jul 2025 00:30:31 -0700
 
 utah (0.1.10) unstable; urgency=medium
 
@@ -291,7 +291,7 @@ utah (0.1.10) unstable; urgency=medium
   * formatting documents
   * refactor: replace string manipulation expressions with string namespace functions
 
- -- Engin Polat <polatengin@hotmail.com>  Thu, 24 Jul 2025 04:02:58 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Wed, 23 Jul 2025 21:02:58 -0700
 
 utah (0.1.11) unstable; urgency=medium
 
@@ -326,5 +326,5 @@ utah (0.1.11) unstable; urgency=medium
   * chore: remove express and its type definitions from dependencies
   * feat(mcp-server): initialize project with TypeScript configuration and package setup
 
- -- Engin Polat <polatengin@hotmail.com>  Wed, 06 Aug 2025 19:03:24 +0000
+ -- Engin Polat <polatengin@hotmail.com>  Wed, 6 Aug 2025 12:03:24 -0700
 
