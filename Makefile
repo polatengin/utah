@@ -203,13 +203,13 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 	fi
 
 compile: build ## Compile a .shx file (usage: make compile FILE=path/to/file.shx)
-ifndef FILE
-	@echo "$(YELLOW)Usage: make compile FILE=<file.shx>$(NC)"
-	@echo "Example: make compile FILE=examples/hello.shx"
-	@exit 1
-endif
-	@echo "$(BLUE)📝 Compiling $(FILE)...$(NC)"
-	@cd $(CLI_DIR) && dotnet run -- compile "../../$(FILE)"
+	ifndef FILE
+		@echo "$(YELLOW)Usage: make compile FILE=<file.shx>$(NC)"
+		@echo "Example: make compile FILE=examples/hello.shx"
+		@exit 1
+	endif
+		@echo "$(BLUE)📝 Compiling $(FILE)...$(NC)"
+		@cd $(CLI_DIR) && dotnet run -- compile "../../$(FILE)"
 
 format: ## Format .NET source code and markdown files in the project
 	@echo "$(BLUE)📝 Formatting project files...$(NC)"
@@ -224,7 +224,6 @@ format: ## Format .NET source code and markdown files in the project
 	fi
 	@echo "$(GREEN)✅ Project formatting complete$(NC)"
 
-# Development workflow targets
 build-extension: build ## Build both CLI and VS Code extension
 	@echo "$(BLUE)🔨 Building VS Code extension...$(NC)"
 	@cd $(VSCODE_DIR) && npm run compile
@@ -238,14 +237,16 @@ build-extension: build ## Build both CLI and VS Code extension
 	@chmod +x $(VSCODE_DIR)/dist/server/utah
 	@echo "$(GREEN)✅ Extension build complete$(NC)"
 
-dev: build test ## Full development cycle: build + test
+build-debian: ## Build Debian package
+	@echo "$(BLUE)📦 Building Debian package...$(NC)"
+	@debuild -us -uc -b
+	@echo "$(GREEN)✅ Debian package build complete$(NC)"
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
 	@cd $(CLI_DIR) && dotnet publish -c Release -o /usr/local/bin/utah
 	@echo "$(GREEN)✅ Utah CLI installed to /usr/local/bin/utah$(NC)"
 
-# Information targets
 info: ## Show project information
 	@echo "Utah Language Development Environment"
 	@echo "===================================="
