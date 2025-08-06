@@ -13,4 +13,7 @@ override_dh_auto_test:
 	make test
 
 override_dh_dwz:
-	# Skip dwz compression for .dotnet executables (no DWARF debug info)
+	# Skip dwz compression for dotnet executables (no DWARF debug info)
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info --dpkg-shlibdeps-params=--warnings=0 -Xlibdl.so.2 -Xlibpthread.so.0
