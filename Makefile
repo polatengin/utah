@@ -249,15 +249,19 @@ build-debian-changelog: ## Generate debian/changelog from git tags
 	CHANGELOG_FILE="debian/changelog"; \
 	DEBFULLNAME="Engin Polat"; \
 	DEBEMAIL="polatengin@hotmail.com"; \
-	mapfile -t tags < <(git tag --sort=version:refname | grep "^v"); \
+	mapfile -t tags < <(git tag --sort=-version:refname | grep "^v"); \
 	> "$$CHANGELOG_FILE"; \
-	for ((i=0; i<$${#tags[@]}-1; i++)); do \
+	for ((i=0; i<$${#tags[@]}; i++)); do \
 		current_tag="$${tags[$$i]}"; \
-		next_tag="$${tags[$$((i+1))]}"; \
-		version="$${next_tag#v}"; \
-		commits=$$(git log "$$current_tag..$$next_tag" --pretty=format:"  * %s" --no-merges); \
-		[[ -z "$$commits" ]] && continue; \
-		date_rfc=$$(git log -1 --format=%cD "$$next_tag"); \
+		if [ $$i -eq $$((${#tags[@]}-1)) ]; then \
+			prev_tag="$$(git rev-list --max-parents=0 HEAD | head -1)"; \
+		else \
+			prev_tag="$${tags[$$((i+1))]}"; \
+		fi; \
+		version="$${current_tag#v}"; \
+		commits=$$(git log "$$prev_tag..$$current_tag" --pretty=format:"  * %s" --no-merges); \
+		[[ -z "$$commits" ]] && commits="  * Initial release"; \
+		date_rfc=$$(git log -1 --format=%cD "$$current_tag"); \
 		{ \
 			echo "$$PACKAGE_NAME ($$version) unstable; urgency=medium"; \
 			echo; \
