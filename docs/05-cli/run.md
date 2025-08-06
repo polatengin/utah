@@ -7,7 +7,7 @@ nav_order: 2
 
 The `utah run` command compiles and immediately executes Utah (.shx) scripts or individual commands without creating persistent .sh files. This is ideal for development, testing, one-off script execution, and quick command testing.
 
-> You can now run .shx files and commands directly without the `run` command! See [Direct Execution](index.md#direct-execution) for details.
+> You can now run .shx files and commands directly without the `run` command! See [Direct Execution](index.md#-direct-execution) for details.
 
 ## Basic Usage
 
