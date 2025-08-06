@@ -69,8 +69,7 @@ Text and character data:
 
 ```typescript
 let message: string = "Hello, Utah!";
-let singleQuoted: string = 'Also works';
-let templateLiteral: string = `Dynamic: ${message}`;
+let templateLiteral: string = "Dynamic: ${message}";
 let multiline: string = `
   This string
   spans multiple
@@ -172,9 +171,9 @@ let userName: string = "Alice";
 let score: number = 95;
 let isWinner: boolean = score > 90;
 
-let message: string = `Hello ${userName}!`;
-let result: string = `Score: ${score}, Winner: ${isWinner}`;
-let complex: string = `User ${userName} scored ${score} points and ${isWinner ? "won" : "lost"}`;
+let message: string = "Hello ${userName}!";
+let result: string = "Score: ${score}, Winner: ${isWinner}";
+let complex: string = "User ${userName} scored ${score} points and ${isWinner ? \"won\" : \"lost\"}";
 ```
 
 **Generated bash:**
@@ -216,7 +215,7 @@ Function parameters are local to the function:
 ```typescript
 function greet(name: string, age: number): void {
   // 'name' and 'age' are only available within this function
-  let greeting: string = `Hello ${name}, you are ${age} years old`;
+  let greeting: string = "Hello ${name}, you are ${age} years old";
   console.log(greeting);
 }
 
@@ -291,13 +290,13 @@ let fruits: string[] = ["apple", "banana", "orange"];
 
 // For-in loop (recommended)
 for (let fruit: string in fruits) {
-  console.log(`Fruit: ${fruit}`);
+  console.log("Fruit: ${fruit}");
 }
 
 // Traditional for loop
 for (let i: number = 0; i < fruits.length; i++) {
   let fruit: string = fruits[i];
-  console.log(`Index ${i}: ${fruit}`);
+  console.log("Index ${i}: ${fruit}");
 }
 ```
 
@@ -379,7 +378,7 @@ let count: number = 42;
 let active: boolean = true;
 
 // Automatic conversion in template literals
-let message: string = `Count: ${count}, Active: ${active}`;
+let message: string = "Count: ${count}, Active: ${active}";
 // Result: "Count: 42, Active: true"
 ```
 
@@ -394,7 +393,7 @@ let dbPort: number = parseInt(env.get("DB_PORT", "5432"));
 let debugMode: boolean = env.get("DEBUG", "false") == "true";
 
 // Use environment variables
-console.log(`Connecting to ${dbHost}:${dbPort}`);
+console.log("Connecting to ${dbHost}:${dbPort}");
 if (debugMode) {
   console.log("Debug mode enabled");
 }
@@ -494,7 +493,7 @@ if (fs.exists(CONFIG_FILE)) {
   }
 }
 
-console.log(`Server will start on ${host}:${port}`);
+console.log("Server will start on ${host}:${port}");
 ```
 
 ### Data Processing Pipeline
@@ -513,22 +512,22 @@ for (let file: string in inputFiles) {
         // Process data here
         processedCount++;
       } else {
-        errors[errors.length] = `Invalid JSON in ${file}`;
+        errors[errors.length] = "Invalid JSON in ${file}";
       }
     } else {
-      errors[errors.length] = `File not found: ${file}`;
+      errors[errors.length] = "File not found: ${file}";
     }
   }
   catch {
-    errors[errors.length] = `Error processing ${file}`;
+    errors[errors.length] = "Error processing ${file}";
   }
 }
 
-console.log(`Processed ${processedCount} files successfully`);
+console.log("Processed ${processedCount} files successfully");
 if (errors.length > 0) {
   console.log("Errors encountered:");
   for (let error: string in errors) {
-    console.log(`- ${error}`);
+    console.log("- ${error}");
   }
 }
 ```
@@ -553,7 +552,7 @@ if (userName.length == 0) {
   exit(1);
 }
 
-console.log(`Processing ${count} items for user: ${userName}`);
+console.log("Processing ${count} items for user: ${userName}");
 ```
 
 ## Next Steps

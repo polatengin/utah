@@ -47,7 +47,6 @@ count="42"
 
 ```typescript
 let message: string = "Hello, World!";
-let singleQuoted: string = 'Also works';
 ```
 
 ### Template Literals
@@ -57,7 +56,7 @@ Use template literals for string interpolation:
 ```typescript
 let name: string = "Utah";
 let version: number = 1.0;
-let greeting: string = `Welcome to ${name} v${version}!`;
+let greeting: string = "Welcome to ${name} v${version}!";
 ```
 
 **Generated bash:**
@@ -109,7 +108,7 @@ function functionName(param1: type, param2: type): returnType {
 ```typescript
 // Function with no return value
 function greet(name: string): void {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 
 // Function with return value
@@ -214,7 +213,7 @@ Traditional C-style for loops:
 
 ```typescript
 for (let i: number = 0; i < 10; i++) {
-  console.log(`Iteration: ${i}`);
+  console.log("Iteration: ${i}");
 }
 ```
 
@@ -226,7 +225,7 @@ Iterate over arrays:
 let fruits: string[] = ["apple", "banana", "orange"];
 
 for (let fruit: string in fruits) {
-  console.log(`Fruit: ${fruit}`);
+  console.log("Fruit: ${fruit}");
 }
 ```
 
@@ -236,7 +235,7 @@ for (let fruit: string in fruits) {
 let count: number = 0;
 
 while (count < 5) {
-  console.log(`Count: ${count}`);
+  console.log("Count: ${count}");
   count++;
 }
 ```
@@ -411,7 +410,7 @@ Utah resolves imports in this order:
 
 ```typescript
 let status: string = isActive ? "active" : "inactive";
-let message: string = count > 0 ? `Found ${count} items` : "No items found";
+let message: string = count > 0 ? "Found ${count} items" : "No items found";
 ```
 
 **Generated bash:**
@@ -446,9 +445,9 @@ Execute functions in parallel:
 
 ```typescript
 function slowTask(name: string): void {
-  console.log(`Starting ${name}...`);
+  console.log("Starting ${name}...");
   // Some work here
-  console.log(`Finished ${name}`);
+  console.log("Finished ${name}");
 }
 
 // Run tasks in parallel

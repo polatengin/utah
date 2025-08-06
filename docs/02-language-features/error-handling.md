@@ -32,7 +32,7 @@ try {
   let result: string = `$(curl -f https://api.example.com/data)`;
 }
 catch (error) {
-  console.log(`API call failed: ${error}`);
+  console.log("API call failed: ${error}");
   // Handle the specific error
 }
 ```
@@ -50,7 +50,7 @@ function loadConfig(filename: string): object {
     return json.parse(content);
   }
   catch {
-    console.log(`Cannot load config from ${filename}`);
+    console.log("Cannot load config from ${filename}");
     throw "Config load failed";
   }
 }
@@ -124,19 +124,19 @@ exit(127);
 function processFile(filename: string): boolean {
   try {
     if (!fs.exists(filename)) {
-      throw `File not found: ${filename}`;
+      throw "File not found: ${filename}";
     }
 
     let content: string = fs.readFile(filename);
     if (string.length(content) == 0) {
-      throw `File is empty: ${filename}`;
+      throw "File is empty: ${filename}";
     }
 
     // Process the file
     return true;
   }
   catch (error) {
-    console.log(`Error processing ${filename}: ${error}`);
+    console.log("Error processing ${filename}: ${error}");
     return false;
   }
 }
@@ -147,7 +147,7 @@ function processFile(filename: string): boolean {
 ```typescript
 function logError(message: string): void {
   let timestamp: string = timer.current();
-  console.log(`[${timestamp}] ERROR: ${message}`);
+  console.log("[${timestamp}] ERROR: ${message}");
 }
 
 try {
@@ -167,22 +167,22 @@ function deployApplication(environment: string, version: string): void {
   // Validate environment
   let validEnvs: string[] = ["dev", "staging", "prod"];
   if (!array.contains(validEnvs, environment)) {
-    throw `Invalid environment: ${environment}`;
+    throw "Invalid environment: ${environment}";
   }
 
   // Validate version format
   if (!string.contains(version, ".")) {
-    throw `Invalid version format: ${version}`;
+    throw "Invalid version format: ${version}";
   }
 
-  console.log(`Deploying ${version} to ${environment}`);
+  console.log("Deploying ${version} to ${environment}");
 }
 
 try {
   deployApplication("prod", "1.2.3");
 }
 catch (error) {
-  console.log(`Deployment failed: ${error}`);
+  console.log("Deployment failed: ${error}");
   exit(1);
 }
 ```
@@ -195,7 +195,7 @@ function ensureDependencies(): void {
 
   for (let tool: string in requiredTools) {
     if (!os.isInstalled(tool)) {
-      throw `Required tool not found: ${tool}`;
+      throw "Required tool not found: ${tool}";
     }
   }
 }
@@ -205,7 +205,7 @@ try {
   console.log("All dependencies are available");
 }
 catch (error) {
-  console.log(`Dependency check failed: ${error}`);
+  console.log("Dependency check failed: ${error}");
   console.log("Please install missing tools and try again");
   exit(1);
 }
@@ -219,12 +219,12 @@ catch (error) {
 function retryOperation(maxAttempts: number, operation: string): boolean {
   for (let attempt: number = 1; attempt <= maxAttempts; attempt++) {
     try {
-      let result: string = `$(${operation})`;
+      let result: string = "$(${operation})";
       console.log("Operation succeeded");
       return true;
     }
     catch {
-      console.log(`Attempt ${attempt} failed`);
+      console.log("Attempt ${attempt} failed");
       if (attempt < maxAttempts) {
         console.log("Retrying in 5 seconds...");
         timer.sleep(5000);
@@ -275,18 +275,18 @@ function getConfiguration(): object {
 
 ```typescript
 function processWithCleanup(inputFile: string): void {
-  let tempFile: string = `/tmp/processing-${timer.current()}`;
+  let tempFile: string = "/tmp/processing-${timer.current()}";
 
   try {
     // Create temporary file
     fs.writeFile(tempFile, "processing data");
 
     // Process data
-    let result: string = `$(process-data ${inputFile} ${tempFile})`;
+    let result: string = "$(process-data ${inputFile} ${tempFile})";
     console.log("Processing completed");
   }
   catch (error) {
-    console.log(`Processing failed: ${error}`);
+    console.log("Processing failed: ${error}");
   }
   finally {
     // Cleanup temporary file
@@ -316,7 +316,7 @@ function callExternalService(): boolean {
   }
   catch {
     failureCount++;
-    console.log(`Service call failed (${failureCount}/${MAX_FAILURES})`);
+    console.log("Service call failed (${failureCount}/${MAX_FAILURES})");
     return false;
   }
 }
@@ -346,8 +346,8 @@ function handleError(message: string): void {
   let timestamp: string = timer.current();
   let logFile: string = "/var/log/script-errors.log";
 
-  fs.appendFile(logFile, `[${timestamp}] ${message}\n`);
-  console.log(`ERROR: ${message}`);
+  fs.appendFile(logFile, "[${timestamp}] ${message}\n");
+  console.log("ERROR: ${message}");
 }
 
 // Use consistent error handling throughout the script
@@ -356,7 +356,7 @@ try {
   processData();
 }
 catch (error) {
-  handleError(`Script execution failed: ${error}`);
+  handleError("Script execution failed: ${error}");
   exit(1);
 }
 ```
@@ -380,7 +380,7 @@ catch (error) {
 function safeFileOperation(filename: string): boolean {
   try {
     if (!fs.exists(filename)) {
-      console.log(`File not found: ${filename}`);
+      console.log("File not found: ${filename}");
       return false;
     }
 
@@ -389,7 +389,7 @@ function safeFileOperation(filename: string): boolean {
     return true;
   }
   catch (error) {
-    console.log(`File operation failed: ${error}`);
+    console.log("File operation failed: ${error}");
     return false;
   }
 }
@@ -400,10 +400,10 @@ function safeFileOperation(filename: string): boolean {
 ```typescript
 function fetchData(url: string): string {
   try {
-    return `$(curl -f --max-time 30 "${url}")`;
+    return "$(curl -f --max-time 30 "${url}")";
   }
   catch {
-    throw `Failed to fetch data from ${url}`;
+    throw "Failed to fetch data from ${url}";
   }
 }
 ```
@@ -413,13 +413,13 @@ function fetchData(url: string): string {
 ```typescript
 function runSystemCommand(command: string): boolean {
   try {
-    let output: string = `$(${command})`;
+    let output: string = "$(${command})";
     console.log("Command completed successfully");
     return true;
   }
   catch (error) {
-    console.log(`Command failed: ${command}`);
-    console.log(`Error: ${error}`);
+    console.log("Command failed: ${command}");
+    console.log("Error: ${error}");
     return false;
   }
 }

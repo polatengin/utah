@@ -54,7 +54,7 @@ for (let fruit of fruits) {
 
 // For-in loop
 for (let i in fruits) {
-  console.log(`${i}: ${fruits[i]}`);
+  console.log("${i}: ${fruits[i]}");
 }
 
 // Traditional for loop

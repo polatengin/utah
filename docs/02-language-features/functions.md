@@ -15,7 +15,7 @@ Functions are declared with the `function` keyword and require type annotations:
 
 ```typescript
 function greet(name: string): void {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 
 greet("World");
@@ -42,7 +42,7 @@ function add(a: number, b: number): number {
 }
 
 let result: number = add(5, 3);
-console.log(`Result: ${result}`);
+console.log("Result: ${result}");
 ```
 
 **Generated Bash:**
@@ -62,7 +62,7 @@ echo "Result: ${result}"
 
 ```typescript
 function getGreeting(name: string): string {
-  return `Hello, ${name}!`;
+  return "Hello, ${name}!";
 }
 
 let message: string = getGreeting("Alice");
@@ -90,7 +90,7 @@ Functions can accept multiple typed parameters:
 ```typescript
 function createUser(name: string, age: number, active: boolean): string {
   let status: string = active ? "active" : "inactive";
-  return `User: ${name}, Age: ${age}, Status: ${status}`;
+  return "User: ${name}, Age: ${age}, Status: ${status}";
 }
 
 let userInfo: string = createUser("Bob", 25, true);
@@ -105,7 +105,7 @@ Pass arrays as function parameters:
 function processItems(items: string[]): number {
   let count: number = 0;
   for (let item: string in items) {
-    console.log(`Processing: ${item}`);
+    console.log("Processing: ${item}");
     count++;
   }
   return count;
@@ -113,7 +113,7 @@ function processItems(items: string[]): number {
 
 let files: string[] = ["file1.txt", "file2.txt", "file3.txt"];
 let processed: number = processItems(files);
-console.log(`Processed ${processed} items`);
+console.log("Processed ${processed} items");
 ```
 
 **Generated Bash:**
@@ -146,12 +146,12 @@ let globalVar: string = "global";
 function testScope(): void {
   let localVar: string = "local";
   globalVar = "modified global";
-  console.log(`Local: ${localVar}`);
-  console.log(`Global: ${globalVar}`);
+  console.log("Local: ${localVar}");
+  console.log("Global: ${globalVar}");
 }
 
 testScope();
-console.log(`Outside function: ${globalVar}`);
+console.log("Outside function: ${globalVar}");
 ```
 
 **Generated Bash:**
@@ -179,11 +179,11 @@ let name: string = "Global";
 
 function showName(): void {
   let name: string = "Local";
-  console.log(`Inside function: ${name}`);
+  console.log("Inside function: ${name}");
 }
 
 showName();
-console.log(`Outside function: ${name}`);
+console.log("Outside function: ${name}");
 ```
 
 ## Function Composition
@@ -194,12 +194,12 @@ Functions can call other functions:
 
 ```typescript
 function formatName(first: string, last: string): string {
-  return `${first} ${last}`;
+  return "${first} ${last}";
 }
 
 function createWelcome(first: string, last: string): string {
   let fullName: string = formatName(first, last);
-  return `Welcome, ${fullName}!`;
+  return "Welcome, ${fullName}!";
 }
 
 let welcome: string = createWelcome("John", "Doe");
@@ -252,7 +252,7 @@ function processFile(filename: string): boolean {
   }
 
   if (!fs.exists(filename)) {
-    console.log(`File not found: ${filename}`);
+    console.log("File not found: ${filename}");
     return false;
   }
 
@@ -262,7 +262,7 @@ function processFile(filename: string): boolean {
     return false;
   }
 
-  console.log(`Processing file: ${filename}`);
+  console.log("Processing file: ${filename}");
   return true;
 }
 ```
@@ -331,23 +331,23 @@ Use return values to indicate success or failure:
 ```typescript
 function backupFile(source: string, dest: string): number {
   if (!fs.exists(source)) {
-    console.log(`Source file not found: ${source}`);
+    console.log("Source file not found: ${source}");
     return 1;
   }
 
   if (fs.exists(dest)) {
-    console.log(`Destination already exists: ${dest}`);
+    console.log("Destination already exists: ${dest}");
     return 2;
   }
 
-  console.log(`Backing up ${source} to ${dest}`);
+  console.log("Backing up ${source} to ${dest}");
   // Copy logic would go here
   return 0;
 }
 
 let result: number = backupFile("data.txt", "backup/data.txt");
 if (result != 0) {
-  console.log(`Backup failed with error code: ${result}`);
+  console.log("Backup failed with error code: ${result}");
   exit(result);
 }
 ```
@@ -359,7 +359,7 @@ Functions that perform actions without returning values:
 ```typescript
 function logMessage(level: string, message: string): void {
   let timestamp: string = timer.current();
-  let logEntry: string = `[${timestamp}] ${level}: ${message}`;
+  let logEntry: string = "[${timestamp}] ${level}: ${message}";
 
   console.log(logEntry);
 
@@ -386,7 +386,7 @@ logError("Database connection failed");
 ```typescript
 function parseConfigFile(filename: string): object {
   if (!fs.exists(filename)) {
-    console.log(`Config file not found: ${filename}, using defaults`);
+    console.log("Config file not found: ${filename}, using defaults");
     return json.parse('{"port": 8080, "debug": false}');
   }
 
@@ -411,7 +411,7 @@ let config: object = parseConfigFile("app.json");
 let port: string = getConfigValue(config, ".port", "8080");
 let debug: string = getConfigValue(config, ".debug", "false");
 
-console.log(`Server will run on port ${port} with debug=${debug}`);
+console.log("Server will run on port ${port} with debug=${debug}");
 ```
 
 ### File Processing Pipeline
@@ -419,13 +419,13 @@ console.log(`Server will run on port ${port} with debug=${debug}`);
 ```typescript
 function validateFile(filename: string): boolean {
   if (!fs.exists(filename)) {
-    console.log(`File not found: ${filename}`);
+    console.log("File not found: ${filename}");
     return false;
   }
 
-  let size: number = `$(stat -c%s "${filename}")`;
+  let size: number = "$(stat -c%s "${filename}")";
   if (size == 0) {
-    console.log(`File is empty: ${filename}`);
+    console.log("File is empty: ${filename}");
     return false;
   }
 
@@ -445,30 +445,30 @@ function processTextFile(filename: string): string {
 function saveProcessedFile(content: string, outputFile: string): boolean {
   try {
     fs.writeFile(outputFile, content);
-    console.log(`Saved processed content to: ${outputFile}`);
+    console.log("Saved processed content to: ${outputFile}");
     return true;
   }
   catch {
-    console.log(`Failed to save file: ${outputFile}`);
+    console.log("Failed to save file: ${outputFile}");
     return false;
   }
 }
 
 function processFilesPipeline(inputFiles: string[]): void {
   for (let file: string in inputFiles) {
-    console.log(`Processing: ${file}`);
+    console.log("Processing: ${file}");
 
     if (!validateFile(file)) {
       continue;
     }
 
     let content: string = processTextFile(file);
-    let outputFile: string = `processed_${file}`;
+    let outputFile: string = "processed_${file}";
 
     if (saveProcessedFile(content, outputFile)) {
-      console.log(`Successfully processed: ${file}`);
+      console.log("Successfully processed: ${file}");
     } else {
-      console.log(`Failed to process: ${file}`);
+      console.log("Failed to process: ${file}");
     }
   }
 }
@@ -510,18 +510,18 @@ function formatSystemInfo(info: object): void {
 
   if (json.has(info, ".os")) {
     let os: string = json.get(info, ".os");
-    console.log(`Operating System: ${os}`);
+    console.log("Operating System: ${os}");
   }
 
   if (json.has(info, ".memory_kb")) {
     let memKb: string = json.get(info, ".memory_kb");
     let memMb: number = memKb / 1024;
-    console.log(`Total Memory: ${memMb} MB`);
+    console.log("Total Memory: ${memMb} MB");
   }
 
   if (json.has(info, ".disk_usage")) {
     let usage: string = json.get(info, ".disk_usage");
-    console.log(`Disk Usage: ${usage}`);
+    console.log("Disk Usage: ${usage}");
   }
 }
 
@@ -546,7 +546,7 @@ function checkPrerequisites(): boolean {
   if (missing.length > 0) {
     console.log("Missing required tools:");
     for (let tool: string in missing) {
-      console.log(`  - ${tool}`);
+      console.log("  - ${tool}");
     }
     return false;
   }
@@ -555,7 +555,7 @@ function checkPrerequisites(): boolean {
 }
 
 function deployApplication(version: string, environment: string): boolean {
-  console.log(`Starting deployment of version ${version} to ${environment}`);
+  console.log("Starting deployment of version ${version} to ${environment}");
 
   if (!checkPrerequisites()) {
     console.log("Prerequisites check failed");
@@ -565,12 +565,12 @@ function deployApplication(version: string, environment: string): boolean {
   // Validate environment
   let validEnvs: string[] = ["dev", "staging", "prod"];
   if (!validEnvs.contains(environment)) {
-    console.log(`Invalid environment: ${environment}`);
+    console.log("Invalid environment: ${environment}");
     return false;
   }
 
   console.log("Building Docker image...");
-  let buildResult: number = `$(docker build -t myapp:${version} .)`;
+  let buildResult: number = "$(docker build -t myapp:${version} .)";
   if (buildResult != 0) {
     console.log("Docker build failed");
     return false;
@@ -662,7 +662,7 @@ function getArrayElement(arr: string[], index: number): string {
 ```typescript
 // Good - explicit types
 function processUserData(name: string, age: number, active: boolean): object {
-  return json.parse(`{"name": "${name}", "age": ${age}, "active": ${active}}`);
+  return json.parse("{"name": "${name}", "age": ${age}, "active": ${active}}");
 }
 
 // Required - Utah enforces type annotations

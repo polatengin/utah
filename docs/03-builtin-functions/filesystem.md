@@ -50,7 +50,7 @@ Read the contents of a file:
 
 ```typescript
 let config: string = fs.readFile("app.json");
-console.log(`Config content: ${config}`);
+console.log("Config content: ${config}");
 
 try {
   let data: string = fs.readFile("important.txt");
@@ -409,7 +409,7 @@ fi
 Append content to a file:
 
 ```typescript
-let logEntry: string = `[${timer.current()}] Application started`;
+let logEntry: string = "[${timer.current()}] Application started";
 fs.appendFile("app.log", logEntry + "\n");
 
 fs.appendFile("notes.txt", "Additional note\n");
@@ -433,7 +433,7 @@ Extract the filename from a path:
 ```typescript
 let fullPath: string = "/home/user/documents/report.pdf";
 let filename: string = fs.filename(fullPath);
-console.log(`Filename: ${filename}`); // Output: report.pdf
+console.log("Filename: ${filename}"); // Output: report.pdf
 ```
 
 **Generated Bash:**
@@ -456,7 +456,7 @@ Extract the directory path from a full path:
 ```typescript
 let fullPath: string = "/home/user/documents/report.pdf";
 let directory: string = fs.dirname(fullPath);
-console.log(`Directory: ${directory}`); // Output: /home/user/documents
+console.log("Directory: ${directory}"); // Output: /home/user/documents
 ```
 
 **Generated Bash:**
@@ -479,10 +479,10 @@ Get the file extension:
 ```typescript
 let filename: string = "document.pdf";
 let ext: string = fs.extension(filename);
-console.log(`Extension: ${ext}`); // Output: pdf
+console.log("Extension: ${ext}"); // Output: pdf
 
 let noExt: string = fs.extension("README");
-console.log(`Extension: ${noExt}`); // Output: (empty)
+console.log("Extension: ${noExt}"); // Output: (empty)
 ```
 
 **Generated Bash:**
@@ -514,7 +514,7 @@ Get the name of the parent directory:
 ```typescript
 let path: string = "/home/user/projects/myapp/src";
 let parentName: string = fs.parentDirName(path);
-console.log(`Parent directory: ${parentName}`); // Output: myapp
+console.log("Parent directory: ${parentName}"); // Output: myapp
 ```
 
 **Generated Bash:**
@@ -540,7 +540,7 @@ let subdir: string = "documents";
 let filename: string = "report.txt";
 
 let fullPath: string = fs.path(dir, subdir, filename);
-console.log(`Full path: ${fullPath}`); // Output: /home/user/documents/report.txt
+console.log("Full path: ${fullPath}"); // Output: /home/user/documents/report.txt
 ```
 
 **Generated Bash:**
@@ -581,15 +581,15 @@ if (fs.exists("project/src")) {
 ```typescript
 // List files in current directory
 let files: string = `$(ls -la)`;
-console.log(`Directory contents:\n${files}`);
+console.log("Directory contents:\n${files}");
 
 // List only files (not directories)
 let filesOnly: string = `$(find . -maxdepth 1 -type f)`;
-console.log(`Files only:\n${filesOnly}`);
+console.log("Files only:\n${filesOnly}");
 
 // List only directories
 let dirsOnly: string = `$(find . -maxdepth 1 -type d)`;
-console.log(`Directories only:\n${dirsOnly}`);
+console.log("Directories only:\n${dirsOnly}");
 ```
 
 ## Practical Examples
@@ -601,37 +601,37 @@ script.description("File backup utility");
 
 function backupFile(source: string, backupDir: string): boolean {
   if (!fs.exists(source)) {
-    console.log(`Source file not found: ${source}`);
+    console.log("Source file not found: ${source}");
     return false;
   }
 
   // Create backup directory if it doesn't exist
   if (!fs.exists(backupDir)) {
-    `$(mkdir -p "${backupDir}")`;
+    "$(mkdir -p "${backupDir}")";
   }
 
   // Generate backup filename with timestamp
   let filename: string = fs.filename(source);
   let extension: string = fs.extension(filename);
-  let baseName: string = filename.replace(`.${extension}`, "");
+  let baseName: string = filename.replace(".${extension}", "");
   let timestamp: string = `$(date +%Y%m%d_%H%M%S)`;
 
   let backupName: string;
   if (extension == "") {
-    backupName = `${baseName}_${timestamp}`;
+    backupName = "${baseName}_${timestamp}";
   } else {
-    backupName = `${baseName}_${timestamp}.${extension}`;
+    backupName = "${baseName}_${timestamp}.${extension}";
   }
 
   let backupPath: string = fs.path(backupDir, backupName);
 
   // Copy file to backup location
-  let result: number = `$(cp "${source}" "${backupPath}")`;
+  let result: number = "$(cp "${source}" "${backupPath}")";
   if (result == 0) {
-    console.log(`✓ Backed up: ${source} → ${backupPath}`);
+    console.log("✓ Backed up: ${source} → ${backupPath}");
     return true;
   } else {
-    console.log(`✗ Failed to backup: ${source}`);
+    console.log("✗ Failed to backup: ${source}");
     return false;
   }
 }
@@ -652,45 +652,45 @@ script.description("Log file rotation and cleanup");
 
 function rotateLogFile(logFile: string, maxSize: number): void {
   if (!fs.exists(logFile)) {
-    console.log(`Log file not found: ${logFile}`);
+    console.log("Log file not found: ${logFile}");
     return;
   }
 
   // Check file size (in bytes)
-  let size: number = `$(stat -c%s "${logFile}")`;
+  let size: number = "$(stat -c%s "${logFile}")";
 
   if (size > maxSize) {
-    console.log(`Log file ${logFile} is ${size} bytes, rotating...`);
+    console.log("Log file ${logFile} is ${size} bytes, rotating...");
 
     // Create rotated filename
     let timestamp: string = `$(date +%Y%m%d_%H%M%S)`;
     let dir: string = fs.dirname(logFile);
     let filename: string = fs.filename(logFile);
-    let rotatedName: string = `${filename}.${timestamp}`;
+    let rotatedName: string = "${filename}.${timestamp}";
     let rotatedPath: string = fs.path(dir, rotatedName);
 
     // Move current log to rotated name
-    `$(mv "${logFile}" "${rotatedPath}")`;
+    "$(mv "${logFile}" "${rotatedPath}")";
 
     // Create new empty log file
     fs.writeFile(logFile, "");
 
-    console.log(`Log rotated: ${logFile} → ${rotatedPath}`);
+    console.log("Log rotated: ${logFile} → ${rotatedPath}");
   } else {
-    console.log(`Log file ${logFile} is ${size} bytes, no rotation needed`);
+    console.log("Log file ${logFile} is ${size} bytes, no rotation needed");
   }
 }
 
 function cleanupOldLogs(logDir: string, daysToKeep: number): void {
   if (!fs.exists(logDir)) {
-    console.log(`Log directory not found: ${logDir}`);
+    console.log("Log directory not found: ${logDir}");
     return;
   }
 
-  console.log(`Cleaning up logs older than ${daysToKeep} days in ${logDir}`);
+  console.log("Cleaning up logs older than ${daysToKeep} days in ${logDir}");
 
   // Find and remove old log files
-  `$(find "${logDir}" -name "*.log.*" -type f -mtime +${daysToKeep} -delete)`;
+  "$(find "${logDir}" -name "*.log.*" -type f -mtime +${daysToKeep} -delete)";
 
   console.log("Log cleanup completed");
 }
@@ -708,7 +708,7 @@ script.description("Configuration file manager");
 
 function loadConfig(configFile: string): object {
   if (!fs.exists(configFile)) {
-    console.log(`Config file not found: ${configFile}, creating default`);
+    console.log("Config file not found: ${configFile}, creating default");
     let defaultConfig: object = json.parse('{"version": "1.0", "debug": false}');
     saveConfig(configFile, defaultConfig);
     return defaultConfig;
@@ -717,13 +717,13 @@ function loadConfig(configFile: string): object {
   try {
     let content: string = fs.readFile(configFile);
     if (!json.isValid(content)) {
-      console.log(`Invalid JSON in ${configFile}, using defaults`);
+      console.log("Invalid JSON in ${configFile}, using defaults");
       return json.parse('{"version": "1.0", "debug": false}');
     }
     return json.parse(content);
   }
   catch {
-    console.log(`Error reading ${configFile}, using defaults`);
+    console.log("Error reading ${configFile}, using defaults");
     return json.parse('{"version": "1.0", "debug": false}');
   }
 }
@@ -732,10 +732,10 @@ function saveConfig(configFile: string, config: object): void {
   try {
     let configJson: string = json.stringify(config, true);
     fs.writeFile(configFile, configJson);
-    console.log(`Configuration saved to ${configFile}`);
+    console.log("Configuration saved to ${configFile}");
   }
   catch {
-    console.log(`Error saving configuration to ${configFile}`);
+    console.log("Error saving configuration to ${configFile}");
   }
 }
 
@@ -747,11 +747,11 @@ function backupConfig(configFile: string): string {
   let dir: string = fs.dirname(configFile);
   let filename: string = fs.filename(configFile);
   let timestamp: string = `$(date +%Y%m%d_%H%M%S)`;
-  let backupName: string = `${filename}.backup.${timestamp}`;
+  let backupName: string = "${filename}.backup.${timestamp}";
   let backupPath: string = fs.path(dir, backupName);
 
-  `$(cp "${configFile}" "${backupPath}")`;
-  console.log(`Config backed up to: ${backupPath}`);
+  "$(cp "${configFile}" "${backupPath}")";
+  console.log("Config backed up to: ${backupPath}");
   return backupPath;
 }
 
@@ -779,7 +779,7 @@ script.description("Organize project files by type");
 
 function organizeFiles(sourceDir: string): void {
   if (!fs.exists(sourceDir)) {
-    console.log(`Source directory not found: ${sourceDir}`);
+    console.log("Source directory not found: ${sourceDir}");
     return;
   }
 
@@ -793,7 +793,7 @@ function organizeFiles(sourceDir: string): void {
   }`);
 
   // Get all files in source directory
-  let allFiles: string = `$(find "${sourceDir}" -maxdepth 1 -type f)`;
+  let allFiles: string = "$(find "${sourceDir}" -maxdepth 1 -type f)";
   let fileList: string[] = allFiles.split("\n");
 
   for (let file: string in fileList) {
@@ -803,7 +803,7 @@ function organizeFiles(sourceDir: string): void {
     let extension: string = fs.extension(filename);
 
     if (extension == "") {
-      console.log(`Skipping file without extension: ${filename}`);
+      console.log("Skipping file without extension: ${filename}");
       continue;
     }
 
@@ -825,14 +825,14 @@ function organizeFiles(sourceDir: string): void {
     // Create category directory
     let categoryDir: string = fs.path(sourceDir, category);
     if (!fs.exists(categoryDir)) {
-      `$(mkdir -p "${categoryDir}")`;
-      console.log(`Created directory: ${categoryDir}`);
+      "$(mkdir -p "${categoryDir}")";
+      console.log("Created directory: ${categoryDir}");
     }
 
     // Move file to category directory
     let destination: string = fs.path(categoryDir, filename);
-    `$(mv "${file}" "${destination}")`;
-    console.log(`Moved ${filename} to ${category}/`);
+    "$(mv "${file}" "${destination}")";
+    console.log("Moved ${filename} to ${category}/");
   }
 
   console.log("File organization completed");
@@ -880,7 +880,7 @@ function safeReadFile(filename: string): string {
     return fs.readFile(filename);
   }
   catch {
-    console.log(`Failed to read file: ${filename}`);
+    console.log("Failed to read file: ${filename}");
     return "";
   }
 }
@@ -901,8 +901,8 @@ function isImageFile(filename: string): boolean {
 ```typescript
 function ensureDirectory(dirPath: string): void {
   if (!fs.exists(dirPath)) {
-    `$(mkdir -p "${dirPath}")`;
-    console.log(`Created directory: ${dirPath}`);
+    "$(mkdir -p "${dirPath}")";
+    console.log("Created directory: ${dirPath}");
   }
 }
 ```

@@ -53,17 +53,17 @@ let healthyCount: number = 0;
 
 for (let service: string in services) {
   if (os.isInstalled("systemctl")) {
-    let status: string = `$(systemctl is-active ${service})`;
+    let status: string = "$(systemctl is-active ${service})";
     if (status == "active") {
-      console.log(`✅ ${service} is running`);
+      console.log("✅ ${service} is running");
       healthyCount++;
     } else {
-      console.log(`❌ ${service} is down`);
+      console.log("❌ ${service} is down");
     }
   }
 }
 
-console.log(`System health: ${healthyCount}/${services.length} services running`);
+console.log("System health: ${healthyCount}/${services.length} services running");
 ```
 
 ### Data Processing
@@ -92,7 +92,7 @@ if (fs.exists(logFile)) {
 
   // Save report
   fs.writeFile(reportFile, json.stringify(stats, true));
-  console.log(`Report saved to ${reportFile}`);
+  console.log("Report saved to ${reportFile}");
 }
 ```
 
@@ -111,18 +111,18 @@ let version: string = args.getString("--version");
 // Validate environment
 let validEnvs: string[] = ["staging", "production"];
 if (!validEnvs.contains(environment)) {
-  console.log(`Invalid environment: ${environment}`);
-  console.log(`Valid environments: ${validEnvs.join(", ")}`);
+  console.log("Invalid environment: ${environment}");
+  console.log("Valid environments: ${validEnvs.join(", ")}");
   exit(1);
 }
 
-console.log(`Deploying version ${version} to ${environment}...`);
+console.log("Deploying version ${version} to ${environment}...");
 
 // Docker deployment
 if (os.isInstalled("docker")) {
-  `$(docker pull myapp:${version})`;
-  `$(docker stop myapp-${environment} || true)`;
-  `$(docker run -d --name myapp-${environment} myapp:${version})`;
+  "$(docker pull myapp:${version})";
+  "$(docker stop myapp-${environment} || true)";
+  "$(docker run -d --name myapp-${environment} myapp:${version})";
   console.log("✅ Deployment completed");
 } else {
   console.log("❌ Docker not available");

@@ -237,17 +237,17 @@ Set up monitoring:
 const setupMonitoring = () => {
     // Configure logging
     const logLevel = env.get("LOG_LEVEL", "info")
-    console.log(`Setting log level to: ${logLevel}`)
+    console.log("Setting log level to: ${logLevel}")
 
     // Set up metrics collection
     const metricsEndpoint = env.get("METRICS_ENDPOINT", "")
     if (metricsEndpoint) {
-        console.log(`Metrics will be sent to: ${metricsEndpoint}`)
+        console.log("Metrics will be sent to: ${metricsEndpoint}")
     }
 
     // Configure alerts
     const alertsEnabled = env.get("ALERTS_ENABLED", "true") === "true"
-    console.log(`Alerts enabled: ${alertsEnabled}`)
+    console.log("Alerts enabled: ${alertsEnabled}")
 }
 
 setupMonitoring()

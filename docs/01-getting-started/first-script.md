@@ -59,9 +59,9 @@ const appName: string = "Utah";
 let userName: string = "Developer";
 let version: number = 1.0;
 
-console.log(`Welcome to ${appName}!`);
-console.log(`Hello, ${userName}`);
-console.log(`Version: ${version}`);
+console.log("Welcome to ${appName}!");
+console.log("Hello, ${userName}");
+console.log("Version: ${version}");
 ```
 
 **Compile and run:**
@@ -100,7 +100,7 @@ Utah supports function declarations with type annotations:
 
 ```typescript
 function greet(name: string): void {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 
 function add(a: number, b: number): number {
@@ -111,7 +111,7 @@ function add(a: number, b: number): number {
 greet("Utah User");
 
 let result: number = add(5, 3);
-console.log(`5 + 3 = ${result}`);
+console.log("5 + 3 = ${result}");
 ```
 
 **Generated bash code:**
@@ -160,13 +160,13 @@ if (score >= 90) {
 ```typescript
 // For loop
 for (let i: number = 1; i <= 3; i++) {
-  console.log(`Count: ${i}`);
+  console.log("Count: ${i}");
 }
 
 // Array iteration
 let fruits: string[] = ["apple", "banana", "orange"];
 for (let fruit: string in fruits) {
-  console.log(`Fruit: ${fruit}`);
+  console.log("Fruit: ${fruit}");
 }
 ```
 
@@ -178,9 +178,9 @@ for (let fruit: string in fruits) {
 let numbers: number[] = [1, 2, 3, 4, 5];
 let names: string[] = ["Alice", "Bob", "Charlie"];
 
-console.log(`First number: ${numbers[0]}`);
-console.log(`Array length: ${numbers.length}`);
-console.log(`Is empty: ${numbers.isEmpty()}`);
+console.log("First number: ${numbers[0]}");
+console.log("Array length: ${numbers.length}");
+console.log("Is empty: ${numbers.isEmpty()}");
 
 // Check if array contains an item
 if (names.contains("Alice")) {
@@ -209,11 +209,11 @@ if (os.isInstalled("git")) {
 
 // Get current OS
 let currentOS: string = os.getOS();
-console.log(`Running on: ${currentOS}`);
+console.log("Running on: ${currentOS}");
 
 // Generate random number
 let randomNum: number = utility.random(1, 10);
-console.log(`Random number: ${randomNum}`);
+console.log("Random number: ${randomNum}");
 ```
 
 ## Error Handling
@@ -251,8 +251,8 @@ if (json.isValid(configJson)) {
   let appName: string = json.get(config, ".app.name");
   let port: number = json.get(config, ".app.port");
 
-  console.log(`App: ${appName}`);
-  console.log(`Port: ${port}`);
+  console.log("App: ${appName}");
+  console.log("Port: ${port}");
 } else {
   console.log("Invalid JSON");
 }
@@ -288,7 +288,7 @@ if (verbose) {
 }
 
 for (let i: number = 1; i <= count; i++) {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 ```
 
@@ -393,11 +393,11 @@ if (isProduction) {
 
 ```typescript
 let timestamp: string = timer.current().toString();
-let backupDir: string = `backup_${timestamp}`;
+let backupDir: string = "backup_${timestamp}";
 
 if (!fs.exists(backupDir)) {
   // Create backup directory
-  console.log(`Creating backup directory: ${backupDir}`);
+  console.log("Creating backup directory: ${backupDir}");
 }
 ```
 

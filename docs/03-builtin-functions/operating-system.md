@@ -15,7 +15,7 @@ Get the current operating system name:
 
 ```typescript
 let currentOS: string = os.getOS();
-console.log(`Running on: ${currentOS}`);
+console.log("Running on: ${currentOS}");
 
 if (currentOS == "Linux") {
   console.log("Linux-specific operations can be performed");
@@ -49,7 +49,7 @@ Get Linux distribution information (Linux only):
 ```typescript
 if (os.getOS() == "Linux") {
   let linuxVersion: string = os.getLinuxVersion();
-  console.log(`Linux distribution: ${linuxVersion}`);
+  console.log("Linux distribution: ${linuxVersion}");
 
   if (linuxVersion.contains("Ubuntu")) {
     console.log("Running on Ubuntu");
@@ -95,7 +95,7 @@ Check if a command or package is available:
 if (os.isInstalled("git")) {
   console.log("Git is available");
   let version: string = `$(git --version)`;
-  console.log(`Version: ${version}`);
+  console.log("Version: ${version}");
 } else {
   console.log("Git is not installed");
 }
@@ -104,9 +104,9 @@ if (os.isInstalled("git")) {
 let requiredTools: string[] = ["curl", "wget", "jq"];
 for (let tool: string in requiredTools) {
   if (os.isInstalled(tool)) {
-    console.log(`✓ ${tool} is available`);
+    console.log("✓ ${tool} is available");
   } else {
-    console.log(`✗ ${tool} is missing`);
+    console.log("✗ ${tool} is missing");
   }
 }
 ```
@@ -146,26 +146,26 @@ Get system process and environment information:
 ```typescript
 // Get current user
 let currentUser: string = `$(whoami)`;
-console.log(`Current user: ${currentUser}`);
+console.log("Current user: ${currentUser}");
 
 // Get system uptime
 if (os.isInstalled("uptime")) {
   let uptime: string = `$(uptime)`;
-  console.log(`System uptime: ${uptime}`);
+  console.log("System uptime: ${uptime}");
 }
 
 // Get memory information (Linux)
 if (os.getOS() == "Linux" && fs.exists("/proc/meminfo")) {
   let memTotal: string = `$(grep MemTotal /proc/meminfo | awk '{print $2}')`;
   let memFree: string = `$(grep MemFree /proc/meminfo | awk '{print $2}')`;
-  console.log(`Memory: ${memFree}KB free of ${memTotal}KB total`);
+  console.log("Memory: ${memFree}KB free of ${memTotal}KB total");
 }
 
 // Get CPU information (Linux)
 if (os.getOS() == "Linux" && fs.exists("/proc/cpuinfo")) {
   let cpuCount: string = `$(grep -c ^processor /proc/cpuinfo)`;
   let cpuModel: string = `$(grep "model name" /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/^ *//')`;
-  console.log(`CPU: ${cpuCount} cores, ${cpuModel}`);
+  console.log("CPU: ${cpuCount} cores, ${cpuModel}");
 }
 ```
 
@@ -183,34 +183,34 @@ function installPackage(packageName: string): boolean {
 
     if (linuxVersion.contains("Ubuntu") || linuxVersion.contains("Debian")) {
       // Ubuntu/Debian using apt
-      console.log(`Installing ${packageName} using apt...`);
-      let result: number = `$(sudo apt-get update && sudo apt-get install -y ${packageName})`;
+      console.log("Installing ${packageName} using apt...");
+      let result: number = "$(sudo apt-get update && sudo apt-get install -y ${packageName})";
       installed = (result == 0);
 
     } else if (linuxVersion.contains("CentOS") || linuxVersion.contains("Red Hat")) {
       // CentOS/RHEL using yum or dnf
       if (os.isInstalled("dnf")) {
-        console.log(`Installing ${packageName} using dnf...`);
-        let result: number = `$(sudo dnf install -y ${packageName})`;
+        console.log("Installing ${packageName} using dnf...");
+        let result: number = "$(sudo dnf install -y ${packageName})";
         installed = (result == 0);
       } else if (os.isInstalled("yum")) {
-        console.log(`Installing ${packageName} using yum...`);
-        let result: number = `$(sudo yum install -y ${packageName})`;
+        console.log("Installing ${packageName} using yum...");
+        let result: number = "$(sudo yum install -y ${packageName})";
         installed = (result == 0);
       }
 
     } else if (linuxVersion.contains("Arch")) {
       // Arch Linux using pacman
-      console.log(`Installing ${packageName} using pacman...`);
-      let result: number = `$(sudo pacman -S --noconfirm ${packageName})`;
+      console.log("Installing ${packageName} using pacman...");
+      let result: number = "$(sudo pacman -S --noconfirm ${packageName})";
       installed = (result == 0);
     }
 
   } else if (osType == "Darwin") {
     // macOS using Homebrew
     if (os.isInstalled("brew")) {
-      console.log(`Installing ${packageName} using Homebrew...`);
-      let result: number = `$(brew install ${packageName})`;
+      console.log("Installing ${packageName} using Homebrew...");
+      let result: number = "$(brew install ${packageName})";
       installed = (result == 0);
     } else {
       console.log("Homebrew not found. Please install Homebrew first.");
@@ -218,9 +218,9 @@ function installPackage(packageName: string): boolean {
   }
 
   if (installed) {
-    console.log(`✓ ${packageName} installed successfully`);
+    console.log("✓ ${packageName} installed successfully");
   } else {
-    console.log(`✗ Failed to install ${packageName}`);
+    console.log("✗ Failed to install ${packageName}");
   }
 
   return installed;
@@ -237,7 +237,7 @@ function checkService(serviceName: string): string {
     return "systemctl not available";
   }
 
-  let status: string = `$(systemctl is-active ${serviceName} 2>/dev/null || echo "inactive")`;
+  let status: string = "$(systemctl is-active ${serviceName} 2>/dev/null || echo "inactive")";
   return status;
 }
 
@@ -252,14 +252,14 @@ function startService(serviceName: string): boolean {
     return false;
   }
 
-  console.log(`Starting service: ${serviceName}`);
-  let result: number = `$(systemctl start ${serviceName})`;
+  console.log("Starting service: ${serviceName}");
+  let result: number = "$(systemctl start ${serviceName})";
 
   if (result == 0) {
-    console.log(`✓ Service ${serviceName} started`);
+    console.log("✓ Service ${serviceName} started");
     return true;
   } else {
-    console.log(`✗ Failed to start service ${serviceName}`);
+    console.log("✗ Failed to start service ${serviceName}");
     return false;
   }
 }
@@ -269,11 +269,11 @@ let services: string[] = ["nginx", "mysql", "redis"];
 
 for (let service: string in services) {
   if (isServiceRunning(service)) {
-    console.log(`✓ ${service} is running`);
+    console.log("✓ ${service} is running");
   } else {
-    console.log(`✗ ${service} is not running`);
+    console.log("✗ ${service} is not running");
 
-    let shouldStart: boolean = console.promptYesNo(`Start ${service}? (y/n): `);
+    let shouldStart: boolean = console.promptYesNo("Start ${service}? (y/n): ");
     if (shouldStart) {
       startService(service);
     }
@@ -294,12 +294,12 @@ function performHealthCheck(): void {
   // Basic system information
   let os: string = os.getOS();
   let user: string = `$(whoami)`;
-  console.log(`Operating System: ${os}`);
-  console.log(`Current User: ${user}`);
+  console.log("Operating System: ${os}");
+  console.log("Current User: ${user}");
 
   if (os == "Linux") {
     let distro: string = os.getLinuxVersion();
-    console.log(`Distribution: ${distro}`);
+    console.log("Distribution: ${distro}");
   }
 
   // Check essential tools
@@ -309,9 +309,9 @@ function performHealthCheck(): void {
 
   for (let tool: string in essentialTools) {
     if (os.isInstalled(tool)) {
-      console.log(`✓ ${tool}`);
+      console.log("✓ ${tool}");
     } else {
-      console.log(`✗ ${tool}`);
+      console.log("✗ ${tool}");
       missingTools[missingTools.length] = tool;
     }
   }
@@ -321,17 +321,17 @@ function performHealthCheck(): void {
 
   if (os.isInstalled("df")) {
     let diskSpace: string = `$(df -h / | tail -1)`;
-    console.log(`Disk Usage: ${diskSpace}`);
+    console.log("Disk Usage: ${diskSpace}");
   }
 
   if (os.isInstalled("free")) {
     let memory: string = `$(free -h | grep Mem)`;
-    console.log(`Memory: ${memory}`);
+    console.log("Memory: ${memory}");
   }
 
   if (os.isInstalled("uptime")) {
     let uptime: string = `$(uptime)`;
-    console.log(`Uptime: ${uptime}`);
+    console.log("Uptime: ${uptime}");
   }
 
   // Network connectivity
@@ -351,7 +351,7 @@ function performHealthCheck(): void {
   if (missingTools.length == 0) {
     console.log("✓ All essential tools are available");
   } else {
-    console.log(`⚠ Missing tools: ${missingTools.join(", ")}`);
+    console.log("⚠ Missing tools: ${missingTools.join(", ")}");
   }
 }
 
@@ -367,7 +367,7 @@ function setupDevelopmentEnvironment(): void {
   console.log("=== Development Environment Setup ===");
 
   let os: string = os.getOS();
-  console.log(`Setting up for ${os}...`);
+  console.log("Setting up for ${os}...");
 
   // Essential development tools
   let devTools: string[] = ["git", "curl", "wget", "vim", "htop"];
@@ -381,7 +381,7 @@ function setupDevelopmentEnvironment(): void {
   }
 
   if (missingTools.length > 0) {
-    console.log(`Missing development tools: ${missingTools.join(", ")}`);
+    console.log("Missing development tools: ${missingTools.join(", ")}");
 
     let shouldInstall: boolean = console.promptYesNo("Install missing tools? (y/n): ");
     if (shouldInstall) {
@@ -399,7 +399,7 @@ function setupDevelopmentEnvironment(): void {
   // Check Node.js
   if (os.isInstalled("node")) {
     let nodeVersion: string = `$(node --version)`;
-    console.log(`✓ Node.js: ${nodeVersion}`);
+    console.log("✓ Node.js: ${nodeVersion}");
   } else {
     console.log("✗ Node.js not found");
     let installNode: boolean = console.promptYesNo("Install Node.js? (y/n): ");
@@ -417,7 +417,7 @@ function setupDevelopmentEnvironment(): void {
   // Check Python
   if (os.isInstalled("python3")) {
     let pythonVersion: string = `$(python3 --version)`;
-    console.log(`✓ Python: ${pythonVersion}`);
+    console.log("✓ Python: ${pythonVersion}");
   } else {
     console.log("✗ Python3 not found");
     let installPython: boolean = console.promptYesNo("Install Python3? (y/n): ");
@@ -429,7 +429,7 @@ function setupDevelopmentEnvironment(): void {
   // Check Docker
   if (os.isInstalled("docker")) {
     let dockerVersion: string = `$(docker --version)`;
-    console.log(`✓ Docker: ${dockerVersion}`);
+    console.log("✓ Docker: ${dockerVersion}");
   } else {
     console.log("✗ Docker not found");
     let installDocker: boolean = console.promptYesNo("Install Docker? (y/n): ");
@@ -457,7 +457,7 @@ function monitorSystem(): void {
     let cpuUsage: string = `$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)`;
     let cpuFloat: number = cpuUsage;
 
-    console.log(`CPU Usage: ${cpuUsage}%`);
+    console.log("CPU Usage: ${cpuUsage}%");
     if (cpuFloat > 80) {
       console.log("⚠ High CPU usage detected!");
     }
@@ -470,7 +470,7 @@ function monitorSystem(): void {
     let memUsed: number = memTotal - memFree;
     let memPercent: number = (memUsed * 100) / memTotal;
 
-    console.log(`Memory Usage: ${memPercent}% (${memUsed}KB / ${memTotal}KB)`);
+    console.log("Memory Usage: ${memPercent}% (${memUsed}KB / ${memTotal}KB)");
     if (memPercent > 90) {
       console.log("⚠ High memory usage detected!");
     }
@@ -481,7 +481,7 @@ function monitorSystem(): void {
     let diskUsage: string = `$(df -h / | tail -1 | awk '{print $5}' | cut -d'%' -f1)`;
     let diskPercent: number = diskUsage;
 
-    console.log(`Disk Usage: ${diskUsage}%`);
+    console.log("Disk Usage: ${diskUsage}%");
     if (diskPercent > 85) {
       console.log("⚠ High disk usage detected!");
     }
@@ -490,7 +490,7 @@ function monitorSystem(): void {
   // Load average (Unix-like systems)
   if (os.isInstalled("uptime")) {
     let loadAvg: string = `$(uptime | awk -F'load average:' '{print $2}')`;
-    console.log(`Load Average:${loadAvg}`);
+    console.log("Load Average:${loadAvg}");
   }
 
   // Check for failed services (systemd systems)
@@ -499,9 +499,9 @@ function monitorSystem(): void {
     let failedCount: number = failedServices;
 
     if (failedCount > 0) {
-      console.log(`⚠ ${failedCount} failed services detected!`);
+      console.log("⚠ ${failedCount} failed services detected!");
       let failedList: string = `$(systemctl --failed --no-legend)`;
-      console.log(`Failed services:\n${failedList}`);
+      console.log("Failed services:\n${failedList}");
     } else {
       console.log("✓ All services are running normally");
     }
@@ -532,7 +532,7 @@ if (args.has("--watch")) {
 // Good - check before using commands
 if (os.isInstalled("systemctl")) {
   let status: string = `$(systemctl is-active nginx)`;
-  console.log(`Nginx status: ${status}`);
+  console.log("Nginx status: ${status}");
 } else {
   console.log("systemctl not available - cannot check service status");
 }
@@ -592,8 +592,8 @@ function getSystemInfo(): object {
 ```typescript
 function requireTool(toolName: string): void {
   if (!os.isInstalled(toolName)) {
-    console.log(`Error: ${toolName} is required but not installed`);
-    console.log(`Please install ${toolName} and try again`);
+    console.log("Error: ${toolName} is required but not installed");
+    console.log("Please install ${toolName} and try again");
     exit(1);
   }
 }

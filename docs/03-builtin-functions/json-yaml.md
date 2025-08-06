@@ -265,7 +265,7 @@ let appName: string = yaml.get(deployment, ".metadata.name");
 let replicas: number = yaml.get(deployment, ".spec.replicas");
 let image: string = yaml.get(deployment, ".spec.template.spec.containers[0].image");
 
-console.log(`Deploying ${appName} with ${replicas} replicas using ${image}`);
+console.log("Deploying ${appName} with ${replicas} replicas using ${image}");
 
 // Update deployment
 deployment = yaml.set(deployment, ".spec.replicas", 5);
@@ -308,8 +308,8 @@ let dbHost: string = json.get(finalConfig, ".database.host");
 let dbPort: number = json.get(finalConfig, ".database.port");
 let debugMode: boolean = json.get(finalConfig, ".debug");
 
-console.log(`Database: ${dbHost}:${dbPort}`);
-console.log(`Debug mode: ${debugMode}`);
+console.log("Database: ${dbHost}:${dbPort}");
+console.log("Debug mode: ${debugMode}");
 
 // Save final configuration
 let configOutput: string = json.stringify(finalConfig);
@@ -331,7 +331,7 @@ let replicas: number = args.get("--replicas");
 let manifestFile: string = args.get("--manifest");
 
 if (!fs.exists(manifestFile)) {
-  console.log(`Manifest file not found: ${manifestFile}`);
+  console.log("Manifest file not found: ${manifestFile}");
   exit(1);
 }
 
@@ -352,9 +352,9 @@ let updatedManifest: string = yaml.stringify(deployment);
 let outputFile: string = manifestFile.replace(".yaml", "-updated.yaml");
 fs.writeFile(outputFile, updatedManifest);
 
-console.log(`Updated manifest saved to: ${outputFile}`);
-console.log(`Image: ${imageTag}`);
-console.log(`Replicas: ${replicas}`);
+console.log("Updated manifest saved to: ${outputFile}");
+console.log("Image: ${imageTag}");
+console.log("Replicas: ${replicas}");
 ```
 
 ### API Response Processing
@@ -395,9 +395,9 @@ summary = json.set(summary, ".last_updated", lastUpdate);
 let summaryJson: string = json.stringify(summary);
 fs.writeFile("repo-summary.json", summaryJson);
 
-console.log(`Repository: ${repoName}`);
-console.log(`Stars: ${stars}`);
-console.log(`Language: ${language}`);
+console.log("Repository: ${repoName}");
+console.log("Stars: ${stars}");
+console.log("Language: ${language}");
 ```
 
 ## Error Handling
@@ -421,7 +421,7 @@ try {
     exit(1);
   }
 
-  console.log(`Using database: ${dbHost}`);
+  console.log("Using database: ${dbHost}");
 }
 catch {
   console.log("Failed to load configuration");

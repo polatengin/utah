@@ -111,7 +111,7 @@ function downloadAndProcess(url: string, outputFile: string): void {
   defer fs.removeDir(tempDir);
 
   // Download file
-  let downloadPath = `${tempDir}/download.tmp`;
+  let downloadPath = "${tempDir}/download.tmp";
   web.download(url, downloadPath);
   defer fs.removeFile(downloadPath);
 
@@ -167,7 +167,7 @@ function robustProcessing(): void {
     // Risky operation
     processData(resource);
   } catch (error) {
-    console.log(`Error occurred: ${error}`);
+    console.log("Error occurred: ${error}");
     // defer still executes after catch block
   }
 }
@@ -198,10 +198,10 @@ Variables referenced in defer statements are captured by value at the time the d
 ```typescript
 function variableCapture(): void {
   let message = "Initial";
-  defer console.log(`Deferred: ${message}`);  // Captures "Initial"
+  defer console.log("Deferred: ${message}");  // Captures "Initial"
 
   message = "Modified";
-  console.log(`Current: ${message}`);         // Prints "Modified"
+  console.log("Current: ${message}");         // Prints "Modified"
 }
 ```
 

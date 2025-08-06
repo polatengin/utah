@@ -24,7 +24,7 @@ let randomRange: number = utility.random(1, 100);
 // Use in control flow
 for (let i: number = 0; i < 5; i++) {
   let dice: number = utility.random(1, 6);
-  console.log(`Roll ${i + 1}: ${dice}`);
+  console.log("Roll ${i + 1}: ${dice}");
 }
 ```
 
@@ -51,9 +51,9 @@ let sessionId: string = utility.uuid();
 let requestId: string = utility.uuid();
 let transactionId: string = utility.uuid();
 
-console.log(`Session: ${sessionId}`);
-console.log(`Request: ${requestId}`);
-console.log(`Transaction: ${transactionId}`);
+console.log("Session: ${sessionId}");
+console.log("Request: ${requestId}");
+console.log("Transaction: ${transactionId}");
 ```
 
 ### UUID Bash Code
@@ -99,9 +99,9 @@ let original: string = "Hello, Utah!";
 let encoded: string = utility.base64Encode(original);
 let decoded: string = utility.base64Decode(encoded);
 
-console.log(`Original: ${original}`);
-console.log(`Encoded: ${encoded}`);
-console.log(`Decoded: ${decoded}`);
+console.log("Original: ${original}");
+console.log("Encoded: ${encoded}");
+console.log("Decoded: ${decoded}");
 
 // Working with special characters
 let complex: string = "Special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?";

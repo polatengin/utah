@@ -23,32 +23,32 @@ script.description("Execute tasks in parallel using background processes");
 
 // Function to run a task in background
 function runInBackground(taskName: string, command: string): string {
-  console.log(`Starting background task: ${taskName}`);
+  console.log("Starting background task: ${taskName}");
 
   // Start process in background and capture PID
-  let pid: string = `$(${command} & echo $!)`;
+  let pid: string = "$(${command} & echo $!)";
 
   if (pid.trim() != "") {
-    console.log(`✅ Task ${taskName} started with PID: ${pid}`);
+    console.log("✅ Task ${taskName} started with PID: ${pid}");
     return pid;
   } else {
-    console.log(`❌ Failed to start task: ${taskName}`);
+    console.log("❌ Failed to start task: ${taskName}");
     return "";
   }
 }
 
 // Function to wait for background process
 function waitForProcess(taskName: string, pid: string): boolean {
-  console.log(`Waiting for task ${taskName} (PID: ${pid}) to complete...`);
+  console.log("Waiting for task ${taskName} (PID: ${pid}) to complete...");
 
   // Wait for specific PID
-  let exitCode: string = `$(wait ${pid} 2>/dev/null; echo $?)`;
+  let exitCode: string = "$(wait ${pid} 2>/dev/null; echo $?)";
 
   if (exitCode == "0") {
-    console.log(`✅ Task ${taskName} completed successfully`);
+    console.log("✅ Task ${taskName} completed successfully");
     return true;
   } else {
-    console.log(`❌ Task ${taskName} failed with exit code: ${exitCode}`);
+    console.log("❌ Task ${taskName} failed with exit code: ${exitCode}");
     return false;
   }
 }
@@ -59,12 +59,12 @@ let backgroundPids: object = {};
 
 // Start all processes in background
 for (let file: string in files) {
-  let taskName: string = `process-${file}`;
-  let command: string = `sleep 5 && echo "Processed ${file}" > ${file}.result`;
+  let taskName: string = "process-${file}";
+  let command: string = "sleep 5 && echo "Processed ${file}" > ${file}.result";
 
   let pid: string = runInBackground(taskName, command);
   if (pid != "") {
-    backgroundPids = json.set(backgroundPids, `.${taskName}`, pid);
+    backgroundPids = json.set(backgroundPids, ".${taskName}", pid);
   }
 }
 
@@ -73,13 +73,13 @@ let taskNames: string[] = json.keys(backgroundPids);
 let successCount: number = 0;
 
 for (let taskName: string in taskNames) {
-  let pid: string = json.getString(backgroundPids, `.${taskName}`);
+  let pid: string = json.getString(backgroundPids, ".${taskName}");
   if (waitForProcess(taskName, pid)) {
     successCount++;
   }
 }
 
-console.log(`Parallel processing completed: ${successCount}/${taskNames.length} tasks successful`);
+console.log("Parallel processing completed: ${successCount}/${taskNames.length} tasks successful");
 ```
 
 ### Advanced Process Pool
@@ -94,7 +94,7 @@ let maxWorkers: number = args.getNumber("--max-workers");
 let taskFile: string = args.getString("--task-file");
 
 if (!fs.exists(taskFile)) {
-  console.log(`❌ Task file not found: ${taskFile}`);
+  console.log("❌ Task file not found: ${taskFile}");
   exit(1);
 }
 
@@ -109,7 +109,7 @@ for (let task: string in tasks) {
   }
 }
 
-console.log(`Processing ${validTasks.length} tasks with ${maxWorkers} workers`);
+console.log("Processing ${validTasks.length} tasks with ${maxWorkers} workers");
 
 // Process pool state
 let runningWorkers: object = {}; // { pid: { task: string, startTime: number } }
@@ -122,20 +122,20 @@ function startWorker(task: string): string {
   let startTime: number = parseInt(`$(date +%s)`);
 
   // Create a unique task ID
-  let taskId: string = `task-${completedTasks + failedTasks + 1}`;
+  let taskId: string = "task-${completedTasks + failedTasks + 1}";
 
   // Execute task in background
-  let command: string = `(${task}) 2>&1 | tee logs/${taskId}.log`;
-  let pid: string = `$(${command} & echo $!)`;
+  let command: string = "(${task}) 2>&1 | tee logs/${taskId}.log";
+  let pid: string = "$(${command} & echo $!)";
 
   if (pid.trim() != "") {
-    runningWorkers = json.set(runningWorkers, `.${pid}`, {
+    runningWorkers = json.set(runningWorkers, ".${pid}", {
       "task": task,
       "task_id": taskId,
       "start_time": startTime
     });
 
-    console.log(`🚀 Started worker ${taskId} (PID: ${pid}): ${task.substring(0, 50)}...`);
+    console.log("🚀 Started worker ${taskId} (PID: ${pid}): ${task.substring(0, 50)}...");
     return pid;
   }
 
@@ -148,12 +148,12 @@ function checkCompletedWorkers(): void {
 
   for (let pid: string in workerPids) {
     // Check if process is still running
-    let isRunning: string = `$(kill -0 ${pid} 2>/dev/null && echo "running" || echo "done")`;
+    let isRunning: string = "$(kill -0 ${pid} 2>/dev/null && echo "running" || echo "done")";
 
     if (isRunning.trim() == "done") {
       // Get exit code
-      let exitCode: string = `$(wait ${pid} 2>/dev/null; echo $?)`;
-      let worker: object = json.get(runningWorkers, `.${pid}`);
+      let exitCode: string = "$(wait ${pid} 2>/dev/null; echo $?)";
+      let worker: object = json.get(runningWorkers, ".${pid}");
       let task: string = json.getString(worker, ".task");
       let taskId: string = json.getString(worker, ".task_id");
       let startTime: number = json.getNumber(worker, ".start_time");
@@ -161,14 +161,14 @@ function checkCompletedWorkers(): void {
 
       if (exitCode == "0") {
         completedTasks++;
-        console.log(`✅ Worker ${taskId} completed in ${duration}s`);
+        console.log("✅ Worker ${taskId} completed in ${duration}s");
       } else {
         failedTasks++;
-        console.log(`❌ Worker ${taskId} failed in ${duration}s (exit code: ${exitCode})`);
+        console.log("❌ Worker ${taskId} failed in ${duration}s (exit code: ${exitCode})");
       }
 
       // Remove from running workers
-      runningWorkers = json.delete(runningWorkers, `.${pid}`);
+      runningWorkers = json.delete(runningWorkers, ".${pid}");
     }
   }
 }
@@ -190,7 +190,7 @@ while (taskQueue.length > 0 || json.keys(runningWorkers).length > 0) {
     if (pid != "") {
       currentWorkers++;
     } else {
-      console.log(`❌ Failed to start worker for task: ${nextTask}`);
+      console.log("❌ Failed to start worker for task: ${nextTask}");
       failedTasks++;
     }
   }
@@ -206,10 +206,10 @@ while (taskQueue.length > 0 || json.keys(runningWorkers).length > 0) {
   let processedTasks: number = completedTasks + failedTasks;
   let progress: number = Math.round((processedTasks / totalTasks) * 100);
 
-  console.log(`Progress: ${processedTasks}/${totalTasks} (${progress}%) - Running: ${json.keys(runningWorkers).length}, Completed: ${completedTasks}, Failed: ${failedTasks}`);
+  console.log("Progress: ${processedTasks}/${totalTasks} (${progress}%) - Running: ${json.keys(runningWorkers).length}, Completed: ${completedTasks}, Failed: ${failedTasks}");
 }
 
-console.log(`🎉 Process pool completed: ${completedTasks} successful, ${failedTasks} failed`);
+console.log("🎉 Process pool completed: ${completedTasks} successful, ${failedTasks} failed");
 ```
 
 ## Concurrent Data Processing
@@ -230,14 +230,14 @@ let pattern: string = args.getString("--pattern");
 let workers: number = args.getNumber("--workers");
 
 if (!fs.exists(inputDir)) {
-  console.log(`❌ Input directory not found: ${inputDir}`);
+  console.log("❌ Input directory not found: ${inputDir}");
   exit(1);
 }
 
 fs.createDirectory(outputDir);
 
 // Find files to process
-let files: string[] = `$(find ${inputDir} -name "${pattern}" -type f)`.split("\n");
+let files: string[] = "$(find ${inputDir} -name "${pattern}" -type f)".split("\n");
 let validFiles: string[] = [];
 
 for (let file: string in files) {
@@ -247,11 +247,11 @@ for (let file: string in files) {
 }
 
 if (validFiles.length == 0) {
-  console.log(`❌ No files found matching pattern: ${pattern}`);
+  console.log("❌ No files found matching pattern: ${pattern}");
   exit(1);
 }
 
-console.log(`Found ${validFiles.length} files to process`);
+console.log("Found ${validFiles.length} files to process");
 
 // Create worker function for file processing
 function createWorkerScript(): string {
@@ -327,35 +327,35 @@ for (let queue: object in workerQueues) {
   let fileList: string[] = json.get(queue, ".files");
 
   if (fileList.length > 0) {
-    console.log(`Starting worker ${workerId} with ${fileList.length} files`);
+    console.log("Starting worker ${workerId} with ${fileList.length} files");
 
     // Create worker command that processes all assigned files
     let workerCommand: string = "";
     for (let file: string in fileList) {
-      workerCommand += `./worker.sh "${file}" "${outputDir}" "${workerId}"; `;
+      workerCommand += "./worker.sh "${file}" "${outputDir}" "${workerId}"; ";
     }
 
     // Start worker in background
-    let pid: string = `$(${workerCommand} & echo $!)`;
+    let pid: string = "$(${workerCommand} & echo $!)";
 
     if (pid.trim() != "") {
       workerPids.push(pid);
-      console.log(`✅ Worker ${workerId} started (PID: ${pid})`);
+      console.log("✅ Worker ${workerId} started (PID: ${pid})");
     } else {
-      console.log(`❌ Failed to start worker ${workerId}`);
+      console.log("❌ Failed to start worker ${workerId}");
     }
   }
 }
 
 // Monitor progress
-console.log(`Monitoring ${workerPids.length} workers...`);
+console.log("Monitoring ${workerPids.length} workers...");
 
 let startTime: number = parseInt(`$(date +%s)`);
 
 // Wait for all workers to complete
 for (let pid: string in workerPids) {
-  console.log(`Waiting for worker PID ${pid}...`);
-  `$(wait ${pid})`;
+  console.log("Waiting for worker PID ${pid}...");
+  "$(wait ${pid})";
 }
 
 let endTime: number = parseInt(`$(date +%s)`);
@@ -365,7 +365,7 @@ let duration: number = endTime - startTime;
 `$(rm -f worker.sh)`;
 
 // Verify results
-let processedFiles: string[] = `$(find ${outputDir} -name "processed_*" -type f)`.split("\n");
+let processedFiles: string[] = "$(find ${outputDir} -name "processed_*" -type f)".split("\n");
 let processedCount: number = 0;
 
 for (let file: string in processedFiles) {
@@ -374,13 +374,13 @@ for (let file: string in processedFiles) {
   }
 }
 
-console.log(`🎉 Parallel processing completed in ${duration} seconds`);
-console.log(`Files processed: ${processedCount}/${validFiles.length}`);
+console.log("🎉 Parallel processing completed in ${duration} seconds");
+console.log("Files processed: ${processedCount}/${validFiles.length}");
 
 if (processedCount == validFiles.length) {
   console.log("✅ All files processed successfully");
 } else {
-  console.log(`⚠️  ${validFiles.length - processedCount} files failed to process`);
+  console.log("⚠️  ${validFiles.length - processedCount} files failed to process");
 }
 ```
 
@@ -398,7 +398,7 @@ let concurrency: number = args.getNumber("--concurrency");
 let timeout: number = args.getNumber("--timeout");
 
 if (!fs.exists(urlsFile)) {
-  console.log(`❌ URLs file not found: ${urlsFile}`);
+  console.log("❌ URLs file not found: ${urlsFile}");
   exit(1);
 }
 
@@ -418,7 +418,7 @@ if (urls.length == 0) {
   exit(1);
 }
 
-console.log(`Making concurrent requests to ${urls.length} URLs with concurrency ${concurrency}`);
+console.log("Making concurrent requests to ${urls.length} URLs with concurrency ${concurrency}");
 
 // Create results directory
 let resultsDir: string = "api-results";
@@ -426,12 +426,12 @@ fs.createDirectory(resultsDir);
 
 // Function to make a single HTTP request
 function makeRequest(url: string, index: number): string {
-  let outputFile: string = `${resultsDir}/response-${index}.json`;
+  let outputFile: string = "${resultsDir}/response-${index}.json";
   let startTime: number = parseInt(`$(date +%s%3N)`); // milliseconds
 
   // Make HTTP request using curl
-  let curlCmd: string = `curl -s -w '{"http_code":"%{http_code}","time_total":"%{time_total}","size_download":"%{size_download}"}' -m ${timeout} "${url}" -o "${outputFile}.body"`;
-  let curlResult: string = `$(${curlCmd} 2>/dev/null || echo '{"http_code":"000","time_total":"0","size_download":"0"}')`;
+  let curlCmd: string = "curl -s -w '{"http_code":"%{http_code}","time_total":"%{time_total}","size_download":"%{size_download}"}' -m ${timeout} "${url}" -o "${outputFile}.body"";
+  let curlResult: string = "$(${curlCmd} 2>/dev/null || echo '{"http_code":"000","time_total":"0","size_download":"0"}')";
 
   let endTime: number = parseInt(`$(date +%s%3N)`);
   let totalTime: number = endTime - startTime;
@@ -458,7 +458,7 @@ function makeRequest(url: string, index: number): string {
     "curl_time": parseFloat(json.getString(metrics, ".time_total")) * 1000,
     "size_bytes": parseInt(json.getString(metrics, ".size_download")),
     "success": json.getString(metrics, ".http_code").startsWith("2"),
-    "body_file": `${outputFile}.body`
+    "body_file": "${outputFile}.body"
   };
 
   // Save response metadata
@@ -468,9 +468,9 @@ function makeRequest(url: string, index: number): string {
   let timeMs: number = json.getNumber(response, ".time_total_ms");
 
   if (json.getBoolean(response, ".success")) {
-    console.log(`✅ [${index}] ${url} → ${httpCode} (${timeMs}ms)`);
+    console.log("✅ [${index}] ${url} → ${httpCode} (${timeMs}ms)");
   } else {
-    console.log(`❌ [${index}] ${url} → ${httpCode} (${timeMs}ms)`);
+    console.log("❌ [${index}] ${url} → ${httpCode} (${timeMs}ms)");
   }
 
   return outputFile;
@@ -492,33 +492,33 @@ while (processedCount < urls.length) {
     batch.push(url);
 
     // Start request in background
-    let command: string = `utah -c "makeRequest('${url}', ${urlIndex})"`;
-    let pid: string = `$(makeRequest "${url}" ${urlIndex} & echo $!)`;
+    let command: string = "utah -c "makeRequest('${url}', ${urlIndex})"";
+    let pid: string = "$(makeRequest "${url}" ${urlIndex} & echo $!)";
 
     if (pid.trim() != "") {
-      batchPids = json.set(batchPids, `.${pid}`, {
+      batchPids = json.set(batchPids, ".${pid}", {
         "url": url,
         "index": urlIndex
       });
     }
   }
 
-  console.log(`Processing batch: ${batch.length} requests`);
+  console.log("Processing batch: ${batch.length} requests");
 
   // Wait for batch to complete
   let pids: string[] = json.keys(batchPids);
   for (let pid: string in pids) {
-    `$(wait ${pid})`;
+    "$(wait ${pid})";
   }
 
   processedCount += batch.length;
-  console.log(`Completed: ${processedCount}/${urls.length} requests`);
+  console.log("Completed: ${processedCount}/${urls.length} requests");
 }
 
 // Analyze results
 console.log("\nAnalyzing results...");
 
-let responseFiles: string[] = `$(find ${resultsDir} -name "response-*.json" -type f)`.split("\n");
+let responseFiles: string[] = "$(find ${resultsDir} -name "response-*.json" -type f)".split("\n");
 let successCount: number = 0;
 let errorCount: number = 0;
 let totalTime: number = 0;
@@ -553,7 +553,7 @@ for (let responseFile: string in responseFiles) {
     totalSize += sizeBytes;
 
     // Count status codes
-    let statusPath: string = `.status_codes.${httpCode}`;
+    let statusPath: string = ".status_codes.${httpCode}";
     let statusCount: number = json.getNumber(summary, statusPath) || 0;
     summary = json.set(summary, statusPath, statusCount + 1);
   }
@@ -566,14 +566,14 @@ summary = json.set(summary, ".average_time_ms", Math.round(totalTime / urls.leng
 summary = json.set(summary, ".total_size_bytes", totalSize);
 
 // Save summary
-fs.writeFile(`${resultsDir}/summary.json`, json.stringify(summary, true));
+fs.writeFile("${resultsDir}/summary.json", json.stringify(summary, true));
 
 console.log(`\nConcurrent API calls completed:`);
-console.log(`✅ Successful: ${successCount}`);
-console.log(`❌ Failed: ${errorCount}`);
-console.log(`⏱️  Average time: ${Math.round(totalTime / urls.length)}ms`);
-console.log(`📦 Total data: ${Math.round(totalSize / 1024)}KB`);
-console.log(`📊 Results saved to: ${resultsDir}/`);
+console.log("✅ Successful: ${successCount}");
+console.log("❌ Failed: ${errorCount}");
+console.log("⏱️  Average time: ${Math.round(totalTime / urls.length)}ms");
+console.log("📦 Total data: ${Math.round(totalSize / 1024)}KB");
+console.log("📊 Results saved to: ${resultsDir}/");
 ```
 
 ## Synchronization and Coordination
@@ -593,19 +593,19 @@ let syncDir: string = args.getString("--sync-dir");
 
 fs.createDirectory(syncDir);
 
-console.log(`Process ${processId} starting coordination with ${totalProcesses} total processes`);
+console.log("Process ${processId} starting coordination with ${totalProcesses} total processes");
 
 // Function to wait for all processes to reach a barrier
 function waitForBarrier(barrierName: string): void {
-  let barrierFile: string = `${syncDir}/${barrierName}_${processId}.ready`;
+  let barrierFile: string = "${syncDir}/${barrierName}_${processId}.ready";
 
   // Signal this process is ready
   fs.writeFile(barrierFile, `$(date -Iseconds)`);
-  console.log(`Process ${processId} reached barrier: ${barrierName}`);
+  console.log("Process ${processId} reached barrier: ${barrierName}");
 
   // Wait for all processes to be ready
   while (true) {
-    let readyFiles: string[] = `$(find ${syncDir} -name "${barrierName}_*.ready" -type f)`.split("\n");
+    let readyFiles: string[] = "$(find ${syncDir} -name "${barrierName}_*.ready" -type f)".split("\n");
     let readyCount: number = 0;
 
     for (let file: string in readyFiles) {
@@ -615,44 +615,44 @@ function waitForBarrier(barrierName: string): void {
     }
 
     if (readyCount >= totalProcesses) {
-      console.log(`All processes reached barrier: ${barrierName}`);
+      console.log("All processes reached barrier: ${barrierName}");
       break;
     }
 
-    console.log(`Waiting at barrier ${barrierName}: ${readyCount}/${totalProcesses} processes ready`);
+    console.log("Waiting at barrier ${barrierName}: ${readyCount}/${totalProcesses} processes ready");
     `$(sleep 2)`;
   }
 }
 
 // Function to acquire a distributed lock
 function acquireLock(lockName: string, timeoutSeconds: number = 30): boolean {
-  let lockFile: string = `${syncDir}/${lockName}.lock`;
+  let lockFile: string = "${syncDir}/${lockName}.lock";
   let startTime: number = parseInt(`$(date +%s)`);
 
   while (true) {
     // Try to create lock file atomically
-    let lockResult: string = `$(set -C; echo "${processId}" > "${lockFile}" 2>/dev/null && echo "acquired" || echo "failed")`;
+    let lockResult: string = "$(set -C; echo "${processId}" > "${lockFile}" 2>/dev/null && echo "acquired" || echo "failed")";
 
     if (lockResult.trim() == "acquired") {
-      console.log(`Process ${processId} acquired lock: ${lockName}`);
+      console.log("Process ${processId} acquired lock: ${lockName}");
       return true;
     }
 
     // Check timeout
     let currentTime: number = parseInt(`$(date +%s)`);
     if (currentTime - startTime > timeoutSeconds) {
-      console.log(`Process ${processId} failed to acquire lock ${lockName} (timeout)`);
+      console.log("Process ${processId} failed to acquire lock ${lockName} (timeout)");
       return false;
     }
 
     // Check if lock holder is still alive
     if (fs.exists(lockFile)) {
       let lockHolder: string = fs.readFile(lockFile).trim();
-      let holderAlive: string = `$(ps aux | grep "${lockHolder}" | grep -v grep >/dev/null && echo "alive" || echo "dead")`;
+      let holderAlive: string = "$(ps aux | grep "${lockHolder}" | grep -v grep >/dev/null && echo "alive" || echo "dead")";
 
       if (holderAlive.trim() == "dead") {
-        console.log(`Lock holder ${lockHolder} appears dead, removing stale lock`);
-        `$(rm -f "${lockFile}")`;
+        console.log("Lock holder ${lockHolder} appears dead, removing stale lock");
+        "$(rm -f "${lockFile}")";
       }
     }
 
@@ -662,16 +662,16 @@ function acquireLock(lockName: string, timeoutSeconds: number = 30): boolean {
 
 // Function to release a distributed lock
 function releaseLock(lockName: string): void {
-  let lockFile: string = `${syncDir}/${lockName}.lock`;
+  let lockFile: string = "${syncDir}/${lockName}.lock";
 
   if (fs.exists(lockFile)) {
     let lockHolder: string = fs.readFile(lockFile).trim();
 
     if (lockHolder == processId) {
-      `$(rm -f "${lockFile}")`;
-      console.log(`Process ${processId} released lock: ${lockName}`);
+      "$(rm -f "${lockFile}")";
+      console.log("Process ${processId} released lock: ${lockName}");
     } else {
-      console.log(`Process ${processId} cannot release lock ${lockName} (held by ${lockHolder})`);
+      console.log("Process ${processId} cannot release lock ${lockName} (held by ${lockHolder})");
     }
   }
 }
@@ -679,7 +679,7 @@ function releaseLock(lockName: string): void {
 // Function to update shared state
 function updateSharedState(key: string, value: string): void {
   if (acquireLock("shared_state", 10)) {
-    let stateFile: string = `${syncDir}/shared_state.json`;
+    let stateFile: string = "${syncDir}/shared_state.json";
     let state: object = {};
 
     if (fs.exists(stateFile)) {
@@ -691,25 +691,25 @@ function updateSharedState(key: string, value: string): void {
       }
     }
 
-    state = json.set(state, `.${key}`, value);
+    state = json.set(state, ".${key}", value);
     fs.writeFile(stateFile, json.stringify(state, true));
 
     releaseLock("shared_state");
-    console.log(`Process ${processId} updated shared state: ${key} = ${value}`);
+    console.log("Process ${processId} updated shared state: ${key} = ${value}");
   } else {
-    console.log(`Process ${processId} failed to update shared state: ${key}`);
+    console.log("Process ${processId} failed to update shared state: ${key}");
   }
 }
 
 // Function to read shared state
 function readSharedState(key: string): string {
-  let stateFile: string = `${syncDir}/shared_state.json`;
+  let stateFile: string = "${syncDir}/shared_state.json";
 
   if (fs.exists(stateFile)) {
     let stateContent: string = fs.readFile(stateFile);
     try {
       let state: object = json.parse(stateContent);
-      return json.getString(state, `.${key}`) || "";
+      return json.getString(state, ".${key}") || "";
     } catch {
       return "";
     }
@@ -722,19 +722,19 @@ function readSharedState(key: string): string {
 console.log("Starting coordinated workflow...");
 
 // Phase 1: Initialization
-updateSharedState(`process_${processId}_status`, "initializing");
+updateSharedState("process_${processId}_status", "initializing");
 waitForBarrier("initialization");
 
 // Phase 2: Work distribution
 if (acquireLock("work_distribution", 30)) {
-  console.log(`Process ${processId} is distributing work...`);
+  console.log("Process ${processId} is distributing work...");
 
   // Create work items
   for (let i: number = 1; i <= 10; i++) {
-    let workFile: string = `${syncDir}/work_item_${i}.json`;
+    let workFile: string = "${syncDir}/work_item_${i}.json";
     let workItem: object = {
       "id": i,
-      "task": `Process item ${i}`,
+      "task": "Process item ${i}",
       "created_by": processId,
       "created_at": `$(date -Iseconds)`,
       "status": "pending"
@@ -746,7 +746,7 @@ if (acquireLock("work_distribution", 30)) {
   updateSharedState("work_distributed", "true");
   releaseLock("work_distribution");
 } else {
-  console.log(`Process ${processId} waiting for work distribution...`);
+  console.log("Process ${processId} waiting for work distribution...");
 
   while (readSharedState("work_distributed") != "true") {
     `$(sleep 1)`;
@@ -760,12 +760,12 @@ let processedCount: number = 0;
 
 while (true) {
   // Try to claim a work item
-  let workItems: string[] = `$(find ${syncDir} -name "work_item_*.json" -type f)`.split("\n");
+  let workItems: string[] = "$(find ${syncDir} -name "work_item_*.json" -type f)".split("\n");
   let claimed: boolean = false;
 
   for (let workFile: string in workItems) {
     if (workFile.trim() != "" && !claimed) {
-      if (acquireLock(`work_${fs.filename(workFile)}`, 5)) {
+      if (acquireLock("work_${fs.filename(workFile)}", 5)) {
         if (fs.exists(workFile)) {
           let workContent: string = fs.readFile(workFile);
           let workItem: object = json.parse(workContent);
@@ -779,7 +779,7 @@ while (true) {
             fs.writeFile(workFile, json.stringify(workItem, true));
 
             let taskId: number = json.getNumber(workItem, ".id");
-            console.log(`Process ${processId} claimed work item ${taskId}`);
+            console.log("Process ${processId} claimed work item ${taskId}");
 
             // Simulate work
             `$(sleep $((RANDOM % 5 + 1)))`;
@@ -790,20 +790,20 @@ while (true) {
 
             fs.writeFile(workFile, json.stringify(workItem, true));
 
-            console.log(`Process ${processId} completed work item ${taskId}`);
+            console.log("Process ${processId} completed work item ${taskId}");
             processedCount++;
             claimed = true;
           }
         }
 
-        releaseLock(`work_${fs.filename(workFile)}`);
+        releaseLock("work_${fs.filename(workFile)}");
       }
     }
   }
 
   if (!claimed) {
     // Check if all work is done
-    let pendingWork: string[] = `$(grep -l '"status":"pending"' ${syncDir}/work_item_*.json 2>/dev/null || echo "")`.split("\n");
+    let pendingWork: string[] = "$(grep -l '"status":"pending"' ${syncDir}/work_item_*.json 2>/dev/null || echo "")".split("\n");
     let hasPending: boolean = false;
 
     for (let file: string in pendingWork) {
@@ -814,7 +814,7 @@ while (true) {
     }
 
     if (!hasPending) {
-      console.log(`Process ${processId} found no more work available`);
+      console.log("Process ${processId} found no more work available");
       break;
     }
 
@@ -822,12 +822,12 @@ while (true) {
   }
 }
 
-updateSharedState(`process_${processId}_completed`, processedCount.toString());
+updateSharedState("process_${processId}_completed", processedCount.toString());
 waitForBarrier("work_completed");
 
 // Phase 4: Results aggregation
 if (acquireLock("results_aggregation", 30)) {
-  console.log(`Process ${processId} aggregating results...`);
+  console.log("Process ${processId} aggregating results...");
 
   let results: object = {
     "total_processes": totalProcesses,
@@ -838,15 +838,15 @@ if (acquireLock("results_aggregation", 30)) {
 
   // Collect results from each process
   for (let i: number = 1; i <= totalProcesses; i++) {
-    let processKey: string = `process_${i}`;
-    let completed: string = readSharedState(`${processKey}_completed`);
+    let processKey: string = "process_${i}";
+    let completed: string = readSharedState("${processKey}_completed");
 
-    results = json.set(results, `.process_results.${processKey}`, {
+    results = json.set(results, ".process_results.${processKey}", {
       "items_processed": parseInt(completed) || 0
     });
   }
 
-  fs.writeFile(`${syncDir}/final_results.json`, json.stringify(results, true));
+  fs.writeFile("${syncDir}/final_results.json", json.stringify(results, true));
   updateSharedState("results_ready", "true");
 
   releaseLock("results_aggregation");
@@ -857,10 +857,10 @@ while (readSharedState("results_ready") != "true") {
   `$(sleep 1)`;
 }
 
-console.log(`Process ${processId} completed coordination. Processed ${processedCount} items.`);
+console.log("Process ${processId} completed coordination. Processed ${processedCount} items.");
 
 // Clean up process-specific files
-`$(rm -f ${syncDir}/*_${processId}.ready)`;
+"$(rm -f ${syncDir}/*_${processId}.ready)";
 ```
 
 ## Performance Monitoring
@@ -912,11 +912,11 @@ function monitorProcesses(pids: string[]): object[] {
   for (let pid: string in pids) {
     if (pid.trim() != "") {
       // Check if process exists
-      let exists: string = `$(kill -0 ${pid} 2>/dev/null && echo "yes" || echo "no")`;
+      let exists: string = "$(kill -0 ${pid} 2>/dev/null && echo "yes" || echo "no")";
 
       if (exists.trim() == "yes") {
         // Get process info
-        let psInfo: string = `$(ps -p ${pid} -o pid,ppid,pcpu,pmem,vsz,rss,comm --no-headers 2>/dev/null || echo "")`;
+        let psInfo: string = "$(ps -p ${pid} -o pid,ppid,pcpu,pmem,vsz,rss,comm --no-headers 2>/dev/null || echo "")";
 
         if (psInfo.trim() != "") {
           let fields: string[] = psInfo.trim().split(/\s+/);
@@ -942,9 +942,9 @@ function monitorProcesses(pids: string[]): object[] {
 
 // Main monitoring function
 function startMonitoring(processesToMonitor: string[]): void {
-  console.log(`Starting resource monitoring (interval: ${monitorInterval}s)`);
-  console.log(`Monitoring ${processesToMonitor.length} processes`);
-  console.log(`Output file: ${outputFile}`);
+  console.log("Starting resource monitoring (interval: ${monitorInterval}s)");
+  console.log("Monitoring ${processesToMonitor.length} processes");
+  console.log("Output file: ${outputFile}");
 
   let monitoringData: object[] = [];
   let startTime: number = parseInt(`$(date +%s)`);
@@ -967,7 +967,7 @@ function startMonitoring(processesToMonitor: string[]): void {
     let loadAvg: number = json.getNumber(systemMetrics, ".load_average");
     let activeProcesses: number = processMetrics.length;
 
-    console.log(`[${`$(date '+%H:%M:%S')`}] CPU: ${cpuUsage}%, Mem: ${memUsage}%, Load: ${loadAvg}, Active: ${activeProcesses}`);
+    console.log("[${`$(date '+%H:%M:%S')`}] CPU: ${cpuUsage}%, Mem: ${memUsage}%, Load: ${loadAvg}, Active: ${activeProcesses}");
 
     // Save data periodically
     fs.writeFile(outputFile, json.stringify(monitoringData, true));
@@ -978,10 +978,10 @@ function startMonitoring(processesToMonitor: string[]): void {
       break;
     }
 
-    `$(sleep ${monitorInterval})`;
+    "$(sleep ${monitorInterval})";
   }
 
-  console.log(`Monitoring completed. Data saved to: ${outputFile}`);
+  console.log("Monitoring completed. Data saved to: ${outputFile}");
 }
 
 // Example usage with background processes
@@ -997,12 +997,12 @@ let taskPids: string[] = [];
 // Start background tasks
 for (let i: number = 0; i < backgroundTasks.length; i++) {
   let task: string = backgroundTasks[i];
-  console.log(`Starting task ${i + 1}: ${task}`);
+  console.log("Starting task ${i + 1}: ${task}");
 
-  let pid: string = `$(${task} & echo $!)`;
+  let pid: string = "$(${task} & echo $!)";
   if (pid.trim() != "") {
     taskPids.push(pid);
-    console.log(`Task ${i + 1} started with PID: ${pid}`);
+    console.log("Task ${i + 1} started with PID: ${pid}");
   }
 }
 
@@ -1024,7 +1024,7 @@ function executeWithErrorHandling(command: string, taskId: string): object {
   let startTime: number = parseInt(`$(date +%s%3N)`);
 
   try {
-    let result: string = `$(${command} 2>&1; echo "EXIT_CODE:$?")`;
+    let result: string = "$(${command} 2>&1; echo "EXIT_CODE:$?")";
     let endTime: number = parseInt(`$(date +%s%3N)`);
 
     let exitCode: string = result.split("EXIT_CODE:")[1]?.trim() || "1";
@@ -1058,20 +1058,20 @@ function executeWithErrorHandling(command: string, taskId: string): object {
 function cleanupOrphanedProcesses(parentPid: string): void {
   console.log("Cleaning up orphaned processes...");
 
-  let children: string[] = `$(pgrep -P ${parentPid} 2>/dev/null || echo "")`.split("\n");
+  let children: string[] = "$(pgrep -P ${parentPid} 2>/dev/null || echo "")".split("\n");
 
   for (let childPid: string in children) {
     if (childPid.trim() != "") {
-      console.log(`Terminating child process: ${childPid}`);
-      `$(kill -TERM ${childPid} 2>/dev/null || true)`;
+      console.log("Terminating child process: ${childPid}");
+      "$(kill -TERM ${childPid} 2>/dev/null || true)";
 
       `$(sleep 2)`;
 
       // Force kill if still running
-      let stillRunning: string = `$(kill -0 ${childPid} 2>/dev/null && echo "yes" || echo "no")`;
+      let stillRunning: string = "$(kill -0 ${childPid} 2>/dev/null && echo "yes" || echo "no")";
       if (stillRunning.trim() == "yes") {
-        console.log(`Force killing process: ${childPid}`);
-        `$(kill -KILL ${childPid} 2>/dev/null || true)`;
+        console.log("Force killing process: ${childPid}");
+        "$(kill -KILL ${childPid} 2>/dev/null || true)";
       }
     }
   }
@@ -1087,7 +1087,7 @@ function monitorMemoryUsage(maxMemoryMB: number): boolean {
   let memoryPercent: number = Math.round((currentMemory / maxMemoryMB) * 100);
 
   if (memoryPercent > 90) {
-    console.log(`⚠️  High memory usage: ${memoryPercent}% (${currentMemory}MB)`);
+    console.log("⚠️  High memory usage: ${memoryPercent}% (${currentMemory}MB)");
     return false;
   }
 
@@ -1100,7 +1100,7 @@ function shouldCreateNewProcess(): boolean {
   let cpuCount: number = parseInt(`$(nproc)`);
 
   if (loadAvg > cpuCount * 2) {
-    console.log(`⚠️  High system load: ${loadAvg} (CPU cores: ${cpuCount})`);
+    console.log("⚠️  High system load: ${loadAvg} (CPU cores: ${cpuCount})");
     return false;
   }
 

@@ -33,13 +33,13 @@ let skipTests: boolean = args.getBoolean("--skip-tests");
 script.exitOnError(true);
 script.enableDebug(false);
 
-console.log(`Starting build ${buildNumber} for ${environment}`);
+console.log("Starting build ${buildNumber} for ${environment}");
 
 // Validate environment
 let validEnvironments: string[] = ["development", "staging", "production"];
 if (!validEnvironments.contains(environment)) {
-  console.log(`❌ Invalid environment: ${environment}`);
-  console.log(`Valid environments: ${validEnvironments.join(", ")}`);
+  console.log("❌ Invalid environment: ${environment}");
+  console.log("Valid environments: ${validEnvironments.join(", ")}");
   exit(1);
 }
 
@@ -50,11 +50,11 @@ function validateBuildEnvironment(): void {
   let requiredTools: string[] = ["node", "npm", "docker", "git"];
   for (let tool: string in requiredTools) {
     if (!os.isInstalled(tool)) {
-      console.log(`❌ Required tool missing: ${tool}`);
+      console.log("❌ Required tool missing: ${tool}");
       exit(1);
     } else {
-      let version: string = `$(${tool} --version | head -1)`;
-      console.log(`✅ ${tool}: ${version}`);
+      let version: string = "$(${tool} --version | head -1)";
+      console.log("✅ ${tool}: ${version}");
     }
   }
 }
@@ -126,14 +126,14 @@ function buildApplication(): void {
 
   // Docker build
   if (fs.exists("Dockerfile")) {
-    let imageName: string = `myapp:${buildNumber}`;
-    `$(docker build -t ${imageName} .)`;
-    console.log(`✅ Docker image built: ${imageName}`);
+    let imageName: string = "myapp:${buildNumber}";
+    "$(docker build -t ${imageName} .)";
+    console.log("✅ Docker image built: ${imageName}");
 
     // Tag for environment
-    let envTag: string = `myapp:${environment}-latest`;
-    `$(docker tag ${imageName} ${envTag})`;
-    console.log(`✅ Tagged for environment: ${envTag}`);
+    let envTag: string = "myapp:${environment}-latest";
+    "$(docker tag ${imageName} ${envTag})";
+    console.log("✅ Tagged for environment: ${envTag}");
   }
 }
 
@@ -155,18 +155,18 @@ function generateArtifacts(): void {
     "docker_version": `$(docker --version 2>/dev/null || echo "N/A")`
   };
 
-  fs.writeFile(`${artifactsDir}/build-info.json`, json.stringify(buildInfo, true));
+  fs.writeFile("${artifactsDir}/build-info.json", json.stringify(buildInfo, true));
 
   // Copy important files
   if (fs.exists("dist")) {
-    `$(cp -r dist ${artifactsDir}/`)`;
+    "$(cp -r dist ${artifactsDir}/")`;
   }
 
   if (fs.exists("build")) {
-    `$(cp -r build ${artifactsDir}/`)`;
+    "$(cp -r build ${artifactsDir}/")`;
   }
 
-  console.log(`✅ Artifacts generated in ${artifactsDir}/`);
+  console.log("✅ Artifacts generated in ${artifactsDir}/");
 }
 
 // Main build process
@@ -176,7 +176,7 @@ runTests();
 buildApplication();
 generateArtifacts();
 
-console.log(`🎉 Build ${buildNumber} completed successfully for ${environment}`);
+console.log("🎉 Build ${buildNumber} completed successfully for ${environment}");
 ```
 
 ### Deployment Script
@@ -214,21 +214,21 @@ let envConfig: object = {
   }
 };
 
-if (!json.has(envConfig, `.${environment}`)) {
-  console.log(`❌ Unknown environment: ${environment}`);
+if (!json.has(envConfig, ".${environment}")) {
+  console.log("❌ Unknown environment: ${environment}");
   exit(1);
 }
 
-let config: object = json.get(envConfig, `.${environment}`);
+let config: object = json.get(envConfig, ".${environment}");
 let replicas: number = json.getNumber(config, ".replicas");
 let namespace: string = json.getString(config, ".namespace");
 let domain: string = json.getString(config, ".domain");
 
-console.log(`Deploying to ${environment} environment`);
-console.log(`Version: ${version}`);
-console.log(`Replicas: ${replicas}`);
-console.log(`Namespace: ${namespace}`);
-console.log(`Domain: ${domain}`);
+console.log("Deploying to ${environment} environment");
+console.log("Version: ${version}");
+console.log("Replicas: ${replicas}");
+console.log("Namespace: ${namespace}");
+console.log("Domain: ${domain}");
 
 // Pre-deployment checks
 function preDeploymentChecks(): void {
@@ -250,23 +250,23 @@ function preDeploymentChecks(): void {
   console.log("✅ Kubernetes cluster accessible");
 
   // Check namespace exists
-  let nsExists: string = `$(kubectl get namespace ${namespace} 2>/dev/null && echo "exists" || echo "missing")`;
+  let nsExists: string = "$(kubectl get namespace ${namespace} 2>/dev/null && echo "exists" || echo "missing")";
   if (nsExists.trim() != "exists") {
-    console.log(`❌ Namespace ${namespace} does not exist`);
+    console.log("❌ Namespace ${namespace} does not exist");
     exit(1);
   }
 
-  console.log(`✅ Namespace ${namespace} exists`);
+  console.log("✅ Namespace ${namespace} exists");
 
   // Check if image exists
   if (!isDryRun) {
-    let imageExists: string = `$(docker manifest inspect myapp:${version} >/dev/null 2>&1 && echo "exists" || echo "missing")`;
+    let imageExists: string = "$(docker manifest inspect myapp:${version} >/dev/null 2>&1 && echo "exists" || echo "missing")";
     if (imageExists.trim() != "exists") {
-      console.log(`❌ Docker image myapp:${version} not found`);
+      console.log("❌ Docker image myapp:${version} not found");
       exit(1);
     }
 
-    console.log(`✅ Docker image myapp:${version} exists`);
+    console.log("✅ Docker image myapp:${version} exists");
   }
 }
 
@@ -274,20 +274,20 @@ function preDeploymentChecks(): void {
 function backupCurrentDeployment(): void {
   console.log("Backing up current deployment...");
 
-  let backupDir: string = `backups/${environment}`;
+  let backupDir: string = "backups/${environment}";
   fs.createDirectory(backupDir);
 
   let timestamp: string = `$(date +%Y%m%d_%H%M%S)`;
-  let backupFile: string = `${backupDir}/deployment-${timestamp}.yaml`;
+  let backupFile: string = "${backupDir}/deployment-${timestamp}.yaml";
 
   if (!isDryRun) {
-    `$(kubectl get deployment myapp -n ${namespace} -o yaml > ${backupFile} 2>/dev/null || echo "No existing deployment")`;
+    "$(kubectl get deployment myapp -n ${namespace} -o yaml > ${backupFile} 2>/dev/null || echo "No existing deployment")";
 
     if (fs.exists(backupFile)) {
-      console.log(`✅ Deployment backed up to ${backupFile}`);
+      console.log("✅ Deployment backed up to ${backupFile}");
     }
   } else {
-    console.log(`🧪 Would backup to ${backupFile}`);
+    console.log("🧪 Would backup to ${backupFile}");
   }
 }
 
@@ -297,13 +297,13 @@ function deployApplication(): void {
     console.log("Rolling back to previous version...");
 
     if (!isDryRun) {
-      `$(kubectl rollout undo deployment/myapp -n ${namespace})`;
+      "$(kubectl rollout undo deployment/myapp -n ${namespace})";
       console.log("✅ Rollback initiated");
     } else {
       console.log("🧪 Would rollback deployment");
     }
   } else {
-    console.log(`Deploying version ${version}...`);
+    console.log("Deploying version ${version}...");
 
     // Generate deployment manifest
     let deploymentManifest: string = `
@@ -335,14 +335,14 @@ spec:
           value: "${version}"
 `;
 
-    let manifestFile: string = `deployment-${environment}.yaml`;
+    let manifestFile: string = "deployment-${environment}.yaml";
     fs.writeFile(manifestFile, deploymentManifest);
 
     if (!isDryRun) {
-      `$(kubectl apply -f ${manifestFile})`;
+      "$(kubectl apply -f ${manifestFile})";
       console.log("✅ Deployment applied");
     } else {
-      console.log(`🧪 Would apply deployment manifest: ${manifestFile}`);
+      console.log("🧪 Would apply deployment manifest: ${manifestFile}");
     }
   }
 }
@@ -357,16 +357,16 @@ function waitForDeployment(): void {
   console.log("Waiting for deployment to complete...");
 
   let timeout: number = 300; // 5 minutes
-  `$(kubectl rollout status deployment/myapp -n ${namespace} --timeout=${timeout}s)`;
+  "$(kubectl rollout status deployment/myapp -n ${namespace} --timeout=${timeout}s)";
 
   // Check if deployment is ready
-  let readyReplicas: string = `$(kubectl get deployment myapp -n ${namespace} -o jsonpath='{.status.readyReplicas}')`;
-  let desiredReplicas: string = `$(kubectl get deployment myapp -n ${namespace} -o jsonpath='{.spec.replicas}')`;
+  let readyReplicas: string = "$(kubectl get deployment myapp -n ${namespace} -o jsonpath='{.status.readyReplicas}')";
+  let desiredReplicas: string = "$(kubectl get deployment myapp -n ${namespace} -o jsonpath='{.spec.replicas}')";
 
   if (readyReplicas == desiredReplicas) {
-    console.log(`✅ Deployment completed: ${readyReplicas}/${desiredReplicas} replicas ready`);
+    console.log("✅ Deployment completed: ${readyReplicas}/${desiredReplicas} replicas ready");
   } else {
-    console.log(`❌ Deployment failed: ${readyReplicas}/${desiredReplicas} replicas ready`);
+    console.log("❌ Deployment failed: ${readyReplicas}/${desiredReplicas} replicas ready");
     exit(1);
   }
 }
@@ -381,16 +381,16 @@ function performHealthCheck(): void {
   console.log("Performing health checks...");
 
   // Get pod IPs
-  let podIPs: string[] = `$(kubectl get pods -n ${namespace} -l app=myapp -o jsonpath='{.items[*].status.podIP}')`.split(" ");
+  let podIPs: string[] = "$(kubectl get pods -n ${namespace} -l app=myapp -o jsonpath='{.items[*].status.podIP}')".split(" ");
 
   for (let podIP: string in podIPs) {
     if (podIP.trim() != "") {
-      let healthCheck: string = `$(curl -s -o /dev/null -w "%{http_code}" http://${podIP}:3000/health 2>/dev/null || echo "000")`;
+      let healthCheck: string = "$(curl -s -o /dev/null -w "%{http_code}" http://${podIP}:3000/health 2>/dev/null || echo "000")";
 
       if (healthCheck == "200") {
-        console.log(`✅ Health check passed for pod ${podIP}`);
+        console.log("✅ Health check passed for pod ${podIP}");
       } else {
-        console.log(`❌ Health check failed for pod ${podIP} (HTTP ${healthCheck})`);
+        console.log("❌ Health check failed for pod ${podIP} (HTTP ${healthCheck})");
       }
     }
   }
@@ -415,14 +415,14 @@ spec:
   type: LoadBalancer
 `;
 
-  let serviceFile: string = `service-${environment}.yaml`;
+  let serviceFile: string = "service-${environment}.yaml";
   fs.writeFile(serviceFile, serviceManifest);
 
   if (!isDryRun) {
-    `$(kubectl apply -f ${serviceFile})`;
+    "$(kubectl apply -f ${serviceFile})";
     console.log("✅ Service updated");
   } else {
-    console.log(`🧪 Would update service: ${serviceFile}`);
+    console.log("🧪 Would update service: ${serviceFile}");
   }
 }
 
@@ -442,7 +442,7 @@ function postDeploymentTasks(): void {
     "rollback": isRollback
   };
 
-  let deploymentLogFile: string = `deployments/${environment}-deployments.log`;
+  let deploymentLogFile: string = "deployments/${environment}-deployments.log";
   fs.createDirectory("deployments");
   fs.appendFile(deploymentLogFile, json.stringify(deploymentInfo) + "\n");
 
@@ -464,9 +464,9 @@ updateService();
 postDeploymentTasks();
 
 if (isRollback) {
-  console.log(`🔄 Rollback completed for ${environment}`);
+  console.log("🔄 Rollback completed for ${environment}");
 } else {
-  console.log(`🚀 Deployment completed: ${version} → ${environment}`);
+  console.log("🚀 Deployment completed: ${version} → ${environment}");
 }
 ```
 
@@ -485,10 +485,10 @@ let githubRef: string = env.get("GITHUB_REF") || "";
 let githubSha: string = env.get("GITHUB_SHA") || "";
 let githubActor: string = env.get("GITHUB_ACTOR") || "";
 
-console.log(`GitHub Event: ${githubEvent}`);
-console.log(`GitHub Ref: ${githubRef}`);
-console.log(`Commit SHA: ${githubSha}`);
-console.log(`Actor: ${githubActor}`);
+console.log("GitHub Event: ${githubEvent}");
+console.log("GitHub Ref: ${githubRef}");
+console.log("Commit SHA: ${githubSha}");
+console.log("Actor: ${githubActor}");
 
 // Determine environment based on branch
 function determineEnvironment(): string {
@@ -506,16 +506,16 @@ function determineEnvironment(): string {
 }
 
 let environment: string = determineEnvironment();
-console.log(`Determined environment: ${environment}`);
+console.log("Determined environment: ${environment}");
 
 // Set GitHub Actions outputs
 function setOutput(name: string, value: string): void {
-  console.log(`::set-output name=${name}::${value}`);
+  console.log("::set-output name=${name}::${value}");
 }
 
 // Set GitHub Actions environment variables
 function setEnvVar(name: string, value: string): void {
-  console.log(`::set-env name=${name}::${value}`);
+  console.log("::set-env name=${name}::${value}");
 }
 
 // Create GitHub Actions step summary
@@ -578,7 +578,7 @@ function runQualityChecks(): boolean {
   }
 
   // Generate summary
-  let summary: string = `## Quality Check Results\n\n${results.join("\n")}\n`;
+  let summary: string = "## Quality Check Results\n\n${results.join("\n")}\n";
   addStepSummary(summary);
 
   return passed;
@@ -593,15 +593,15 @@ function buildAndTest(): boolean {
 
   for (let utahFile: string in utahFiles) {
     if (utahFile.trim() != "") {
-      console.log(`Compiling ${utahFile}...`);
-      let compileResult: string = `$(utah compile ${utahFile} 2>&1; echo $?)`;
+      console.log("Compiling ${utahFile}...");
+      let compileResult: string = "$(utah compile ${utahFile} 2>&1; echo $?)";
 
       if (!compileResult.trim().endsWith("0")) {
-        console.log(`❌ Failed to compile ${utahFile}`);
+        console.log("❌ Failed to compile ${utahFile}");
         return false;
       }
 
-      console.log(`✅ Compiled ${utahFile}`);
+      console.log("✅ Compiled ${utahFile}");
     }
   }
 
@@ -646,15 +646,15 @@ function createReleaseArtifacts(): void {
 
   // Create release package
   if (compiledScripts.length > 0) {
-    let releasePackage: string = `${artifactsDir}/utah-scripts-${githubSha.substring(0, 8)}.tar.gz`;
-    let tarCmd: string = `tar -czf ${releasePackage}`;
+    let releasePackage: string = "${artifactsDir}/utah-scripts-${githubSha.substring(0, 8)}.tar.gz";
+    let tarCmd: string = "tar -czf ${releasePackage}";
 
     for (let script: string in compiledScripts) {
-      tarCmd += ` ${script}`;
+      tarCmd += " ${script}";
     }
 
-    `$(${tarCmd})`;
-    console.log(`✅ Release package created: ${releasePackage}`);
+    "$(${tarCmd})";
+    console.log("✅ Release package created: ${releasePackage}");
 
     setOutput("release-package", releasePackage);
   }
@@ -669,10 +669,10 @@ function createReleaseArtifacts(): void {
     "scripts": compiledScripts
   };
 
-  let manifestFile: string = `${artifactsDir}/deployment-manifest.json`;
+  let manifestFile: string = "${artifactsDir}/deployment-manifest.json";
   fs.writeFile(manifestFile, json.stringify(deploymentManifest, true));
 
-  console.log(`✅ Deployment manifest created: ${manifestFile}`);
+  console.log("✅ Deployment manifest created: ${manifestFile}");
   setOutput("deployment-manifest", manifestFile);
 }
 
@@ -699,11 +699,11 @@ function runCICD(): void {
 
     // Generate final summary
     let status: string = success ? "✅ SUCCESS" : "❌ FAILED";
-    let summary: string = `## CI/CD Pipeline Result: ${status}\n\n`;
-    summary += `- **Environment**: ${environment}\n`;
-    summary += `- **Version**: ${githubSha.substring(0, 8)}\n`;
-    summary += `- **Quality Checks**: ${qualityPassed ? "✅ Passed" : "❌ Failed"}\n`;
-    summary += `- **Build & Test**: ${buildPassed ? "✅ Passed" : "❌ Failed"}\n`;
+    let summary: string = "## CI/CD Pipeline Result: ${status}\n\n";
+    summary += "- **Environment**: ${environment}\n";
+    summary += "- **Version**: ${githubSha.substring(0, 8)}\n";
+    summary += "- **Quality Checks**: ${qualityPassed ? "✅ Passed" : "❌ Failed"}\n";
+    summary += "- **Build & Test**: ${buildPassed ? "✅ Passed" : "❌ Failed"}\n";
 
     addStepSummary(summary);
 
@@ -736,17 +736,17 @@ let workspace: string = env.get("WORKSPACE") || ".";
 let gitBranch: string = env.get("GIT_BRANCH") || "unknown";
 let gitCommit: string = env.get("GIT_COMMIT") || "unknown";
 
-console.log(`Jenkins Build: ${jobName} #${buildNumber}`);
-console.log(`Branch: ${gitBranch}`);
-console.log(`Commit: ${gitCommit}`);
-console.log(`Workspace: ${workspace}`);
+console.log("Jenkins Build: ${jobName} #${buildNumber}");
+console.log("Branch: ${gitBranch}");
+console.log("Commit: ${gitCommit}");
+console.log("Workspace: ${workspace}");
 
 // Stage: Checkout and Setup
 function setupStage(): void {
   console.log("=== SETUP STAGE ===");
 
   // Change to workspace directory
-  `$(cd ${workspace})`;
+  "$(cd ${workspace})";
 
   // Clean previous artifacts
   if (fs.exists("artifacts")) {
@@ -780,10 +780,10 @@ function buildStage(): void {
 
   for (let utahFile: string in utahFiles) {
     if (utahFile.trim() != "") {
-      console.log(`Compiling ${utahFile}...`);
+      console.log("Compiling ${utahFile}...");
 
       let startTime: number = parseInt(`$(date +%s)`);
-      let compileResult: string = `$(utah compile ${utahFile} 2>&1; echo "EXIT_CODE:$?")`;
+      let compileResult: string = "$(utah compile ${utahFile} 2>&1; echo "EXIT_CODE:$?")";
       let endTime: number = parseInt(`$(date +%s)`);
 
       let exitCode: string = compileResult.split("EXIT_CODE:")[1]?.trim() || "1";
@@ -799,9 +799,9 @@ function buildStage(): void {
       compilationResults.push(result);
 
       if (exitCode == "0") {
-        console.log(`✅ Compiled ${utahFile} (${duration}s)`);
+        console.log("✅ Compiled ${utahFile} (${duration}s)");
       } else {
-        console.log(`❌ Failed to compile ${utahFile}`);
+        console.log("❌ Failed to compile ${utahFile}");
         console.log(compileResult);
       }
     }
@@ -820,7 +820,7 @@ function buildStage(): void {
   }
 
   if (failedCount > 0) {
-    console.log(`❌ ${failedCount} compilation(s) failed`);
+    console.log("❌ ${failedCount} compilation(s) failed");
     exit(1);
   }
 
@@ -848,9 +848,9 @@ function testStage(): void {
 
   for (let testFile: string in testFiles) {
     if (testFile.trim() != "") {
-      console.log(`Running ${testFile}...`);
-      `$(utah ${testFile})`;
-      console.log(`✅ ${testFile} passed`);
+      console.log("Running ${testFile}...");
+      "$(utah ${testFile})";
+      console.log("✅ ${testFile} passed");
     }
   }
 
@@ -870,9 +870,9 @@ function packageStage(): void {
 
   for (let file: string in compiledFiles) {
     if (file.trim() != "") {
-      let destFile: string = `${distDir}/${fs.filename(file)}`;
+      let destFile: string = "${distDir}/${fs.filename(file)}";
       fs.copy(file, destFile);
-      console.log(`📦 Packaged ${file} → ${destFile}`);
+      console.log("📦 Packaged ${file} → ${destFile}");
     }
   }
 
@@ -886,17 +886,17 @@ function packageStage(): void {
     "built_by": "Jenkins"
   };
 
-  fs.writeFile(`${distDir}/version.json`, json.stringify(versionInfo, true));
+  fs.writeFile("${distDir}/version.json", json.stringify(versionInfo, true));
 
   // Create tarball
-  let packageName: string = `utah-scripts-${buildNumber}.tar.gz`;
-  let packagePath: string = `artifacts/${packageName}`;
+  let packageName: string = "utah-scripts-${buildNumber}.tar.gz";
+  let packagePath: string = "artifacts/${packageName}";
 
-  `$(cd artifacts && tar -czf ${packageName} dist/)`;
+  "$(cd artifacts && tar -czf ${packageName} dist/)";
 
   if (fs.exists(packagePath)) {
-    let packageSize: string = `$(du -h ${packagePath} | cut -f1)`;
-    console.log(`✅ Package created: ${packagePath} (${packageSize})`);
+    let packageSize: string = "$(du -h ${packagePath} | cut -f1)";
+    console.log("✅ Package created: ${packagePath} (${packageSize})");
   } else {
     console.log("❌ Package creation failed");
     exit(1);
@@ -911,7 +911,7 @@ function archiveStage(): void {
 
   // Archive artifacts for Jenkins
   let archivePattern: string = "artifacts/**/*";
-  console.log(`Archiving artifacts: ${archivePattern}`);
+  console.log("Archiving artifacts: ${archivePattern}");
 
   // Generate build summary
   let summary: object = {
@@ -925,7 +925,7 @@ function archiveStage(): void {
     "artifacts": {
       "compilation_report": "artifacts/compilation-report.json",
       "distribution": "artifacts/dist/",
-      "package": `artifacts/utah-scripts-${buildNumber}.tar.gz`
+      "package": "artifacts/utah-scripts-${buildNumber}.tar.gz"
     },
     "status": "success"
   };
@@ -941,31 +941,31 @@ function deployStage(): void {
 
   // Only deploy from main/master branch
   if (gitBranch != "origin/main" && gitBranch != "origin/master") {
-    console.log(`⏭️  Skipping deploy for branch: ${gitBranch}`);
+    console.log("⏭️  Skipping deploy for branch: ${gitBranch}");
     return;
   }
 
   console.log("Deploying to staging environment...");
 
   // Extract package for deployment
-  let packagePath: string = `artifacts/utah-scripts-${buildNumber}.tar.gz`;
+  let packagePath: string = "artifacts/utah-scripts-${buildNumber}.tar.gz";
   let deployDir: string = "deploy";
 
   fs.createDirectory(deployDir);
-  `$(cd deploy && tar -xzf ../${packagePath})`;
+  "$(cd deploy && tar -xzf ../${packagePath})";
 
   // Deploy scripts (example - copy to deployment location)
   let deploymentPath: string = "/opt/utah-scripts";
 
   if (fs.exists(deploymentPath)) {
     // Backup current deployment
-    let backupPath: string = `${deploymentPath}.backup.${buildNumber}`;
-    `$(cp -r ${deploymentPath} ${backupPath})`;
-    console.log(`📁 Current deployment backed up to ${backupPath}`);
+    let backupPath: string = "${deploymentPath}.backup.${buildNumber}";
+    "$(cp -r ${deploymentPath} ${backupPath})";
+    console.log("📁 Current deployment backed up to ${backupPath}");
   }
 
   // Deploy new version
-  `$(cp -r deploy/dist/* ${deploymentPath}/ 2>/dev/null || echo "Deploy path not accessible")`;
+  "$(cp -r deploy/dist/* ${deploymentPath}/ 2>/dev/null || echo "Deploy path not accessible")";
 
   console.log("✅ Deploy stage completed");
 }
@@ -980,7 +980,7 @@ function runPipeline(): void {
     archiveStage();
     deployStage();
 
-    console.log(`🎉 Pipeline completed successfully: ${jobName} #${buildNumber}`);
+    console.log("🎉 Pipeline completed successfully: ${jobName} #${buildNumber}");
 
   } catch {
     console.log("❌ Pipeline failed");
@@ -1023,10 +1023,10 @@ let repository: string = args.getString("--repository");
 let tag: string = args.getString("--tag");
 let action: string = args.getString("--action");
 
-let fullImageName: string = `${registry}/${repository}:${tag}`;
+let fullImageName: string = "${registry}/${repository}:${tag}";
 
-console.log(`Docker Registry Operation: ${action}`);
-console.log(`Image: ${fullImageName}`);
+console.log("Docker Registry Operation: ${action}");
+console.log("Image: ${fullImageName}");
 
 // Build Docker image
 function buildImage(): void {
@@ -1038,18 +1038,18 @@ function buildImage(): void {
   }
 
   // Build image
-  `$(docker build -t ${fullImageName} .)`;
+  "$(docker build -t ${fullImageName} .)";
 
   // Verify image was built
-  let imageExists: string = `$(docker images -q ${fullImageName})`;
+  let imageExists: string = "$(docker images -q ${fullImageName})";
   if (imageExists.trim() != "") {
-    console.log(`✅ Image built successfully: ${fullImageName}`);
+    console.log("✅ Image built successfully: ${fullImageName}");
 
     // Get image size
-    let imageSize: string = `$(docker images ${fullImageName} --format "table {{.Size}}" | tail -1)`;
-    console.log(`Image size: ${imageSize}`);
+    let imageSize: string = "$(docker images ${fullImageName} --format "table {{.Size}}" | tail -1)";
+    console.log("Image size: ${imageSize}");
   } else {
-    console.log(`❌ Failed to build image: ${fullImageName}`);
+    console.log("❌ Failed to build image: ${fullImageName}");
     exit(1);
   }
 }
@@ -1060,18 +1060,18 @@ function pushImage(): void {
 
   // Login to registry (assumes credentials are configured)
   if (registry != "docker.io") {
-    `$(docker login ${registry})`;
+    "$(docker login ${registry})";
   }
 
   // Push image
-  `$(docker push ${fullImageName})`;
+  "$(docker push ${fullImageName})";
 
   // Verify push
-  let pushResult: string = `$(docker manifest inspect ${fullImageName} >/dev/null 2>&1 && echo "success" || echo "failed")`;
+  let pushResult: string = "$(docker manifest inspect ${fullImageName} >/dev/null 2>&1 && echo "success" || echo "failed")";
   if (pushResult.trim() == "success") {
-    console.log(`✅ Image pushed successfully: ${fullImageName}`);
+    console.log("✅ Image pushed successfully: ${fullImageName}");
   } else {
-    console.log(`❌ Failed to push image: ${fullImageName}`);
+    console.log("❌ Failed to push image: ${fullImageName}");
     exit(1);
   }
 }
@@ -1080,14 +1080,14 @@ function pushImage(): void {
 function pullImage(): void {
   console.log("Pulling image from registry...");
 
-  `$(docker pull ${fullImageName})`;
+  "$(docker pull ${fullImageName})";
 
   // Verify pull
-  let imageExists: string = `$(docker images -q ${fullImageName})`;
+  let imageExists: string = "$(docker images -q ${fullImageName})";
   if (imageExists.trim() != "") {
-    console.log(`✅ Image pulled successfully: ${fullImageName}`);
+    console.log("✅ Image pulled successfully: ${fullImageName}");
   } else {
-    console.log(`❌ Failed to pull image: ${fullImageName}`);
+    console.log("❌ Failed to pull image: ${fullImageName}");
     exit(1);
   }
 }
@@ -1099,10 +1099,10 @@ function scanImage(): void {
   // Check if scanning tool is available
   if (os.isInstalled("trivy")) {
     console.log("Using Trivy for vulnerability scanning...");
-    `$(trivy image ${fullImageName})`;
+    "$(trivy image ${fullImageName})";
   } else if (os.isInstalled("docker-scan")) {
     console.log("Using Docker scan for vulnerability scanning...");
-    `$(docker scan ${fullImageName})`;
+    "$(docker scan ${fullImageName})";
   } else {
     console.log("⚠️  No vulnerability scanner available");
     console.log("Consider installing Trivy or enabling Docker scan");
@@ -1112,8 +1112,8 @@ function scanImage(): void {
 // Execute action
 let validActions: string[] = ["build", "push", "pull", "scan"];
 if (!validActions.contains(action)) {
-  console.log(`❌ Invalid action: ${action}`);
-  console.log(`Valid actions: ${validActions.join(", ")}`);
+  console.log("❌ Invalid action: ${action}");
+  console.log("Valid actions: ${validActions.join(", ")}");
   exit(1);
 }
 
@@ -1138,16 +1138,16 @@ script.exitOnError(false); // Handle errors manually
 
 function runWithRetry(command: string, maxRetries: number = 3): boolean {
   for (let attempt: number = 1; attempt <= maxRetries; attempt++) {
-    console.log(`Attempt ${attempt}/${maxRetries}: ${command}`);
+    console.log("Attempt ${attempt}/${maxRetries}: ${command}");
 
-    let result: string = `$(${command} 2>&1; echo "EXIT_CODE:$?")`;
+    let result: string = "$(${command} 2>&1; echo "EXIT_CODE:$?")";
     let exitCode: string = result.split("EXIT_CODE:")[1]?.trim() || "1";
 
     if (exitCode == "0") {
-      console.log(`✅ Command succeeded on attempt ${attempt}`);
+      console.log("✅ Command succeeded on attempt ${attempt}");
       return true;
     } else {
-      console.log(`❌ Command failed on attempt ${attempt}`);
+      console.log("❌ Command failed on attempt ${attempt}");
       if (attempt < maxRetries) {
         console.log("Retrying in 10 seconds...");
         `$(sleep 10)`;
@@ -1155,7 +1155,7 @@ function runWithRetry(command: string, maxRetries: number = 3): boolean {
     }
   }
 
-  console.log(`❌ Command failed after ${maxRetries} attempts`);
+  console.log("❌ Command failed after ${maxRetries} attempts");
   return false;
 }
 
@@ -1166,7 +1166,7 @@ function validateCIEnvironment(): boolean {
   for (let varName: string in requiredVars) {
     let value: string = env.get(varName) || "";
     if (value == "") {
-      console.log(`❌ Required environment variable missing: ${varName}`);
+      console.log("❌ Required environment variable missing: ${varName}");
       return false;
     }
   }
@@ -1184,17 +1184,17 @@ function manageBuildCache(): void {
   fs.createDirectory(cacheDir);
 
   // Cache compiled scripts
-  let sourceFiles: string[] = `$(find . -name "*.shx" -newer ${cacheDir}/last-build 2>/dev/null || find . -name "*.shx")`.split("\n");
+  let sourceFiles: string[] = "$(find . -name "*.shx" -newer ${cacheDir}/last-build 2>/dev/null || find . -name "*.shx")".split("\n");
 
   if (sourceFiles.length == 1 && sourceFiles[0].trim() == "") {
     console.log("✅ No sources changed, using cache");
     return;
   }
 
-  console.log(`Building ${sourceFiles.length} changed files...`);
+  console.log("Building ${sourceFiles.length} changed files...");
 
   // Update cache timestamp
-  `$(touch ${cacheDir}/last-build)`;
+  "$(touch ${cacheDir}/last-build)";
 }
 ```
 

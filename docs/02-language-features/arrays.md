@@ -31,7 +31,7 @@ Get the number of elements in an array:
 ```typescript
 let fruits: string[] = ["apple", "banana", "orange"];
 let count: number = array.length(fruits);
-console.log(`We have ${count} fruits`);
+console.log("We have ${count} fruits");
 ```
 
 #### `array.contains()`
@@ -88,7 +88,7 @@ let numbers: number[] = [1, 2, 3, 4, 5];
 let numberString: string = array.join(numbers, "-");      // "1-2-3-4-5"
 
 // Use in string interpolation
-console.log(`Fruits: ${array.join(fruits, ", ")}`);       // "Fruits: apple, banana, cherry"
+console.log("Fruits: ${array.join(fruits, ", ")}");       // "Fruits: apple, banana, cherry"
 ```
 
 #### `array.sort()`
@@ -113,8 +113,8 @@ let numbersDesc: number[] = array.sort(numbers, "desc");  // [9, 6, 5, 4, 3, 2, 
 let fruitsDesc: string[] = array.sort(fruits, "desc");    // ["date", "cherry", "banana", "apple"]
 
 // Original arrays remain unchanged - sort() returns a new array
-console.log(`Original: ${array.join(numbers, ", ")}`);     // Still [3, 1, 4, 1, 5, 9, 2, 6]
-console.log(`Sorted: ${array.join(numbersAsc, ", ")}`);    // [1, 1, 2, 3, 4, 5, 6, 9]
+console.log("Original: ${array.join(numbers, ", ")}");     // Still [3, 1, 4, 1, 5, 9, 2, 6]
+console.log("Sorted: ${array.join(numbersAsc, ", ")}");    // [1, 1, 2, 3, 4, 5, 6, 9]
 
 // Use with different data types
 // - string[]: Lexicographic (alphabetical) sorting
@@ -284,7 +284,7 @@ Iterate over array elements:
 let servers: string[] = ["web1", "web2", "db1"];
 
 for (let server: string in servers) {
-  console.log(`Checking server: ${server}`);
+  console.log("Checking server: ${server}");
 }
 ```
 
@@ -296,7 +296,7 @@ Use index-based iteration:
 let files: string[] = ["file1.txt", "file2.txt", "file3.txt"];
 
 for (let i: number = 0; i < array.length(files); i++) {
-  console.log(`Processing file ${i + 1}: ${files[i]}`);
+  console.log("Processing file ${i + 1}: ${files[i]}");
 }
 ```
 
@@ -309,13 +309,13 @@ let files: string[] = ["config.json", "data.csv", "script.sh"];
 
 for (let file: string in files) {
   if (string.endsWith(file, ".json")) {
-    console.log(`Processing JSON file: ${file}`);
+    console.log("Processing JSON file: ${file}");
   }
   else if (string.endsWith(file, ".csv")) {
-    console.log(`Processing CSV file: ${file}`);
+    console.log("Processing CSV file: ${file}");
   }
   else {
-    console.log(`Skipping unknown file type: ${file}`);
+    console.log("Skipping unknown file type: ${file}");
   }
 }
 ```
@@ -329,11 +329,11 @@ let image: string = "nginx:latest";
 
 let command: string = baseCommand;
 for (let option: string in options) {
-  command = `${command} ${option}`;
+  command = "${command} ${option}";
 }
-command = `${command} ${image}`;
+command = "${command} ${image}";
 
-console.log(`Running: ${command}`);
+console.log("Running: ${command}");
 ```
 
 ### Path Manipulation
@@ -343,10 +343,10 @@ let basePath: string = "/var/www";
 let projects: string[] = ["project1", "project2", "project3"];
 
 for (let project: string in projects) {
-  let fullPath: string = `${basePath}/${project}`;
+  let fullPath: string = "${basePath}/${project}";
 
   if (fs.exists(fullPath)) {
-    console.log(`Found project: ${fullPath}`);
+    console.log("Found project: ${fullPath}");
   }
 }
 ```
@@ -358,10 +358,10 @@ let emails: string[] = ["user@example.com", "invalid-email", "admin@site.org"];
 
 for (let email: string in emails) {
   if (string.contains(email, "@") && string.contains(email, ".")) {
-    console.log(`Valid email: ${email}`);
+    console.log("Valid email: ${email}");
   }
   else {
-    console.log(`Invalid email: ${email}`);
+    console.log("Invalid email: ${email}");
   }
 }
 ```
@@ -404,7 +404,7 @@ function processArray(items: string[]): void {
     }
 
     // Process item
-    console.log(`Processing: ${item}`);
+    console.log("Processing: ${item}");
   }
 }
 ```

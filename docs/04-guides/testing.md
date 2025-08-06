@@ -43,10 +43,10 @@ import "../src/utils.shx";
 // Test utilities
 function assert(condition: boolean, message: string): void {
   if (!condition) {
-    console.log(`FAIL: ${message}`);
+    console.log("FAIL: ${message}");
     script.exit(1);
   } else {
-    console.log(`PASS: ${message}`);
+    console.log("PASS: ${message}");
   }
 }
 
@@ -179,19 +179,19 @@ let passed: number = 0;
 let failed: number = 0;
 
 for (let testFile of testFiles) {
-  console.log(`Running ${testFile}...`);
+  console.log("Running ${testFile}...");
 
   try {
-    system.execute(`utah ${testFile}`);
-    console.log(`✅ ${testFile} passed`);
+    system.execute("utah ${testFile}");
+    console.log("✅ ${testFile} passed");
     passed++;
   } catch (error) {
-    console.log(`❌ ${testFile} failed`);
+    console.log("❌ ${testFile} failed");
     failed++;
   }
 }
 
-console.log(`\nTest Results: ${passed} passed, ${failed} failed`);
+console.log("\nTest Results: ${passed} passed, ${failed} failed");
 
 if (failed > 0) {
   script.exit(1);
@@ -231,7 +231,7 @@ jobs:
 let mockApiResponse: string = '{"status": "success", "data": {"id": 1}}';
 
 function mockWebGet(url: string): string {
-  console.log(`Mock: GET ${url}`);
+  console.log("Mock: GET ${url}");
   return mockApiResponse;
 }
 
@@ -277,7 +277,7 @@ function testPerformance(): void {
     utility.hash("test string");
   }, 1000);
 
-  console.log(`Execution time: ${executionTime}ms`);
+  console.log("Execution time: ${executionTime}ms");
   assert(executionTime < 5000, "Function should execute in under 5 seconds");
 }
 ```

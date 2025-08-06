@@ -76,7 +76,7 @@ let repeated: string = string.repeat("abc", 3); // "abcabcabc"
 ```typescript
 // Template literals (legacy syntax still supported)
 let name: string = "Utah";
-let message: string = `Hello, ${name}!`;
+let message: string = "Hello, ${name}!";
 
 // String concatenation
 let combined: string = "hello" + " " + "world";

@@ -28,13 +28,13 @@ script.enableDebug(true);
 function measureExecutionTime<T>(func: () => T, description: string): T {
   let startTime: number = parseInt(`$(date +%s%3N)`); // milliseconds
 
-  console.log(`⏱️  Starting: ${description}`);
+  console.log("⏱️  Starting: ${description}");
   let result: T = func();
 
   let endTime: number = parseInt(`$(date +%s%3N)`);
   let duration: number = endTime - startTime;
 
-  console.log(`✅ Completed: ${description} (${duration}ms)`);
+  console.log("✅ Completed: ${description} (${duration}ms)");
 
   return result;
 }
@@ -44,7 +44,7 @@ function profileMemoryUsage(description: string): object {
   let beforeMem: string = `$(free -m | grep Mem | awk '{print $3}')`;
   let beforeProcMem: string = `$(ps -o pid,vsz,rss -p $$ | tail -1 | awk '{print $2 "," $3}')`;
 
-  console.log(`📊 Memory before ${description}: System=${beforeMem}MB, Process=${beforeProcMem}`);
+  console.log("📊 Memory before ${description}: System=${beforeMem}MB, Process=${beforeProcMem}");
 
   return {
     "description": description,
@@ -61,7 +61,7 @@ function benchmarkApproaches(): void {
 
   let testData: string[] = [];
   for (let i: number = 0; i < 1000; i++) {
-    testData.push(`test-item-${i}`);
+    testData.push("test-item-${i}");
   }
 
   // Approach 1: Traditional loop
@@ -84,12 +84,12 @@ function benchmarkApproaches(): void {
   let result3: string[] = measureExecutionTime(() => {
     let tempFile: string = "/tmp/test_data.txt";
     fs.writeFile(tempFile, testData.join("\n"));
-    let filtered: string = `$(grep '5' ${tempFile})`;
-    `$(rm ${tempFile})`;
+    let filtered: string = "$(grep '5' ${tempFile})";
+    "$(rm ${tempFile})";
     return filtered.split("\n");
   }, "Shell grep command");
 
-  console.log(`Results: Approach1=${result1.length}, Approach2=${result2.length}, Approach3=${result3.length}`);
+  console.log("Results: Approach1=${result1.length}, Approach2=${result2.length}, Approach3=${result3.length}");
 }
 
 // Example profiling session
@@ -132,8 +132,8 @@ class ResourceMonitor {
       done
     `;
 
-    this.monitoringPid = `$(${monitorScript} & echo $!)`;
-    console.log(`✅ Resource monitoring started (PID: ${this.monitoringPid})`);
+    this.monitoringPid = "$(${monitorScript} & echo $!)";
+    console.log("✅ Resource monitoring started (PID: ${this.monitoringPid})");
   }
 
   stop(): object[] {
@@ -146,7 +146,7 @@ class ResourceMonitor {
 
     // Stop monitoring process
     if (this.monitoringPid != "") {
-      `$(kill ${this.monitoringPid} 2>/dev/null || true)`;
+      "$(kill ${this.monitoringPid} 2>/dev/null || true)";
     }
 
     // Read monitoring data
@@ -169,11 +169,11 @@ class ResourceMonitor {
         }
       }
 
-      `$(rm -f ${logFile})`;
+      "$(rm -f ${logFile})";
     }
 
     this.isMonitoring = false;
-    console.log(`✅ Resource monitoring stopped (${this.samples.length} samples)`);
+    console.log("✅ Resource monitoring stopped (${this.samples.length} samples)");
 
     return this.samples;
   }
@@ -236,7 +236,7 @@ function optimizedArrayOperations(): void {
 
   let largeArray: string[] = [];
   for (let i: number = 0; i < 10000; i++) {
-    largeArray.push(`item-${i}`);
+    largeArray.push("item-${i}");
   }
 
   // Inefficient: Multiple array iterations
@@ -281,7 +281,7 @@ function optimizedArrayOperations(): void {
     return result;
   }, "Efficient single iteration");
 
-  console.log(`Results match: ${inefficientResult.length == efficientResult.length}`);
+  console.log("Results match: ${inefficientResult.length == efficientResult.length}");
 }
 
 // Optimized string operations
@@ -290,7 +290,7 @@ function optimizedStringOperations(): void {
 
   let testStrings: string[] = [];
   for (let i: number = 0; i < 1000; i++) {
-    testStrings.push(`This is test string number ${i} with some content`);
+    testStrings.push("This is test string number ${i} with some content");
   }
 
   // Inefficient: String concatenation in loop
@@ -307,7 +307,7 @@ function optimizedStringOperations(): void {
     return testStrings.join("\n");
   }, "Efficient array join");
 
-  console.log(`Result lengths match: ${inefficientConcat.length == efficientConcat.length}`);
+  console.log("Result lengths match: ${inefficientConcat.length == efficientConcat.length}");
 }
 
 // Optimized file I/O
@@ -316,13 +316,13 @@ function optimizedFileIO(): void {
 
   let testData: string[] = [];
   for (let i: number = 0; i < 1000; i++) {
-    testData.push(`Line ${i}: ${`$(date +%s%3N)`}\n`);
+    testData.push("Line ${i}: ${`$(date +%s%3N)`}\n");
   }
 
   // Inefficient: Multiple file writes
   measureExecutionTime(() => {
     let outputFile: string = "/tmp/inefficient_output.txt";
-    `$(rm -f ${outputFile})`;
+    "$(rm -f ${outputFile})";
 
     for (let line: string in testData) {
       fs.appendFile(outputFile, line);
@@ -351,15 +351,15 @@ script.description("Optimize memory usage in Utah scripts");
 
 // Memory-efficient data processing
 function processLargeDataset(filePath: string): void {
-  console.log(`Processing large dataset: ${filePath}`);
+  console.log("Processing large dataset: ${filePath}");
 
   if (!fs.exists(filePath)) {
-    console.log(`Creating test dataset: ${filePath}`);
+    console.log("Creating test dataset: ${filePath}");
 
     // Create a large test file
     let lines: string[] = [];
     for (let i: number = 0; i < 100000; i++) {
-      lines.push(`${i},data-${i},${Math.random()},${`$(date +%s)`}`);
+      lines.push("${i},data-${i},${Math.random()},${`$(date +%s)`}");
     }
     fs.writeFile(filePath, lines.join("\n"));
   }
@@ -379,7 +379,7 @@ function processLargeDataset(filePath: string): void {
       }
     }
 
-    console.log(`Inefficient approach processed: ${processedCount} lines`);
+    console.log("Inefficient approach processed: ${processedCount} lines");
     profileMemoryUsage("after processing");
   }, "Memory-inefficient file processing");
 
@@ -387,21 +387,21 @@ function processLargeDataset(filePath: string): void {
   measureExecutionTime(() => {
     profileMemoryUsage("before streaming");
 
-    let processedCount: number = parseInt(`$(grep -c 'data' ${filePath})`);
+    let processedCount: number = parseInt("$(grep -c 'data' ${filePath})");
 
-    console.log(`Efficient approach processed: ${processedCount} lines`);
+    console.log("Efficient approach processed: ${processedCount} lines");
     profileMemoryUsage("after streaming");
   }, "Memory-efficient stream processing");
 }
 
 // Chunk-based processing for large datasets
 function processInChunks(filePath: string, chunkSize: number = 1000): void {
-  console.log(`Processing file in chunks of ${chunkSize} lines`);
+  console.log("Processing file in chunks of ${chunkSize} lines");
 
-  let totalLines: number = parseInt(`$(wc -l < ${filePath})`);
+  let totalLines: number = parseInt("$(wc -l < ${filePath})");
   let chunksCount: number = Math.ceil(totalLines / chunkSize);
 
-  console.log(`Total lines: ${totalLines}, Chunks: ${chunksCount}`);
+  console.log("Total lines: ${totalLines}, Chunks: ${chunksCount}");
 
   let processedTotal: number = 0;
 
@@ -409,10 +409,10 @@ function processInChunks(filePath: string, chunkSize: number = 1000): void {
     let startLine: number = chunk * chunkSize + 1;
     let endLine: number = Math.min((chunk + 1) * chunkSize, totalLines);
 
-    console.log(`Processing chunk ${chunk + 1}/${chunksCount} (lines ${startLine}-${endLine})`);
+    console.log("Processing chunk ${chunk + 1}/${chunksCount} (lines ${startLine}-${endLine})");
 
     // Extract chunk using sed
-    let chunkData: string = `$(sed -n '${startLine},${endLine}p' ${filePath})`;
+    let chunkData: string = "$(sed -n '${startLine},${endLine}p' ${filePath})";
     let chunkLines: string[] = chunkData.split("\n");
 
     // Process chunk
@@ -424,14 +424,14 @@ function processInChunks(filePath: string, chunkSize: number = 1000): void {
     }
 
     processedTotal += chunkProcessed;
-    console.log(`Chunk ${chunk + 1} processed: ${chunkProcessed} lines`);
+    console.log("Chunk ${chunk + 1} processed: ${chunkProcessed} lines");
 
     // Force garbage collection simulation
     chunkData = "";
     chunkLines = [];
   }
 
-  console.log(`Total processed: ${processedTotal} lines`);
+  console.log("Total processed: ${processedTotal} lines");
 }
 
 // Example usage
@@ -440,7 +440,7 @@ processLargeDataset(testFile);
 processInChunks(testFile, 5000);
 
 // Clean up
-`$(rm -f ${testFile})`;
+"$(rm -f ${testFile})";
 ```
 
 ### Caching and Memoization
@@ -455,9 +455,9 @@ class SimpleCache {
   private missCount: number = 0;
 
   get(key: string): string | null {
-    if (json.has(this.cache, `.${key}`)) {
+    if (json.has(this.cache, ".${key}")) {
       this.hitCount++;
-      return json.getString(this.cache, `.${key}`);
+      return json.getString(this.cache, ".${key}");
     } else {
       this.missCount++;
       return null;
@@ -465,7 +465,7 @@ class SimpleCache {
   }
 
   set(key: string, value: string): void {
-    this.cache = json.set(this.cache, `.${key}`, value);
+    this.cache = json.set(this.cache, ".${key}", value);
   }
 
   getStats(): object {
@@ -499,7 +499,7 @@ class FileCache {
   private getCacheFilePath(key: string): string {
     // Create safe filename from key
     let safeKey: string = key.replace(/[^a-zA-Z0-9]/g, "_");
-    return `${this.cacheDir}/${safeKey}.cache`;
+    return "${this.cacheDir}/${safeKey}.cache";
   }
 
   get(key: string): string | null {
@@ -507,14 +507,14 @@ class FileCache {
 
     if (fs.exists(cacheFile)) {
       // Check if cache is still valid
-      let fileAge: number = parseInt(`$(stat -c %Y ${cacheFile})`);
+      let fileAge: number = parseInt("$(stat -c %Y ${cacheFile})");
       let currentTime: number = parseInt(`$(date +%s)`);
 
       if (currentTime - fileAge < this.maxAge) {
         return fs.readFile(cacheFile);
       } else {
         // Cache expired, remove file
-        `$(rm -f ${cacheFile})`;
+        "$(rm -f ${cacheFile})";
       }
     }
 
@@ -527,7 +527,7 @@ class FileCache {
   }
 
   clear(): void {
-    `$(rm -f ${this.cacheDir}/*.cache)`;
+    "$(rm -f ${this.cacheDir}/*.cache)";
   }
 }
 
@@ -541,10 +541,10 @@ function expensiveOperation(input: string): string {
   }
 
   // Simulate expensive computation
-  console.log(`Computing expensive operation for: ${input}`);
+  console.log("Computing expensive operation for: ${input}");
   `$(sleep 1)`; // Simulate delay
 
-  let result: string = `processed_${input}_${`$(date +%s)`}`;
+  let result: string = "processed_${input}_${`$(date +%s)`}";
   cache.set(input, result);
 
   return result;
@@ -558,7 +558,7 @@ let testInputs: string[] = ["input1", "input2", "input3", "input1", "input2", "i
 measureExecutionTime(() => {
   for (let input: string in testInputs) {
     let result: string = expensiveOperation(input);
-    console.log(`Result for ${input}: ${result.substring(0, 20)}...`);
+    console.log("Result for ${input}: ${result.substring(0, 20)}...");
   }
 }, "Cached operations");
 
@@ -573,12 +573,12 @@ let fileCache: FileCache = new FileCache("/tmp/utah_cache", 60);
 function cachedHttpRequest(url: string): string {
   let cached: string | null = fileCache.get(url);
   if (cached !== null) {
-    console.log(`Cache hit for: ${url}`);
+    console.log("Cache hit for: ${url}");
     return cached;
   }
 
-  console.log(`Making HTTP request to: ${url}`);
-  let response: string = `$(curl -s "${url}" || echo "Error fetching ${url}")`;
+  console.log("Making HTTP request to: ${url}");
+  let response: string = "$(curl -s "${url}" || echo "Error fetching ${url}")";
 
   fileCache.set(url, response);
   return response;
@@ -593,7 +593,7 @@ let testUrls: string[] = [
 
 for (let url: string in testUrls) {
   let response: string = cachedHttpRequest(url);
-  console.log(`Response length for ${url}: ${response.length} characters`);
+  console.log("Response length for ${url}: ${response.length} characters");
 }
 
 // Clean up
@@ -613,31 +613,31 @@ function optimizedFindOperations(): void {
 
   // Create test directory structure
   let testDir: string = "/tmp/find_test";
-  `$(rm -rf ${testDir})`;
+  "$(rm -rf ${testDir})";
   fs.createDirectory(testDir);
 
   // Create test files
   for (let i: number = 0; i < 100; i++) {
-    let subDir: string = `${testDir}/dir${i % 10}`;
+    let subDir: string = "${testDir}/dir${i % 10}";
     fs.createDirectory(subDir);
 
     for (let j: number = 0; j < 10; j++) {
-      let fileName: string = i % 2 == 0 ? `file${j}.txt` : `document${j}.log`;
-      fs.writeFile(`${subDir}/${fileName}`, `Test content ${i}-${j}`);
+      let fileName: string = i % 2 == 0 ? "file${j}.txt" : "document${j}.log";
+      fs.writeFile("${subDir}/${fileName}", "Test content ${i}-${j}");
     }
   }
 
   // Inefficient: Multiple find commands
   measureExecutionTime(() => {
-    let txtFiles: string[] = `$(find ${testDir} -name "*.txt")`.split("\n");
-    let logFiles: string[] = `$(find ${testDir} -name "*.log")`.split("\n");
+    let txtFiles: string[] = "$(find ${testDir} -name "*.txt")".split("\n");
+    let logFiles: string[] = "$(find ${testDir} -name "*.log")".split("\n");
 
-    console.log(`Found ${txtFiles.length} .txt files and ${logFiles.length} .log files`);
+    console.log("Found ${txtFiles.length} .txt files and ${logFiles.length} .log files");
   }, "Multiple find commands");
 
   // Efficient: Single find with regex
   measureExecutionTime(() => {
-    let allFiles: string[] = `$(find ${testDir} -type f \\( -name "*.txt" -o -name "*.log" \\))`.split("\n");
+    let allFiles: string[] = "$(find ${testDir} -type f \\( -name "*.txt" -o -name "*.log" \\))".split("\n");
 
     let txtCount: number = 0;
     let logCount: number = 0;
@@ -650,11 +650,11 @@ function optimizedFindOperations(): void {
       }
     }
 
-    console.log(`Found ${txtCount} .txt files and ${logCount} .log files`);
+    console.log("Found ${txtCount} .txt files and ${logCount} .log files");
   }, "Single find with multiple patterns");
 
   // Clean up
-  `$(rm -rf ${testDir})`;
+  "$(rm -rf ${testDir})";
 }
 
 // Optimize grep operations
@@ -667,34 +667,34 @@ function optimizedGrepOperations(): void {
 
   for (let i: number = 0; i < 10000; i++) {
     let lineType: string = i % 3 == 0 ? "ERROR" : (i % 3 == 1 ? "WARNING" : "INFO");
-    lines.push(`[${`$(date +%H:%M:%S)`}] ${lineType}: Log message ${i}`);
+    lines.push("[${`$(date +%H:%M:%S)`}] ${lineType}: Log message ${i}");
   }
 
   fs.writeFile(testFile, lines.join("\n"));
 
   // Inefficient: Multiple grep commands
   measureExecutionTime(() => {
-    let errors: number = parseInt(`$(grep -c "ERROR" ${testFile})`);
-    let warnings: number = parseInt(`$(grep -c "WARNING" ${testFile})`);
+    let errors: number = parseInt("$(grep -c "ERROR" ${testFile})");
+    let warnings: number = parseInt("$(grep -c "WARNING" ${testFile})");
     let total: number = errors + warnings;
 
-    console.log(`Found ${errors} errors, ${warnings} warnings (total: ${total})`);
+    console.log("Found ${errors} errors, ${warnings} warnings (total: ${total})");
   }, "Multiple grep commands");
 
   // Efficient: Single grep with extended regex
   measureExecutionTime(() => {
-    let matches: string = `$(grep -E "(ERROR|WARNING)" ${testFile} | wc -l)`;
+    let matches: string = "$(grep -E "(ERROR|WARNING)" ${testFile} | wc -l)";
     let total: number = parseInt(matches);
 
     // Get counts separately if needed
-    let errors: number = parseInt(`$(grep -o "ERROR" ${testFile} | wc -l)`);
+    let errors: number = parseInt("$(grep -o "ERROR" ${testFile} | wc -l)");
     let warnings: number = total - errors;
 
-    console.log(`Found ${errors} errors, ${warnings} warnings (total: ${total})`);
+    console.log("Found ${errors} errors, ${warnings} warnings (total: ${total})");
   }, "Single grep with regex");
 
   // Clean up
-  `$(rm -f ${testFile})`;
+  "$(rm -f ${testFile})";
 }
 
 // Optimize sort and text processing
@@ -706,30 +706,30 @@ function optimizedTextProcessing(): void {
   let data: string[] = [];
 
   for (let i: number = 0; i < 5000; i++) {
-    data.push(`${Math.floor(Math.random() * 1000)},user${i},action${i % 10}`);
+    data.push("${Math.floor(Math.random() * 1000)},user${i},action${i % 10}");
   }
 
   fs.writeFile(testFile, data.join("\n"));
 
   // Inefficient: Multiple processing steps
   measureExecutionTime(() => {
-    `$(sort ${testFile} > /tmp/sorted.txt)`;
+    "$(sort ${testFile} > /tmp/sorted.txt)";
     `$(uniq /tmp/sorted.txt > /tmp/unique.txt)`;
     let uniqueCount: number = parseInt(`$(wc -l < /tmp/unique.txt)`);
 
-    console.log(`Unique lines (inefficient): ${uniqueCount}`);
+    console.log("Unique lines (inefficient): ${uniqueCount}");
     `$(rm -f /tmp/sorted.txt /tmp/unique.txt)`;
   }, "Multiple text processing steps");
 
   // Efficient: Pipeline processing
   measureExecutionTime(() => {
-    let uniqueCount: number = parseInt(`$(sort ${testFile} | uniq | wc -l)`);
+    let uniqueCount: number = parseInt("$(sort ${testFile} | uniq | wc -l)");
 
-    console.log(`Unique lines (efficient): ${uniqueCount}`);
+    console.log("Unique lines (efficient): ${uniqueCount}");
   }, "Pipeline text processing");
 
   // Clean up
-  `$(rm -f ${testFile})`;
+  "$(rm -f ${testFile})";
 }
 
 optimizedFindOperations();
@@ -748,16 +748,16 @@ function parallelFileProcessing(): void {
 
   // Create test files
   let testDir: string = "/tmp/parallel_test";
-  `$(rm -rf ${testDir})`;
+  "$(rm -rf ${testDir})";
   fs.createDirectory(testDir);
 
   let files: string[] = [];
   for (let i: number = 0; i < 20; i++) {
-    let fileName: string = `${testDir}/file${i}.txt`;
+    let fileName: string = "${testDir}/file${i}.txt";
     let content: string[] = [];
 
     for (let j: number = 0; j < 1000; j++) {
-      content.push(`Line ${j} in file ${i} with content ${Math.random()}`);
+      content.push("Line ${j} in file ${i} with content ${Math.random()}");
     }
 
     fs.writeFile(fileName, content.join("\n"));
@@ -769,22 +769,22 @@ function parallelFileProcessing(): void {
     let totalLines: number = 0;
 
     for (let file: string in files) {
-      let lineCount: number = parseInt(`$(wc -l < ${file})`);
+      let lineCount: number = parseInt("$(wc -l < ${file})");
       totalLines += lineCount;
     }
 
-    console.log(`Sequential processing: ${totalLines} total lines`);
+    console.log("Sequential processing: ${totalLines} total lines");
   }, "Sequential file processing");
 
   // Parallel processing using xargs
   measureExecutionTime(() => {
-    let totalLines: number = parseInt(`$(printf '%s\\n' ${files.join(' ')} | xargs -P 4 wc -l | tail -1 | awk '{print $1}')`);
+    let totalLines: number = parseInt("$(printf '%s\\n' ${files.join(' ')} | xargs -P 4 wc -l | tail -1 | awk '{print $1}')");
 
-    console.log(`Parallel processing: ${totalLines} total lines`);
+    console.log("Parallel processing: ${totalLines} total lines");
   }, "Parallel file processing with xargs");
 
   // Clean up
-  `$(rm -rf ${testDir})`;
+  "$(rm -rf ${testDir})";
 }
 
 // Parallel network operations
@@ -803,13 +803,13 @@ function parallelNetworkOperations(): void {
     let responses: number = 0;
 
     for (let url: string in urls) {
-      let response: string = `$(curl -s -w "%{http_code}" -o /dev/null "${url}" || echo "000")`;
+      let response: string = "$(curl -s -w "%{http_code}" -o /dev/null "${url}" || echo "000")";
       if (response == "200") {
         responses++;
       }
     }
 
-    console.log(`Sequential requests: ${responses} successful`);
+    console.log("Sequential requests: ${responses} successful");
   }, "Sequential HTTP requests");
 
   // Parallel requests using background processes
@@ -821,25 +821,25 @@ function parallelNetworkOperations(): void {
     // Start all requests in background
     for (let i: number = 0; i < urls.length; i++) {
       let url: string = urls[i];
-      let outputFile: string = `${tempDir}/response_${i}.txt`;
-      let command: string = `curl -s -w "%{http_code}" -o /dev/null "${url}" > ${outputFile}`;
+      let outputFile: string = "${tempDir}/response_${i}.txt";
+      let command: string = "curl -s -w "%{http_code}" -o /dev/null "${url}" > ${outputFile}";
 
-      let pid: string = `$(${command} & echo $!)`;
+      let pid: string = "$(${command} & echo $!)";
       pids.push(pid);
     }
 
     // Wait for all to complete
     for (let pid: string in pids) {
-      `$(wait ${pid})`;
+      "$(wait ${pid})";
     }
 
     // Count successful responses
-    let responses: number = parseInt(`$(grep -c "200" ${tempDir}/response_*.txt 2>/dev/null || echo "0")`);
+    let responses: number = parseInt("$(grep -c "200" ${tempDir}/response_*.txt 2>/dev/null || echo "0")");
 
-    console.log(`Parallel requests: ${responses} successful`);
+    console.log("Parallel requests: ${responses} successful");
 
     // Clean up
-    `$(rm -rf ${tempDir})`;
+    "$(rm -rf ${tempDir})";
   }, "Parallel HTTP requests");
 }
 
@@ -871,7 +871,7 @@ function optimizeEnvAccess(): void {
       let var3: string = env.get("TEST_VAR_3") || "";
 
       // Use variables
-      let combined: string = `${var1}-${var2}-${var3}`;
+      let combined: string = "${var1}-${var2}-${var3}";
     }
   }, "Multiple env.get() calls");
 
@@ -882,7 +882,7 @@ function optimizeEnvAccess(): void {
     let cachedVar3: string = env.get("TEST_VAR_3") || "";
 
     for (let i: number = 0; i < 1000; i++) {
-      let combined: string = `${cachedVar1}-${cachedVar2}-${cachedVar3}`;
+      let combined: string = "${cachedVar1}-${cachedVar2}-${cachedVar3}";
     }
   }, "Cached environment variables");
 }
@@ -936,7 +936,7 @@ function optimizeConfigLoading(): void {
   }, "Single config file load");
 
   // Clean up
-  `$(rm -f ${configFile})`;
+  "$(rm -f ${configFile})";
 }
 
 optimizeEnvAccess();

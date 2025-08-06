@@ -182,7 +182,7 @@ switch (action) {
 import "utils/ansible.shx";
 
 function runPlaybook(playbook: string, inventory: string): void {
-  console.log(`Running playbook: ${playbook}`);
+  console.log("Running playbook: ${playbook}");
 
   let result: string = ansible.playbook(playbook, inventory);
 
@@ -198,7 +198,7 @@ function manageServices(): void {
   let services: string[] = ["nginx", "postgresql", "redis"];
 
   for (let service of services) {
-    console.log(`Managing service: ${service}`);
+    console.log("Managing service: ${service}");
     ansible.service(service, "restarted");
   }
 }
@@ -215,16 +215,16 @@ manageServices();
 ```typescript
 // docker/docker-ops.shx
 function buildAndPush(image: string, tag: string): void {
-  console.log(`Building ${image}:${tag}...`);
+  console.log("Building ${image}:${tag}...");
 
   // Build image
-  let buildResult: string = system.execute(`docker build -t ${image}:${tag} .`);
+  let buildResult: string = system.execute("docker build -t ${image}:${tag} .");
 
   if (buildResult.includes("Successfully built")) {
     console.log("✅ Image built successfully!");
 
     // Push to registry
-    system.execute(`docker push ${image}:${tag}`);
+    system.execute("docker push ${image}:${tag}");
     console.log("✅ Image pushed to registry!");
   } else {
     console.log("❌ Image build failed!");
@@ -233,17 +233,17 @@ function buildAndPush(image: string, tag: string): void {
 }
 
 function deployContainer(image: string, port: number): void {
-  console.log(`Deploying container: ${image}`);
+  console.log("Deploying container: ${image}");
 
   // Stop existing container
-  system.execute(`docker stop ${image} || true`);
-  system.execute(`docker rm ${image} || true`);
+  system.execute("docker stop ${image} || true");
+  system.execute("docker rm ${image} || true");
 
   // Run new container
-  let runCmd: string = `docker run -d --name ${image} -p ${port}:80 ${image}:latest`;
+  let runCmd: string = "docker run -d --name ${image} -p ${port}:80 ${image}:latest";
   system.execute(runCmd);
 
-  console.log(`✅ Container deployed on port ${port}`);
+  console.log("✅ Container deployed on port ${port}");
 }
 
 // Main deployment
@@ -256,13 +256,13 @@ deployContainer("my-app", 8080);
 ```typescript
 // kubernetes/k8s-deploy.shx
 function deployToKubernetes(namespace: string, manifest: string): void {
-  console.log(`Deploying to namespace: ${namespace}`);
+  console.log("Deploying to namespace: ${namespace}");
 
   // Create namespace if it doesn't exist
-  system.execute(`kubectl create namespace ${namespace} || true`);
+  system.execute("kubectl create namespace ${namespace} || true");
 
   // Apply manifest
-  let result: string = system.execute(`kubectl apply -f ${manifest} -n ${namespace}`);
+  let result: string = system.execute("kubectl apply -f ${manifest} -n ${namespace}");
 
   if (result.includes("created") || result.includes("configured")) {
     console.log("✅ Deployment successful!");
@@ -273,16 +273,16 @@ function deployToKubernetes(namespace: string, manifest: string): void {
 }
 
 function waitForDeployment(namespace: string, deployment: string): void {
-  console.log(`Waiting for deployment: ${deployment}`);
+  console.log("Waiting for deployment: ${deployment}");
 
-  system.execute(`kubectl rollout status deployment/${deployment} -n ${namespace}`);
+  system.execute("kubectl rollout status deployment/${deployment} -n ${namespace}");
   console.log("✅ Deployment ready!");
 }
 
 function checkHealth(namespace: string, service: string): void {
-  console.log(`Checking health of service: ${service}`);
+  console.log("Checking health of service: ${service}");
 
-  let pods: string = system.execute(`kubectl get pods -n ${namespace} -l app=${service}`);
+  let pods: string = system.execute("kubectl get pods -n ${namespace} -l app=${service}");
 
   if (pods.includes("Running")) {
     console.log("✅ Service is healthy!");
@@ -315,7 +315,7 @@ function checkWebservice(url: string): boolean {
 
 function checkDatabase(connectionString: string): boolean {
   try {
-    let result: string = system.execute(`psql "${connectionString}" -c "SELECT 1;"`);
+    let result: string = system.execute("psql "${connectionString}" -c "SELECT 1;"");
     return result.includes("1 row");
   } catch (error) {
     return false;
@@ -334,16 +334,16 @@ function checkServices(): void {
       : checkDatabase(service.connection);
 
     if (healthy) {
-      console.log(`✅ ${service.name} is healthy`);
+      console.log("✅ ${service.name} is healthy");
     } else {
-      console.log(`❌ ${service.name} is unhealthy`);
+      console.log("❌ ${service.name} is unhealthy");
       sendAlert(service.name);
     }
   }
 }
 
 function sendAlert(serviceName: string): void {
-  let message: string = `Alert: ${serviceName} is unhealthy`;
+  let message: string = "Alert: ${serviceName} is unhealthy";
 
   // Send to Slack
   web.post("https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK", {
@@ -351,7 +351,7 @@ function sendAlert(serviceName: string): void {
   });
 
   // Send email
-  system.execute(`echo "${message}" | mail -s "Service Alert" admin@example.com`);
+  system.execute("echo "${message}" | mail -s "Service Alert" admin@example.com");
 }
 
 checkServices();
@@ -362,7 +362,7 @@ checkServices();
 ```typescript
 // monitoring/log-analysis.shx
 function analyzeAccessLogs(logFile: string): void {
-  console.log(`Analyzing access logs: ${logFile}`);
+  console.log("Analyzing access logs: ${logFile}");
 
   let logs: string = filesystem.readFile(logFile);
   let lines: string[] = logs.split("\n");
@@ -378,25 +378,25 @@ function analyzeAccessLogs(logFile: string): void {
     }
   }
 
-  console.log(`Errors: ${errorCount}, Warnings: ${warningCount}`);
+  console.log("Errors: ${errorCount}, Warnings: ${warningCount}");
 
   if (errorCount > 10) {
-    sendAlert(`High error count: ${errorCount}`);
+    sendAlert("High error count: ${errorCount}");
   }
 }
 
 function rotateLogFiles(logDir: string): void {
-  console.log(`Rotating logs in: ${logDir}`);
+  console.log("Rotating logs in: ${logDir}");
 
   let files: string[] = filesystem.listFiles(logDir);
 
   for (let file of files) {
     if (file.endsWith(".log")) {
       let timestamp: string = utility.dateString();
-      let archivedName: string = `${file}.${timestamp}`;
+      let archivedName: string = "${file}.${timestamp}";
 
       filesystem.move(file, archivedName);
-      system.execute(`gzip ${archivedName}`);
+      system.execute("gzip ${archivedName}");
     }
   }
 }
@@ -471,7 +471,7 @@ function deployWithErrorHandling(): void {
     // Deployment logic
     system.execute("kubectl apply -f deployment.yaml");
   } catch (error) {
-    console.log(`❌ Deployment failed: ${error}`);
+    console.log("❌ Deployment failed: ${error}");
 
     // Rollback on failure
     system.execute("kubectl rollout undo deployment/myapp");
@@ -503,7 +503,7 @@ if (apiKey == "") {
 // Log all operations with timestamps
 function logOperation(operation: string): void {
   let timestamp: string = utility.dateString();
-  console.log(`[${timestamp}] ${operation}`);
+  console.log("[${timestamp}] ${operation}");
 }
 
 // Monitor resource usage
@@ -511,7 +511,7 @@ function checkResourceUsage(): void {
   let cpuUsage: string = system.execute("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'");
   let memUsage: string = system.execute("free -m | grep Mem | awk '{print ($3/$2)*100}'");
 
-  console.log(`CPU Usage: ${cpuUsage}, Memory Usage: ${memUsage}%`);
+  console.log("CPU Usage: ${cpuUsage}, Memory Usage: ${memUsage}%");
 }
 ```
 
@@ -522,13 +522,13 @@ function checkResourceUsage(): void {
 import "config/production.shx";
 
 function loadConfig(environment: string): object {
-  let configFile: string = `config/${environment}.json`;
+  let configFile: string = "config/${environment}.json";
 
   if (filesystem.exists(configFile)) {
     let configData: string = filesystem.readFile(configFile);
     return json.parse(configData);
   }
 
-  throw new Error(`Configuration file not found: ${configFile}`);
+  throw new Error("Configuration file not found: ${configFile}");
 }
 ```

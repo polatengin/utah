@@ -91,11 +91,11 @@ function divide(a: number, b: number): number {
 // Check file existence before operations
 function processFile(filename: string): void {
   if (!filesystem.exists(filename)) {
-    throw new Error(`File not found: ${filename}`);
+    throw new Error("File not found: ${filename}");
   }
 
   if (!filesystem.isReadable(filename)) {
-    throw new Error(`File not readable: ${filename}`);
+    throw new Error("File not readable: ${filename}");
   }
 
   // Process file
@@ -121,7 +121,7 @@ function retryOperation(operation: Function, maxRetries: number = 3): any {
         throw error;
       }
 
-      console.log(`Attempt ${attempts} failed, retrying...`);
+      console.log("Attempt ${attempts} failed, retrying...");
       utility.sleep(1000); // Wait 1 second before retry
     }
   }
@@ -132,7 +132,7 @@ function getConfigValue(key: string, defaultValue: string = ""): string {
   try {
     return system.env(key);
   } catch (error) {
-    console.log(`Warning: Could not get ${key}, using default`);
+    console.log("Warning: Could not get ${key}, using default");
     return defaultValue;
   }
 }
@@ -198,7 +198,7 @@ function batchFileOperations(files: string[]): void {
   let commands: string[] = [];
 
   for (let file of files) {
-    commands.push(`cp ${file} /destination/`);
+    commands.push("cp ${file} /destination/");
   }
 
   // Execute all commands in one call
@@ -259,7 +259,7 @@ function expensiveOperation(input: string): string {
 
 // File-based caching
 function getCachedData(key: string, ttl: number = 3600): string {
-  let cacheFile: string = `/tmp/cache_${key}`;
+  let cacheFile: string = "/tmp/cache_${key}";
 
   if (filesystem.exists(cacheFile)) {
     let fileAge: number = utility.timestamp() - filesystem.modTime(cacheFile);
@@ -323,7 +323,7 @@ function getSecret(key: string): string {
   let secret: string = system.env(key);
 
   if (!secret) {
-    throw new Error(`Required secret ${key} not found`);
+    throw new Error("Required secret ${key} not found");
   }
 
   return secret;
@@ -334,7 +334,7 @@ function createSecureFile(filename: string, content: string): void {
   filesystem.writeFile(filename, content);
 
   // Set restrictive permissions
-  system.execute(`chmod 600 ${filename}`);
+  system.execute("chmod 600 ${filename}");
 }
 
 // Hash sensitive data
@@ -342,7 +342,7 @@ function hashPassword(password: string): string {
   let salt: string = utility.randomString(16);
   let hash: string = utility.hash(password + salt);
 
-  return `${salt}:${hash}`;
+  return "${salt}:${hash}";
 }
 ```
 
@@ -378,7 +378,7 @@ function calculateTax(amount: number, rate: number): number {
 }
 
 function formatCurrency(amount: number): string {
-  return `$${amount.toFixed(2)}`;
+  return "$${amount.toFixed(2)}";
 }
 
 function calculateTotal(subtotal: number, taxRate: number): string {
@@ -461,10 +461,10 @@ let environment: string = system.env("ENVIRONMENT") || "development";
 let config: object = loadConfig(environment);
 
 function loadConfig(env: string): object {
-  let configFile: string = `config/${env}.json`;
+  let configFile: string = "config/${env}.json";
 
   if (!filesystem.exists(configFile)) {
-    throw new Error(`Configuration file not found: ${configFile}`);
+    throw new Error("Configuration file not found: ${configFile}");
   }
 
   return json.parse(filesystem.readFile(configFile));
@@ -479,8 +479,8 @@ const VERSION: string = "1.2.3";
 const BUILD_DATE: string = "2024-01-15";
 
 function printVersion(): void {
-  console.log(`Application Version: ${VERSION}`);
-  console.log(`Build Date: ${BUILD_DATE}`);
+  console.log("Application Version: ${VERSION}");
+  console.log("Build Date: ${BUILD_DATE}");
 }
 
 // Check compatibility
@@ -488,7 +488,7 @@ function checkCompatibility(): void {
   let requiredVersion: string = "1.0.0";
 
   if (compareVersions(VERSION, requiredVersion) < 0) {
-    throw new Error(`Version ${requiredVersion} or higher required`);
+    throw new Error("Version ${requiredVersion} or higher required");
   }
 }
 ```
@@ -510,7 +510,7 @@ function healthCheck(): boolean {
 
     return dbHealth && apiHealth && diskHealth;
   } catch (error) {
-    console.log(`Health check failed: ${error}`);
+    console.log("Health check failed: ${error}");
     return false;
   }
 }

@@ -157,7 +157,7 @@ Traditional C-style for loops:
 
 ```typescript
 for (let i: number = 0; i < 10; i++) {
-  console.log(`Iteration ${i}`);
+  console.log("Iteration ${i}");
 }
 ```
 
@@ -177,7 +177,7 @@ Iterate over arrays and strings:
 let fruits: string[] = ["apple", "banana", "orange"];
 
 for (let fruit: string in fruits) {
-  console.log(`Processing: ${fruit}`);
+  console.log("Processing: ${fruit}");
 }
 ```
 
@@ -198,7 +198,7 @@ Conditional iteration:
 let count: number = 0;
 
 while (count < 5) {
-  console.log(`Count is: ${count}`);
+  console.log("Count is: ${count}");
   count++;
 }
 ```
@@ -224,7 +224,7 @@ for (let num: number in numbers) {
   if (num > 5) {
     break;
   }
-  console.log(`Number: ${num}`);
+  console.log("Number: ${num}");
 }
 ```
 
@@ -275,7 +275,7 @@ Conditional expressions for simple branching:
 ```typescript
 let age: number = 20;
 let status: string = (age >= 18) ? "adult" : "minor";
-console.log(`Status: ${status}`);
+console.log("Status: ${status}");
 ```
 
 **Generated Bash:**
@@ -328,22 +328,22 @@ for (let file: string in files) {
 
     switch (extension) {
       case "json":
-        console.log(`Processing JSON file: ${file}`);
+        console.log("Processing JSON file: ${file}");
         // Process JSON
         break;
       case "txt":
-        console.log(`Processing text file: ${file}`);
+        console.log("Processing text file: ${file}");
         // Process text
         break;
       case "sql":
-        console.log(`Processing SQL file: ${file}`);
+        console.log("Processing SQL file: ${file}");
         // Process SQL
         break;
       default:
-        console.log(`Unknown file type: ${file}`);
+        console.log("Unknown file type: ${file}");
     }
   } else {
-    console.log(`File not found: ${file}`);
+    console.log("File not found: ${file}");
   }
 }
 ```
@@ -370,7 +370,7 @@ if (!validEnvs.contains(env)) {
   exit(1);
 }
 
-console.log(`Starting server on port ${port} in ${env} mode`);
+console.log("Starting server on port ${port} in ${env} mode");
 ```
 
 ### Service Health Check
@@ -381,32 +381,32 @@ let healthyServices: string[] = [];
 let unhealthyServices: string[] = [];
 
 for (let service: string in services) {
-  console.log(`Checking ${service}...`);
+  console.log("Checking ${service}...");
 
   if (os.isInstalled("systemctl")) {
     // Use systemctl for service status
-    let status: string = `$(systemctl is-active ${service})`;
+    let status: string = "$(systemctl is-active ${service})";
 
     if (status == "active") {
       healthyServices[healthyServices.length] = service;
-      console.log(`✓ ${service} is running`);
+      console.log("✓ ${service} is running");
     } else {
       unhealthyServices[unhealthyServices.length] = service;
-      console.log(`✗ ${service} is not running`);
+      console.log("✗ ${service} is not running");
     }
   } else {
-    console.log(`Cannot check ${service}: systemctl not available`);
+    console.log("Cannot check ${service}: systemctl not available");
   }
 }
 
 console.log(`\nHealth Check Summary:`);
-console.log(`Healthy services: ${healthyServices.length}`);
-console.log(`Unhealthy services: ${unhealthyServices.length}`);
+console.log("Healthy services: ${healthyServices.length}");
+console.log("Unhealthy services: ${unhealthyServices.length}");
 
 if (unhealthyServices.length > 0) {
   console.log("Services need attention:");
   for (let service: string in unhealthyServices) {
-    console.log(`  - ${service}`);
+    console.log("  - ${service}");
   }
   exit(1);
 } else {
@@ -458,7 +458,7 @@ if (timeout < 1 || timeout > 300) {
   timeout = 30;
 }
 
-console.log(`Starting with config: debug=${debug}, port=${port}, timeout=${timeout}`);
+console.log("Starting with config: debug=${debug}, port=${port}, timeout=${timeout}");
 ```
 
 ## Best Practices
@@ -493,12 +493,12 @@ function processFile(filename: string): void {
   }
 
   if (!fs.exists(filename)) {
-    console.log(`Error: File not found: ${filename}`);
+    console.log("Error: File not found: ${filename}");
     return;
   }
 
   // Process the file
-  console.log(`Processing: ${filename}`);
+  console.log("Processing: ${filename}");
 }
 ```
 
@@ -540,7 +540,7 @@ let items: string[] = ["a", "b", "c"];
 // Check array is not empty before processing
 if (items.length > 0) {
   for (let item: string in items) {
-    console.log(`Processing: ${item}`);
+    console.log("Processing: ${item}");
   }
 } else {
   console.log("No items to process");
@@ -595,7 +595,7 @@ function backupDatabase(dbName: string): void {
   }
 
   // Main logic here
-  console.log(`Backing up database: ${dbName}`);
+  console.log("Backing up database: ${dbName}");
 }
 ```
 

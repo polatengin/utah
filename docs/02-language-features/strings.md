@@ -31,7 +31,7 @@ Get the length of a string:
 ```typescript
 let message: string = "Hello, Utah!";
 let len: number = string.length(message);
-console.log(`Message length: ${len}`);
+console.log("Message length: ${len}");
 ```
 
 #### `string.contains()`
@@ -117,7 +117,7 @@ Use template literals for dynamic strings:
 ```typescript
 let name: string = "Alice";
 let age: number = 30;
-let message: string = `Hello, ${name}! You are ${age} years old.`;
+let message: string = "Hello, ${name}! You are ${age} years old.";
 ```
 
 ### Multi-line Strings
@@ -150,7 +150,7 @@ if (string.endsWith(filePath, ".pdf")) {
 
 let pathParts: string[] = string.split(filePath, "/");
 let fileName: string = pathParts[array.length(pathParts) - 1];
-console.log(`File name: ${fileName}`);
+console.log("File name: ${fileName}");
 ```
 
 ### URL Processing
@@ -164,7 +164,7 @@ if (string.startsWith(url, "https://")) {
 
 let urlParts: string[] = string.split(url, "/");
 let domain: string = urlParts[2];
-console.log(`Domain: ${domain}`);
+console.log("Domain: ${domain}");
 ```
 
 ### Text Processing
@@ -175,7 +175,7 @@ let cleaned: string = string.trim(input);
 let upperCase: string = string.toUpperCase(cleaned);
 let replaced: string = string.replace(upperCase, "WORLD", "UTAH");
 
-console.log(`Result: ${replaced}`); // "HELLO, UTAH!"
+console.log("Result: ${replaced}"); // "HELLO, UTAH!"
 ```
 
 ### Configuration Parsing
@@ -189,7 +189,7 @@ for (let pair: string in pairs) {
   if (array.length(keyValue) == 2) {
     let key: string = string.trim(keyValue[0]);
     let value: string = string.trim(keyValue[1]);
-    console.log(`${key}: ${value}`);
+    console.log("${key}: ${value}");
   }
 }
 ```
@@ -224,9 +224,9 @@ function isValidEmail(email: string): boolean {
 
 let email: string = "user@example.com";
 if (isValidEmail(email)) {
-  console.log(`Valid email: ${email}`);
+  console.log("Valid email: ${email}");
 } else {
-  console.log(`Invalid email: ${email}`);
+  console.log("Invalid email: ${email}");
 }
 ```
 
@@ -242,8 +242,8 @@ if (array.length(parts) >= 4) {
   let level: string = parts[2];
   let message: string = string.join(array.slice(parts, 3), " ");
 
-  console.log(`Date: ${date}, Time: ${time}, Level: ${level}`);
-  console.log(`Message: ${message}`);
+  console.log("Date: ${date}, Time: ${time}, Level: ${level}");
+  console.log("Message: ${message}");
 }
 ```
 
@@ -285,7 +285,7 @@ function processString(input: string): void {
   }
 
   // Process string
-  console.log(`Processing: ${trimmed}`);
+  console.log("Processing: ${trimmed}");
 }
 ```
 
@@ -300,7 +300,7 @@ let user: string = "Alice";
 let action: string = "login";
 let timestamp: string = "2024-01-15 14:30:22";
 
-let logMessage: string = `[${timestamp}] User '${user}' performed action: ${action}`;
+let logMessage: string = "[${timestamp}] User '${user}' performed action: ${action}";
 console.log(logMessage);
 ```
 
@@ -310,11 +310,11 @@ console.log(logMessage);
 let environment: string = "production";
 let debugMode: boolean = false;
 
-let config: string = `Environment: ${environment}`;
+let config: string = "Environment: ${environment}";
 if (debugMode) {
-  config = `${config}, Debug: enabled`;
+  config = "${config}, Debug: enabled";
 } else {
-  config = `${config}, Debug: disabled`;
+  config = "${config}, Debug: disabled";
 }
 
 console.log(config);
@@ -327,7 +327,6 @@ Handle special characters in strings:
 ```typescript
 // Strings with quotes
 let message: string = "She said, \"Hello, world!\"";
-let singleQuote: string = 'It\'s a beautiful day';
 
 // Strings with backslashes
 let path: string = "C:\\Users\\Alice\\Documents";

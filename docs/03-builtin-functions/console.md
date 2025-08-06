@@ -15,10 +15,10 @@ Print messages to standard output with automatic newline:
 
 ```typescript
 console.log("Hello, World!");
-console.log(`Current user: ${USER}`);
+console.log("Current user: ${USER}");
 
 let count: number = 42;
-console.log(`Processing ${count} items`);
+console.log("Processing ${count} items");
 ```
 
 **Generated Bash:**
@@ -59,10 +59,10 @@ Prompt user for input with a message:
 
 ```typescript
 let name: string = console.prompt("Enter your name: ");
-console.log(`Hello, ${name}!`);
+console.log("Hello, ${name}!");
 
 let age: string = console.prompt("Enter your age: ");
-console.log(`You are ${age} years old`);
+console.log("You are ${age} years old");
 ```
 
 **Generated Bash:**
@@ -444,18 +444,18 @@ args.define("--file", "-f", "File to delete", "string", true);
 let filename: string = args.getString("--file");
 
 if (!fs.exists(filename)) {
-  console.log(`Error: File not found: ${filename}`);
+  console.log("Error: File not found: ${filename}");
   exit(1);
 }
 
-console.log(`File: ${filename}`);
-console.log(`Size: $(stat -c%s "${filename}") bytes`);
+console.log("File: ${filename}");
+console.log("Size: $(stat -c%s "${filename}") bytes");
 
-let confirmed: boolean = console.promptYesNo(`Are you sure you want to delete ${filename}? (y/n): `);
+let confirmed: boolean = console.promptYesNo("Are you sure you want to delete ${filename}? (y/n): ");
 
 if (confirmed) {
-  console.log(`Deleting ${filename}...`);
-  `$(rm "${filename}")`;
+  console.log("Deleting ${filename}...");
+  "$(rm "${filename}")";
   console.log("File deleted successfully");
 } else {
   console.log("Deletion cancelled");
@@ -480,10 +480,10 @@ let enableSSL: boolean = console.promptYesNo("Enable SSL? (y/n): ");
 let enableDebug: boolean = console.promptYesNo("Enable debug mode? (y/n): ");
 
 console.log("\n=== Configuration Summary ===");
-console.log(`Application Name: ${appName}`);
-console.log(`Port: ${port}`);
-console.log(`SSL Enabled: ${enableSSL}`);
-console.log(`Debug Mode: ${enableDebug}`);
+console.log("Application Name: ${appName}");
+console.log("Port: ${port}");
+console.log("SSL Enabled: ${enableSSL}");
+console.log("Debug Mode: ${enableDebug}");
 
 let saveConfig: boolean = console.promptYesNo("\nSave this configuration? (y/n): ");
 
@@ -551,7 +551,7 @@ if (os.isInstalled("docker")) {
 
 if (fs.exists("/proc/version")) {
   let kernelVersion: string = `$(cat /proc/version | awk '{print $3}')`;
-  console.log(`✓ Kernel version: ${kernelVersion}`);
+  console.log("✓ Kernel version: ${kernelVersion}");
 }
 ```
 
@@ -571,19 +571,19 @@ let tasks: string[] = [
 
 let total: number = tasks.length;
 
-console.log(`Starting process with ${total} tasks...\n`);
+console.log("Starting process with ${total} tasks...\n");
 
 for (let i: number = 0; i < total; i++) {
   let current: number = i + 1;
   let task: string = tasks[i];
   let percent: number = (current * 100) / total;
 
-  console.log(`[${current}/${total}] (${percent}%) ${task}...`);
+  console.log("[${current}/${total}] (${percent}%) ${task}...");
 
   // Simulate work (in real script, this would be actual work)
   `$(sleep 1)`;
 
-  console.log(`✓ ${task} completed`);
+  console.log("✓ ${task} completed");
 }
 
 console.log("\n✓ All tasks completed successfully!");
@@ -593,8 +593,8 @@ console.log("\n✓ All tasks completed successfully!");
 
 ```typescript
 function handleError(operation: string, error: string): boolean {
-  console.log(`\n❌ Error during ${operation}:`);
-  console.log(`   ${error}`);
+  console.log("\n❌ Error during ${operation}:");
+  console.log("   ${error}");
 
   console.log("\nOptions:");
   console.log("1. Retry the operation");
@@ -707,7 +707,7 @@ function requireRoot(): void {
   if (!console.isSudo()) {
     console.log("This operation requires root privileges.");
     console.log("Please run with sudo:");
-    console.log(`sudo utah run ${args.getScriptName()}`);
+    console.log("sudo utah run ${args.getScriptName()}");
     exit(1);
   }
 }

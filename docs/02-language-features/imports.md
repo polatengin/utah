@@ -67,13 +67,13 @@ function validateEmail(email: string): boolean {
 function ensureDirectory(path: string): void {
   if (!fs.exists(path)) {
     fs.mkdir(path);
-    console.log(`Created directory: ${path}`);
+    console.log("Created directory: ${path}");
   }
 }
 
 function logMessage(level: string, message: string): void {
   let timestamp: string = formatTimestamp();
-  console.log(`[${timestamp}] ${level}: ${message}`);
+  console.log("[${timestamp}] ${level}: ${message}");
 }
 ```
 
@@ -128,17 +128,17 @@ function connectToDatabase(): object {
   let host: string = getConfigValue(config, ".database.host");
   let port: string = getConfigValue(config, ".database.port");
 
-  logMessage("INFO", `Connecting to database at ${host}:${port}`);
+  logMessage("INFO", "Connecting to database at ${host}:${port}");
 
   // Database connection logic here
   return { host: host, port: port, connected: true };
 }
 
 function executeQuery(connection: object, query: string): string {
-  logMessage("DEBUG", `Executing query: ${query}`);
+  logMessage("DEBUG", "Executing query: ${query}");
 
   // Query execution logic
-  return `$(psql -h ${connection.host} -p ${connection.port} -c "${query}")`;
+  return "$(psql -h ${connection.host} -p ${connection.port} -c \"${query}\")";
 }
 ```
 
@@ -170,10 +170,10 @@ function main(): void {
 
     // Execute some queries
     let result: string = executeQuery(db, "SELECT version()");
-    logMessage("INFO", `Database version: ${result}`);
+    logMessage("INFO", "Database version: ${result}");
   }
   catch (error) {
-    logMessage("ERROR", `Database connection failed: ${error}`);
+    logMessage("ERROR", "Database connection failed: ${error}");
     exit(1);
   }
 
@@ -250,7 +250,7 @@ const VERSION: string = "1.0.0";
 const DEFAULT_TIMEOUT: number = 30;
 
 function getAppInfo(): string {
-  return `${APP_NAME} v${VERSION}`;
+  return "${APP_NAME} v${VERSION}";
 }
 ```
 
@@ -262,10 +262,10 @@ Consistent error handling across modules:
 // lib/errors.shx
 function handleError(module: string, operation: string, error: string): void {
   let timestamp: string = timer.current();
-  let message: string = `[${timestamp}] ${module}.${operation}: ${error}`;
+  let message: string = "[${timestamp}] ${module}.${operation}: ${error}";
 
   console.log(message);
-  fs.appendFile("/var/log/app-errors.log", `${message}\n`);
+  fs.appendFile("/var/log/app-errors.log", "${message}\n");
 }
 
 // Usage in other modules

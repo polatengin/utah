@@ -101,7 +101,7 @@ const appName: string = "MyApp";
 let users: string[] = ["Alice", "Bob", "Charlie"];
 
 function greet(name: string): void {
-  console.log(`Hello, ${name}! Welcome to ${appName}.`);
+  console.log("Hello, ${name}! Welcome to ${appName}.");
 }
 
 for (let user: string in users) {

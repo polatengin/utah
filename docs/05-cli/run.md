@@ -56,7 +56,7 @@ utah -c "console.log(fs.exists('/etc/passwd'))"
 utah --command "json.installDependencies()"
 
 # Multiple statements (use quotes to wrap the entire command)
-utah -c "let name: string = 'Utah'; console.log(\`Hello from \${name}!\`);"
+utah -c "let name: string = 'Utah'; console.log(\"Hello from \${name}!\");"
 ```
 
 ### With Arguments
@@ -75,7 +75,7 @@ let name: string = args.getString("--name");
 let count: number = args.getNumber("--count");
 
 for (let i: number = 0; i < count; i++) {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 ```
 
@@ -155,7 +155,7 @@ Unlike `utah compile`, the run command streams output as it happens:
 ```typescript
 // slow-script.shx
 for (let i: number = 1; i <= 5; i++) {
-  console.log(`Step ${i} of 5`);
+  console.log("Step ${i} of 5");
   `$(sleep 1)`;  // Wait 1 second
 }
 console.log("Completed!");
@@ -259,8 +259,8 @@ Scripts can access and modify environment variables:
 
 ```typescript
 // env-script.shx
-console.log(`Current PATH: ${PATH}`);
-console.log(`Home directory: ${HOME}`);
+console.log("Current PATH: ${PATH}");
+console.log("Home directory: ${HOME}");
 
 // Set environment variable for child processes
 ENV["CUSTOM_VAR"] = "Hello from Utah";
@@ -275,7 +275,7 @@ Scripts can read from stdin and write to stdout/stderr:
 // input-script.shx
 console.log("Enter your name:");
 let name: string = console.prompt("Name: ");
-console.log(`Hello, ${name}!`);
+console.log("Hello, ${name}!");
 ```
 
 ```bash
@@ -525,21 +525,21 @@ utah run hanging-script.shx
 
 ```typescript
 console.log("Debug: Reached checkpoint 1");
-console.log(`Debug: Variable value is ${someVar}`);
+console.log("Debug: Variable value is ${someVar}");
 ```
 
 1. **Use temporary files:**
 
 ```typescript
-fs.writeFile("/tmp/debug.log", `Current state: ${JSON.stringify(data)}`);
+fs.writeFile("/tmp/debug.log", "Current state: ${JSON.stringify(data)}");
 ```
 
 1. **Check environment:**
 
 ```typescript
-console.log(`PWD: ${PWD}`);
-console.log(`USER: ${USER}`);
-console.log(`PATH: ${PATH}`);
+console.log("PWD: ${PWD}");
+console.log("USER: ${USER}");
+console.log("PATH: ${PATH}");
 ```
 
 ### Performance Debugging

@@ -91,7 +91,7 @@ let name: string = "Utah";
 let count: number = 42;
 
 function greet(user: string): void {
-  console.log(`Hello, ${user}!`);
+  console.log("Hello, ${user}!");
 }
 
 greet(name);

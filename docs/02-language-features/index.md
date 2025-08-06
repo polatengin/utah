@@ -79,7 +79,7 @@ const appName: string = "MyApp";
 let users: string[] = ["Alice", "Bob"];
 
 function greet(name: string): void {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 
 for (let user: string in users) {
@@ -115,7 +115,7 @@ Use template literals for dynamic strings:
 ```typescript
 let name: string = "Utah";
 let version: number = 1.0;
-let message: string = `Welcome to ${name} v${version}!`;
+let message: string = "Welcome to ${name} v${version}!";
 ```
 
 ### Parallel Execution
@@ -243,7 +243,7 @@ fi
 ```typescript
 let name: string = "Alice";
 if (name == "Alice") {
-  console.log(`Hello, ${name}!`);
+  console.log("Hello, ${name}!");
 }
 ```
 
@@ -287,7 +287,7 @@ catch {
 }
 
 let port: number = json.get(config, ".port");
-console.log(`Server will start on port ${port}`);
+console.log("Server will start on port ${port}");
 ```
 
 ### Deployment Script
@@ -301,7 +301,7 @@ args.define("--version", "-v", "Version tag", "string", true);
 let environment: string = args.get("--env");
 let version: string = args.get("--version");
 
-console.log(`Deploying version ${version} to ${environment}`);
+console.log("Deploying version ${version} to ${environment}");
 
 // Validate environment
 let validEnvs: string[] = ["dev", "staging", "prod"];
@@ -338,15 +338,15 @@ for (let file: string in inputFiles) {
       processed = json.set(processed, ".timestamp", timer.current());
 
       results[array.length(results)] = processed;
-      console.log(`Processed: ${file}`);
+      console.log("Processed: ${file}");
     }
     catch {
-      console.log(`Error processing: ${file}`);
+      console.log("Error processing: ${file}");
     }
   }
 }
 
-console.log(`Processed ${array.length(results)} files successfully`);
+console.log("Processed ${array.length(results)} files successfully");
 ```
 
 ## Next Steps
