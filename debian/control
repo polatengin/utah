@@ -8,6 +8,7 @@ Standards-Version: 4.5.0
 Package: utah
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Utah is a tool for managing and automating tasks in software development.
- Utah is a versatile tool designed to streamline software development processes. It provides a range of features for
+Description: CLI transpiler that converts TypeScript-like .shx files to bash scripts
+ A versatile transpiler designed to streamline shell script development by converting
+ TypeScript-like .shx files into optimized bash scripts. It provides a range of features for
  task management, automation, and integration with various development tools.
