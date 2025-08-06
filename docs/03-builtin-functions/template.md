@@ -1,6 +1,6 @@
 # Template Functions
 
-Utah provides template functions for processing files with variable substitution. These functions use `envsubst` to replace "${VARIABLE}" placeholders with environment variable values, making them perfect for configuration file generation and dynamic content creation.
+Utah provides template functions for processing files with variable substitution. These functions use `envsubst` to replace `"$\{VARIABLE\}"` placeholders with environment variable values, making them perfect for configuration file generation and dynamic content creation.
 
 ## Available Functions
 
@@ -10,7 +10,7 @@ Process a template file and write the result with environment variable substitut
 
 **Parameters:**
 
-- `sourceFilePath` (string): Path to the template file containing "${VARIABLE}" placeholders
+- `sourceFilePath` (string): Path to the template file containing `"$\{VARIABLE\}"` placeholders
 - `targetFilePath` (string): Path where the processed file will be written
 
 **Returns:** `string` - "true" if successful, "false" if failed (when used as expression)
