@@ -10,3 +10,9 @@ obj/
 build/
 
 tests/temp/
+
+debian/debhelper-build-stamp
+debian/files
+debian/*.substvars
+debian/.debhelper
+debian/utah
