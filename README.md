@@ -4664,9 +4664,11 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.shuffle()` function
 
-- [x] Add shebang (`#!/bin/bash`) to generated scripts
+- [ ] `array.unique()` function to remove duplicate elements
 
-- [ ] Typed return values and richer type checking
+- [ ] Multiline string support with triple-double quotes (`"""`)
+
+- [x] Add shebang (`#!/bin/bash`) to generated scripts
 
 - [x] `utility.random()` function
 
@@ -4684,25 +4686,57 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `args.*` functions (`get()`, `has()`, `all()`, `define()`, `showHelp()` implemented)
 
-- [x] `web.*` functions (`get()` implemented - `put()`, `speedtest()` coming soon)
+- [x] `web.get()` function
+
+- [ ] `web.post()` function
+
+- [ ] `web.put()` function
+
+- [ ] `web.delete()` function
+
+- [ ] `web.speedTest()` function
 
 - [x] `console.*` functions
 
-- [ ] `ssh.*` functions (`connect()`, `save()`, `transferFile()`)
+- [ ] `ssh.connect()` function with SSH key support
 
-- [ ] `git.*` functions (`undoLastCommit()` implemented, `mergePR()`, `forcePush()` coming soon)
+- [ ] `ssh.execute()` function with command output handling
 
-- [ ] `validate.*` functions (`notNullable()`, `notEmpty()`, `greaterThan()`, `ipv4()`, `numberOnly()`, `alphaNumeric()`, `email()`)
+- [ ] `ssh.upload()` function for file transfers
+
+- [ ] `ssh.download()` function for file transfers
+
+- [ ] `ssh.disconnect()` function to close SSH connections
+
+- [ ] `git.undoLastCommit()` function for undoing the last commit
+
+- [ ] `git.mergePR()` function for merging pull requests
+
+- [ ] `git.forcePush()` function for force pushing changes
+
+- [ ] `validate.isEmail()` function for email validation
+
+- [ ] `validate.isURL()` function for URL validation
+
+- [ ] `validate.isUUID()` function for UUID validation
+
+- [ ] `validate.isPhoneNumber()` function for phone number validation
+
+- [ ] `validate.isNull()` function for null checks
+
+- [ ] `validate.isGreaterThan()` function for numeric comparisons
+
+- [ ] `validate.isLessThan()` function for numeric comparisons
+
+- [ ] `validate.isInRange()` function for numeric range checks
+
+- [ ] `validate.isAlphaNumeric()` function for alphanumeric checks
 
 - [x] Error handling: try/catch, subshell
-
-- [ ] Typecasting and type conversion
 
 - [x] More complex expressions and operators
 
 - [x] Support for managing environment variables
-
-- [ ] Support for functions with multiple return values
 
 - [x] Enhanced string manipulation functions
 
@@ -4716,7 +4750,25 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] yaml parsing and manipulation functions
 
-- [ ] File I/O operations (watch, delete, permissions, etc.)
+- [ ] `fs.delete()` - Delete files or directories with recursive option
+
+- [ ] `fs.watch()` - File system watching for changes
+
+- [ ] `fs.createTempFile()` - Create temporary files with unique names
+
+- [ ] `fs.find()` - Find files matching patterns or conditions
+
+- [ ] `fs.chmod()` - Change file permissions
+
+- [ ] `fs.chown()` - Change file ownership
+
+- [ ] `process.start()` - Start a new process with command and arguments
+
+- [ ] `process.kill()` - Kill a running process by ID or name
+
+- [ ] `process.isRunning()` - Check if a process is currently running
+
+- [ ] `process.waitForExit()` - Wait for a process to exit and get its exit code
 
 - [x] Argument parsing and validation (with default values, types, and help generation)
 
