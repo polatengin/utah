@@ -239,7 +239,7 @@ build-extension: build ## Build both CLI and VS Code extension
 
 build-debian: ## Build Debian package
 	@echo "$(BLUE)📦 Building Debian package...$(NC)"
-	@debuild -us -uc -b --lintian-opts --suppress-tags debian-changelog-line-too-long,extended-description-line-too-long
+	@debuild -us -uc -b --lintian-opts --suppress-tags debian-changelog-line-too-long,extended-description-line-too-long,no-manual-page
 	@echo "$(GREEN)✅ Debian package build complete$(NC)"
 
 build-debian-changelog: ## Generate debian/changelog from git tags
