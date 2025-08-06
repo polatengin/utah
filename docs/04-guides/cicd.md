@@ -307,7 +307,7 @@ function deployApplication(): void {
 
     // Read deployment manifest template from file
     let deploymentManifest: string = fs.readFile("deployment-template.yaml");
-    
+
     // Replace placeholders with actual values
     deploymentManifest = string.replace(deploymentManifest, "{{NAMESPACE}}", namespace);
     deploymentManifest = string.replace(deploymentManifest, "{{REPLICAS}}", replicas.toString());
@@ -391,7 +391,7 @@ function updateService(): void {
 
   // Read service manifest template from file
   let serviceManifest: string = fs.readFile("service-template.yaml");
-  
+
   // Replace placeholders with actual values
   serviceManifest = string.replace(serviceManifest, "{{NAMESPACE}}", namespace);
 

@@ -178,7 +178,7 @@ function processLargeFile(filename: string): void {
   // For large files, process in chunks
   let content: string = fs.readFile(filename);
   let lines: string[] = string.split(content, "\n");
-  
+
   for (let line: string in lines) {
     processLine(line);
   }
