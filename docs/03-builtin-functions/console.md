@@ -763,7 +763,7 @@ if (args.has("--system-install")) {
 ```typescript
 function setupConfiguration(): void {
   let configFile: string;
-  
+
   if (console.isInteractive()) {
     // Interactive mode - can prompt user
     configFile = console.promptFile("Select config file", "*.json");
@@ -776,7 +776,7 @@ function setupConfiguration(): void {
       exit(1);
     }
   }
-  
+
   console.log(`Using config: ${configFile}`);
 }
 ```
