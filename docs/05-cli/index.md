@@ -50,7 +50,7 @@ utah format --in-place
 |---------|-------------|-------|
 | `<file.shx>` | **Direct execution** | `utah <file.shx>` |
 | `-c, --command` | **Direct command** | `utah -c <command>` |
-| `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o <output.sh>]` |
+| `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o, --output <output.sh>]` |
 | `run` | Compile and execute | `utah run <file.shx>` or `utah run -c <command>` |
 | `format` | Format source code | `utah format [file.shx] [options]` |
 | `lsp` | Language server | `utah lsp` |
@@ -65,8 +65,9 @@ utah format --in-place
 Transpiles Utah (.shx) source files into bash (.sh) scripts:
 
 ```bash
-utah compile script.shx                # Creates script.sh
-utah compile script.shx -o custom.sh   # Creates custom.sh
+utah compile script.shx                        # Creates script.sh
+utah compile script.shx -o custom.sh           # Creates custom.sh
+utah compile script.shx --output custom.sh     # Creates custom.sh
 ```
 
 **Features:**

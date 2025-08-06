@@ -10,7 +10,7 @@ The `utah compile` command transpiles Utah (.shx) source files into bash (.sh) s
 ## Basic Usage
 
 ```bash
-utah compile <file.shx> [-o <output.sh>]
+utah compile <file.shx> [-o, --output <output.sh>]
 ```
 
 ## Examples
@@ -27,9 +27,10 @@ This creates `script.sh` in the same directory.
 
 ```bash
 utah compile script.shx -o /path/to/custom.sh
+utah compile script.shx --output /path/to/custom.sh
 ```
 
-This creates the specified output file.
+Both commands create the specified output file. You can use either `-o` or `--output`.
 
 ### Batch Compilation
 
@@ -365,11 +366,11 @@ import "logging.shx";
 ```bash
 # Good: Descriptive names
 utah compile backup-script.shx -o bin/backup-database.sh
-utah compile deploy.shx -o scripts/deploy-production.sh
+utah compile deploy.shx --output scripts/deploy-production.sh
 
 # Avoid: Generic names
 utah compile backup-script.shx -o script.sh
-utah compile deploy.shx -o output.sh
+utah compile deploy.shx --output output.sh
 ```
 
 ### 3. Validate After Compilation

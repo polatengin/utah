@@ -4315,6 +4315,7 @@ utah compile script.shx
 
 # Compile with custom output
 utah compile script.shx -o custom-name.sh
+utah compile script.shx --output custom-name.sh
 ```
 
 ## Development
