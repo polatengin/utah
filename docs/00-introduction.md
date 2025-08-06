@@ -7,7 +7,31 @@ permalink: /
 slug: /
 ---
 
-**Utah** is a tool th### CLI Reference
+**Utah** is a tool that allows you to write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
+
+📦 **File Extension:** `.shx`
+
+### Language Reference
+
+- [Arrays](./02-language-features/arrays.md)
+- [Console Functions](./02-language-features/console.md)
+- [Control Flow](./02-language-features/control-flow.md)
+- [Defer Statements](./02-language-features/defer.md)
+- [Error Handling](./02-language-features/error-handling.md)
+- [File System Functions](./02-language-features/filesystem.md)
+- [Functions](./02-language-features/functions.md)
+- [Git Functions](./02-language-features/git.md)
+- [Import System](./02-language-features/imports.md)
+- [JSON and YAML Processing](./02-language-features/json-yaml.md)
+- [Operating System Functions](./02-language-features/operating-system.md)
+- [Strings](./02-language-features/strings.md)
+- [System Functions](./02-language-features/system.md)
+- [Template Functions](./02-language-features/template.md)
+- [Utility Functions](./02-language-features/utilities.md)
+- [Variables and Types](./02-language-features/variables.md)
+- [Web Functions](./02-language-features/web.md)
+
+### CLI Reference
 
 - [Overview](./04-cli/index.md)
 - [Compile Command](./04-cli/compile.md)
@@ -22,9 +46,7 @@ slug: /
 - [Testing Scripts](./03-guides/testing.md)
 - [CI/CD Integration](./03-guides/cicd.md)
 - [DevOps Automation](./03-guides/devops.md)
-- [Best Practices](./03-guides/best-practices.md) write shell scripts in a strongly typed, TypeScript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
-
-📦 **File Extension:** `.shx`
+- [Best Practices](./03-guides/best-practices.md)
 
 ## Quick Start
 
