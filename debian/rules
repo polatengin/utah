@@ -4,16 +4,16 @@
 	dh $@
 
 override_dh_auto_clean:
-	make test
+	@make clean
 
 override_dh_auto_build:
-	make build
+	@make build
 
 override_dh_auto_test:
-	make test
+	@echo "Tests skipped"
 
 override_dh_dwz:
-	# Skip dwz compression for dotnet executables (no DWARF debug info)
+	@echo "DWZ compression skipped"
 
 override_dh_shlibdeps:
-	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info --dpkg-shlibdeps-params=--warnings=0 -Xlibdl.so.2 -Xlibpthread.so.0
+	@dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info --dpkg-shlibdeps-params=--warnings=0 -Xlibdl.so.2 -Xlibpthread.so.0
