@@ -364,7 +364,7 @@ checkServices();
 function analyzeAccessLogs(logFile: string): void {
   console.log("Analyzing access logs: ${logFile}");
 
-  let logs: string = filesystem.readFile(logFile);
+  let logs: string = fs.readFile(logFile);
   let lines: string[] = logs.split("\n");
 
   let errorCount: number = 0;
@@ -388,14 +388,15 @@ function analyzeAccessLogs(logFile: string): void {
 function rotateLogFiles(logDir: string): void {
   console.log("Rotating logs in: ${logDir}");
 
-  let files: string[] = filesystem.listFiles(logDir);
+  let filesList: string = "$(ls ${logDir}/*.log 2>/dev/null || true)";
+  let files: string[] = string.split(filesList, "\n");
 
   for (let file of files) {
-    if (file.endsWith(".log")) {
+    if (string.length(file) > 0) {
       let timestamp: string = utility.dateString();
       let archivedName: string = "${file}.${timestamp}";
 
-      filesystem.move(file, archivedName);
+      fs.move(file, archivedName);
       system.execute("gzip ${archivedName}");
     }
   }
@@ -524,8 +525,8 @@ import "config/production.shx";
 function loadConfig(environment: string): object {
   let configFile: string = "config/${environment}.json";
 
-  if (filesystem.exists(configFile)) {
-    let configData: string = filesystem.readFile(configFile);
+  if (fs.exists(configFile)) {
+    let configData: string = fs.readFile(configFile);
     return json.parse(configData);
   }
 

@@ -87,11 +87,12 @@ function complexCleanup(): void {
   let connection = db.connect();
   defer connection.close();
 
-  let tempDir = fs.createTempDir();
-  defer fs.removeDir(tempDir);
+  let tempDir = "$(mktemp -d)";
+  defer "$(rm -rf ${tempDir})";
 
-  let logFile = fs.openFile("process.log");
-  defer logFile.close();
+  // Process file directly without opening a file handle
+  let logContent: string = fs.readFile("process.log");
+  defer fs.appendFile("cleanup.log", "Cleanup completed\n");
 
   // Work with resources...
   if (errorCondition) {
@@ -107,17 +108,17 @@ function complexCleanup(): void {
 ```typescript
 function downloadAndProcess(url: string, outputFile: string): void {
   // Create temporary directory
-  let tempDir = fs.createTempDir();
-  defer fs.removeDir(tempDir);
+  let tempDir = "$(mktemp -d)";
+  defer "$(rm -rf ${tempDir})";
 
   // Download file
   let downloadPath = "${tempDir}/download.tmp";
   web.download(url, downloadPath);
-  defer fs.removeFile(downloadPath);
+  defer fs.delete(downloadPath);
 
-  // Open output file
-  let output = fs.openFile(outputFile, "write");
-  defer output.close();
+  // Process and write to output file
+  let processedData: string = processDownloadedData(downloadPath);
+  defer fs.writeFile(outputFile, processedData);
 
   // Process and write...
 }
@@ -131,7 +132,7 @@ function criticalSection(): void {
 
   // Acquire lock
   fs.createFile(lockFile);
-  defer fs.removeFile(lockFile);
+  defer fs.delete(lockFile);
 
   // Critical work that must be protected...
 }
@@ -255,7 +256,7 @@ function avoidPattern(): void {
 function comprehensiveCleanup(): void {
   // File system cleanup
   let tempFile = fs.createTempFile();
-  defer fs.removeFile(tempFile);
+  defer fs.delete(tempFile);
 
   // Network cleanup
   let connection = net.connect("api.example.com");

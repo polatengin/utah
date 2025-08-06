@@ -7,7 +7,7 @@ has_children: true
 
 Utah provides a comprehensive command-line interface for compiling, running, formatting, and managing Utah scripts. The CLI is built with .NET 9 and offers robust error handling and clear feedback.
 
-## Direct Execution ✨
+## ✨ Direct Execution
 
 Utah supports direct execution of `.shx` files and commands without requiring explicit command prefixes:
 

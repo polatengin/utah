@@ -66,7 +66,7 @@ function validateEmail(email: string): boolean {
 
 function ensureDirectory(path: string): void {
   if (!fs.exists(path)) {
-    fs.mkdir(path);
+    $(mkdir -p ${path});
     console.log("Created directory: ${path}");
   }
 }
@@ -130,7 +130,7 @@ function executeQuery(connection: object, query: string): string {
   logMessage("DEBUG", "Executing query: ${query}");
 
   // Query execution logic
-  return "$(psql -h ${connection.host} -p ${connection.port} -c \"${query}\")";
+  return $(psql -h ${connection.host} -p ${connection.port} -c \"${query}\");
 }
 ```
 

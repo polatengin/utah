@@ -1,6 +1,6 @@
 ---
 layout: default
-title: CI/CD Integration
+title: Cloud Integration
 parent: Guides
 nav_order: 6
 ---

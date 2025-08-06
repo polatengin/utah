@@ -5,7 +5,10 @@ parent: Guides
 nav_order: 2
 ---
 
-Batch file operations and data transformation with Utah. Learn how to efficiently process files, directories, and data using Utah's built-in file system functions.
+Batch file operationsfunction processLogsInDirectory(dir: string): void {
+  let items: string[] = string.split($(find ${dir} -type f -name "*.log"), "
+");
+  for (let item of items) {and data transformation with Utah. Learn how to efficiently process files, directories, and data using Utah's built-in file system functions.
 
 ## Prerequisites
 
@@ -229,11 +232,11 @@ function filterFilesBySize(directory: string, minSizeMB: number): string[] {
   let minSizeBytes: number = minSizeMB * 1024 * 1024;
   let largeFiles: string[] = [];
 
-  let allFiles: string[] = string.split("$(find ${directory} -type f)", "\n");
+  let allFiles: string[] = string.split($(find ${directory} -type f), "\n");
 
   for (let file: string in allFiles) {
     if (file.trim() != "") {
-      let sizeBytes: string = "$(stat -f%z "${file}" 2>/dev/null || stat -c%s "${file}" 2>/dev/null)";
+      let sizeBytes: string = $(stat -f%z "${file}" 2>/dev/null || stat -c%s "${file}" 2>/dev/null);
       if (sizeBytes != "" && parseInt(sizeBytes) > minSizeBytes) {
         array.push(largeFiles, file);
       }
@@ -249,7 +252,7 @@ function filterFilesByDate(directory: string, daysSince: number): string[] {
 
   // Find files modified in the last N days
   let findCmd: string = "find ${directory} -type f -mtime -${daysSince}";
-  let files: string[] = string.split("$(${findCmd})", "\n");
+  let files: string[] = string.split($(${findCmd}), "\n");
 
   for (let file: string in files) {
     if (file.trim() != "") {
@@ -687,8 +690,8 @@ script.description("Process files with automatic resource cleanup");
 
 function processFileWithCleanup(inputFile: string, outputFile: string): void {
   // Create temporary directory
-  let tempDir = fs.createTempDir();
-  defer fs.removeDir(tempDir);  // Always cleanup temp directory
+  let tempDir = "$(mktemp -d)";
+  defer "$(rm -rf ${tempDir})";  // Always cleanup temp directory
 
   // Open input file
   let input = fs.openFile(inputFile, "read");
@@ -701,7 +704,7 @@ function processFileWithCleanup(inputFile: string, outputFile: string): void {
   // Setup logging
   let logFile = "${tempDir}/processing.log";
   fs.createFile(logFile);
-  defer fs.removeFile(logFile);  // Cleanup log file
+  defer fs.delete(logFile);  // Cleanup log file
 
   console.log("Processing ${inputFile} → ${outputFile}");
 
@@ -723,11 +726,11 @@ function processLargeFileWithBackup(filename: string): void {
   // Create backup before processing
   let backupFile = "${filename}.backup.$(date +%Y%m%d_%H%M%S)";
   fs.copy(filename, backupFile);
-  defer fs.removeFile(backupFile);  // Remove backup when done
+  defer fs.delete(backupFile);  // Remove backup when done
 
   // Create working directory
-  let workDir = fs.createTempDir();
-  defer fs.removeDir(workDir);
+  let workDir = "$(mktemp -d)";
+  defer "$(rm -rf ${workDir})";
 
   // Process in working directory
   let workFile = "${workDir}/working.tmp";

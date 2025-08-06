@@ -90,16 +90,12 @@ function divide(a: number, b: number): number {
 
 // Check file existence before operations
 function processFile(filename: string): void {
-  if (!filesystem.exists(filename)) {
+  if (!fs.exists(filename)) {
     throw new Error("File not found: ${filename}");
   }
 
-  if (!filesystem.isReadable(filename)) {
-    throw new Error("File not readable: ${filename}");
-  }
-
   // Process file
-  let content: string = filesystem.readFile(filename);
+  let content: string = fs.readFile(filename);
   // ...
 }
 ```
@@ -151,7 +147,7 @@ function logError(error: Error, context: object = {}): void {
   };
 
   let logEntry: string = json.stringify(errorInfo);
-  filesystem.appendFile("/var/log/app.log", logEntry + "\n");
+  fs.appendFile("/var/log/app.log", logEntry + "\n");
 }
 
 // Usage
@@ -170,27 +166,22 @@ try {
 ```typescript
 // Use defer for automatic cleanup
 function processFile(filename: string): void {
-  let file = fs.openFile(filename);
-  defer file.close();  // Automatically closes when function exits
-
-  let tempDir = fs.createTempDir();
-  defer fs.removeDir(tempDir);  // Cleanup temp directory
+  let tempDir = "$(mktemp -d)";
+  defer "$(rm -rf ${tempDir})";  // Cleanup temp directory
 
   // Process file - cleanup happens automatically
+  let content: string = fs.readFile(filename);
 }
 
 // Use streams for large files
 function processLargeFile(filename: string): void {
-  let stream: FileStream = filesystem.createReadStream(filename);
-
-  stream.onChunk((chunk: string) => {
-    // Process chunk
-    processChunk(chunk);
-  });
-
-  stream.onEnd(() => {
-    console.log("File processing completed");
-  });
+  // For large files, process in chunks
+  let content: string = fs.readFile(filename);
+  let lines: string[] = string.split(content, "\n");
+  
+  for (let line: string in lines) {
+    processLine(line);
+  }
 }
 
 // Minimize system calls
@@ -261,11 +252,13 @@ function expensiveOperation(input: string): string {
 function getCachedData(key: string, ttl: number = 3600): string {
   let cacheFile: string = "/tmp/cache_${key}";
 
-  if (filesystem.exists(cacheFile)) {
-    let fileAge: number = utility.timestamp() - filesystem.modTime(cacheFile);
+  if (fs.exists(cacheFile)) {
+    let fileModTime: string = "$(stat -c %Y ${cacheFile})";
+    let currentTime: string = "$(date +%s)";
+    let fileAge: number = parseInt(currentTime) - parseInt(fileModTime);
 
     if (fileAge < ttl) {
-      return filesystem.readFile(cacheFile);
+      return fs.readFile(cacheFile);
     }
   }
 
@@ -273,7 +266,7 @@ function getCachedData(key: string, ttl: number = 3600): string {
   let data: string = fetchDataFromSource(key);
 
   // Cache data
-  filesystem.writeFile(cacheFile, data);
+  fs.writeFile(cacheFile, data);
 
   return data;
 }
@@ -331,7 +324,7 @@ function getSecret(key: string): string {
 
 // Secure file permissions
 function createSecureFile(filename: string, content: string): void {
-  filesystem.writeFile(filename, content);
+  fs.writeFile(filename, content);
 
   // Set restrictive permissions
   system.execute("chmod 600 ${filename}");
@@ -360,7 +353,7 @@ function auditLog(operation: string, user: string, resource: string): void {
   };
 
   let logEntry: string = json.stringify(entry);
-  filesystem.appendFile("/var/log/audit.log", logEntry + "\n");
+  fs.appendFile("/var/log/audit.log", logEntry + "\n");
 }
 
 // Usage
@@ -445,7 +438,7 @@ function testAddNumbers(): void {
 
 // Mock external dependencies
 function mockFileSystem(): void {
-  filesystem.readFile = (path: string): string => {
+  fs.readFile = (path: string): string => {
     return "mocked content";
   };
 }
@@ -463,11 +456,11 @@ let config: object = loadConfig(environment);
 function loadConfig(env: string): object {
   let configFile: string = "config/${env}.json";
 
-  if (!filesystem.exists(configFile)) {
+  if (!fs.exists(configFile)) {
     throw new Error("Configuration file not found: ${configFile}");
   }
 
-  return json.parse(filesystem.readFile(configFile));
+  return json.parse(fs.readFile(configFile));
 }
 ```
 

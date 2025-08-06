@@ -68,7 +68,7 @@ class UtahApp
       case "compile":
         if (args.Length < 2 || !args[1].EndsWith(".shx"))
         {
-          Console.WriteLine("Usage: utah compile <file.shx> [-o <output.sh>]");
+          Console.WriteLine("Usage: utah compile <file.shx> [-o, --output <output.sh>]");
           return;
         }
         var inputPath = args[1];
@@ -177,7 +177,7 @@ class UtahApp
   {
     for (int i = 0; i < args.Length - 1; i++)
     {
-      if (args[i] == "-o")
+      if (args[i] == "-o" || args[i] == "--output")
       {
         return args[i + 1];
       }
@@ -602,7 +602,7 @@ class UtahApp
     Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
     Console.WriteLine("  compile <file.shx>           Compile a .shx file to a .sh file.");
     Console.WriteLine("    Options:");
-    Console.WriteLine("      -o <file>                Write formatted output to a specific file (single file only).");
+    Console.WriteLine("      -o, --output <file>      Write compiled output to a specific file.");
     Console.WriteLine("  format [file.shx]            Format .shx file(s) according to EditorConfig rules.");
     Console.WriteLine("    Options:");
     Console.WriteLine("      (no file)                Format all .shx files recursively from current directory.");

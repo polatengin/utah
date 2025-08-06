@@ -50,14 +50,16 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
-function setUp(): void {
-  // Setup test environment
-  filesystem.mkdir("/tmp/test-data");
+function setupTest(): void {
+  console.log("Setting up test environment");
+
+  // Create test directory
+  "$(mkdir -p /tmp/test-data)";
 }
 
-function tearDown(): void {
-  // Clean up test environment
-  filesystem.removeDirectory("/tmp/test-data");
+function teardownTest(): void {
+  // Cleanup test environment
+  fs.delete("/tmp/test-data");
 }
 ```
 
@@ -108,17 +110,17 @@ function testDivide(): void {
 function testFileOperations(): void {
   let testFile: string = "/tmp/test.txt";
 
-  // Test file creation
-  filesystem.writeFile(testFile, "Hello, Utah!");
-  assert(filesystem.exists(testFile), "File should be created");
+  // Create file
+  fs.writeFile(testFile, "Hello, Utah!");
+  assert(fs.exists(testFile), "File should be created");
 
-  // Test file reading
-  let content: string = filesystem.readFile(testFile);
+  // Read file
+  let content: string = fs.readFile(testFile);
   assert(content == "Hello, Utah!", "File content should match");
 
-  // Test file deletion
-  filesystem.remove(testFile);
-  assert(!filesystem.exists(testFile), "File should be deleted");
+  // Delete file
+  fs.delete(testFile);
+  assert(!fs.exists(testFile), "File should be deleted");
 }
 ```
 
