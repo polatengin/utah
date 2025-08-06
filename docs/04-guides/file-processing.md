@@ -5,11 +5,6 @@ parent: Guides
 nav_order: 2
 ---
 
-Batch file operationsfunction processLogsInDirectory(dir: string): void {
-  let items: string[] = string.split($(find ${dir} -type f -name "*.log"), "
-");
-  for (let item of items) {and data transformation with Utah. Learn how to efficiently process files, directories, and data using Utah's built-in file system functions.
-
 ## Prerequisites
 
 - Basic Utah syntax knowledge

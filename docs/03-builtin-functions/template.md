@@ -96,7 +96,7 @@ server:
   environment: ${NODE_ENV:-production}
 ```
 
-The "${VARIABLE:-default}" syntax provides default values when variables are not set.
+The `${VARIABLE:-default}` syntax provides default values when variables are not set.
 
 ## Error Handling
 
