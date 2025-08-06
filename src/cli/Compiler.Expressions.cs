@@ -72,6 +72,8 @@ public partial class Compiler
         return CompileFunctionCallExpression(func);
       case ConsoleIsSudoExpression sudo:
         return CompileConsoleIsSudoExpression(sudo);
+      case ConsoleIsInteractiveExpression interactive:
+        return CompileConsoleIsInteractiveExpression(interactive);
       case ConsolePromptYesNoExpression prompt:
         return CompileConsolePromptYesNoExpression(prompt);
       case ConsoleShowMessageExpression showMessage:
@@ -242,6 +244,11 @@ public partial class Compiler
   private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)
   {
     return "$([ \"$(id -u)\" -eq 0 ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileConsoleIsInteractiveExpression(ConsoleIsInteractiveExpression interactive)
+  {
+    return "$([ -t 0 ] && echo \"true\" || echo \"false\")";
   }
 
   private string CompileConsolePromptYesNoExpression(ConsolePromptYesNoExpression prompt)

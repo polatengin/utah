@@ -145,6 +145,46 @@ fi
 - File: `tests/positive_fixtures/console_issudo.shx`
 - Tests privilege detection using `$EUID` variable
 
+### console.isInteractive()
+
+Check if the script is running in an interactive terminal session:
+
+```typescript
+if (console.isInteractive()) {
+  console.log("Running in interactive mode - can show prompts");
+  let name: string = console.promptText("Enter your name");
+  console.log(`Hello, ${name}!`);
+} else {
+  console.log("Running in non-interactive mode");
+  console.log("Using default configuration");
+}
+```
+
+**Generated Bash:**
+
+```bash
+if [ -t 0 ]; then
+  echo "Running in interactive mode - can show prompts"
+  name=$(while true; do read -p "Enter your name: " input; if [ -n "${input}" ]; then echo "${input}"; break; else echo "Please enter a valid name."; fi; done)
+  echo "Hello, ${name}!"
+else
+  echo "Running in non-interactive mode"
+  echo "Using default configuration"
+fi
+```
+
+**Use Cases:**
+
+- **Adaptive Scripts**: Show prompts only when running interactively
+- **Automation Support**: Provide non-interactive fallbacks for CI/CD pipelines
+- **Background Processing**: Detect when scripts run in background or as cron jobs
+- **Error Prevention**: Avoid script hangs when prompts can't be displayed
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/console_isinteractive.shx`
+- Tests TTY detection using `[ -t 0 ]` bash test
+
 ## Dialog Functions
 
 Utah provides comprehensive dialog functions for creating interactive terminal user interfaces. These functions automatically detect and use the best available dialog system (`dialog`, `whiptail`, or fallback to basic prompts).
@@ -718,6 +758,29 @@ if (args.has("--system-install")) {
 }
 ```
 
+### 5. Adapt to Execution Environment
+
+```typescript
+function setupConfiguration(): void {
+  let configFile: string;
+  
+  if (console.isInteractive()) {
+    // Interactive mode - can prompt user
+    configFile = console.promptFile("Select config file", "*.json");
+  } else {
+    // Non-interactive mode - use environment or defaults
+    configFile = env.get("CONFIG_FILE") || "/etc/app/default.json";
+    if (!fs.exists(configFile)) {
+      console.log("Error: Config file not found and not in interactive mode");
+      console.log("Set CONFIG_FILE environment variable or run interactively");
+      exit(1);
+    }
+  }
+  
+  console.log(`Using config: ${configFile}`);
+}
+```
+
 ### 5. Format Output Consistently
 
 ```typescript
@@ -739,6 +802,7 @@ console.log("================================");
 | `console.prompt(message)` | Get user input | string | message: string | `let name = console.prompt("Name: ")` |
 | `console.promptYesNo(message)` | Get yes/no input | boolean | message: string | `let ok = console.promptYesNo("Continue? ")` |
 | `console.isSudo()` | Check root privileges | boolean | none | `if (console.isSudo()) { ... }` |
+| `console.isInteractive()` | Check if interactive | boolean | none | `if (console.isInteractive()) { ... }` |
 
 ### Dialog Functions Reference
 

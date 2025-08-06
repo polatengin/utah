@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-105-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-106-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2947,6 +2947,7 @@ Utah provides console system functions for checking system privileges and perfor
 #### Privilege Checking
 
 - `console.isSudo()` - Check if the script is running with root/sudo privileges
+- `console.isInteractive()` - Check if the script is running in an interactive terminal session
 
 #### User Interaction
 
@@ -2986,6 +2987,18 @@ if (isSudo) {
   // Prompt for sudo or exit
 }
 
+// Check if running in interactive terminal
+let isInteractive: boolean = console.isInteractive();
+
+if (isInteractive) {
+  console.log("Running in interactive mode - can show prompts");
+  let userName: string = console.promptText("Enter your name");
+  console.log(`Hello, ${userName}!`);
+} else {
+  console.log("Running in non-interactive mode (pipe/background)");
+  console.log("Using default configuration...");
+}
+
 // Prompt user for yes/no confirmation
 let proceed: boolean = console.promptYesNo("Do you want to continue?");
 
@@ -3002,6 +3015,15 @@ if (console.isSudo()) {
   console.log("Installing system packages...");
 } else {
   console.log("Please run with sudo for system operations");
+}
+
+// Combine interactive and privilege checks
+if (console.isInteractive() && console.isSudo()) {
+  console.log("Interactive elevated session - can show prompts");
+} else if (!console.isInteractive()) {
+  console.log("Non-interactive session - using defaults");
+} else {
+  console.log("Interactive but no elevated privileges");
 }
 
 // Chain prompts for user interaction
@@ -3059,16 +3081,26 @@ The console system functions transpile to efficient bash commands:
 # console.isSudo() becomes:
 isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
 
+# console.isInteractive() becomes:
+isInteractive=$([ -t 0 ] && echo "true" || echo "false")
+
 # console.promptYesNo("prompt text") becomes:
 proceed=$(while true; do read -p "Do you want to continue? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
 
 # Complete example:
 isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
+isInteractive=$([ -t 0 ] && echo "true" || echo "false")
 
 if [ "${isSudo}" = "true" ]; then
   echo "Running with elevated privileges"
 else
   echo "Running with normal user privileges"
+fi
+
+if [ "${isInteractive}" = "true" ]; then
+  echo "Running in interactive mode - can show prompts"
+else
+  echo "Running in non-interactive mode (pipe/background)"
 fi
 
 proceed=$(while true; do read -p "Do you want to continue? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
@@ -3090,19 +3122,25 @@ fi
 ### Console System Functions Use Cases
 
 - **Privilege Verification**: Ensure scripts have necessary permissions before execution
+- **Interactive Detection**: Determine if the script can display prompts and dialogs
+- **Environment Adaptation**: Adjust script behavior based on execution context (interactive vs automated)
 - **Security Checks**: Validate user permissions for sensitive operations
 - **Admin Scripts**: Build installation and configuration scripts that require root access
-- **Conditional Logic**: Execute different code paths based on privilege level
-- **Error Prevention**: Fail gracefully when insufficient privileges are detected
-- **User Guidance**: Provide helpful messages about required permissions
+- **Conditional Logic**: Execute different code paths based on privilege level and interactivity
+- **Error Prevention**: Fail gracefully when insufficient privileges are detected or when prompts can't be shown
+- **User Guidance**: Provide helpful messages about required permissions and execution context
 
 ### Security Best Practices
 
 - **Always check privileges** before performing system-level operations
+- **Check interactivity** before showing prompts to avoid script hangs in automated environments
 - **Fail early** if required privileges are not available
-- **Provide clear error messages** when privilege checks fail
+- **Provide alternatives** for non-interactive execution (defaults, environment variables, config files)
+- **Provide clear error messages** when privilege checks fail or when interactivity is required but not available
 - **Use `console.isSudo()`** instead of assuming user permissions
+- **Use `console.isInteractive()`** before displaying prompts or dialogs
 - **Document privilege requirements** in script comments and usage instructions
+- **Test scripts** in both interactive and non-interactive environments
 
 ### Technical Notes
 
@@ -4448,6 +4486,7 @@ Current tests cover:
 - **arrays_isempty.shx** - Array isEmpty() method for checking empty arrays
 - **arrays_reverse.shx** - Array reverse() method for reversing array order
 - **console_clear.shx** - Console clear() function for clearing terminal screen
+- **console_isinteractive.shx** - Console interactive terminal detection for adaptive script behavior
 - **console_issudo.shx** - Console system functions and privilege checking
 - **console_prompt_yesno.shx** - User interaction with yes/no prompts
 - **console_promptdirectory.shx** - Console directory selection dialog with default path
@@ -4587,7 +4626,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `console.log()` for output
 
-- [x] Console system functions (`console.isSudo()`)
+- [x] Console system functions (`console.isSudo()`, `console.isInteractive()`)
 
 - [x] String interpolation with double quotes (`"Hello, ${name}"`)
 

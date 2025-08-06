@@ -14,6 +14,7 @@ public record StringInterpolationExpression(List<object> Parts) : Expression; //
 public record FunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ParallelFunctionCall(string Name, List<Expression> Arguments) : Expression;
 public record ConsoleIsSudoExpression() : Expression;
+public record ConsoleIsInteractiveExpression() : Expression;
 public record ConsolePromptYesNoExpression(Expression PromptText) : Expression;
 // Dialog expressions
 public record ConsoleShowMessageExpression(Expression Title, Expression Message) : Expression;

@@ -639,6 +639,12 @@ public partial class Parser
         return new ConsoleIsSudoExpression();
       }
 
+      // Special handling for console.isInteractive()
+      if (functionName == "console.isInteractive" && string.IsNullOrEmpty(argsContent))
+      {
+        return new ConsoleIsInteractiveExpression();
+      }
+
       // Special handling for console.promptYesNo()
       if (functionName == "console.promptYesNo" && !string.IsNullOrEmpty(argsContent))
       {

@@ -1,0 +1,8 @@
+let isInteractive: boolean = console.isInteractive();
+console.log("${isInteractive}");
+
+if (isInteractive) {
+  console.log("Running in interactive terminal");
+} else {
+  console.log("Running in non-interactive environment");
+}
