@@ -41,6 +41,7 @@ Utah is organized into several main components:
 
 - **src/cli/** - Main CLI transpiler written in C#
 - **src/vscode-extension/** - VS Code extension for Utah language support
+- **src/mcp-server/** - Model Context Protocol server for AI assistant integration
 - **tests/** - Test suite with positive and negative test cases
 - **docs/** - Documentation website built with Docusaurus
 - **examples/** - Sample Utah scripts
@@ -60,6 +61,7 @@ Follow the established patterns in the codebase:
 - **CLI Changes**: Modify files in `src/cli/`
 - **Language Features**: Add AST nodes, parser logic, and compiler output
 - **VS Code Extension**: Update files in `src/vscode-extension/`
+- **MCP Server**: Update Model Context Protocol server in `src/mcp-server/`
 - **Documentation**: Update relevant `.md` files
 
 ### 3. Add Tests
