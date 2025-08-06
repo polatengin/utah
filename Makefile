@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev watch markdownlint
+.PHONY: help build build-extension test compile clean install info dev markdownlint
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -33,7 +33,17 @@ help:
 	@echo "  make test FILE=env_get_ternary"
 	@echo "  make compile FILE=examples/hello.shx"
 
-build: ## Build the CLI
+clean: ## Clean build artifacts and test files
+	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
+	@cd $(CLI_DIR) && dotnet clean
+	@rm -rf $(TESTS_DIR)/temp
+	@rm -f $(TESTS_DIR)/positive_fixtures/*.sh
+	@rm -f $(TESTS_DIR)/negative_fixtures/*.sh
+	@rm -rf $(VSCODE_DIR)/server
+	@rm -rf $(VSCODE_DIR)/dist
+	@echo "$(GREEN)✅ Clean complete$(NC)"
+
+build: clean ## Build the CLI
 	@echo "$(BLUE)🔨 Building Utah CLI...$(NC)"
 	@cd $(CLI_DIR) && dotnet build
 	@echo "$(GREEN)✅ Build complete$(NC)"
@@ -200,16 +210,6 @@ endif
 	@echo "$(BLUE)📝 Compiling $(FILE)...$(NC)"
 	@cd $(CLI_DIR) && dotnet run -- compile "../../$(FILE)"
 
-clean: ## Clean build artifacts and test files
-	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
-	@cd $(CLI_DIR) && dotnet clean
-	@rm -rf $(TESTS_DIR)/temp
-	@rm -f $(TESTS_DIR)/positive_fixtures/*.sh
-	@rm -f $(TESTS_DIR)/negative_fixtures/*.sh
-	@rm -rf $(VSCODE_DIR)/server
-	@rm -rf $(VSCODE_DIR)/dist
-	@echo "$(GREEN)✅ Clean complete$(NC)"
-
 # Development workflow targets
 build-extension: build ## Build both CLI and VS Code extension
 	@echo "$(BLUE)🔨 Building VS Code extension...$(NC)"
@@ -225,14 +225,6 @@ build-extension: build ## Build both CLI and VS Code extension
 	@echo "$(GREEN)✅ Extension build complete$(NC)"
 
 dev: build test ## Full development cycle: build + test
-
-watch: ## Watch for changes and run tests (requires inotify-tools)
-	@echo "$(BLUE)👀 Watching for changes...$(NC)"
-	@while inotifywait -r -e modify,create,delete $(CLI_DIR) 2>/dev/null; do \
-		echo "$(YELLOW)🔄 Changes detected, running tests...$(NC)"; \
-		make test || true; \
-		echo "$(BLUE)👀 Watching for changes...$(NC)"; \
-	done
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
