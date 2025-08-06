@@ -51,11 +51,11 @@ let words: string[] = string.split(text, " ");
 let length: number = string.length(text);
 
 // File operations
-let content: string = filesystem.readFile("file.txt");
-filesystem.writeFile("output.txt", content);
-filesystem.copyFile("source.txt", "backup/source.txt");
-filesystem.moveFile("temp.txt", "archive/processed.txt");
-filesystem.rename("old-name.txt", "new-name.txt");
+let content: string = fs.readFile("file.txt");
+fs.writeFile("output.txt", content);
+fs.copyFile("source.txt", "backup/source.txt");
+fs.moveFile("temp.txt", "archive/processed.txt");
+fs.rename("old-name.txt", "new-name.txt");
 
 // Template processing
 template.update("config.template", "config.yml");

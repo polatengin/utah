@@ -120,19 +120,6 @@ let age: number = 30;
 let message: string = "Hello, ${name}! You are ${age} years old.";
 ```
 
-### Multi-line Strings
-
-Utah supports multi-line string literals:
-
-```typescript
-let script: string = `
-  #!/bin/bash
-  echo "Starting process..."
-  ./run-task.sh
-  echo "Process completed"
-`;
-```
-
 ## Common String Patterns
 
 ### File Path Processing
@@ -331,13 +318,6 @@ let message: string = "She said, \"Hello, world!\"";
 // Strings with backslashes
 let path: string = "C:\\Users\\Alice\\Documents";
 let regexPattern: string = "\\d+\\.\\d+";
-
-// Multi-line strings with proper formatting
-let jsonTemplate: string = `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "A sample JSON file"
-}`;
 ```
 
 Strings form the foundation of text manipulation in Utah, providing type-safe operations with familiar syntax and powerful built-in functions for common text processing tasks.

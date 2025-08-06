@@ -418,7 +418,7 @@ if (unhealthyServices.length > 0) {
 
 ```typescript
 let configFile: string = "app.json";
-let defaultConfig: string = '{"debug": false, "port": 3000, "timeout": 30}';
+let defaultConfig: string = "{\"debug\": false, \"port\": 3000, \"timeout\": 30}";
 
 // Load configuration
 let config: object;

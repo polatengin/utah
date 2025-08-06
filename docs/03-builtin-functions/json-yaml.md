@@ -5,7 +5,15 @@ parent: Functions
 nav_order: 1
 ---
 
-Utah provides comprehensive JSON and YAML processing capabilities that allow you to work with structured data directly in your scripts. These functions use industry-standard tools like `jq` and `yq` under the hood.
+Utah provides comprehensive JSON and YAML processing capabilities that allow you to work with structured data directly iParse YAML content into an object:
+
+```typescript
+// Read YAML from a file
+let yamlConfig: string = fs.readFile("app-config.yaml");
+
+let config: object = yaml.parse(yamlConfig);
+console.log("YAML configuration loaded");
+``` These functions use industry-standard tools like `jq` and `yq` under the hood.
 
 ## JSON Functions
 
@@ -31,7 +39,7 @@ if (!os.isInstalled("jq")) {
 Check if a string contains valid JSON syntax:
 
 ```typescript
-let data: string = '{"name": "Utah", "version": 1.0}';
+let data: string = "{\"name\": \"Utah\", \"version\": 1.0}";
 let valid: boolean = json.isValid(data);
 
 if (valid) {
@@ -47,7 +55,7 @@ if (valid) {
 Parse a JSON string into an object:
 
 ```typescript
-let jsonData: string = '{"app": {"name": "MyApp", "port": 8080}}';
+let jsonData: string = "{\"app\": {\"name\": \"MyApp\", \"port\": 8080}}";
 let config: object = json.parse(jsonData);
 console.log("Configuration loaded");
 ```
@@ -68,7 +76,7 @@ console.log("Config as string: " + configString);
 Get a value using jq-style path syntax:
 
 ```typescript
-let userData: string = '{"user": {"name": "Alice", "settings": {"theme": "dark"}}}';
+let userData: string = "{\"user\": {\"name\": \"Alice\", \"settings\": {\"theme\": \"dark\"}}}";
 let user: object = json.parse(userData);
 
 // Access nested properties
@@ -76,7 +84,7 @@ let userName: string = json.get(user, ".user.name");           // "Alice"
 let theme: string = json.get(user, ".user.settings.theme");   // "dark"
 
 // Access array elements
-let tagsJson: string = '{"tags": ["work", "personal", "urgent"]}';
+let tagsJson: string = "{\"tags\": [\"work\", \"personal\", \"urgent\"]}";
 let tags: object = json.parse(tagsJson);
 let firstTag: string = json.get(tags, ".tags[0]");            // "work"
 let lastTag: string = json.get(tags, ".tags[-1]");           // "urgent"
@@ -163,8 +171,8 @@ for (let value: any in values) {
 Merge two JSON objects (second object takes precedence):
 
 ```typescript
-let defaults: string = '{"timeout": 30, "retries": 3, "debug": false}';
-let userConfig: string = '{"timeout": 60, "debug": true, "verbose": true}';
+let defaults: string = "{\"timeout\": 30, \"retries\": 3, \"debug\": false}";
+let userConfig: string = "{\"timeout\": 60, \"debug\": true, \"verbose\": true}";
 
 let defaultObj: object = json.parse(defaults);
 let userObj: object = json.parse(userConfig);
@@ -195,14 +203,8 @@ if (!os.isInstalled("yq") || !os.isInstalled("jq")) {
 Check if a string contains valid YAML syntax:
 
 ```typescript
-let configYaml: string = `
-database:
-  host: localhost
-  port: 5432
-features:
-  - logging
-  - monitoring
-`;
+// Read YAML from a file instead of multiline strings
+let configYaml: string = fs.readFile("config.yaml");
 
 let valid: boolean = yaml.isValid(configYaml);
 if (valid) {
@@ -242,20 +244,8 @@ console.log("YAML output:\n" + yamlString);
 YAML functions use the same jq-style path syntax as JSON functions:
 
 ```typescript
-let k8sManifest: string = `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-spec:
-  replicas: 3
-  template:
-    spec:
-      containers:
-      - name: app
-        image: myapp:latest
-        ports:
-        - containerPort: 8080
+// Read Kubernetes manifest from file
+let k8sManifest: string = fs.readFile("deployment.yaml");
 `;
 
 let deployment: object = yaml.parse(k8sManifest);

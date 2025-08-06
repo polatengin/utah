@@ -139,7 +139,7 @@ function testApiIntegration(): void {
 
 function testWebhookHandler(): void {
   // Test webhook processing
-  let payload: string = '{"action": "push", "repository": {"name": "utah"}}';
+  let payload: string = "{\"action\": \"push\", \"repository\": {\"name\": \"utah\"}}";
   let result: boolean = processWebhook(payload);
 
   assert(result == true, "Webhook should be processed successfully");
@@ -228,7 +228,7 @@ jobs:
 
 ```typescript
 // test/mocks.shx
-let mockApiResponse: string = '{"status": "success", "data": {"id": 1}}';
+let mockApiResponse: string = "{\"status\": \"success\", \"data\": {\"id\": 1}}";
 
 function mockWebGet(url: string): string {
   console.log("Mock: GET ${url}");

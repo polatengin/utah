@@ -255,19 +255,8 @@ console.log("Found ${validFiles.length} files to process");
 
 // Create worker function for file processing
 function createWorkerScript(): string {
-  let workerScript: string = `#!/bin/bash
-# Worker script for file processing
-
-process_file() {
-  local input_file="$1"
-  local output_dir="$2"
-  local worker_id="$3"
-
-  echo "[Worker $worker_id] Processing: $input_file"
-
-  # Get filename without path
-  local filename=$(basename "$input_file")
-  local output_file="$output_dir/processed_$filename"
+  // Write worker script to file instead of using multiline strings
+  let workerScript: string = "#!/bin/bash\n# Worker script for file processing\n\nprocess_file() {\n  local input_file=\"$1\"\n  local output_dir=\"$2\"\n  local worker_id=\"$3\"\n\n  echo \"[Worker $worker_id] Processing: $input_file\"\n\n  # Get filename without path\n  local filename=$(basename \"$input_file\")\n  local output_file=\"$output_dir/processed_$filename\"
 
   # Example processing: convert to uppercase and add metadata
   {

@@ -56,7 +56,7 @@ utah -c "console.log(fs.exists('/etc/passwd'))"
 utah --command "json.installDependencies()"
 
 # Multiple statements (use quotes to wrap the entire command)
-utah -c "let name: string = 'Utah'; console.log(\"Hello from \${name}!\");"
+utah -c "let name: string = \"Utah\"; console.log(\"Hello from \${name}!\");"
 ```
 
 ### With Arguments

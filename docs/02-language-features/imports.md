@@ -83,15 +83,7 @@ function logMessage(level: string, message: string): void {
 // lib/config.shx
 script.description("Configuration management");
 
-const DEFAULT_CONFIG: string = `{
-  "database": {
-    "host": "localhost",
-    "port": 5432
-  },
-  "logging": {
-    "level": "info"
-  }
-}`;
+const DEFAULT_CONFIG: string = "{\"database\": {\"host\": \"localhost\", \"port\": 5432}, \"logging\": {\"level\": \"info\"}}";
 
 function loadConfig(): object {
   let configFile: string = "config.json";

@@ -305,24 +305,13 @@ function deployApplication(): void {
   } else {
     console.log("Deploying version ${version}...");
 
-    // Generate deployment manifest
-    let deploymentManifest: string = `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: myapp
-  namespace: ${namespace}
-spec:
-  replicas: ${replicas}
-  selector:
-    matchLabels:
-      app: myapp
-  template:
-    metadata:
-      labels:
-        app: myapp
-        version: "${version}"
-    spec:
+    // Read deployment manifest template from file
+    let deploymentManifest: string = fs.readFile("deployment-template.yaml");
+    
+    // Replace placeholders with actual values
+    deploymentManifest = string.replace(deploymentManifest, "{{NAMESPACE}}", namespace);
+    deploymentManifest = string.replace(deploymentManifest, "{{REPLICAS}}", replicas.toString());
+    deploymentManifest = string.replace(deploymentManifest, "{{VERSION}}", version);
       containers:
       - name: myapp
         image: myapp:${version}
@@ -400,20 +389,11 @@ function performHealthCheck(): void {
 function updateService(): void {
   console.log("Updating service configuration...");
 
-  let serviceManifest: string = `
-apiVersion: v1
-kind: Service
-metadata:
-  name: myapp-service
-  namespace: ${namespace}
-spec:
-  selector:
-    app: myapp
-  ports:
-  - port: 80
-    targetPort: 3000
-  type: LoadBalancer
-`;
+  // Read service manifest template from file
+  let serviceManifest: string = fs.readFile("service-template.yaml");
+  
+  // Replace placeholders with actual values
+  serviceManifest = string.replace(serviceManifest, "{{NAMESPACE}}", namespace);
 
   let serviceFile: string = "service-${environment}.yaml";
   fs.writeFile(serviceFile, serviceManifest);

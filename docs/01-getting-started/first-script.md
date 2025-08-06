@@ -244,7 +244,7 @@ Utah provides excellent JSON support:
 // Ensure JSON dependencies are available
 json.installDependencies();
 
-let configJson: string = '{"app": {"name": "MyApp", "port": 8080}}';
+let configJson: string = "{\"app\": {\"name\": \"MyApp\", \"port\": 8080}}";
 
 if (json.isValid(configJson)) {
   let config: object = json.parse(configJson);

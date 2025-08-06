@@ -70,11 +70,6 @@ Text and character data:
 ```typescript
 let message: string = "Hello, Utah!";
 let templateLiteral: string = "Dynamic: ${message}";
-let multiline: string = `
-  This string
-  spans multiple
-  lines
-`;
 ```
 
 #### `number`
@@ -136,7 +131,7 @@ For JSON/YAML objects:
 
 ```typescript
 // Parse JSON into object
-let configJson: string = '{"host": "localhost", "port": 8080}';
+let configJson: string = "{\"host\": \"localhost\", \"port\": 8080}";
 let config: object = json.parse(configJson);
 
 // Parse YAML into object
@@ -308,7 +303,7 @@ Objects in Utah are primarily used for JSON and YAML data:
 
 ```typescript
 // Parse JSON
-let userJson: string = '{"name": "Alice", "age": 30, "admin": true}';
+let userJson: string = "{\"name\": \"Alice\", \"age\": 30, \"admin\": true}";
 let user: object = json.parse(userJson);
 
 // Access properties

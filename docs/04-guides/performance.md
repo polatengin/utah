@@ -119,20 +119,13 @@ class ResourceMonitor {
     console.log("🔍 Starting resource monitoring...");
     this.isMonitoring = true;
 
-    // Start monitoring in background
-    let monitorScript: string = `
-      while true; do
-        TIMESTAMP=$(date +%s%3N)
-        CPU_PERCENT=$(ps -p $$ -o %cpu --no-headers 2>/dev/null | tr -d ' ' || echo "0")
-        MEM_VSZ=$(ps -p $$ -o vsz --no-headers 2>/dev/null | tr -d ' ' || echo "0")
-        MEM_RSS=$(ps -p $$ -o rss --no-headers 2>/dev/null | tr -d ' ' || echo "0")
+    // Create monitoring script file
+    let monitorScript: string = "while true; do\n  TIMESTAMP=$(date +%s%3N)\n  CPU_PERCENT=$(ps -p $$ -o %cpu --no-headers 2>/dev/null | tr -d ' ' || echo \"0\")\n  MEM_VSZ=$(ps -p $$ -o vsz --no-headers 2>/dev/null | tr -d ' ' || echo \"0\")\n  MEM_RSS=$(ps -p $$ -o rss --no-headers 2>/dev/null | tr -d ' ' || echo \"0\")\n\n  echo \"$TIMESTAMP,$CPU_PERCENT,$MEM_VSZ,$MEM_RSS\" >> /tmp/resource_monitor_$$.log\n  sleep 1\ndone";
+    
+    let scriptFile: string = "/tmp/monitor_$$.sh";
+    fs.writeFile(scriptFile, monitorScript);
 
-        echo "$TIMESTAMP,$CPU_PERCENT,$MEM_VSZ,$MEM_RSS" >> /tmp/resource_monitor_$$.log
-        sleep 1
-      done
-    `;
-
-    this.monitoringPid = "$(${monitorScript} & echo $!)";
+    this.monitoringPid = "$(chmod +x ${scriptFile} && ${scriptFile} & echo $!)";
     console.log("✅ Resource monitoring started (PID: ${this.monitoringPid})");
   }
 
@@ -150,7 +143,7 @@ class ResourceMonitor {
     }
 
     // Read monitoring data
-    let logFile: string = `/tmp/resource_monitor_$$.log`;
+    let logFile: string = "/tmp/resource_monitor_$$.log";
     if (fs.exists(logFile)) {
       let logContent: string = fs.readFile(logFile);
       let lines: string[] = logContent.split("\n");

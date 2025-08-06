@@ -389,15 +389,7 @@ if (fs.exists(logFile)) {
   let errorRequests: number = json.getNumber(stats, ".status_codes.404") || 0;
 
   let summaryFile: string = "${outputDir}/summary.txt";
-  let summary: string = `Log Analysis Summary
-===================
-Total Requests: ${totalRequests}
-Successful (200): ${successfulRequests}
-Not Found (404): ${errorRequests}
-Success Rate: ${Math.round((successfulRequests / totalRequests) * 100)}%
-
-Generated: $(date)
-`;
+  let summary: string = "Log Analysis Summary\n===================\nTotal Requests: ${totalRequests}\nSuccessful (200): ${successfulRequests}\nNot Found (404): ${errorRequests}\nSuccess Rate: ${Math.round((successfulRequests / totalRequests) * 100)}%\n\nGenerated: $(date)\n";
 
   fs.writeFile(summaryFile, summary);
 

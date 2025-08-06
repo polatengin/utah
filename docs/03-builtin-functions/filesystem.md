@@ -82,7 +82,7 @@ Write content to a file (overwrites existing content):
 let content: string = "Hello, World!";
 fs.writeFile("output.txt", content);
 
-let jsonData: string = '{"name": "test", "value": 123}';
+let jsonData: string = "{\"name\": \"test\", \"value\": 123}";
 fs.writeFile("data.json", jsonData);
 ```
 
