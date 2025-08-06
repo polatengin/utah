@@ -924,7 +924,7 @@ public partial class Compiler
       // Complex expression - we need to handle the result as an array
       var compiledArray = CompileExpression(isEmpty.Array);
       var uniqueVar = $"_utah_isempty_{GetUniqueId()}";
-      
+
       // For command substitutions, we need to capture the output as an array
       if (compiledArray.StartsWith("$("))
       {
@@ -1130,7 +1130,7 @@ public partial class Compiler
   private string CompileArraySortExpression(ArraySortExpression arraySort)
   {
     var compiledArray = CompileExpression(arraySort.Array);
-    
+
     _sortCounter++;
     var uniqueVar = $"_utah_sort_{_sortCounter}";
 
@@ -1187,7 +1187,7 @@ public partial class Compiler
     {
       // It's an array literal or expression result - use simple lexicographic sort
       var sortCommand = sortOrder == "desc" ? "sort -r" : "sort";
-      
+
       // If it's an array literal, we need to create a temporary array first
       if (arraySort.Array is ArrayLiteral)
       {
@@ -1212,7 +1212,7 @@ public partial class Compiler
   private string CompileArrayShuffleExpression(ArrayShuffleExpression arrayShuffle)
   {
     var compiledArray = CompileExpression(arrayShuffle.Array);
-    
+
     // Check if this is a literal array or a variable
     if (arrayShuffle.Array is VariableExpression varExpr)
     {
@@ -2138,7 +2138,7 @@ fi
       throw new InvalidOperationException("array.isEmpty() requires exactly 1 argument");
 
     var arrayArg = args[0];
-    
+
     // Handle command substitutions that generate arrays
     if (arrayArg.StartsWith("$("))
     {
@@ -2262,7 +2262,7 @@ fi
       throw new InvalidOperationException("array.shuffle() requires exactly 1 argument");
 
     var varName = ExtractVariableName(args[0]);
-    
+
     // Use shuf command if available, otherwise fall back to Fisher-Yates shuffle using RANDOM
     return $"($(if command -v shuf &> /dev/null; then printf '%s\\n' \"${{{varName}[@]}}\" | shuf; else arr=(\"${{{varName}[@]}}\"); for ((i=${{#arr[@]}}-1; i>0; i--)); do j=$((RANDOM % (i+1))); temp=\"${{arr[i]}}\"; arr[i]=\"${{arr[j]}}\"; arr[j]=\"$temp\"; done; printf '%s\\n' \"${{arr[@]}}\"; fi))";
   }

@@ -359,7 +359,7 @@ public partial class Parser
       {
         var parenIndex = methodPart.IndexOf('(');
         var arrayFunctionName = methodPart.Substring(0, parenIndex).Trim();
-        
+
         // Skip functions that have dedicated AST node handling
         if (arrayFunctionName != "sort" && arrayFunctionName != "shuffle")
         {
@@ -431,10 +431,10 @@ public partial class Parser
       {
         var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
         var args = SplitByComma(argsContent).Select(arg => ParseExpression(arg.Trim())).ToList();
-        
+
         Expression arrayExpr = args[0]; // First argument is the array
         Expression? sortOrderExpr = args.Count > 1 ? args[1] : null; // Second argument is optional sort order
-        
+
         return new ArraySortExpression(arrayExpr, sortOrderExpr);
       }
 
@@ -444,12 +444,12 @@ public partial class Parser
         // This shouldn't happen since shuffle requires an argument, but handle empty case
         throw new InvalidOperationException("array.shuffle() requires an array argument");
       }
-      
+
       if (objectName == "array" && methodPart.StartsWith("shuffle(") && methodPart.EndsWith(")"))
       {
         var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
         var arrayExpr = ParseExpression(argsContent);
-        
+
         return new ArrayShuffleExpression(arrayExpr);
       }
 
