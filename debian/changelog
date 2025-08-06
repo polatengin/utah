@@ -1,107 +1,173 @@
-utah (0.1.1) unstable; urgency=medium
+utah (0.1.11) unstable; urgency=medium
 
-  * feat: add script control functions and their handling in the compiler and parser, add tests and documentation
+  * chore(deps): bump github/codeql-action from 3.29.2 to 3.29.5 (#19)
+  * chore(deps-dev): bump @types/node in /src/vscode-extension (#16)
+  * chore(deps-dev): bump @typescript-eslint/parser in /src/vscode-extension (#15)
+  * chore(deps-dev): bump eslint in /src/vscode-extension (#14)
+  * feat: add initial debian packaging files including control, rules, format, and install
   * formatting documents
-  * feat: enhance completion handler with additional methods and keywords
-  * feat: implement completion handler for language server
-  * feat: enhance language server activation with improved error handling and logging
-  * feat: update build configuration
-  * fix: ensure tsconfig includes skipLibCheck and noEmit options for better type checking
-  * feat: add support for building vscode extension and clean up related files
+  * feat: update new function features and enhancements
+  * feat: add console.isInteractive() function and related documentation
   * formatting documents
-  * feat: implement utility.random() function with min/max parameters, add tests and documentation
-  * feat: add negative test coverage for compiler error handling
-  * feat: update test coverage and remove duplicates
-  * feat: adding support for while and break statements, adding tests and documentation
-  * feat: add additional roadmap ideas for utility, script, args, web, console, and ssh functions
-  * feat: add RawStatement class and update parsing logic to handle raw shell script lines
+  * fix: update compile command documentation to include both -o and --output options
+  * fix: update file handling and cleanup methods for consistency across documentation
+  * fix: update string formatting in multiple documentation files for consistency
+  * fix string interpolation in multiple documentation files
+  * docs: remove recognition section from contributing guide
+  * docs: update test categories in contributing guide to include format tests
+  * docs: update link to README.md in contributing guide
+  * docs: update contributing guide to include MCP server component
+  * feat: add format target for project file formatting
+  * remove unneeded watch rule
   * formatting documents
-  * fix: update variable echo syntax to use braces for consistency
-  * renaming some test files
-  * fixing failing tests
-  * feat: add console.promptYesNo() functionality; implement parsing, compilation, and tests
-  * fix: add tests/temp/ directory to .gitignore
-  * fixing failing tests
-  * feat: add console.isSudo() functionality; implement parsing, compilation, and tests
-  * docs: adding installation instructions
-  * fix: update release workflow to ensure the latest release is marked correctly
-  * feat: add run command to execute .shx files with error handling
-  * fix: update section header for file system functions
-  * fix: update code blocks for clarity and consistency; move process information functions section
-  * pinning github actions using full commit shas
+  * feat: add array.shuffle() function and update documentation and tests
+  * feat: implement array.merge() function and add tests for various array types
+  * fix: add forwardPorts configuration
+  * Update dependencies and modify dev script in package.json
+  * fix: update start script to build and run the server
+  * fix: update server name to Utah MCP Server
+  * fix: simplify start script to directly run the server
+  * feat(mcp-server): implement AVM MCP Server with Utah language definitions
+  * chore: remove express and its type definitions from dependencies
+  * feat(mcp-server): initialize project with TypeScript configuration and package setup
 
- -- Engin Polat <polatengin@hotmail.com>  Mon, 7 Jul 2025 22:13:19 -0700
+ -- Engin Polat <polatengin@hotmail.com>  Wed, 6 Aug 2025 12:03:24 -0700
 
-utah (0.1.2) unstable; urgency=medium
+utah (0.1.10) unstable; urgency=medium
 
-  * removing failing steps
-  * adding osx-arm to release (#3)
-  * removing user input from install script
-  * changed shebang for macos support
-  * Adding install script
-  * refactor code structure for improved readability and maintainability
-  * Update README.md
-  * feat: implement console.clear() functionality, tests added, and documentation added
+  * chore: update checkout step to include fetch-depth and fetch-tags options
+  * feat: add automatic release notes generation using Gemini API
+  * chore: updating roadmap
+  * fix: trim trailing whitespace from markdown files before linting
   * formatting documents
-  * feat: add web.get() function and related template literal support with tests and examples
+  * feat: implement defer statements for automatic cleanup and resource management
+  * Implement console dialog functions and their corresponding parser, formatter, and compiler logic
+  * fix: add missing test badge
   * formatting documents
-  * feat: add range validation for utility.random() function and update related tests
-  * feat: implement array.reverse() method and add related tests and documentation
-  * feat: remove deprecated health check script
-  * formatting documents
-  * feat: implement array.isEmpty() method, add related tests and documentation
-  * feat: add server health check demo in the examples folder
-  * feat: add item in the roadmap for validation for min/max parameters in utility.random() function
-  * formatting documents
-  * feat: add a test for env.get() usage in ternary operators
-  * feat: update regex for function name validation to fix ternary operator parsing issues
-  * feat: add testing instructions for running the test suite for specific test file
-  * feat: update string functions to use consistent casing and correct method calls
-  * feat: enhance test command to support specific test execution and improved output
-  * feat: enhance release workflow with test badge generation and detailed test results summary
+  * refactor: replace string manipulation expressions with string namespace functions
 
- -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 14:10:41 -0700
+ -- Engin Polat <polatengin@hotmail.com>  Wed, 23 Jul 2025 21:02:58 -0700
 
-utah (0.1.3) unstable; urgency=medium
+utah (0.1.9) unstable; urgency=medium
 
-  * refactor: streamline test result handling and summary creation in release workflow
-  * feat: update versioning in project file and enhance test result tracking
-  * feat: add version command to display project and runtime information
-  * refactor: remove unused using directives from parser files
-  * refactor: split parsing methods to separate files
-
- -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 18:48:51 -0700
-
-utah (0.1.4) unstable; urgency=medium
-
-  * feat: implement array.contains() method for checking element presence
-  * feat: add support for parallel function calls with new syntax and implementation
-  * removing broken emoji
+  * refactor: replace array manipulation with array namespace functions
+  * refactor string manipulation to use string namespace functions
+  * Refactor array methods to use array namespace functions
+  * fix: rename AnalyzeCompletionContext for consistency
   * formatting documents
-  * docs: update section title for script metadata and argument parsing
-  * feat: implement argument parsing functionality with args.define(), args.has(), args.get(), and args.showHelp()
+  * Enhance string manipulation functions and documentation
+  * formatting document
+  * feat: enhance cli with direct execution support for .shx files and commands
+  * chore(deps-dev): bump eslint in /src/vscode-extension (#11)
+  * chore(deps-dev): bump @types/node in /src/vscode-extension (#13)
+  * chore(deps-dev): bump @typescript-eslint/parser in /src/vscode-extension (#12)
+  * chore(deps-dev): bump esbuild in /src/vscode-extension (#10)
+  * feat: add fs.delete function with documentation, examples, and tests
   * formatting documents
-  * feat: add script.description() functionality for setting script metadata
-  * feat: add support for else if statements in parser and compiler
-  * refactor: improve array expression parsing
-  * feat: enhance array assignment handling and update regex for variable parsing
-  * feat: enhance array assignment handling in CompileExpression method
+  * feat: rename fs.copyFile and fs.moveFile functions to fs.copy and fs.move, update documentation and tests accordingly
+  * feat: add fs.rename function with documentation, examples, and tests
+  * feat: add fs.moveFile function and related documentation, examples, and tests
+  * feat: implement fs.copyFile function and related expressions/statements
+  * feat: mark template functions as complete
+  * fix: update examples reference to include tests folder
+  * fix: update code blocks in documentation
+  * feat: add template functions for file processing and variable substitution
+  * feat: rename TemplateLiteralExpression to StringInterpolationExpression and update related references
   * formatting documents
-  * feat: implement try-catch statement support in parser and compiler, and documentation
-  * Refactor shell scripts for improved readability and consistency
-  * feat: add StringLengthExpression and update parsing for length methods
-  * feat: add ProcessElapsedTimeExpression and enhance template literal parsing
-  * fixing failing test
-  * feat: update handling of .length property for arrays in expression compilation
-  * formatting documents
-  * feat: enhance ternary expression parsing and add test cases for nested ternaries
-  * formatting documents
-  * feat: add ArrayAssignment class and implement parsing and compilation logic for array assignments
-  * feat: enhance boolean condition handling for expressions and statements
-  * feat: improving os_isinstalled tests
-  * feat: add OsIsInstalledExpression and implement parsing and compilation logic
+  * feat: separate arrays and strings into individual documentation files and update references
+  * feat: update with new test coverage details and additional test files
 
- -- Engin Polat <polatengin@hotmail.com>  Thu, 10 Jul 2025 17:04:02 -0700
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 22 Jul 2025 00:30:31 -0700
+
+utah (0.1.8) unstable; urgency=medium
+
+  * formatting documents
+  * feat: add utility functions for UUID generation, text hashing, and Base64 encoding/decoding with corresponding tests and documentation
+  * feat: add array.shuffle() function to the list of planned features
+  * formatting document
+  * feat: implement array.sort() method with support for ascending and descending orders, add tests and documentation
+  * feat: add array.join() method implementation, tests and documentation
+  * feat: add markdownlint target to Makefile for linting markdown files
+  * formatting document
+  * chore: update badges
+  * feat: add GitHub Pages deployment badge
+  * feat: update navigation items in docusaurus config and add GitHub icon
+  * fix: update workflow trigger to workflow_dispatch and remove redundant working-directory
+  * fix: correct working-directory and cache-dependency-path in GitHub Actions workflow
+  * fix: add missing working-directory for steps in GitHub Actions workflow
+  * rename documentation files and folders
+  * feat: add GitHub Actions workflow for deploying documentation to GitHub Pages
+  * fix: add .docusaurus and build directories
+  * feat: initialize website with Docusaurus setup
+  * fix: update metadata in contributing guide for consistency in layout and navigation
+  * fix: update metadata in Docker guide for consistency in layout and navigation
+  * fix: update metadata for cloud, devops, and testing guides to ensure consistency in layout and navigation
+  * fix: update documentation headers for array, git, string, system, utility, and web functions
+  * fix: update links in documentation to use relative paths for consistency
+  * Add documentation for best practices, cloud deployment, DevOps integration, Docker usage, and testing strategies
+  * feat: add contributing guide to improve onboarding for new contributors
+  * feat: add documentation for array, git, string, system, utility, and web functions
+  * fix: remove outdated import alias example and clean up whitespace in documentation
+  * feat: enhance 'utah run' command to support direct command execution and improve usage instructions
+  * fix: update format command usage and options in documentation
+  * fix: improve clarity and formatting in the documentation
+  * refactor: remove outdated integration guides for clarity
+  * fix: update documentation title for clarity
+  * feat: add favicon for improved branding
+  * feat: add favicon for improved branding
+  * fix: update extension icon
+  * feat: add mermaid plugin configuration for diagram support
+  * refactor: remove unused command definition from contributes section
+  * docs: add documentation section for usage instructions
+  * fix: correct wording for error handling in utility.random function
+  * formatting document
+
+ -- Engin Polat <polatengin@hotmail.com>  Fri, 18 Jul 2025 13:10:08 -0700
+
+utah (0.1.7) unstable; urgency=medium
+
+  * feat: enhance formatting command to support recursive formatting of all .shx files
+  * feat: add comprehensive guide on security best practices for automation scripts
+  * feat: add comprehensive guide on performance optimization with profiling, resource monitoring, and best practices
+  * feat: add comprehensive guide on parallel execution with background process management and resource monitoring
+  * feat: add comprehensive CI/CD integration guide with build and deployment scripts
+  * feat: add comprehensive system administration guide with monitoring, management, and best practices
+  * feat: add comprehensive file processing guide with examples and best practices
+  * refactor: remove outdated development workflow section from guides
+  * feat: enhance documentation with command-line arguments and developer tools sections
+  * add run command example in documentation
+  * feat: update color scheme to dark
+  * Create CNAME
+  * Add documentation for Utah's language features
+  * feat: add automated dependency installation functions for json and yaml with corresponding tests and documentation
+  * formatting document
+  * adding missing documentation
+  * feat: add yml manipulation, parsing, and validation functions with corresponding tests and documentation
+  * feat: add json manipulation, parsing, and validation functions with corresponding tests and documentation
+
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 14:04:48 -0700
+
+utah (0.1.6) unstable; urgency=medium
+
+  * fix: adjust spacing in formatting options and test cases for consistency
+  * fix: correct spelling of malformatted to malformed
+  * formatting document
+  * feat: enhance formatting rules to add blank lines between statement types and improve parser regex for control structures
+  * formatting document
+  * feat: enhance formatting functionality to preserve comments and improve test cases
+  * feat: add malformatted test input files directory
+  * formatting document
+  * feat: improve code formatting and handle malformatted expressions in parser
+  * feat: add malformatted test cases and format validation
+  * feat: implement scheduler.cron functionality with cron job scheduling and lambda support
+  * formatting document
+  * feat: update devcontainer and installation script with additional features and improvements
+  * feat: add code formatting feature with editorconfig support
+  * adding a few improvement ideas to roadmap
+  * feat: update installation command to accept version tag
+  * feat: enhance installation script with improved error handling and accepting version to install
+
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 07:01:51 -0700
 
 utah (0.1.5) unstable; urgency=medium
 
@@ -157,174 +223,114 @@ utah (0.1.5) unstable; urgency=medium
 
  -- Engin Polat <polatengin@hotmail.com>  Tue, 15 Jul 2025 18:01:15 -0700
 
-utah (0.1.6) unstable; urgency=medium
+utah (0.1.4) unstable; urgency=medium
 
-  * fix: adjust spacing in formatting options and test cases for consistency
-  * fix: correct spelling of malformatted to malformed
-  * formatting document
-  * feat: enhance formatting rules to add blank lines between statement types and improve parser regex for control structures
-  * formatting document
-  * feat: enhance formatting functionality to preserve comments and improve test cases
-  * feat: add malformatted test input files directory
-  * formatting document
-  * feat: improve code formatting and handle malformatted expressions in parser
-  * feat: add malformatted test cases and format validation
-  * feat: implement scheduler.cron functionality with cron job scheduling and lambda support
-  * formatting document
-  * feat: update devcontainer and installation script with additional features and improvements
-  * feat: add code formatting feature with editorconfig support
-  * adding a few improvement ideas to roadmap
-  * feat: update installation command to accept version tag
-  * feat: enhance installation script with improved error handling and accepting version to install
-
- -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 07:01:51 -0700
-
-utah (0.1.7) unstable; urgency=medium
-
-  * feat: enhance formatting command to support recursive formatting of all .shx files
-  * feat: add comprehensive guide on security best practices for automation scripts
-  * feat: add comprehensive guide on performance optimization with profiling, resource monitoring, and best practices
-  * feat: add comprehensive guide on parallel execution with background process management and resource monitoring
-  * feat: add comprehensive CI/CD integration guide with build and deployment scripts
-  * feat: add comprehensive system administration guide with monitoring, management, and best practices
-  * feat: add comprehensive file processing guide with examples and best practices
-  * refactor: remove outdated development workflow section from guides
-  * feat: enhance documentation with command-line arguments and developer tools sections
-  * add run command example in documentation
-  * feat: update color scheme to dark
-  * Create CNAME
-  * Add documentation for Utah's language features
-  * feat: add automated dependency installation functions for json and yaml with corresponding tests and documentation
-  * formatting document
-  * adding missing documentation
-  * feat: add yml manipulation, parsing, and validation functions with corresponding tests and documentation
-  * feat: add json manipulation, parsing, and validation functions with corresponding tests and documentation
-
- -- Engin Polat <polatengin@hotmail.com>  Thu, 17 Jul 2025 14:04:48 -0700
-
-utah (0.1.8) unstable; urgency=medium
-
+  * feat: implement array.contains() method for checking element presence
+  * feat: add support for parallel function calls with new syntax and implementation
+  * removing broken emoji
   * formatting documents
-  * feat: add utility functions for UUID generation, text hashing, and Base64 encoding/decoding with corresponding tests and documentation
-  * feat: add array.shuffle() function to the list of planned features
-  * formatting document
-  * feat: implement array.sort() method with support for ascending and descending orders, add tests and documentation
-  * feat: add array.join() method implementation, tests and documentation
-  * feat: add markdownlint target to Makefile for linting markdown files
-  * formatting document
-  * chore: update badges
-  * feat: add GitHub Pages deployment badge
-  * feat: update navigation items in docusaurus config and add GitHub icon
-  * fix: update workflow trigger to workflow_dispatch and remove redundant working-directory
-  * fix: correct working-directory and cache-dependency-path in GitHub Actions workflow
-  * fix: add missing working-directory for steps in GitHub Actions workflow
-  * rename documentation files and folders
-  * feat: add GitHub Actions workflow for deploying documentation to GitHub Pages
-  * fix: add .docusaurus and build directories
-  * feat: initialize website with Docusaurus setup
-  * fix: update metadata in contributing guide for consistency in layout and navigation
-  * fix: update metadata in Docker guide for consistency in layout and navigation
-  * fix: update metadata for cloud, devops, and testing guides to ensure consistency in layout and navigation
-  * fix: update documentation headers for array, git, string, system, utility, and web functions
-  * fix: update links in documentation to use relative paths for consistency
-  * Add documentation for best practices, cloud deployment, DevOps integration, Docker usage, and testing strategies
-  * feat: add contributing guide to improve onboarding for new contributors
-  * feat: add documentation for array, git, string, system, utility, and web functions
-  * fix: remove outdated import alias example and clean up whitespace in documentation
-  * feat: enhance 'utah run' command to support direct command execution and improve usage instructions
-  * fix: update format command usage and options in documentation
-  * fix: improve clarity and formatting in the documentation
-  * refactor: remove outdated integration guides for clarity
-  * fix: update documentation title for clarity
-  * feat: add favicon for improved branding
-  * feat: add favicon for improved branding
-  * fix: update extension icon
-  * feat: add mermaid plugin configuration for diagram support
-  * refactor: remove unused command definition from contributes section
-  * docs: add documentation section for usage instructions
-  * fix: correct wording for error handling in utility.random function
-  * formatting document
-
- -- Engin Polat <polatengin@hotmail.com>  Fri, 18 Jul 2025 13:10:08 -0700
-
-utah (0.1.9) unstable; urgency=medium
-
-  * refactor: replace array manipulation with array namespace functions
-  * refactor string manipulation to use string namespace functions
-  * Refactor array methods to use array namespace functions
-  * fix: rename AnalyzeCompletionContext for consistency
+  * docs: update section title for script metadata and argument parsing
+  * feat: implement argument parsing functionality with args.define(), args.has(), args.get(), and args.showHelp()
   * formatting documents
-  * Enhance string manipulation functions and documentation
-  * formatting document
-  * feat: enhance cli with direct execution support for .shx files and commands
-  * chore(deps-dev): bump eslint in /src/vscode-extension (#11)
-  * chore(deps-dev): bump @types/node in /src/vscode-extension (#13)
-  * chore(deps-dev): bump @typescript-eslint/parser in /src/vscode-extension (#12)
-  * chore(deps-dev): bump esbuild in /src/vscode-extension (#10)
-  * feat: add fs.delete function with documentation, examples, and tests
+  * feat: add script.description() functionality for setting script metadata
+  * feat: add support for else if statements in parser and compiler
+  * refactor: improve array expression parsing
+  * feat: enhance array assignment handling and update regex for variable parsing
+  * feat: enhance array assignment handling in CompileExpression method
   * formatting documents
-  * feat: rename fs.copyFile and fs.moveFile functions to fs.copy and fs.move, update documentation and tests accordingly
-  * feat: add fs.rename function with documentation, examples, and tests
-  * feat: add fs.moveFile function and related documentation, examples, and tests
-  * feat: implement fs.copyFile function and related expressions/statements
-  * feat: mark template functions as complete
-  * fix: update examples reference to include tests folder
-  * fix: update code blocks in documentation
-  * feat: add template functions for file processing and variable substitution
-  * feat: rename TemplateLiteralExpression to StringInterpolationExpression and update related references
+  * feat: implement try-catch statement support in parser and compiler, and documentation
+  * Refactor shell scripts for improved readability and consistency
+  * feat: add StringLengthExpression and update parsing for length methods
+  * feat: add ProcessElapsedTimeExpression and enhance template literal parsing
+  * fixing failing test
+  * feat: update handling of .length property for arrays in expression compilation
   * formatting documents
-  * feat: separate arrays and strings into individual documentation files and update references
-  * feat: update with new test coverage details and additional test files
-
- -- Engin Polat <polatengin@hotmail.com>  Tue, 22 Jul 2025 00:30:31 -0700
-
-utah (0.1.10) unstable; urgency=medium
-
-  * chore: update checkout step to include fetch-depth and fetch-tags options
-  * feat: add automatic release notes generation using Gemini API
-  * chore: updating roadmap
-  * fix: trim trailing whitespace from markdown files before linting
+  * feat: enhance ternary expression parsing and add test cases for nested ternaries
   * formatting documents
-  * feat: implement defer statements for automatic cleanup and resource management
-  * Implement console dialog functions and their corresponding parser, formatter, and compiler logic
-  * fix: add missing test badge
-  * formatting documents
-  * refactor: replace string manipulation expressions with string namespace functions
+  * feat: add ArrayAssignment class and implement parsing and compilation logic for array assignments
+  * feat: enhance boolean condition handling for expressions and statements
+  * feat: improving os_isinstalled tests
+  * feat: add OsIsInstalledExpression and implement parsing and compilation logic
 
- -- Engin Polat <polatengin@hotmail.com>  Wed, 23 Jul 2025 21:02:58 -0700
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 10 Jul 2025 17:04:02 -0700
 
-utah (0.1.11) unstable; urgency=medium
+utah (0.1.3) unstable; urgency=medium
 
-  * chore(deps): bump github/codeql-action from 3.29.2 to 3.29.5 (#19)
-  * chore(deps-dev): bump @types/node in /src/vscode-extension (#16)
-  * chore(deps-dev): bump @typescript-eslint/parser in /src/vscode-extension (#15)
-  * chore(deps-dev): bump eslint in /src/vscode-extension (#14)
-  * feat: add initial debian packaging files including control, rules, format, and install
-  * formatting documents
-  * feat: update new function features and enhancements
-  * feat: add console.isInteractive() function and related documentation
-  * formatting documents
-  * fix: update compile command documentation to include both -o and --output options
-  * fix: update file handling and cleanup methods for consistency across documentation
-  * fix: update string formatting in multiple documentation files for consistency
-  * fix string interpolation in multiple documentation files
-  * docs: remove recognition section from contributing guide
-  * docs: update test categories in contributing guide to include format tests
-  * docs: update link to README.md in contributing guide
-  * docs: update contributing guide to include MCP server component
-  * feat: add format target for project file formatting
-  * remove unneeded watch rule
-  * formatting documents
-  * feat: add array.shuffle() function and update documentation and tests
-  * feat: implement array.merge() function and add tests for various array types
-  * fix: add forwardPorts configuration
-  * Update dependencies and modify dev script in package.json
-  * fix: update start script to build and run the server
-  * fix: update server name to Utah MCP Server
-  * fix: simplify start script to directly run the server
-  * feat(mcp-server): implement AVM MCP Server with Utah language definitions
-  * chore: remove express and its type definitions from dependencies
-  * feat(mcp-server): initialize project with TypeScript configuration and package setup
+  * refactor: streamline test result handling and summary creation in release workflow
+  * feat: update versioning in project file and enhance test result tracking
+  * feat: add version command to display project and runtime information
+  * refactor: remove unused using directives from parser files
+  * refactor: split parsing methods to separate files
 
- -- Engin Polat <polatengin@hotmail.com>  Wed, 6 Aug 2025 12:03:24 -0700
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 18:48:51 -0700
+
+utah (0.1.2) unstable; urgency=medium
+
+  * removing failing steps
+  * adding osx-arm to release (#3)
+  * removing user input from install script
+  * changed shebang for macos support
+  * Adding install script
+  * refactor code structure for improved readability and maintainability
+  * Update README.md
+  * feat: implement console.clear() functionality, tests added, and documentation added
+  * formatting documents
+  * feat: add web.get() function and related template literal support with tests and examples
+  * formatting documents
+  * feat: add range validation for utility.random() function and update related tests
+  * feat: implement array.reverse() method and add related tests and documentation
+  * feat: remove deprecated health check script
+  * formatting documents
+  * feat: implement array.isEmpty() method, add related tests and documentation
+  * feat: add server health check demo in the examples folder
+  * feat: add item in the roadmap for validation for min/max parameters in utility.random() function
+  * formatting documents
+  * feat: add a test for env.get() usage in ternary operators
+  * feat: update regex for function name validation to fix ternary operator parsing issues
+  * feat: add testing instructions for running the test suite for specific test file
+  * feat: update string functions to use consistent casing and correct method calls
+  * feat: enhance test command to support specific test execution and improved output
+  * feat: enhance release workflow with test badge generation and detailed test results summary
+
+ -- Engin Polat <polatengin@hotmail.com>  Tue, 8 Jul 2025 14:10:41 -0700
+
+utah (0.1.1) unstable; urgency=medium
+
+  * feat: add script control functions and their handling in the compiler and parser, add tests and documentation
+  * formatting documents
+  * feat: enhance completion handler with additional methods and keywords
+  * feat: implement completion handler for language server
+  * feat: enhance language server activation with improved error handling and logging
+  * feat: update build configuration
+  * fix: ensure tsconfig includes skipLibCheck and noEmit options for better type checking
+  * feat: add support for building vscode extension and clean up related files
+  * formatting documents
+  * feat: implement utility.random() function with min/max parameters, add tests and documentation
+  * feat: add negative test coverage for compiler error handling
+  * feat: update test coverage and remove duplicates
+  * feat: adding support for while and break statements, adding tests and documentation
+  * feat: add additional roadmap ideas for utility, script, args, web, console, and ssh functions
+  * feat: add RawStatement class and update parsing logic to handle raw shell script lines
+  * formatting documents
+  * fix: update variable echo syntax to use braces for consistency
+  * renaming some test files
+  * fixing failing tests
+  * feat: add console.promptYesNo() functionality; implement parsing, compilation, and tests
+  * fix: add tests/temp/ directory to .gitignore
+  * fixing failing tests
+  * feat: add console.isSudo() functionality; implement parsing, compilation, and tests
+  * docs: adding installation instructions
+  * fix: update release workflow to ensure the latest release is marked correctly
+  * feat: add run command to execute .shx files with error handling
+  * fix: update section header for file system functions
+  * fix: update code blocks for clarity and consistency; move process information functions section
+  * pinning github actions using full commit shas
+
+ -- Engin Polat <polatengin@hotmail.com>  Mon, 7 Jul 2025 22:13:19 -0700
+
+utah (0.1.0) unstable; urgency=medium
+
+  * Initial release
+
+ -- Engin Polat <polatengin@hotmail.com>  Thu, 3 Jul 2025 23:13:23 -0700
 
