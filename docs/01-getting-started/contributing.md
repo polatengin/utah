@@ -222,14 +222,6 @@ Utah follows semantic versioning:
 
 We are committed to providing a welcoming and inclusive environment for all contributors. Please read and follow our Code of Conduct.
 
-## Recognition
-
-Contributors are recognized in several ways:
-
-- **CONTRIBUTORS.md**: All contributors are listed
-- **Release Notes**: Major contributions are highlighted
-- **Website**: Regular contributors may be featured
-
 ## Common Contribution Areas
 
 ### High Priority
