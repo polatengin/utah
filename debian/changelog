@@ -293,3 +293,38 @@ utah (0.1.10) unstable; urgency=medium
 
  -- Engin Polat <polatengin@hotmail.com>  Thu, 24 Jul 2025 04:02:58 +0000
 
+utah (0.1.11) unstable; urgency=medium
+
+  * chore(deps): bump github/codeql-action from 3.29.2 to 3.29.5 (#19)
+  * chore(deps-dev): bump @types/node in /src/vscode-extension (#16)
+  * chore(deps-dev): bump @typescript-eslint/parser in /src/vscode-extension (#15)
+  * chore(deps-dev): bump eslint in /src/vscode-extension (#14)
+  * feat: add initial debian packaging files including control, rules, format, and install
+  * formatting documents
+  * feat: update new function features and enhancements
+  * feat: add console.isInteractive() function and related documentation
+  * formatting documents
+  * fix: update compile command documentation to include both -o and --output options
+  * fix: update file handling and cleanup methods for consistency across documentation
+  * fix: update string formatting in multiple documentation files for consistency
+  * fix string interpolation in multiple documentation files
+  * docs: remove recognition section from contributing guide
+  * docs: update test categories in contributing guide to include format tests
+  * docs: update link to README.md in contributing guide
+  * docs: update contributing guide to include MCP server component
+  * feat: add format target for project file formatting
+  * remove unneeded watch rule
+  * formatting documents
+  * feat: add array.shuffle() function and update documentation and tests
+  * feat: implement array.merge() function and add tests for various array types
+  * fix: add forwardPorts configuration
+  * Update dependencies and modify dev script in package.json
+  * fix: update start script to build and run the server
+  * fix: update server name to Utah MCP Server
+  * fix: simplify start script to directly run the server
+  * feat(mcp-server): implement AVM MCP Server with Utah language definitions
+  * chore: remove express and its type definitions from dependencies
+  * feat(mcp-server): initialize project with TypeScript configuration and package setup
+
+ -- Engin Polat <polatengin@hotmail.com>  Wed, 06 Aug 2025 19:03:24 +0000
+
