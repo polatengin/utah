@@ -175,7 +175,7 @@ cd src/vscode-extension && npm test
 
 - **Positive Tests**: Valid Utah code that should compile successfully
 - **Negative Tests**: Invalid code that should fail compilation
-- **Integration Tests**: End-to-end functionality tests
+- **Format Tests**: Malformed code that should be formatted correctly
 
 ### Adding New Tests
 
