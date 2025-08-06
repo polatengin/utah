@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev markdownlint
+.PHONY: help build build-extension test compile clean install info dev markdownlint format
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -32,6 +32,7 @@ help:
 	@echo "  make test"
 	@echo "  make test FILE=env_get_ternary"
 	@echo "  make compile FILE=examples/hello.shx"
+	@echo "  make format"
 
 clean: ## Clean build artifacts and test files
 	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
@@ -209,6 +210,19 @@ ifndef FILE
 endif
 	@echo "$(BLUE)📝 Compiling $(FILE)...$(NC)"
 	@cd $(CLI_DIR) && dotnet run -- compile "../../$(FILE)"
+
+format: ## Format .NET source code and markdown files in the project
+	@echo "$(BLUE)📝 Formatting project files...$(NC)"
+	@echo "$(BLUE)Formatting .NET source code...$(NC)"
+	@cd $(CLI_DIR) && dotnet format
+	@echo "$(BLUE)Formatting markdown files...$(NC)"
+	@find . -name "*.md" -exec sed -i -E 's/[[:space:]]+$$//' {} +
+	@if command -v markdownlint >/dev/null 2>&1; then \
+		markdownlint --fix --ignore-path .gitignore --ignore node_modules --ignore src/website/node_modules --ignore src/vscode-extension/node_modules "**/*.md" 2>/dev/null || true; \
+	else \
+		echo "$(YELLOW)⚠️  markdownlint not found, skipping markdown formatting$(NC)"; \
+	fi
+	@echo "$(GREEN)✅ Project formatting complete$(NC)"
 
 # Development workflow targets
 build-extension: build ## Build both CLI and VS Code extension
