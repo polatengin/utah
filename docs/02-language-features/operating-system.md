@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Operating System Functions
-parent: Functions
+parent: Language Features
 nav_order: 4
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Git Functions
-parent: Functions
+parent: Language Features
 nav_order: 6
 ---
 

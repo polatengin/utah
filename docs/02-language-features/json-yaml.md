@@ -1,7 +1,7 @@
 ---
 layout: default
 title: JSON and YAML Processing
-parent: Functions
+parent: Language Features
 nav_order: 1
 ---
 

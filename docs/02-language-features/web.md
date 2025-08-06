@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Web Functions
-parent: Functions
+parent: Language Features
 nav_order: 10
 ---
 

@@ -1,4 +1,9 @@
-# Template Functions
+---
+layout: default
+title: Template Functions
+parent: Language Features
+nav_order: 10
+---
 
 Utah provides template functions for processing files with variable substitution. These functions use `envsubst` to replace `"$\{VARIABLE\}"` placeholders with environment variable values, making them perfect for configuration file generation and dynamic content creation.
 

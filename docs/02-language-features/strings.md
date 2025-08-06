@@ -34,14 +34,14 @@ let len: number = string.length(message);
 console.log("Message length: ${len}");
 ```
 
-#### `string.contains()`
+#### `string.includes()`
 
 Check if a string contains a substring:
 
 ```typescript
 let filepath: string = "/home/user/script.shx";
 
-if (string.contains(filepath, ".shx")) {
+if (string.includes(filepath, ".shx")) {
   console.log("This is a Utah script file");
 }
 ```
@@ -82,12 +82,22 @@ let parts: string[] = string.split(path, "/");
 
 #### `string.replace()`
 
-Replace occurrences of a substring:
+Replace first occurrence of a substring:
 
 ```typescript
 let message: string = "Hello, World!";
 let updated: string = string.replace(message, "World", "Utah");
 // updated is "Hello, Utah!"
+```
+
+#### `string.replaceAll()`
+
+Replace all occurrences of a substring:
+
+```typescript
+let text: string = "hello hello world";
+let updated: string = string.replaceAll(text, "hello", "hi");
+// updated is "hi hi world"
 ```
 
 #### `string.trim()`
@@ -110,6 +120,74 @@ let upper: string = string.toUpperCase(name);  // "UTAH"
 let lower: string = string.toLowerCase(name);  // "utah"
 ```
 
+#### `string.capitalize()`
+
+Capitalize the first letter of a string:
+
+```typescript
+let name: string = "john";
+let capitalized: string = string.capitalize(name);  // "John"
+```
+
+#### `string.substring()` and `string.slice()`
+
+Extract parts of a string:
+
+```typescript
+let text: string = "JavaScript";
+
+// substring(start, end) - extracts from start index to end index
+let sub: string = string.substring(text, 0, 4);  // "Java"
+
+// slice(start, end) - similar to substring but supports negative indices
+let sliced: string = string.slice(text, 4, 10);  // "Script"
+```
+
+#### `string.indexOf()`
+
+Find the position of a substring:
+
+```typescript
+let text: string = "The quick brown fox";
+let position: number = string.indexOf(text, "brown");  // 10
+let notFound: number = string.indexOf(text, "cat");    // -1
+```
+
+#### `string.padStart()` and `string.padEnd()`
+
+Add padding to strings:
+
+```typescript
+let num: string = "42";
+
+// Pad start with zeros to make it 5 characters
+let padded: string = string.padStart(num, 5, "0");  // "00042"
+
+// Pad end with dashes to make it 5 characters
+let paddedEnd: string = string.padEnd(num, 5, "-");  // "42---"
+```
+
+#### `string.repeat()`
+
+Repeat a string multiple times:
+
+```typescript
+let pattern: string = "abc";
+let repeated: string = string.repeat(pattern, 3);  // "abcabcabc"
+```
+
+#### `string.isEmpty()`
+
+Check if a string is empty:
+
+```typescript
+let text: string = "";
+let whitespace: string = "   ";
+
+let empty: boolean = string.isEmpty(text);        // true
+let notEmpty: boolean = string.isEmpty(whitespace); // false
+```
+
 ### String Interpolation
 
 Use template literals for dynamic strings:
@@ -127,7 +205,7 @@ let message: string = "Hello, ${name}! You are ${age} years old.";
 ```typescript
 let filePath: string = "/home/user/documents/report.pdf";
 
-if (string.contains(filePath, "/home/")) {
+if (string.includes(filePath, "/home/")) {
   console.log("File is in user directory");
 }
 
@@ -165,6 +243,30 @@ let replaced: string = string.replace(upperCase, "WORLD", "UTAH");
 console.log("Result: ${replaced}"); // "HELLO, UTAH!"
 ```
 
+### Advanced String Manipulation
+
+```typescript
+// Working with user input
+let userName: string = "john_doe";
+let displayName: string = string.capitalize(string.replace(userName, "_", " "));
+console.log("Welcome ${displayName}!"); // "Welcome John doe!"
+
+// Formatting numbers
+let number: string = "42";
+let padded: string = string.padStart(number, 6, "0");
+console.log("Order #${padded}"); // "Order #000042"
+
+// Creating patterns
+let separator: string = string.repeat("-", 20);
+console.log(separator); // "--------------------"
+
+// Text analysis
+let sentence: string = "The quick brown fox jumps over the lazy dog";
+let wordPosition: number = string.indexOf(sentence, "fox");
+let excerpt: string = string.substring(sentence, wordPosition, wordPosition + 3);
+console.log("Found '${excerpt}' at position ${wordPosition}");
+```
+
 ### Configuration Parsing
 
 ```typescript
@@ -181,40 +283,63 @@ for (let pair: string in pairs) {
 }
 ```
 
-### Email Validation
+### String Validation
 
 ```typescript
-function isValidEmail(email: string): boolean {
-  // Basic email validation
-  if (!string.contains(email, "@")) {
+function validateInput(input: string): boolean {
+  // Check if string is empty
+  if (string.isEmpty(input)) {
+    console.log("Input cannot be empty");
     return false;
   }
 
-  if (!string.contains(email, ".")) {
-    return false;
-  }
-
-  let emailParts: string[] = string.split(email, "@");
-  if (array.length(emailParts) != 2) {
-    return false;
-  }
-
-  let localPart: string = emailParts[0];
-  let domainPart: string = emailParts[1];
-
-  if (string.length(localPart) == 0 || string.length(domainPart) == 0) {
+  // Check if string is only whitespace
+  if (string.isEmpty(string.trim(input))) {
+    console.log("Input cannot be only whitespace");
     return false;
   }
 
   return true;
 }
 
-let email: string = "user@example.com";
-if (isValidEmail(email)) {
-  console.log("Valid email: ${email}");
-} else {
-  console.log("Invalid email: ${email}");
+function isValidIdentifier(name: string): boolean {
+  // Check for valid identifier pattern
+  if (string.includes(name, " ")) {
+    return false;
+  }
+
+  if (string.startsWith(name, "_") || string.startsWith(name, "-")) {
+    return false;
+  }
+
+  return true;
 }
+
+let userInput: string = "my_variable";
+if (validateInput(userInput) && isValidIdentifier(userInput)) {
+  console.log("Valid identifier: ${userInput}");
+}
+```
+
+### Text Formatting and Cleanup
+
+```typescript
+// Clean and format text data
+let rawData: string = "  JavaScript, Python, TypeScript  ";
+let languages: string[] = string.split(rawData, ",");
+
+for (let lang: string in languages) {
+  let cleaned: string = string.trim(lang);
+  let formatted: string = string.capitalize(string.toLowerCase(cleaned));
+  console.log("Language: ${formatted}");
+}
+
+// Replace multiple patterns
+let messyText: string = "Hello... world!!! How are you???";
+let step1: string = string.replaceAll(messyText, "...", ".");
+let step2: string = string.replaceAll(step1, "!!!", "!");
+let step3: string = string.replaceAll(step2, "???", "?");
+console.log("Cleaned: ${step3}");
 ```
 
 ### Log Processing
@@ -305,6 +430,47 @@ if (debugMode) {
 }
 
 console.log(config);
+```
+
+### Email Validation
+
+```typescript
+function isValidEmail(email: string): boolean {
+  // Check if empty or only whitespace
+  if (string.isEmpty(email) || string.isEmpty(string.trim(email))) {
+    return false;
+  }
+
+  // Basic email validation
+  if (!string.includes(email, "@")) {
+    return false;
+  }
+
+  if (!string.includes(email, ".")) {
+    return false;
+  }
+
+  let emailParts: string[] = string.split(email, "@");
+  if (array.length(emailParts) != 2) {
+    return false;
+  }
+
+  let localPart: string = emailParts[0];
+  let domainPart: string = emailParts[1];
+
+  if (string.isEmpty(localPart) || string.isEmpty(domainPart)) {
+    return false;
+  }
+
+  return true;
+}
+
+let email: string = "user@example.com";
+if (isValidEmail(email)) {
+  console.log("Valid email: ${email}");
+} else {
+  console.log("Invalid email: ${email}");
+}
 ```
 
 ## String Escaping
