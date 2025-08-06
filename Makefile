@@ -275,8 +275,14 @@ build-debian-changelog: ## Generate debian/changelog from git tags
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
-	@cd $(CLI_DIR) && dotnet publish -c Release -o /usr/local/bin/utah
-	@echo "$(GREEN)✅ Utah CLI installed to /usr/local/bin/utah$(NC)"
+	@if [ -n "$(DESTDIR)" ]; then \
+		echo "$(BLUE)Building release version for packaging...$(NC)"; \
+		cd $(CLI_DIR) && dotnet publish -c Release; \
+		echo "$(GREEN)✅ Utah CLI built for packaging$(NC)"; \
+	else \
+		cd $(CLI_DIR) && dotnet publish -c Release -o /usr/local/bin/utah; \
+		echo "$(GREEN)✅ Utah CLI installed to /usr/local/bin/utah$(NC)"; \
+	fi
 
 info: ## Show project information
 	@echo "Utah Language Development Environment"
