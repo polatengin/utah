@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-106-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-108-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1508,6 +1508,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.delete(path)` - Delete a file or directory recursively, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
+- `fs.createTempFolder(prefix?, baseDir?)` - Create a secure temporary directory and return its absolute path
 
 #### Path Manipulation Functions
 
@@ -1587,6 +1588,12 @@ fs.delete("temp/processing.tmp");
 // Delete entire directory
 fs.delete("old-cache");
 
+// Create a temporary working directory
+let tmpDir: string = fs.createTempFolder();
+console.log("Temp dir:", tmpDir);
+// ... use temp dir ...
+fs.delete(tmpDir); // cleanup
+
 // Check if files exist before operations
 let configExists: boolean = fs.exists("config.txt");
 if (configExists) {
@@ -1657,6 +1664,25 @@ if [ "$configExists" = "true" ]; then
 else
   echo "Config file not found, using defaults"
 fi
+
+# Create secure temporary directory:
+_utah_tmp_base="${TMPDIR:-/tmp}"
+_utah_prefix=utah
+_utah_prefix=$(echo "${_utah_prefix}" | tr -cd '[:alnum:]_.-')
+[ -z "${_utah_prefix}" ] && _utah_prefix=utah
+if command -v mktemp >/dev/null 2>&1; then
+  dir=$(mktemp -d -t "${_utah_prefix}.XXXXXXXX" 2>/dev/null) || dir=$(mktemp -d "${_utah_tmp_base%/}/${_utah_prefix}.XXXXXXXX" 2>/dev/null)
+fi
+if [ -z "${dir}" ]; then
+  for _i in 1 2 3 4 5 6 7 8 9 10; do
+    _suf=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c12)
+    [ -z "${_suf}" ] && _suf=$$
+    _cand="${_utah_tmp_base%/}/${_utah_prefix}-${_suf}"
+    if mkdir -m 700 "${_cand}" 2>/dev/null; then dir="${_cand}"; break; fi
+  done
+fi
+if [ -z "${dir}" ]; then echo "Error: Could not create temporary directory" >&2; exit 1; fi
+echo "${dir}"
 
 backupDirExists=$([ -e "/backup" ] && echo "true" || echo "false")
 echo "Backup directory available: $backupDirExists"
@@ -4729,7 +4755,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [ ] `ssh.disconnect()` function to close SSH connections
 
-- [ ] `git.undoLastCommit()` function for undoing the last commit
+- [x] `git.undoLastCommit()` function for undoing the last commit
 
 - [ ] `git.mergePR()` function for merging pull requests
 

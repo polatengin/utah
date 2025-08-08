@@ -162,6 +162,8 @@ public partial class Compiler
         return CompileFsParentDirNameExpression(fsParentDirName);
       case FsExistsExpression fsExists:
         return CompileFsExistsExpression(fsExists);
+      case FsCreateTempFolderExpression fsCreateTempFolder:
+        return CompileFsCreateTempFolderExpression(fsCreateTempFolder);
       case FsReadFileExpression fsReadFile:
         return CompileFsReadFileExpression(fsReadFile);
       case FsCopyExpression fsCopy:
@@ -1354,6 +1356,35 @@ public partial class Compiler
   {
     var path = CompileExpression(fsExists.Path);
     return $"$([ -e {path} ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileFsCreateTempFolderExpression(FsCreateTempFolderExpression expr)
+  {
+    // Prepare optional inputs
+    var prefixExpr = expr.Prefix != null ? CompileExpression(expr.Prefix) : null;
+    var baseDirExpr = expr.BaseDir != null ? CompileExpression(expr.BaseDir) : null;
+
+    // Build bash script ensuring mktemp-first with secure fallback
+    // We inline the variables and sanitize prefix at runtime for dynamic inputs
+    var setPrefix = prefixExpr != null ? $"_utah_prefix={prefixExpr};" : "_utah_prefix=utah;";
+    var setBase = baseDirExpr != null ? $"_utah_tmp_base={baseDirExpr};" : "_utah_tmp_base=\"${TMPDIR:-/tmp}\";";
+
+    var script =
+      "$({ " +
+      setBase + " " +
+      setPrefix + " " +
+      "_utah_prefix=$(echo \"${_utah_prefix}\" | tr -cd '[:alnum:]_.-'); " +
+      "[ -z \"${_utah_prefix}\" ] && _utah_prefix=utah; " +
+      "if command -v mktemp >/dev/null 2>&1; then " +
+      (baseDirExpr != null
+        ? "dir=$(mktemp -d -p \"${_utah_tmp_base}\" \"${_utah_prefix}.XXXXXXXX\" 2>/dev/null) || dir=$(mktemp -d \"${_utah_tmp_base%/}/${_utah_prefix}.XXXXXXXX\" 2>/dev/null); "
+        : "dir=$(mktemp -d -t \"${_utah_prefix}.XXXXXXXX\" 2>/dev/null) || dir=$(mktemp -d \"${_utah_tmp_base%/}/${_utah_prefix}.XXXXXXXX\" 2>/dev/null); ") +
+      "fi; " +
+      "if [ -z \"${dir}\" ]; then for _i in 1 2 3 4 5 6 7 8 9 10; do _suf=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c12); [ -z \"${_suf}\" ] && _suf=$$; _cand=\"${_utah_tmp_base%/}/${_utah_prefix}-${_suf}\"; if mkdir -m 700 \"${_cand}\" 2>/dev/null; then dir=\"${_cand}\"; break; fi; done; fi; " +
+      "if [ -z \"${dir}\" ]; then echo \"Error: Could not create temporary directory\" >&2; exit 1; fi; " +
+      "echo \"${dir}\"; })";
+
+    return script;
   }
 
   private string CompileStringInterpolationExpression(StringInterpolationExpression stringInterpolation)

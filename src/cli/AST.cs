@@ -69,6 +69,7 @@ public record FsMoveExpression(Expression SourcePath, Expression TargetPath) : E
 public record FsRenameExpression(Expression OldName, Expression NewName) : Expression;
 public record FsDeleteExpression(Expression Path) : Expression;
 public record StringNamespaceCallExpression(string FunctionName, List<Expression> Arguments) : Expression;
+public record FsCreateTempFolderExpression(Expression? Prefix, Expression? BaseDir) : Expression;
 public record ArrayNamespaceCallExpression(string FunctionName, List<Expression> Arguments) : Expression;
 public record TimerCurrentExpression() : Expression;
 public record AssignmentExpression(Expression Left, Expression Right) : Expression;

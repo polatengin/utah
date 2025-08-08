@@ -1,0 +1,9 @@
+let tmp1: string = fs.createTempFolder();
+console.log("TMP1: ${tmp1}");
+
+let tmp2: string = fs.createTempFolder("job");
+console.log("TMP2: ${tmp2}");
+
+let base: string = "/var/tmp";
+let tmp3: string = fs.createTempFolder("build", base);
+console.log("TMP3: ${tmp3}");

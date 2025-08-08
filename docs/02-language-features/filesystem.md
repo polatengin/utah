@@ -561,6 +561,65 @@ echo "Full path: ${fullPath}"
 
 ## Directory Operations
 
+### fs.createTempFolder()
+
+Create a secure temporary directory and return its absolute path. Useful for scratch workspaces you’ll clean up later.
+
+```typescript
+// Default: under $TMPDIR or /tmp, prefix "utah"
+let tmpDir: string = fs.createTempFolder();
+console.log("Temp dir: ${tmpDir}");
+
+// Custom prefix
+let jobTmp: string = fs.createTempFolder("job");
+
+// Custom prefix and base directory
+let buildTmp: string = fs.createTempFolder("build", "/var/tmp");
+
+// Remember to clean up when done
+if (fs.exists(tmpDir)) {
+  fs.delete(tmpDir);
+}
+```
+
+**Generated Bash (simplified):**
+
+```bash
+# Defaults
+_utah_tmp_base="${TMPDIR:-/tmp}"
+_utah_prefix="utah"
+_utah_prefix=$(echo "${_utah_prefix}" | tr -cd '[:alnum:]_.-')
+[ -z "${_utah_prefix}" ] && _utah_prefix=utah
+
+if command -v mktemp >/dev/null 2>&1; then
+  dir=$(mktemp -d -t "${_utah_prefix}.XXXXXXXX" 2>/dev/null) || \
+  dir=$(mktemp -d "${_utah_tmp_base%/}/${_utah_prefix}.XXXXXXXX" 2>/dev/null)
+fi
+
+if [ -z "${dir}" ]; then
+  # Fallback with secure mkdir retry
+  for _i in 1 2 3 4 5 6 7 8 9 10; do
+    _suf=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c12)
+    [ -z "${_suf}" ] && _suf=$$
+    _cand="${_utah_tmp_base%/}/${_utah_prefix}-${_suf}"
+    if mkdir -m 700 "${_cand}" 2>/dev/null; then dir="${_cand}"; break; fi
+  done
+fi
+
+if [ -z "${dir}" ]; then echo "Error: Could not create temporary directory" >&2; exit 1; fi
+echo "${dir}"
+```
+
+**Notes:**
+
+- Prefix is sanitized to safe characters [A-Za-z0-9_.-]; defaults to "utah" if empty
+- Directory permissions are 0700; you are responsible for removing it when done
+- When baseDir is supplied, creation happens under that directory
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_create_temp_folder_default.shx`
+
 ### Creating Directories
 
 ```typescript
@@ -924,5 +983,6 @@ function ensureDirectory(dirPath: string): void {
 | `fs.extension(path)` | Get file extension | string | `fs.extension("file.txt")` |
 | `fs.parentDirName(path)` | Parent dir name | string | `fs.parentDirName("/a/b/c")` |
 | `fs.path(...)` | Join path components | string | `fs.path(dir, subdir, file)` |
+| `fs.createTempFolder(prefix?, baseDir?)` | Create secure temporary directory | string | `fs.createTempFolder("job", "/var/tmp")` |
 
 Filesystem functions are essential for any script that works with files and directories. They provide a safe, cross-platform way to manipulate the filesystem while maintaining Utah's type safety guarantees.

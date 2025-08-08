@@ -633,6 +633,25 @@ public partial class Parser
         throw new InvalidOperationException("fs.exists() requires exactly 1 argument (path)");
       }
 
+      // Special handling for fs.createTempFolder()
+      if (functionName == "fs.createTempFolder")
+      {
+        var args = string.IsNullOrWhiteSpace(argsContent) ? new List<string>() : SplitByComma(argsContent);
+        if (args.Count == 0)
+        {
+          return new FsCreateTempFolderExpression(null, null);
+        }
+        if (args.Count == 1)
+        {
+          return new FsCreateTempFolderExpression(ParseExpression(args[0]), null);
+        }
+        if (args.Count == 2)
+        {
+          return new FsCreateTempFolderExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+        }
+        throw new InvalidOperationException("fs.createTempFolder() requires 0 to 2 arguments (prefix?, baseDir?)");
+      }
+
       // Special handling for console.isSudo()
       if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
       {
