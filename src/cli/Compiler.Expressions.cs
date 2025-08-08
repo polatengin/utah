@@ -260,13 +260,13 @@ public partial class Compiler
     {
       promptText = promptText[1..^1];
     }
-    
+
     // Automatically append " (y/n): " if not already present
     if (!promptText.EndsWith(" (y/n): ") && !promptText.EndsWith("(y/n): ") && !promptText.EndsWith(" (y/n):") && !promptText.EndsWith("(y/n):"))
     {
       promptText += " (y/n): ";
     }
-    
+
     // Generate bash code that prompts the user and returns true/false based on yes/no response
     return $"$(while true; do read -p \"{promptText}\" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
   }
