@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-108-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-109-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1508,6 +1508,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.delete(path)` - Delete a file or directory recursively, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
+- `fs.find(path, name?)` - Search for files and directories, with optional wildcard pattern, returns string[]
 - `fs.createTempFolder(prefix?, baseDir?)` - Create a secure temporary directory and return its absolute path
 
 #### Path Manipulation Functions
@@ -4797,13 +4798,13 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] yaml parsing and manipulation functions
 
-- [ ] `fs.delete()` - Delete files or directories with recursive option
+- [x] `fs.delete()` - Delete files or directories with recursive option
 
 - [ ] `fs.watch()` - File system watching for changes
 
-- [ ] `fs.createTempFolder()` - Create temporary folders with unique names
+- [x] `fs.createTempFolder()` - Create temporary folders with unique names
 
-- [ ] `fs.createTempFile()` - Create temporary files with unique names
+- [x] `fs.createTempFile()` - Create temporary files with unique names
 
 - [ ] `fs.find()` - Find files matching patterns or conditions
 

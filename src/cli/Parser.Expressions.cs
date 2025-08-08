@@ -573,6 +573,24 @@ public partial class Parser
         throw new InvalidOperationException("fs.delete() requires exactly 1 argument (path)");
       }
 
+      // Special handling for fs.find()
+      if (functionName == "fs.find")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var searchPathExpr = ParseExpression(args[0]);
+          return new FsFindExpression(searchPathExpr, null);
+        }
+        if (args.Count == 2)
+        {
+          var searchPathExpr = ParseExpression(args[0]);
+          var namePatternExpr = ParseExpression(args[1]);
+          return new FsFindExpression(searchPathExpr, namePatternExpr);
+        }
+        throw new InvalidOperationException("fs.find() requires 1 or 2 arguments (path, name?)");
+      }
+
       // Special handling for fs.dirname()
       if (functionName == "fs.dirname")
       {

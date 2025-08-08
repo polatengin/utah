@@ -404,6 +404,92 @@ fi
 - File: `tests/positive_fixtures/fs_delete.shx`
 - Tests file deletion, directory deletion, return values, and dynamic path expressions
 
+### fs.find()
+
+Search for files and directories recursively with optional wildcard pattern matching. Returns an array of matching paths:
+
+```typescript
+// Find all files and directories
+let allItems: string[] = fs.find(".");
+console.log("Found ${array.length(allItems)} items");
+
+// Find files by pattern
+let markdownFiles: string[] = fs.find(".", "*.md");
+let sourceFiles: string[] = fs.find("src", "*.shx");
+
+// Find in specific directory
+let testFiles: string[] = fs.find("tests", "*.shx");
+let configFiles: string[] = fs.find(".", "*.json");
+
+// Find with variables
+let searchDir: string = "docs";
+let pattern: string = "*.md";
+let docFiles: string[] = fs.find(searchDir, pattern);
+
+// Process results
+for (let file: string in markdownFiles) {
+  if (file.trim() != "") {
+    console.log("Processing: ${file}");
+    let content: string = fs.readFile(file);
+    // Process file content...
+  }
+}
+
+// Use with other filesystem functions
+let logFiles: string[] = fs.find("/var/log", "*.log");
+for (let logFile: string in logFiles) {
+  if (fs.exists(logFile)) {
+    console.log("Log file: ${logFile}");
+  }
+}
+```
+
+**Generated Bash:**
+
+```bash
+# Find all items
+allItems=$(IFS=$'\n'; mapfile -t _utah_find_results < <(find "." 2>/dev/null); printf '%s\n' "${_utah_find_results[@]}")
+echo "Found ${#allItems[@]} items"
+
+# Find by pattern
+markdownFiles=$(IFS=$'\n'; mapfile -t _utah_find_results < <(find "." -name "*.md" 2>/dev/null); printf '%s\n' "${_utah_find_results[@]}")
+sourceFiles=$(IFS=$'\n'; mapfile -t _utah_find_results < <(find "src" -name "*.shx" 2>/dev/null); printf '%s\n' "${_utah_find_results[@]}")
+
+# Find in specific directory
+testFiles=$(IFS=$'\n'; mapfile -t _utah_find_results < <(find "tests" -name "*.shx" 2>/dev/null); printf '%s\n' "${_utah_find_results[@]}")
+configFiles=$(IFS=$'\n'; mapfile -t _utah_find_results < <(find "." -name "*.json" 2>/dev/null); printf '%s\n' "${_utah_find_results[@]}")
+
+# Process results
+for file in "${markdownFiles[@]}"; do
+  if [ -n "$(echo "$file" | tr -d '[:space:]')" ]; then
+    echo "Processing: $file"
+    content=$(cat "$file")
+    # Process file content...
+  fi
+done
+```
+
+**Key Features:**
+
+- **Recursive Search**: Searches all subdirectories by default
+- **Wildcard Support**: Supports shell wildcard patterns (`*`, `?`, `[abc]`, etc.)
+- **Array Return**: Returns `string[]` for easy iteration and processing
+- **Error Resilience**: Uses `2>/dev/null` to handle permission errors gracefully
+- **Empty Filtering**: Automatically handles empty results
+- **Variable Support**: Both parameters accept variables and expressions
+
+**Wildcard Patterns:**
+
+- `*.txt` - All files ending with .txt
+- `file?.log` - Files like file1.log, fileA.log, etc.
+- `test[1-9].txt` - Files like test1.txt through test9.txt
+- `*.{js,ts}` - Files ending with .js or .ts
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_find.shx`
+- Tests basic finding, pattern matching, variable usage, and empty results
+
 ### fs.appendFile()
 
 Append content to a file:
@@ -977,6 +1063,7 @@ function ensureDirectory(dirPath: string): void {
 | `fs.move(source, target)` | Move/rename file/directory with directory creation | boolean | `fs.move("old.txt", "new.txt")` |
 | `fs.rename(oldName, newName)` | Rename file/directory in place | boolean | `fs.rename("old.txt", "new.txt")` |
 | `fs.delete(path)` | Delete file/directory recursively | boolean | `fs.delete("temp.txt")` |
+| `fs.find(path, name?)` | Search for files/directories with wildcard patterns | string[] | `fs.find(".", "*.md")` |
 | `fs.appendFile(path, content)` | Append to file | void | `fs.appendFile("log.txt", entry)` |
 | `fs.filename(path)` | Extract filename | string | `fs.filename("/path/file.txt")` |
 | `fs.dirname(path)` | Extract directory | string | `fs.dirname("/path/file.txt")` |

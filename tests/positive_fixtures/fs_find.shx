@@ -1,0 +1,52 @@
+#!/usr/bin/env utah
+
+// Test fs.find() function
+
+// Basic find - all items in current directory
+let allItems: string[] = fs.find(".");
+console.log("Found ${array.length(allItems)} items in current directory");
+
+// Find specific file types
+let markdownFiles: string[] = fs.find(".", "*.md");
+console.log("Found ${array.length(markdownFiles)} markdown files");
+
+// Find in subdirectory
+let testFiles: string[] = fs.find("tests", "*.shx");
+console.log("Found ${array.length(testFiles)} test files");
+
+// Find with complex patterns
+let expectedFiles: string[] = fs.find("tests/expected", "*.sh");
+console.log("Found ${array.length(expectedFiles)} expected output files");
+
+// Find configuration files
+let configFiles: string[] = fs.find(".", "*.json");
+
+// Test with variables
+let searchDir: string = "src";
+let pattern: string = "*.cs";
+let csharpFiles: string[] = fs.find(searchDir, pattern);
+console.log("Found ${array.length(csharpFiles)} C# files in ${searchDir}");
+
+// Test empty results (should not error)
+let nonExistent: string[] = fs.find(".", "*.nonexistent");
+console.log("Non-existent files: ${array.length(nonExistent)}");
+
+// Process results
+for (let file: string in markdownFiles) {
+  if (string.trim(file) != "") {
+    console.log("Markdown file: ${file}");
+  }
+}
+
+// Find by different patterns
+let txtFiles: string[] = fs.find(".", "*.txt");
+let logFiles: string[] = fs.find(".", "*.log");
+
+console.log("Text files: ${array.length(txtFiles)}");
+console.log("Log files: ${array.length(logFiles)}");
+
+// Complex variable usage
+let baseDir: string = "tests";
+let filePattern: string = "fs_*.shx";
+let findResults: string[] = fs.find(baseDir, filePattern);
+console.log("Found ${array.length(findResults)} fs test files");
