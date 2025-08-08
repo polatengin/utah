@@ -1,0 +1,80 @@
+// Test array.unique() function with different data types and edge cases
+
+// Test with number array containing duplicates
+let numbers: number[] = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
+let uniqueNumbers: number[] = array.unique(numbers);
+console.log("Original numbers: " + array.join(numbers, ", "));
+console.log("Unique numbers: " + array.join(uniqueNumbers, ", "));
+
+// Test with string array containing duplicates
+let fruits: string[] = ["apple", "banana", "apple", "cherry", "banana", "date", "apple"];
+let uniqueFruits: string[] = array.unique(fruits);
+console.log("Original fruits: " + array.join(fruits, ", "));
+console.log("Unique fruits: " + array.join(uniqueFruits, ", "));
+
+// Test with boolean array containing duplicates
+let flags: boolean[] = [true, false, true, false, true, true, false];
+let uniqueFlags: boolean[] = array.unique(flags);
+console.log("Original flags: " + array.join(flags, ", "));
+console.log("Unique flags: " + array.join(uniqueFlags, ", "));
+
+// Test edge case: empty array
+let empty: string[] = [];
+let uniqueEmpty: string[] = array.unique(empty);
+console.log("Empty array unique: " + array.join(uniqueEmpty, ", "));
+
+// Test edge case: single element
+let single: number[] = [42];
+let uniqueSingle: number[] = array.unique(single);
+console.log("Single element unique: " + array.join(uniqueSingle, ", "));
+
+// Test edge case: no duplicates
+let noDuplicates: string[] = ["a", "b", "c", "d"];
+let stillUnique: string[] = array.unique(noDuplicates);
+console.log("No duplicates array: " + array.join(stillUnique, ", "));
+
+// Test edge case: all duplicates
+let allSame: number[] = [7, 7, 7, 7];
+let onlyOne: number[] = array.unique(allSame);
+console.log("All same elements: " + array.join(onlyOne, ", "));
+
+// Test order preservation (first occurrence preserved)
+let orderTest: string[] = ["c", "a", "b", "a", "c", "d", "b"];
+let uniqueOrder: string[] = array.unique(orderTest);
+console.log("Order preservation test: " + array.join(uniqueOrder, ", "));
+
+// Test chaining with other array functions
+let list1: number[] = [1, 2, 3];
+let list2: number[] = [2, 3, 4];
+let merged: number[] = array.merge(list1, list2);
+let uniqueMerged: number[] = array.unique(merged);
+console.log("Merged array: " + array.join(merged, ", "));
+console.log("Unique merged: " + array.join(uniqueMerged, ", "));
+
+// Test unique then sort
+let unsorted: number[] = [5, 2, 8, 2, 1, 5, 3];
+let uniqueUnsorted: number[] = array.unique(unsorted);
+let sortedUnique: number[] = array.sort(uniqueUnsorted);
+console.log("Original unsorted: " + array.join(unsorted, ", "));
+console.log("Unique then sorted: " + array.join(sortedUnique, ", "));
+
+// Test sort then unique (should be same result)
+let sortedFirst: number[] = array.sort(unsorted);
+let uniqueAfterSort: number[] = array.unique(sortedFirst);
+console.log("Sorted then unique: " + array.join(uniqueAfterSort, ", "));
+
+// Test with variable assignment and conditionals
+let testData: string[] = ["test", "data", "test", "more", "data"];
+let uniqueData: string[] = array.unique(testData);
+if (array.length(uniqueData) < array.length(testData)) {
+  console.log("Duplicates were removed successfully");
+}
+
+// Test that original array is unchanged
+console.log("Original numbers unchanged: " + array.join(numbers, ", "));
+console.log("Original fruits unchanged: " + array.join(fruits, ", "));
+
+// Test with larger array
+let moreNumbers: number[] = [10, 20, 10, 30, 20, 40, 30, 50, 40, 60, 50];
+let uniqueMore: number[] = array.unique(moreNumbers);
+console.log("Larger array unique: " + array.join(uniqueMore, ", "));

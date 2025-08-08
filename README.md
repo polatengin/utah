@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-109-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-110-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1291,6 +1291,61 @@ let choices: string[] = ["red", "blue", "green", "yellow"];
 let randomized: string[] = array.shuffle(choices);
 let randomChoice: string = randomized[0];  // First element of shuffled array
 console.log(`Random choice: ${randomChoice}`);
+```
+
+Remove duplicate elements from arrays using the `array.unique()` function:
+
+```typescript
+// Basic unique operations with different types
+let numbers: number[] = [1, 2, 2, 3, 1, 4, 3, 5];
+let uniqueNumbers: number[] = array.unique(numbers);  // Gets [1, 2, 3, 4, 5]
+
+let fruits: string[] = ["apple", "banana", "apple", "cherry", "banana"];
+let uniqueFruits: string[] = array.unique(fruits);  // Gets ["apple", "banana", "cherry"]
+
+let flags: boolean[] = [true, false, true, false, true];
+let uniqueFlags: boolean[] = array.unique(flags);  // Gets [true, false]
+
+// Order of first occurrence is preserved
+let items: string[] = ["c", "a", "b", "a", "c", "d"];
+let uniqueItems: string[] = array.unique(items);  // Gets ["c", "a", "b", "d"]
+
+// Edge cases
+let emptyArray: string[] = [];
+let uniqueEmpty: string[] = array.unique(emptyArray);  // Gets []
+
+let single: number[] = [42];
+let uniqueSingle: number[] = array.unique(single);  // Gets [42]
+
+let allSame: number[] = [7, 7, 7, 7];
+let onlyOne: number[] = array.unique(allSame);  // Gets [7]
+
+// Original array remains unchanged
+console.log(`Original: ${array.join(numbers, ", ")}`);    // Still [1, 2, 2, 3, 1, 4, 3, 5]
+console.log(`Unique: ${array.join(uniqueNumbers, ", ")}`); // [1, 2, 3, 4, 5]
+
+// Chain with other array functions
+let list1: number[] = [1, 2, 3];
+let list2: number[] = [2, 3, 4];
+let merged: number[] = array.merge(list1, list2);      // Gets [1, 2, 3, 2, 3, 4]
+let uniqueMerged: number[] = array.unique(merged);     // Gets [1, 2, 3, 4]
+
+// Sort then unique vs unique then sort
+let data: number[] = [5, 2, 8, 2, 1, 5, 3];
+let uniqueFirst: number[] = array.sort(array.unique(data));  // Gets [1, 2, 3, 5, 8]
+let sortedFirst: number[] = array.unique(array.sort(data));  // Gets [1, 2, 3, 5, 8] (same result)
+
+// Use in conditionals and data processing
+let dataset: string[] = ["test", "data", "test", "more", "data"];
+let cleanData: string[] = array.unique(dataset);
+if (array.length(cleanData) < array.length(dataset)) {
+  console.log("Duplicates were removed");
+}
+
+// Combine multiple arrays and remove duplicates
+let userInput: string[] = ["a", "b", "c"];
+let defaultOptions: string[] = ["b", "c", "d"];
+let allOptions: string[] = array.unique(array.merge(userInput, defaultOptions));  // Gets ["a", "b", "c", "d"]
 ```
 
 ### Array Iteration
@@ -4710,7 +4765,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.random()` function
 
-- [ ] `array.unique()` function to remove duplicate elements
+- [x] `array.unique()` function to remove duplicate elements
 
 - [ ] `array.forEach()` function to iterate over elements
 

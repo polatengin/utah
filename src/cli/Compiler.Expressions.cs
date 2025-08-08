@@ -152,6 +152,8 @@ public partial class Compiler
         return CompileArrayMergeExpression(arrayMerge);
       case ArrayShuffleExpression arrayShuffle:
         return CompileArrayShuffleExpression(arrayShuffle);
+      case ArrayUniqueExpression arrayUnique:
+        return CompileArrayUniqueExpression(arrayUnique);
       case FsDirnameExpression fsDirname:
         return CompileFsDirnameExpression(fsDirname);
       case FsFileNameExpression fsFileName:
@@ -1254,6 +1256,24 @@ public partial class Compiler
     }
   }
 
+  private string CompileArrayUniqueExpression(ArrayUniqueExpression arrayUnique)
+  {
+    var compiledArray = CompileExpression(arrayUnique.Array);
+
+    // Check if this is a literal array or a variable
+    if (arrayUnique.Array is VariableExpression varExpr)
+    {
+      // It's a variable reference
+      var arrayName = varExpr.Name;
+      return $"($(declare -A _utah_seen; for item in \"${{{arrayName}[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
+    }
+    else
+    {
+      // It's an array literal or expression result
+      return $"($(arr={compiledArray}; declare -A _utah_seen; for item in \"${{arr[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
+    }
+  }
+
   private string GetArrayType(string arrayName)
   {
     // For now, we'll use a simple heuristic based on common naming patterns
@@ -1522,6 +1542,7 @@ public partial class Compiler
       "sort" => CompileArraySortFunction(args),
       "merge" => CompileArrayMergeFunction(args),
       "shuffle" => CompileArrayShuffleFunction(args),
+      "unique" => CompileArrayUniqueFunction(args),
       _ => throw new NotSupportedException($"Array function '{functionName}' is not supported")
     };
   }
@@ -2359,5 +2380,16 @@ fi
 
     // Use shuf command if available, otherwise fall back to Fisher-Yates shuffle using RANDOM
     return $"($(if command -v shuf &> /dev/null; then printf '%s\\n' \"${{{varName}[@]}}\" | shuf; else arr=(\"${{{varName}[@]}}\"); for ((i=${{#arr[@]}}-1; i>0; i--)); do j=$((RANDOM % (i+1))); temp=\"${{arr[i]}}\"; arr[i]=\"${{arr[j]}}\"; arr[j]=\"$temp\"; done; printf '%s\\n' \"${{arr[@]}}\"; fi))";
+  }
+
+  private string CompileArrayUniqueFunction(List<string> args)
+  {
+    if (args.Count != 1)
+      throw new InvalidOperationException("array.unique() requires exactly 1 argument");
+
+    var varName = ExtractVariableName(args[0]);
+
+    // Use associative array to track seen elements, preserving order
+    return $"($(declare -A _utah_seen; for item in \"${{{varName}[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
   }
 }

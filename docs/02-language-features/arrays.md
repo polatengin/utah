@@ -274,6 +274,115 @@ if (!array.isEmpty(array.shuffle(numbers))) {
 }
 ```
 
+### Array Deduplication
+
+#### Basic Unique Operations
+
+Remove duplicate elements from arrays using the `array.unique()` function:
+
+```typescript
+// String array deduplication
+let names: string[] = ["alice", "bob", "alice", "charlie", "bob"];
+let uniqueNames: string[] = array.unique(names);  // ["alice", "bob", "charlie"]
+
+// Number array deduplication
+let numbers: number[] = [1, 2, 2, 3, 1, 4, 3, 5];
+let uniqueNumbers: number[] = array.unique(numbers);  // [1, 2, 3, 4, 5]
+
+// Boolean array deduplication
+let flags: boolean[] = [true, false, true, false, true];
+let uniqueFlags: boolean[] = array.unique(flags);  // [true, false]
+```
+
+#### Order Preservation
+
+The `array.unique()` function preserves the order of first occurrence:
+
+```typescript
+// First occurrence order is maintained
+let items: string[] = ["c", "a", "b", "a", "c", "d", "b"];
+let uniqueItems: string[] = array.unique(items);  // ["c", "a", "b", "d"]
+
+// Even with numbers, first occurrence is preserved
+let data: number[] = [5, 2, 8, 2, 1, 5, 3];
+let uniqueData: number[] = array.unique(data);  // [5, 2, 8, 1, 3]
+```
+
+#### Unique Edge Cases
+
+```typescript
+// Empty arrays
+let empty: string[] = [];
+let uniqueEmpty: string[] = array.unique(empty);  // []
+
+// Single element arrays
+let single: number[] = [42];
+let uniqueSingle: number[] = array.unique(single);  // [42]
+
+// No duplicates
+let noDuplicates: string[] = ["a", "b", "c"];
+let stillUnique: string[] = array.unique(noDuplicates);  // ["a", "b", "c"]
+
+// All duplicates
+let allSame: number[] = [7, 7, 7, 7];
+let onlyOne: number[] = array.unique(allSame);  // [7]
+```
+
+#### Deduplication Use Cases
+
+```typescript
+// Remove duplicates from user input
+let userTags: string[] = ["javascript", "typescript", "javascript", "react", "typescript"];
+let cleanTags: string[] = array.unique(userTags);
+console.log("Clean tags: " + array.join(cleanTags, ", "));
+
+// Deduplicate merged data
+let list1: string[] = ["apple", "banana"];
+let list2: string[] = ["banana", "cherry", "apple"];
+let combined: string[] = array.merge(list1, list2);      // ["apple", "banana", "banana", "cherry", "apple"]
+let uniqueCombined: string[] = array.unique(combined);   // ["apple", "banana", "cherry"]
+
+// Data cleaning pipeline
+let rawData: number[] = [10, 20, 10, 30, 20, 40];
+let cleanData: number[] = array.unique(rawData);
+console.log("Removed " + (array.length(rawData) - array.length(cleanData)) + " duplicates");
+
+// Configuration options deduplication
+let defaultSettings: string[] = ["debug", "verbose"];
+let userSettings: string[] = ["verbose", "production", "debug"];
+let allSettings: string[] = array.unique(array.merge(defaultSettings, userSettings));
+console.log("Final settings: " + array.join(allSettings, ", "));
+```
+
+#### Unique Chaining with Other Array Methods
+
+```typescript
+// Unique then sort
+let unsorted: number[] = [5, 2, 8, 2, 1, 5, 3];
+let sortedUnique: number[] = array.sort(array.unique(unsorted));  // [1, 2, 3, 5, 8]
+
+// Sort then unique (same result for this case)
+let uniqueSorted: number[] = array.unique(array.sort(unsorted));  // [1, 2, 3, 5, 8]
+
+// Complex chaining
+let words1: string[] = ["hello", "world", "hello"];
+let words2: string[] = ["world", "utah", "hello"];
+let processedWords: string[] = array.sort(array.unique(array.merge(words1, words2)));
+console.log("Final words: " + array.join(processedWords, ", "));  // "hello, utah, world"
+
+// Use in data analysis
+let responses: string[] = ["yes", "no", "yes", "maybe", "no", "yes"];
+let uniqueResponses: string[] = array.unique(responses);
+console.log("Response types: " + array.length(uniqueResponses));  // 3
+
+// Filter duplicates before processing
+let ids: number[] = [1, 2, 3, 2, 4, 1, 5];
+let uniqueIds: number[] = array.unique(ids);
+for (let id: number in uniqueIds) {
+  console.log("Processing ID: " + id);
+}
+```
+
 ### Array Iteration
 
 #### For-In Loops
