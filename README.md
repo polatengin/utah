@@ -4861,7 +4861,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `fs.createTempFile()` - Create temporary files with unique names
 
-- [ ] `fs.find()` - Find files matching patterns or conditions
+- [x] `fs.find()` - Find files matching patterns or conditions
 
 - [ ] `fs.chmod()` - Change file permissions
 
