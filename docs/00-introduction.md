@@ -11,43 +11,6 @@ slug: /
 
 📦 **File Extension:** `.shx`
 
-### Language Reference
-
-- [Arrays](./02-language-features/arrays.md)
-- [Console Functions](./02-language-features/console.md)
-- [Control Flow](./02-language-features/control-flow.md)
-- [Defer Statements](./02-language-features/defer.md)
-- [Error Handling](./02-language-features/error-handling.md)
-- [File System Functions](./02-language-features/filesystem.md)
-- [Functions](./02-language-features/functions.md)
-- [Git Functions](./02-language-features/git.md)
-- [Import System](./02-language-features/imports.md)
-- [JSON and YAML Processing](./02-language-features/json-yaml.md)
-- [Operating System Functions](./02-language-features/operating-system.md)
-- [Strings](./02-language-features/strings.md)
-- [System Functions](./02-language-features/system.md)
-- [Template Functions](./02-language-features/template.md)
-- [Utility Functions](./02-language-features/utilities.md)
-- [Variables and Types](./02-language-features/variables.md)
-- [Web Functions](./02-language-features/web.md)
-
-### CLI Reference
-
-- [Overview](./04-cli/index.md)
-- [Compile Command](./04-cli/compile.md)
-- [Run Command](./04-cli/run.md)
-- [Format Command](./04-cli/format.md)
-- [VS Code Extension](./04-cli/vscode-extension.md)
-
-### Guides
-
-- [Development Guides](./03-guides/index.md)
-- [Parallel Execution](./03-guides/parallel.md)
-- [Testing Scripts](./03-guides/testing.md)
-- [CI/CD Integration](./03-guides/cicd.md)
-- [DevOps Automation](./03-guides/devops.md)
-- [Best Practices](./03-guides/best-practices.md)
-
 ## Quick Start
 
 Get started with Utah in seconds:
@@ -186,31 +149,25 @@ fi
 
 ## Documentation Sections
 
-### Getting Started
+### Language Reference
 
-- [Installation Guide](./01-getting-started/installation.md)
-- [Your First Script](./01-getting-started/first-script.md)
-- [Basic Syntax](./01-getting-started/syntax.md)
-
-### Language Features
-
-- [Variables and Types](./02-language-features/variables.md)
-- [Control Flow](./02-language-features/control-flow.md)
-- [Functions](./02-language-features/functions.md)
 - [Arrays](./02-language-features/arrays.md)
-- [Strings](./02-language-features/strings.md)
-- [Import System](./02-language-features/imports.md)
+- [Console Functions](./02-language-features/console.md)
+- [Control Flow](./02-language-features/control-flow.md)
+- [Defer Statements](./02-language-features/defer.md)
 - [Error Handling](./02-language-features/error-handling.md)
-
-### Built-in Functions
-
-- [File System](./02-language-features/filesystem.md)
-- [JSON/YAML Processing](./02-language-features/json-yaml.md)
-- [Console and User Interaction](./02-language-features/console.md)
-- [Operating System](./02-language-features/operating-system.md)
-- [Web and API](./02-language-features/web.md)
-- [System and Process](./02-language-features/system.md)
-- [Utilities](./02-language-features/utilities.md)
+- [File System Functions](./02-language-features/filesystem.md)
+- [Functions](./02-language-features/functions.md)
+- [Git Functions](./02-language-features/git.md)
+- [Import System](./02-language-features/imports.md)
+- [JSON and YAML Processing](./02-language-features/json-yaml.md)
+- [Operating System Functions](./02-language-features/operating-system.md)
+- [Strings](./02-language-features/strings.md)
+- [System Functions](./02-language-features/system.md)
+- [Template Functions](./02-language-features/template.md)
+- [Utility Functions](./02-language-features/utilities.md)
+- [Variables and Types](./02-language-features/variables.md)
+- [Web Functions](./02-language-features/web.md)
 
 ### CLI Reference
 
@@ -220,7 +177,7 @@ fi
 - [Format Command](./04-cli/format.md)
 - [VS Code Extension](./04-cli/vscode-extension.md)
 
-### Advanced Guides
+### Guides
 
 - [Development Guides](./03-guides/index.md)
 - [Parallel Execution](./03-guides/parallel.md)
@@ -228,6 +185,12 @@ fi
 - [CI/CD Integration](./03-guides/cicd.md)
 - [DevOps Automation](./03-guides/devops.md)
 - [Best Practices](./03-guides/best-practices.md)
+
+### Getting Started
+
+- [Installation Guide](./01-getting-started/installation.md)
+- [Your First Script](./01-getting-started/first-script.md)
+- [Basic Syntax](./01-getting-started/syntax.md)
 
 ## Community and Support
 
