@@ -28,7 +28,7 @@ jobs:
 
     - name: Install Utah
       run: |
-        curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+        curl -sL https://utahshx.com/install.sh | sudo bash
 
     - name: Run Deployment Script
       run: |
@@ -54,7 +54,7 @@ variables:
   UTAH_VERSION: "latest"
 
 before_script:
-  - curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+  - curl -sL https://utahshx.com/install.sh | sudo bash
 
 test:
   stage: test
@@ -90,7 +90,7 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
-                    curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+                    curl -sL https://utahshx.com/install.sh | sudo bash
                     utah version
                 '''
             }

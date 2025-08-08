@@ -4,8 +4,8 @@
 # Usage:
 #   ./install-utah.sh                    # Install latest version
 #   ./install-utah.sh v1.2.3             # Install specific version
-#   curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | bash
-#   curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | bash -s v1.2.3
+#   curl -sL https://utahshx.com/install.sh | bash
+#   curl -sL https://utahshx.com/install.sh | bash -s v1.2.3
 # Requirements:
 #   - curl or wget (for downloading)
 #   - sudo access (for installing to /usr/local/bin/)

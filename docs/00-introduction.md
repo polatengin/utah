@@ -18,7 +18,7 @@ Get started with Utah in seconds:
 - **Install Utah CLI:**
 
   ```bash
-  curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+  curl -sL https://utahshx.com/install.sh | sudo bash
   ```
 
 - **Write your first `.shx` script:**

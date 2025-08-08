@@ -26,7 +26,7 @@ This makes Utah feel more like traditional script interpreters (`python script.p
 
 ```bash
 # Install Utah
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 
 # Compile a script
 utah compile script.shx
@@ -222,7 +222,7 @@ jobs:
 
       - name: Install Utah
         run: |
-          curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+          curl -sL https://utahshx.com/install.sh | sudo bash
 
       - name: Check formatting
         run: |
@@ -323,7 +323,7 @@ utah: command not found
 
 ```bash
 # Reinstall Utah
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 ```
 
 - **Problem: Compilation fails with syntax error**

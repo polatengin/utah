@@ -12,7 +12,7 @@ This guide will help you install the Utah CLI tool on your system.
 The easiest way to install Utah is using our one-liner installation script:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 ```
 
 This script will:
@@ -63,7 +63,7 @@ Utah requires:
 
 ```bash
 # Using the install script (recommended)
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 
 # Or manual installation
 wget https://github.com/polatengin/utah/releases/latest/download/utah-linux-x64.tar.gz
@@ -76,7 +76,7 @@ sudo chmod +x /usr/local/bin/utah
 
 ```bash
 # Using the install script
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 
 # Or using Homebrew (if available)
 # brew install utah  # Coming soon
@@ -94,7 +94,7 @@ Utah works best in Windows Subsystem for Linux (WSL):
 
 ```bash
 # In WSL terminal
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 ```
 
 ## Installing Dependencies
@@ -174,7 +174,7 @@ To update to the latest version:
 
 ```bash
 # Re-run the installation script
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 ```
 
 The script will automatically replace the existing installation with the latest version.

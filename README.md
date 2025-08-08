@@ -15,7 +15,7 @@ For detailed documentation on how to use `utah`, please refer to the [Utah shx d
 You can install the latest version of the `utah` CLI with this one-liner:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+curl -sL https://utahshx.com/install.sh | sudo bash
 ```
 
 ## 🚀 How It Works

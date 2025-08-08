@@ -344,7 +344,7 @@ jobs:
 
     - name: Install Utah
       run: |
-        curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+        curl -sL https://utahshx.com/install.sh | sudo bash
 
     - name: Check formatting
       run: |
@@ -368,7 +368,7 @@ jobs:
 
     - name: Install Utah
       run: |
-        curl -sL https://raw.githubusercontent.com/polatengin/utah/refs/heads/main/scripts/install.sh | sudo bash
+        curl -sL https://utahshx.com/install.sh | sudo bash
 
     - name: Format files
       run: utah format --in-place
