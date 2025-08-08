@@ -185,6 +185,54 @@ fi
 - File: `tests/positive_fixtures/console_isinteractive.shx`
 - Tests TTY detection using `[ -t 0 ]` bash test
 
+### console.getShell()
+
+Detect the current shell being used to execute the script:
+
+```typescript
+let currentShell: string = console.getShell();
+console.log(`Running in: ${currentShell}`);
+
+if (currentShell == "bash") {
+  console.log("Using Bash-specific features");
+} else if (currentShell == "zsh") {
+  console.log("Using Zsh-specific features");
+} else if (currentShell == "fish") {
+  console.log("Using Fish-specific features");
+} else {
+  console.log(`Shell ${currentShell} detected - using POSIX features`);
+}
+```
+
+**Generated Bash:**
+
+```bash
+currentShell=$(basename "${SHELL:-$0}")
+echo "Running in: ${currentShell}"
+
+if [ "${currentShell}" = "bash" ]; then
+  echo "Using Bash-specific features"
+elif [ "${currentShell}" = "zsh" ]; then
+  echo "Using Zsh-specific features"
+elif [ "${currentShell}" = "fish" ]; then
+  echo "Using Fish-specific features"
+else
+  echo "Shell ${currentShell} detected - using POSIX features"
+fi
+```
+
+**Use Cases:**
+
+- **Feature Detection**: Enable shell-specific features when available
+- **Compatibility**: Provide fallbacks for different shell environments
+- **Debugging**: Log the execution environment for troubleshooting
+- **Script Adaptation**: Adjust behavior based on shell capabilities
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/console_getshell.shx`
+- Tests shell detection using `$SHELL` environment variable
+
 ## Dialog Functions
 
 Utah provides comprehensive dialog functions for creating interactive terminal user interfaces. These functions automatically detect and use the best available dialog system (`dialog`, `whiptail`, or fallback to basic prompts).
@@ -803,6 +851,7 @@ console.log("================================");
 | `console.promptYesNo(message)` | Get yes/no input | boolean | message: string | `let ok = console.promptYesNo("Continue? ")` |
 | `console.isSudo()` | Check root privileges | boolean | none | `if (console.isSudo()) { ... }` |
 | `console.isInteractive()` | Check if interactive | boolean | none | `if (console.isInteractive()) { ... }` |
+| `console.getShell()` | Get current shell name | string | none | `let shell = console.getShell()` |
 
 ### Dialog Functions Reference
 

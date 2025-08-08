@@ -74,6 +74,8 @@ public partial class Compiler
         return CompileConsoleIsSudoExpression(sudo);
       case ConsoleIsInteractiveExpression interactive:
         return CompileConsoleIsInteractiveExpression(interactive);
+      case ConsoleGetShellExpression getShell:
+        return CompileConsoleGetShellExpression(getShell);
       case ConsolePromptYesNoExpression prompt:
         return CompileConsolePromptYesNoExpression(prompt);
       case ConsoleShowMessageExpression showMessage:
@@ -249,6 +251,13 @@ public partial class Compiler
   private string CompileConsoleIsInteractiveExpression(ConsoleIsInteractiveExpression interactive)
   {
     return "$([ -t 0 ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileConsoleGetShellExpression(ConsoleGetShellExpression getShell)
+  {
+    // Return the shell name by checking the SHELL environment variable and extracting the basename
+    // Falls back to checking $0 if SHELL is not available
+    return "$(basename \"${SHELL:-$0}\")";
   }
 
   private string CompileConsolePromptYesNoExpression(ConsolePromptYesNoExpression prompt)

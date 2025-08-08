@@ -1,0 +1,9 @@
+let shell: string = console.getShell();
+console.log("Detected shell: ${shell}");
+
+// Test that it returns a string value
+if (shell) {
+  console.log("Shell detection successful");
+} else {
+  console.log("Shell detection failed");
+}

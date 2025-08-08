@@ -2949,6 +2949,10 @@ Utah provides console system functions for checking system privileges and perfor
 - `console.isSudo()` - Check if the script is running with root/sudo privileges
 - `console.isInteractive()` - Check if the script is running in an interactive terminal session
 
+#### System Detection
+
+- `console.getShell()` - Get the name of the current shell (bash, zsh, fish, etc.)
+
 #### User Interaction
 
 - `console.promptYesNo("prompt text")` - Display a yes/no prompt and return user's choice as boolean
@@ -3026,6 +3030,15 @@ if (console.isInteractive() && console.isSudo()) {
   console.log("Interactive but no elevated privileges");
 }
 
+// Detect current shell for shell-specific features
+let currentShell: string = console.getShell();
+console.log(`Running in: ${currentShell}`);
+if (currentShell == "zsh") {
+  console.log("Using Zsh-specific autocomplete features");
+} else if (currentShell == "bash") {
+  console.log("Using Bash-compatible syntax");
+}
+
 // Chain prompts for user interaction
 let confirmInstall: boolean = console.promptYesNo("Install new packages?");
 if (confirmInstall) {
@@ -3084,6 +3097,9 @@ isSudo=$([ "$(id -u)" -eq 0 ] && echo "true" || echo "false")
 # console.isInteractive() becomes:
 isInteractive=$([ -t 0 ] && echo "true" || echo "false")
 
+# console.getShell() becomes:
+currentShell=$(basename "${SHELL:-$0}")
+
 # console.promptYesNo("prompt text") becomes:
 proceed=$(while true; do read -p "Do you want to continue? (y/n): " yn; case $yn in [Yy]* ) echo "true"; break;; [Nn]* ) echo "false"; break;; * ) echo "Please answer yes or no.";; esac; done)
 
@@ -3123,6 +3139,7 @@ fi
 
 - **Privilege Verification**: Ensure scripts have necessary permissions before execution
 - **Interactive Detection**: Determine if the script can display prompts and dialogs
+- **Shell Detection**: Identify the current shell to enable shell-specific features
 - **Environment Adaptation**: Adjust script behavior based on execution context (interactive vs automated)
 - **Security Checks**: Validate user permissions for sensitive operations
 - **Admin Scripts**: Build installation and configuration scripts that require root access
@@ -4626,7 +4643,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `console.log()` for output
 
-- [x] Console system functions (`console.isSudo()`, `console.isInteractive()`)
+- [x] Console system functions (`console.isSudo()`, `console.isInteractive()`, `console.getShell()`)
 
 - [x] String interpolation with double quotes (`"Hello, ${name}"`)
 
@@ -4667,6 +4684,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 - [x] `array.random()` function
 
 - [ ] `array.unique()` function to remove duplicate elements
+
+- [ ] `array.forEach()` function to iterate over elements
 
 - [ ] Multiline string support with triple-double quotes (`"""`)
 
