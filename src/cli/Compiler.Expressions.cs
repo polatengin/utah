@@ -1371,28 +1371,28 @@ public partial class Compiler
   private string CompileFsFindExpression(FsFindExpression fsFind)
   {
     var searchPath = CompileExpression(fsFind.SearchPath);
-    
+
     // Remove quotes if already quoted, then add our own quotes for bash safety
     if (searchPath.StartsWith("\"") && searchPath.EndsWith("\""))
     {
       searchPath = searchPath[1..^1]; // Remove existing quotes
     }
-    
+
     var findCmd = $"find \"{searchPath}\"";
-    
+
     if (fsFind.NamePattern != null)
     {
       var namePattern = CompileExpression(fsFind.NamePattern);
-      
+
       // Remove quotes if already quoted, then add our own quotes for bash safety
       if (namePattern.StartsWith("\"") && namePattern.EndsWith("\""))
       {
         namePattern = namePattern[1..^1]; // Remove existing quotes
       }
-      
+
       findCmd += $" -name \"{namePattern}\"";
     }
-    
+
     // Return as array split by newlines, filtering empty entries
     return $"$(IFS=$'\\n'; mapfile -t _utah_find_results < <({findCmd} 2>/dev/null); printf '%s\\n' \"${{_utah_find_results[@]}}\")";
   }
@@ -1455,7 +1455,7 @@ public partial class Compiler
         {
           compiled = compiled[1..^1];
         }
-        
+
         // If the compiled expression already contains bash substitution (starts with $), use it directly
         if (compiled.StartsWith("$"))
         {
