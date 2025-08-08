@@ -79,7 +79,7 @@ echo "You are ${age} years old"
 Prompt user for yes/no confirmation:
 
 ```typescript
-let shouldContinue: boolean = console.promptYesNo("Do you want to continue? (y/n): ");
+let shouldContinue: boolean = console.promptYesNo("Do you want to continue?");
 
 if (shouldContinue) {
   console.log("Continuing...");
@@ -491,7 +491,7 @@ if (!fs.exists(filename)) {
 console.log("File: ${filename}");
 console.log("Size: $(stat -c%s "${filename}") bytes");
 
-let confirmed: boolean = console.promptYesNo("Are you sure you want to delete ${filename}? (y/n): ");
+let confirmed: boolean = console.promptYesNo("Are you sure you want to delete ${filename}?");
 
 if (confirmed) {
   console.log("Deleting ${filename}...");
@@ -516,8 +516,8 @@ if (port == "") {
   port = "3000";
 }
 
-let enableSSL: boolean = console.promptYesNo("Enable SSL? (y/n): ");
-let enableDebug: boolean = console.promptYesNo("Enable debug mode? (y/n): ");
+let enableSSL: boolean = console.promptYesNo("Enable SSL?");
+let enableDebug: boolean = console.promptYesNo("Enable debug mode?");
 
 console.log("\n=== Configuration Summary ===");
 console.log("Application Name: ${appName}");
@@ -525,7 +525,7 @@ console.log("Port: ${port}");
 console.log("SSL Enabled: ${enableSSL}");
 console.log("Debug Mode: ${enableDebug}");
 
-let saveConfig: boolean = console.promptYesNo("\nSave this configuration? (y/n): ");
+let saveConfig: boolean = console.promptYesNo("\nSave this configuration?");
 
 if (saveConfig) {
   let config: object = json.parse('{}');
@@ -566,7 +566,7 @@ if (console.isSudo()) {
 } else {
   console.log("⚠ Running as regular user");
 
-  let needsRoot: boolean = console.promptYesNo("This script may need root privileges. Continue anyway? (y/n): ");
+  let needsRoot: boolean = console.promptYesNo("This script may need root privileges. Continue anyway?");
   if (!needsRoot) {
     console.log("Please run with sudo for full functionality:");
     console.log("sudo utah run " + args.getScriptName());
@@ -698,7 +698,7 @@ if (retryCount >= maxRetries) {
 ```typescript
 // Good - clear and specific
 let dbPassword: string = console.prompt("Enter database password (will not echo): ");
-let confirmDelete: boolean = console.promptYesNo("Delete all log files? This cannot be undone (y/n): ");
+let confirmDelete: boolean = console.promptYesNo("Delete all log files? This cannot be undone.");
 
 // Avoid - unclear prompts
 let input: string = console.prompt("Enter value: ");

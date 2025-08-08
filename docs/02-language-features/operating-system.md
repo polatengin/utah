@@ -273,7 +273,7 @@ for (let service: string in services) {
   } else {
     console.log("✗ ${service} is not running");
 
-    let shouldStart: boolean = console.promptYesNo("Start ${service}? (y/n): ");
+    let shouldStart: boolean = console.promptYesNo("Start ${service}?");
     if (shouldStart) {
       startService(service);
     }
@@ -383,7 +383,7 @@ function setupDevelopmentEnvironment(): void {
   if (missingTools.length > 0) {
     console.log("Missing development tools: ${missingTools.join(", ")}");
 
-    let shouldInstall: boolean = console.promptYesNo("Install missing tools? (y/n): ");
+    let shouldInstall: boolean = console.promptYesNo("Install missing tools?");
     if (shouldInstall) {
       for (let tool: string in missingTools) {
         installPackage(tool);
@@ -402,7 +402,7 @@ function setupDevelopmentEnvironment(): void {
     console.log("✓ Node.js: ${nodeVersion}");
   } else {
     console.log("✗ Node.js not found");
-    let installNode: boolean = console.promptYesNo("Install Node.js? (y/n): ");
+    let installNode: boolean = console.promptYesNo("Install Node.js?");
     if (installNode) {
       if (os == "Darwin" && os.isInstalled("brew")) {
         `$(brew install node)`;
@@ -420,7 +420,7 @@ function setupDevelopmentEnvironment(): void {
     console.log("✓ Python: ${pythonVersion}");
   } else {
     console.log("✗ Python3 not found");
-    let installPython: boolean = console.promptYesNo("Install Python3? (y/n): ");
+    let installPython: boolean = console.promptYesNo("Install Python3?");
     if (installPython) {
       installPackage("python3");
     }
@@ -432,7 +432,7 @@ function setupDevelopmentEnvironment(): void {
     console.log("✓ Docker: ${dockerVersion}");
   } else {
     console.log("✗ Docker not found");
-    let installDocker: boolean = console.promptYesNo("Install Docker? (y/n): ");
+    let installDocker: boolean = console.promptYesNo("Install Docker?");
     if (installDocker) {
       console.log("Please install Docker manually from https://docker.com");
     }

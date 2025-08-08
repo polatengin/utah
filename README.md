@@ -4664,6 +4664,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.shuffle()` function
 
+- [x] `array.random()` function
+
 - [ ] `array.unique()` function to remove duplicate elements
 
 - [ ] Multiline string support with triple-double quotes (`"""`)
@@ -4753,6 +4755,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 - [ ] `fs.delete()` - Delete files or directories with recursive option
 
 - [ ] `fs.watch()` - File system watching for changes
+
+- [ ] `fs.createTempFolder()` - Create temporary folders with unique names
 
 - [ ] `fs.createTempFile()` - Create temporary files with unique names
 
