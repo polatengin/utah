@@ -38,11 +38,11 @@ const AsciinemaPlayer: React.FC<AsciinemaPlayerProps> = ({
     const loadPlayer = async () => {
       // Dynamically import asciinema-player to avoid SSR issues
       const { create } = await import('asciinema-player');
-      
+
       if (ref.current) {
         // Clear any existing content
         ref.current.innerHTML = '';
-        
+
         // Create the player
         create(src, ref.current, {
           cols,
@@ -65,9 +65,9 @@ const AsciinemaPlayer: React.FC<AsciinemaPlayerProps> = ({
   }, [src, cols, rows, autoPlay, preload, loop, startAt, speed, idleTimeLimit, theme, poster, fit, fontSize]);
 
   return (
-    <div 
-      ref={ref} 
-      style={{ 
+    <div
+      ref={ref}
+      style={{
         margin: '20px 0',
         borderRadius: '8px',
         overflow: 'hidden',
