@@ -7,7 +7,33 @@ description: "Advanced DevOps automation script showcasing Utah's enterprise fea
 permalink: /examples/system-health-monitor/
 ---
 
+import { AsciinemaPlayer } from '@site/src/components';
+
 A comprehensive DevOps automation script that demonstrates Utah's advanced features including log analysis, performance monitoring, user management, and CI/CD pipeline monitoring. This example showcases how Utah simplifies complex system administration tasks.
+
+## 🎬 Interactive Demo
+
+Watch this script in action! The demo shows advanced argument parsing, real-time monitoring with professional output, and dynamic alerting:
+
+<AsciinemaPlayer
+  src="/assets/system-health-monitor.cast"
+  autoPlay={false}
+  loop={false}
+  speed={1}
+  idleTimeLimit={3}
+  theme="asciinema"
+  poster="npt:0:01"
+  cols={120}
+  rows={30}
+  fontSize="14px"
+/>
+
+**What you'll see in the demo:**
+
+- **Basic execution** with `--verbose` flag showing comprehensive system analysis
+- **Help system** demonstrating advanced argument parsing with typed parameters
+- **Custom thresholds** triggering dynamic alerts by setting lower CPU/memory limits
+- **Professional output** with rich colors, emojis, and structured reporting
 
 ## Features Demonstrated
 
@@ -366,6 +392,22 @@ This single Utah script replaces what would be **400+ lines of complex bash code
 - ✅ **Error Handling**: Built-in try/catch and validation
 - ✅ **Clean Syntax**: TypeScript-like readability
 - ✅ **Built-in Functions**: No need for external utilities
+
+## Utah vs Traditional Bash
+
+| Feature | Traditional Bash | Utah Language |
+|---------|------------------|---------------|
+| Argument Parsing | `getopts` manual parsing | Built-in `args.*` functions |
+| Error Handling | Complex trap/exit code logic | Automatic error management |
+| JSON Processing | Requires `jq` external tool | Native object support |
+| HTTP Requests | `curl` with manual parsing | Built-in `web.*` functions |
+| Text Processing | `awk`/`sed` command chains | Built-in string functions |
+| Type Validation | Manual string checks | Static type checking |
+| Array Operations | Complex bash array syntax | Modern array methods |
+| Process Management | Manual PID tracking | Built-in `system.*` functions |
+
+**The Result**: Utah provides enterprise-grade DevOps automation with the simplicity of modern scripting languages.
+
 - ✅ **Parallel Execution**: Built-in concurrency support
 - ✅ **Advanced Data Structures**: Arrays, objects, and complex types
 
