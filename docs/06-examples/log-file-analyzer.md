@@ -7,9 +7,25 @@ description: "Comprehensive array operations example: a log file analyzer that d
 permalink: /examples/log-file-analyzer/
 ---
 
+import { AsciinemaPlayer } from '@site/src/components';
+
 ## Log File Analyzer - Comprehensive Array Operations
 
 A real-world example demonstrating Utah's powerful array handling capabilities through a log file analyzer. This script processes server logs, analyzes patterns, generates reports, and demonstrates most of Utah's array functions in practical scenarios.
+
+## 🎬 Interactive Demo
+
+Watch this script in action! The demo shows comprehensive array operations including length, isEmpty, contains, merge, unique, sort, shuffle, reverse, and join:
+
+<AsciinemaPlayer
+  src="/assets/log-file-analyzer.cast"
+  autoPlay={false}
+  loop={false}
+  speed={1}
+  idleTimeLimit={3}
+  theme="asciinema"
+  poster="npt:0:01"
+/>
 
 ## Features Demonstrated
 
