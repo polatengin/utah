@@ -7,9 +7,25 @@ description: "Comprehensive switch statement example: a DevOps deployment pipeli
 permalink: /examples/devops-deployment-manager/
 ---
 
+import { AsciinemaPlayer } from '@site/src/components';
+
 ## DevOps Deployment Manager - Comprehensive Switch Statements
 
 A real-world example demonstrating Utah's powerful switch statement capabilities through a DevOps deployment pipeline manager. This script handles different environments, deployment strategies, service operations, and error scenarios using clean conditional logic.
+
+## 🎬 Interactive Demo
+
+Watch this script in action! The demo shows comprehensive switch statement usage for environment configuration, deployment strategies, service management, and resource allocation:
+
+<AsciinemaPlayer
+  src="/assets/devops-deployment-manager.cast"
+  autoPlay={false}
+  loop={false}
+  speed={1}
+  idleTimeLimit={3}
+  theme="asciinema"
+  poster="npt:0:01"
+/>
 
 ## Features Demonstrated
 
