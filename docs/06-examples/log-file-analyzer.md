@@ -34,27 +34,27 @@ A real-world example demonstrating Utah's powerful array handling capabilities t
 function main(): void {
   console.log("🔍 Utah Log File Analyzer");
   console.log("=========================");
-  
+
   // Initialize data structures
   let logFiles: string[] = [
     "/var/log/apache2/access.log",
-    "/var/log/nginx/access.log", 
+    "/var/log/nginx/access.log",
     "/var/log/app/application.log"
   ];
-  
+
   let allLogEntries: string[] = [];
   let errorEntries: string[] = [];
   let warningEntries: string[] = [];
   let ipAddresses: string[] = [];
   let userAgents: string[] = [];
-  
+
   // For demo purposes, use sample data
   console.log("Using sample data for demonstration...");
   createSampleData(allLogEntries, errorEntries, warningEntries, ipAddresses);
-  
+
   // Generate comprehensive report
   generateReport(allLogEntries, errorEntries, warningEntries, ipAddresses, userAgents);
-  
+
   // Interactive analysis menu
   showAnalysisMenu(allLogEntries, errorEntries, warningEntries, ipAddresses);
 }
@@ -76,18 +76,18 @@ function createSampleData(
     "2024-01-15 10:33:45 [WARN] Slow query detected - execution time: 2.3s",
     "2024-01-15 10:34:12 [ERROR] Connection timeout - host unreachable"
   ];
-  
+
   // Process sample data
   for (let log: string in sampleLogs) {
     array.push(allEntries, log);
-    
+
     // Categorize by log level
     if (string.includes(log, "ERROR")) {
       array.push(errors, log);
     } else if (string.includes(log, "WARN")) {
       array.push(warnings, log);
     }
-    
+
     // Extract sample IP addresses
     if (string.includes(log, "192.168.1.100")) {
       if (!array.contains(ips, "192.168.1.100")) {
@@ -95,7 +95,7 @@ function createSampleData(
       }
     }
   }
-  
+
   // Add more sample IPs for demonstration
   array.push(ips, "203.0.113.45");
   array.push(ips, "198.51.100.78");
@@ -111,13 +111,13 @@ function generateReport(
 ): void {
   console.log("📋 COMPREHENSIVE LOG ANALYSIS REPORT");
   console.log("=====================================");
-  
+
   // Basic statistics using array.length()
   let totalEntries: number = array.length(allEntries);
   let errorCount: number = array.length(errors);
   let warningCount: number = array.length(warnings);
   let ipCount: number = array.length(ips);
-  
+
   console.log("📊 Log Entry Statistics:");
   console.log("Total entries processed:");
   console.log(totalEntries);
@@ -127,21 +127,21 @@ function generateReport(
   console.log(warningCount);
   console.log("Unique IP addresses:");
   console.log(ipCount);
-  
+
   // Error analysis
   let errorsEmpty: boolean = array.isEmpty(errors);
   if (!errorsEmpty) {
     console.log("🚨 Error Analysis:");
     analyzeErrors(errors);
   }
-  
-  // Warning analysis  
+
+  // Warning analysis
   let warningsEmpty: boolean = array.isEmpty(warnings);
   if (!warningsEmpty) {
     console.log("⚠️  Warning Analysis:");
     analyzeWarnings(warnings);
   }
-  
+
   // IP address analysis
   let ipsEmpty: boolean = array.isEmpty(ips);
   if (!ipsEmpty) {
@@ -154,13 +154,13 @@ function analyzeErrors(errors: string[]): void {
   // Count error types
   let errorTypes: string[] = [];
   let errorCounts: number[] = [];
-  
+
   for (let error: string in errors) {
     let errorType: string = extractErrorType(error);
     let index: number = findOrAddErrorType(errorTypes, errorCounts, errorType);
     errorCounts[index] = errorCounts[index] + 1;
   }
-  
+
   // Display error types
   console.log("Error type breakdown:");
   let typeCount: number = array.length(errorTypes);
@@ -189,7 +189,7 @@ function findOrAddErrorType(types: string[], counts: number[], errorType: string
       return i;
     }
   }
-  
+
   // Not found, add new type
   array.push(types, errorType);
   array.push(counts, 0);
@@ -200,7 +200,7 @@ function findOrAddErrorType(types: string[], counts: number[], errorType: string
 function analyzeWarnings(warnings: string[]): void {
   let warningCount: number = array.length(warnings);
   let displayCount: number = warningCount > 3 ? 3 : warningCount;
-  
+
   console.log("Recent warnings:");
   for (let i: number = warningCount - displayCount; i < warningCount; i++) {
     let warning: string = warnings[i];
@@ -211,32 +211,32 @@ function analyzeWarnings(warnings: string[]): void {
 function analyzeIPAddresses(ips: string[]): void {
   // Sort IPs for better readability using array.sort()
   let sortedIPs: string[] = array.sort(ips);
-  
+
   let ipCount: number = array.length(sortedIPs);
   console.log("Found unique IP addresses:");
   console.log(ipCount);
-  
+
   // Categorize by type
   let internalIPs: string[] = [];
   let externalIPs: string[] = [];
-  
+
   for (let ip: string in sortedIPs) {
-    if (string.startsWith(ip, "192.168.") || 
-        string.startsWith(ip, "10.") || 
+    if (string.startsWith(ip, "192.168.") ||
+        string.startsWith(ip, "10.") ||
         string.startsWith(ip, "172.")) {
       array.push(internalIPs, ip);
     } else {
       array.push(externalIPs, ip);
     }
   }
-  
+
   let internalCount: number = array.length(internalIPs);
   let externalCount: number = array.length(externalIPs);
   console.log("Internal IPs:");
   console.log(internalCount);
   console.log("External IPs:");
   console.log(externalCount);
-  
+
   // Show sample external IPs using array.join()
   let extEmpty: boolean = array.isEmpty(externalIPs);
   if (!extEmpty) {
@@ -256,7 +256,7 @@ function showAnalysisMenu(
 ): void {
   console.log("🎯 INTERACTIVE ANALYSIS MENU");
   console.log("=============================");
-  
+
   let menuOptions: string[] = [
     "Show detailed error analysis",
     "Export IP addresses to file",
@@ -265,7 +265,7 @@ function showAnalysisMenu(
     "Show array statistics",
     "Exit"
   ];
-  
+
   console.log("Available options:");
   let optionCount: number = array.length(menuOptions);
   for (let i: number = 0; i < optionCount; i++) {
@@ -275,14 +275,14 @@ function showAnalysisMenu(
     console.log(". ");
     console.log(option);
   }
-  
+
   // For demo purposes, we'll simulate selecting option 5 (array statistics)
   let choice: number = 5;
   let selectedOption: string = menuOptions[choice - 1];
   console.log("Selected option:");
   console.log(choice);
   console.log(selectedOption);
-  
+
   if (choice == 5) {
     showArrayStatistics(allEntries, errors, warnings, ips);
   }
@@ -296,16 +296,16 @@ function showArrayStatistics(
 ): void {
   console.log("📈 ARRAY OPERATIONS STATISTICS");
   console.log("===============================");
-  
+
   // Demonstrate array functions
   console.log("Array function demonstrations:");
-  
+
   // array.length() demonstrations
   let totalCount: number = array.length(allEntries);
   let errorCount: number = array.length(errors);
   let warningCount: number = array.length(warnings);
   let ipCount: number = array.length(ips);
-  
+
   console.log("🔢 array.length() results:");
   console.log("All entries:");
   console.log(totalCount);
@@ -315,12 +315,12 @@ function showArrayStatistics(
   console.log(warningCount);
   console.log("IPs:");
   console.log(ipCount);
-  
+
   // array.isEmpty() demonstrations
   let errorsEmpty: boolean = array.isEmpty(errors);
   let warningsEmpty: boolean = array.isEmpty(warnings);
   let ipsEmpty: boolean = array.isEmpty(ips);
-  
+
   console.log("❓ array.isEmpty() results:");
   console.log("Errors empty:");
   console.log(errorsEmpty);
@@ -328,29 +328,29 @@ function showArrayStatistics(
   console.log(warningsEmpty);
   console.log("IPs empty:");
   console.log(ipsEmpty);
-  
+
   // array.contains() demonstrations
   if (!ipsEmpty) {
     let firstIP: string = ips[0];
     let hasFirstIP: boolean = array.contains(ips, firstIP);
     let hasFakeIP: boolean = array.contains(ips, "999.999.999.999");
-    
+
     console.log("🔍 array.contains() examples:");
     console.log("IPs contains first IP:");
     console.log(hasFirstIP);
     console.log("IPs contains fake IP:");
     console.log(hasFakeIP);
   }
-  
+
   // array.merge() demonstration
   let sampleErrors: string[] = ["Error 1", "Error 2"];
   let sampleWarnings: string[] = ["Warning 1", "Warning 2"];
   let combined: string[] = array.merge(sampleErrors, sampleWarnings);
-  
+
   let sampleErrorCount: number = array.length(sampleErrors);
   let sampleWarningCount: number = array.length(sampleWarnings);
   let combinedCount: number = array.length(combined);
-  
+
   console.log("🔗 array.merge() example:");
   console.log("Merged");
   console.log(sampleErrorCount);
@@ -359,68 +359,68 @@ function showArrayStatistics(
   console.log("warnings =");
   console.log(combinedCount);
   console.log("items");
-  
+
   // array.unique() demonstration
   let duplicatedList: string[] = ["item1", "item2", "item1", "item3", "item2"];
   let uniqueList: string[] = array.unique(duplicatedList);
-  
+
   let originalCount: number = array.length(duplicatedList);
   let uniqueCount: number = array.length(uniqueList);
-  
+
   console.log("⭐ array.unique() example:");
   console.log("Original:");
   console.log(originalCount);
   console.log("items, Unique:");
   console.log(uniqueCount);
   console.log("items");
-  
+
   // array.sort() demonstration
   let unsortedNumbers: string[] = ["3", "1", "4", "1", "5"];
   let sortedNumbers: string[] = array.sort(unsortedNumbers);
-  
+
   let unsortedList: string = array.join(unsortedNumbers, ", ");
   let sortedList: string = array.join(sortedNumbers, ", ");
-  
+
   console.log("📊 array.sort() example:");
   console.log("Unsorted:");
   console.log(unsortedList);
   console.log("Sorted:");
   console.log(sortedList);
-  
-  // array.shuffle() demonstration  
+
+  // array.shuffle() demonstration
   let orderedList: string[] = ["A", "B", "C", "D", "E"];
   let shuffledList: string[] = array.shuffle(orderedList);
-  
+
   let orderedJoined: string = array.join(orderedList, ", ");
   let shuffledJoined: string = array.join(shuffledList, ", ");
-  
+
   console.log("🎲 array.shuffle() example:");
   console.log("Original:");
   console.log(orderedJoined);
   console.log("Shuffled:");
   console.log(shuffledJoined);
-  
+
   // array.reverse() demonstration
   let normalOrder: string[] = ["first", "second", "third"];
   let reversedOrder: string[] = array.reverse(normalOrder);
-  
+
   let normalJoined: string = array.join(normalOrder, " → ");
   let reversedJoined: string = array.join(reversedOrder, " ← ");
-  
+
   console.log("🔄 array.reverse() example:");
   console.log("Normal:");
   console.log(normalJoined);
   console.log("Reversed:");
   console.log(reversedJoined);
-  
+
   // array.join() demonstrations
   console.log("🔗 array.join() examples:");
   let fruits: string[] = ["apple", "banana", "cherry"];
-  
+
   let commaSeparated: string = array.join(fruits, ", ");
   let pipeSeparated: string = array.join(fruits, " | ");
   let spaceSeparated: string = array.join(fruits, " ");
-  
+
   console.log("Comma-separated:");
   console.log(commaSeparated);
   console.log("Pipe-separated:");
@@ -514,10 +514,10 @@ Sample external IPs:
 =============================
 Available options:
 1
-. 
+.
 Show detailed error analysis
 2
-. 
+.
 Export IP addresses to file
 [...continues...]
 ```
@@ -530,7 +530,7 @@ Utah enforces type safety for arrays, preventing runtime errors:
 
 ```typescript
 let numbers: number[] = [1, 2, 3, 4, 5];      // Numbers only
-let names: string[] = ["Alice", "Bob"];        // Strings only  
+let names: string[] = ["Alice", "Bob"];        // Strings only
 let flags: boolean[] = [true, false, true];    // Booleans only
 ```
 
@@ -584,7 +584,7 @@ for (let file: string in configFiles) {
 let csvData: string = "user1,user2,user3";
 let users: string[] = string.split(csvData, ",");
 
-// Console interaction  
+// Console interaction
 for (let user: string in users) {
   console.log("Processing user:");
   console.log(user);
@@ -650,7 +650,7 @@ console.log(report);
 // Interactive menus using arrays
 let options: string[] = [
   "View errors",
-  "Export data", 
+  "Export data",
   "Generate report",
   "Exit"
 ];
