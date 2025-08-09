@@ -1,3 +1,27 @@
+---
+layout: default
+title: Server Health Check
+parent: Examples
+nav_order: 2
+description: "Practical server monitoring script with auto-recovery capabilities"
+permalink: /examples/health-check/
+---
+
+A practical server monitoring script that performs comprehensive health checks, logs issues, and executes automatic recovery procedures. This example demonstrates Utah's error handling, environment configuration, and system monitoring capabilities.
+
+## Features Demonstrated
+
+- **Environment-based configuration** with sensible defaults
+- **Privilege checking** with sudo validation
+- **Resource monitoring** with dynamic thresholds
+- **Auto-recovery procedures** with environment-specific logic
+- **File system operations** with path manipulation
+- **Comprehensive logging** with timestamped entries
+- **Error handling** with graceful degradation
+
+## Complete Script
+
+```typescript
 // Server Health Check and Auto-Recovery Script
 // This script monitors server health, logs issues, and performs automatic recovery
 
@@ -70,10 +94,10 @@ for (let app: string in applications) {
   console.log(`${status}: ${app}`);
 
   if (!isInstalled) {
-    missingApps[missingApps.length] = app;
+    array.push(missingApps, app);
   }
 
-  appStatuses[appStatuses.length] = `${app}: ${status}`;
+  array.push(appStatuses, `${app}: ${status}`);
 }
 
 // Application health assessment using switch
@@ -176,7 +200,7 @@ if (issuesFound) {
     console.log(`⏳ Waiting ${recoveryDelay}ms before recovery...`);
 
     let recoverySteps: string = alertLevel == "CRITICAL" ? "emergency" : "standard";
-    console.log(`� Executing ${recoverySteps} recovery steps...`);
+    console.log(`🛠️  Executing ${recoverySteps} recovery steps...`);
 
     console.log("✅ Recovery procedures completed");
   } else {
@@ -204,12 +228,12 @@ for (let configPath: string in configPaths) {
 
 // Generate comprehensive report
 let reportData: string[] = [];
-reportData[0] = `Server Health Report`;
-reportData[1] = `===================`;
-reportData[2] = `OS: ${serverOS}`;
-reportData[3] = `Memory: ${currentMemory}%`;
-reportData[4] = `CPU: ${currentCPU}%`;
-reportData[5] = `Issues Found: ${issuesFound ? "Yes" : "No"}`;
+array.push(reportData, `Server Health Report`);
+array.push(reportData, `===================`);
+array.push(reportData, `OS: ${serverOS}`);
+array.push(reportData, `Memory: ${currentMemory}%`);
+array.push(reportData, `CPU: ${currentCPU}%`);
+array.push(reportData, `Issues Found: ${issuesFound ? "Yes" : "No"}`);
 
 let reportContent: string = array.join(reportData, "\n");
 fs.writeFile("/tmp/health-report.txt", reportContent);
@@ -224,3 +248,195 @@ if (issuesFound) {
   console.log("🎉 All systems healthy!");
   exit(0);
 }
+```
+
+## Key Features Explained
+
+### Environment-Based Configuration
+
+The script adapts its behavior based on the detected environment:
+
+```typescript
+let environment: string = "unknown";
+switch (serverOS) {
+  case "linux":
+    environment = "production";
+    break;
+  case "darwin":
+    environment = "development";
+    break;
+  case "windows":
+    environment = "testing";
+    break;
+}
+
+// Environment-specific thresholds
+const memoryThreshold: number = environment == "production" ? 80 : 90;
+const cpuThreshold: number = environment == "production" ? 70 : 85;
+```
+
+### Privilege Checking
+
+Utah provides built-in privilege detection:
+
+```typescript
+let hasAdminRights: boolean = console.isSudo();
+if (!hasAdminRights) {
+  console.log("❌ Error: This script requires sudo privileges for system operations");
+  exit(1);
+}
+```
+
+### Smart Status Evaluation
+
+Using ternary operators for concise status logic:
+
+```typescript
+let memoryStatus: string = currentMemory > 80 ? "CRITICAL" : currentMemory > 60 ? "WARNING" : "OK";
+let cpuStatus: string = currentCPU > 90 ? "CRITICAL" : currentCPU > 70 ? "WARNING" : "OK";
+```
+
+### Application Health Assessment
+
+Automated checking of critical applications:
+
+```typescript
+const applications: string[] = ["docker", "nginx", "git", "curl"];
+let missingApps: string[] = [];
+
+for (let app: string in applications) {
+  let isInstalled: boolean = os.isInstalled(app);
+  if (!isInstalled) {
+    array.push(missingApps, app);
+  }
+}
+
+// Assessment based on missing applications
+switch (missingApps.length) {
+  case 0:
+    appHealthLevel = "EXCELLENT";
+    break;
+  case 1:
+    appHealthLevel = "GOOD";
+    break;
+  default:
+    appHealthLevel = "POOR";
+    break;
+}
+```
+
+### Auto-Recovery Logic
+
+Environment-specific recovery procedures:
+
+```typescript
+switch (environment) {
+  case "production":
+    console.log("🛡️  Production mode: Conservative recovery");
+    console.log("🔄 Graceful service restart...");
+    break;
+  case "development":
+    console.log("🚀 Development mode: Aggressive optimization");
+    console.log("💾 Clearing all caches...");
+    break;
+  case "testing":
+    console.log("🧪 Testing mode: Diagnostic recovery");
+    console.log("🔍 Running system diagnostics...");
+    break;
+}
+```
+
+### File System Operations
+
+Built-in path manipulation functions:
+
+```typescript
+let logDirName: string = fs.dirname("/var/log/health-check.log");
+let logFileName: string = fs.fileName("/var/log/health-check.log");
+let configExt: string = fs.extension(configPath);
+```
+
+## Usage Examples
+
+### Basic Health Check
+
+```bash
+utah compile health-check.shx
+sudo ./health-check.sh
+```
+
+### With Environment Variables
+
+```bash
+export LOG_LEVEL="DEBUG"
+export MAX_RETRIES="5"
+export ALERT_EMAIL="ops@company.com"
+sudo ./health-check.sh
+```
+
+### Automated Monitoring
+
+```bash
+# Add to crontab for regular monitoring
+*/5 * * * * /usr/local/bin/utah run /opt/scripts/health-check.shx
+```
+
+## Environment Configuration
+
+Create a `.env` file for customization:
+
+```bash
+LOG_LEVEL=INFO
+MAX_RETRIES=3
+ALERT_EMAIL=admin@company.com
+```
+
+## Output Examples
+
+### Healthy System
+
+```text
+🔍 Starting comprehensive server health check...
+⚙️  Configuration loaded - Log Level: INFO, Max Retries: 3
+✅ Running with administrator privileges
+📊 Server OS: linux
+🔧 Process ID: 12345
+💾 Memory Usage: 45% (OK)
+⚡ CPU Usage: 25% (OK)
+🌍 Environment detected: production
+✅ INSTALLED: docker
+✅ INSTALLED: nginx
+✅ INSTALLED: git
+✅ INSTALLED: curl
+📦 Application Health: EXCELLENT (0 missing)
+⏱️  Health check completed in 245ms
+🎉 All systems healthy!
+```
+
+### System with Issues
+
+```text
+🔍 Starting comprehensive server health check...
+📊 Server OS: linux
+💾 Memory Usage: 85% (CRITICAL)
+⚡ CPU Usage: 75% (WARNING)
+⚠️  HIGH MEMORY USAGE: 85% (threshold: 80%) - CRITICAL
+⚠️  HIGH CPU USAGE: 75% (threshold: 70%) - Action: THROTTLE_SERVICES
+🔧 Issues detected (CRITICAL). Attempt CONSERVATIVE recovery? (y/n)
+```
+
+## Benefits Over Traditional Bash
+
+- **Type Safety**: All variables are strongly typed with clear interfaces
+- **Error Handling**: Built-in error handling with `script.exitOnError()`
+- **Environment Detection**: Automatic OS and environment detection
+- **File Operations**: Clean path manipulation without external tools
+- **Interactive Prompts**: Built-in user interaction functions
+- **Comprehensive Logging**: Structured logging with timestamps
+- **Auto-Recovery**: Intelligent recovery procedures based on severity
+
+## Related Examples
+
+- [System Health Monitor](system-health-monitor) - Comprehensive monitoring suite
+- [String Processing](string-processing) - Text manipulation techniques
+- [Arrays](arrays) - Array operations and data structures

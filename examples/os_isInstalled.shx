@@ -1,7 +1,0 @@
-let gitInstalled: boolean = os.isInstalled("git");
-
-if (gitInstalled) {
-  console.log("Git is installed");
-} else {
-  console.log("Git is not installed");
-}

@@ -1,7 +1,0 @@
-let name: string = "Alice";
-
-function greet(who: string): void {
-  console.log(`Hello, ${who}!`);
-}
-
-greet(name);
