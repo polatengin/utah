@@ -1170,13 +1170,13 @@ public partial class Compiler
 
     // Build curl command with optional options
     string curlCommand = $"curl -s -X DELETE {curlUrl}";
-    
+
     // If options are provided, compile them and add to curl command
     if (webDelete.Options != null)
     {
       var options = CompileExpression(webDelete.Options);
       string curlOptions;
-      
+
       if (options.StartsWith("${") && options.EndsWith("}"))
       {
         curlOptions = options;
@@ -1189,7 +1189,7 @@ public partial class Compiler
       {
         curlOptions = $"${{{options}}}";
       }
-      
+
       curlCommand = $"curl -s -X DELETE {curlOptions} {curlUrl}";
     }
 

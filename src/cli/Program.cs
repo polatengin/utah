@@ -261,11 +261,11 @@ class UtahApp
       var output = compiler.Compile(ast);
 
       // For local files, preserve directory structure; for URLs, use filename only
-      var finalOutputPath = outputPath ?? 
-        (isUrl 
+      var finalOutputPath = outputPath ??
+        (isUrl
           ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
           : Path.ChangeExtension(inputPath, ".sh"));
-      
+
       File.WriteAllText(finalOutputPath, output);
       Console.WriteLine($"✅ Compiled: {finalOutputPath}");
     }
