@@ -7,7 +7,26 @@ description: "A comprehensive real-world example using loops, string processing,
 permalink: /examples/log-analytics-pipeline/
 ---
 
+import { AsciinemaPlayer } from '@site/src/components';
+
 A comprehensive real-world example that demonstrates Utah's capabilities by building a log analytics pipeline. This script processes web server access logs to extract insights about traffic patterns, errors, and user behavior, showcasing the powerful combination of loops and string processing in Utah.
+
+## 🎬 Interactive Demo
+
+Watch this script in action! The demo shows the complete log analytics pipeline including file processing, string manipulation, loops, and report generation:
+
+<AsciinemaPlayer
+  src="/assets/log-analytics-pipeline.cast"
+  autoPlay={false}
+  loop={false}
+  speed={1}
+  idleTimeLimit={3}
+  theme="asciinema"
+  poster="npt:0:01"
+  cols={120}
+  rows={30}
+  fontSize="14px"
+/>
 
 ## Features Demonstrated
 
@@ -51,7 +70,7 @@ try {
   if (!fs.exists(logFile)) {
     console.log("❌ Log file not found: " + logFile);
     console.log("💡 Creating sample log data for demo...");
-    
+
     // Create sample log entries for demonstration
     let sampleLogs: string[] = [
       "192.168.1.100 - - [09/Aug/2025:10:15:23 +0000] \"GET /api/users HTTP/1.1\" 200 1234",
@@ -65,12 +84,12 @@ try {
       "198.51.100.10 - - [09/Aug/2025:12:31:22 +0000] \"GET /api/stats HTTP/1.1\" 500 678",
       "192.168.1.75 - - [09/Aug/2025:13:45:33 +0000] \"PUT /api/update HTTP/1.1\" 201 345"
     ];
-    
+
     // Create output directory if it doesn't exist
     if (!fs.exists(outputDir)) {
       fs.createDirectory(outputDir);
     }
-    
+
     logFile = outputDir + "/sample_access.log";
     let logContent: string = array.join(sampleLogs, "\n");
     fs.writeFile(logFile, logContent);
@@ -81,7 +100,7 @@ try {
   console.log("\n📖 Reading log file: " + logFile);
   let logContent: string = fs.readFile(logFile);
   let logLines: string[] = string.split(logContent, "\n");
-  
+
   console.log("📊 Processing " + array.length(logLines) + " log entries...");
 
   // Initialize data structures for analysis
@@ -98,21 +117,21 @@ try {
     }
 
     totalRequests++;
-    
+
     // Parse IP address (first field)
     let spaceIndex: number = string.indexOf(line, " ");
     if (spaceIndex > 0) {
       let ipAddress: string = string.substring(line, 0, spaceIndex);
-      
+
       // Track IP addresses
       let ipEntry: string = ipAddress + ":1";
-      
+
       // Check if IP already exists in our tracking
       let ipFound: boolean = false;
       for (let i: number = 0; i < array.length(ipCounts); i++) {
         let existingEntry: string = ipCounts[i];
         let existingIp: string = string.substring(existingEntry, 0, string.indexOf(existingEntry, ":"));
-        
+
         if (existingIp == ipAddress) {
           // Increment count
           let countStr: string = string.substring(existingEntry, string.indexOf(existingEntry, ":") + 1);
@@ -122,7 +141,7 @@ try {
           break;
         }
       }
-      
+
       if (!ipFound) {
         array.push(ipCounts, ipEntry);
       }
@@ -131,17 +150,17 @@ try {
     // Parse timestamp and extract hour
     let timestampStart: number = string.indexOf(line, "[");
     let timestampEnd: number = string.indexOf(line, "]");
-    
+
     if (timestampStart >= 0 && timestampEnd > timestampStart) {
       let timestamp: string = string.substring(line, timestampStart + 1, timestampEnd);
       // Extract hour from timestamp: [09/Aug/2025:10:15:23 +0000]
       let hourStart: number = string.indexOf(timestamp, ":") + 1;
       let hourEnd: number = string.indexOf(timestamp, ":", hourStart);
-      
+
       if (hourStart > 0 && hourEnd > hourStart) {
         let hour: string = string.substring(timestamp, hourStart, hourEnd);
         let hourEntry: string = hour + ":1";
-        
+
         // Track hourly traffic
         let hourFound: boolean = false;
         for (let i: number = 0; i < array.length(hourlyTraffic); i++) {
@@ -154,7 +173,7 @@ try {
             break;
           }
         }
-        
+
         if (!hourFound) {
           array.push(hourlyTraffic, hourEntry);
         }
@@ -166,11 +185,11 @@ try {
     if (statusStart >= 0) {
       let afterQuote: string = string.substring(line, statusStart + 2);
       let statusEnd: number = string.indexOf(afterQuote, " ");
-      
+
       if (statusEnd > 0) {
         let statusCode: string = string.substring(afterQuote, 0, statusEnd);
         let statusEntry: string = statusCode + ":1";
-        
+
         // Track status codes
         let statusFound: boolean = false;
         for (let i: number = 0; i < array.length(statusCodes); i++) {
@@ -183,7 +202,7 @@ try {
             break;
           }
         }
-        
+
         if (!statusFound) {
           array.push(statusCodes, statusEntry);
         }
@@ -205,7 +224,7 @@ try {
   array.push(report, "Log Analytics Report - Generated on " + utility.getCurrentTimestamp());
   array.push(report, "====================================================");
   array.push(report, "");
-  
+
   // Summary statistics
   array.push(report, "📊 Summary Statistics:");
   array.push(report, "  Total Requests: " + totalRequests);
@@ -230,7 +249,7 @@ try {
     let parts: string[] = string.split(entry, ":");
     let code: string = parts[0];
     let count: string = parts[1];
-    
+
     let description: string = "";
     switch (code) {
       case "200":
@@ -254,7 +273,7 @@ try {
       default:
         description = "Other";
     }
-    
+
     array.push(report, "  " + code + " " + description + ": " + count + " requests");
   }
   array.push(report, "");
@@ -279,7 +298,7 @@ try {
         array.push(report, "  " + errorCount + ". " + errorLine);
       }
     }
-    
+
     if (array.length(errorEntries) > 5) {
       array.push(report, "  ... and " + (array.length(errorEntries) - 5) + " more errors");
     }
@@ -289,7 +308,7 @@ try {
   // Step 5: Save report to file
   let reportContent: string = array.join(report, "\n");
   let reportFile: string = outputDir + "/analytics_report_" + utility.getCurrentDate() + ".txt";
-  
+
   fs.writeFile(reportFile, reportContent);
   console.log("💾 Report saved to: " + reportFile);
 
@@ -299,16 +318,16 @@ try {
   // Step 7: Git operations (if in a git repository)
   if (fs.exists(".git")) {
     console.log("\n🔄 Committing report to Git repository...");
-    
+
     try {
       git.add(reportFile);
       git.commit("Add analytics report for " + utility.getCurrentDate());
       console.log("✅ Report committed to Git");
-      
+
       // Show recent commits
       console.log("\n📝 Recent commits:");
       // Note: In a real implementation, we'd use git.log() if available
-      
+
     } catch (error) {
       console.log("⚠️  Git operations failed (repository might not be initialized)");
     }
@@ -316,7 +335,7 @@ try {
 
   // Step 8: Clean up and recommendations
   console.log("\n🎯 Recommendations:");
-  
+
   // Analyze error rate
   let errorRate: number = array.length(errorEntries) * 100 / totalRequests;
   if (errorRate > 10) {
@@ -331,7 +350,7 @@ try {
   for (let entry: string in ipCounts) {
     let parts: string[] = string.split(entry, ":");
     let count: number = utility.parseInt(parts[1]);
-    
+
     if (count > totalRequests / 2) {
       console.log("🔍 IP " + parts[0] + " has unusually high activity (" + count + " requests). Consider investigation.");
     }
@@ -715,7 +734,7 @@ Employee: bob
 for (let file: string in fileList) {
   let content: string = fs.readFile(file);
   let lines: string[] = string.split(content, "\n");
-  
+
   for (let line: string in lines) {
     if (string.includes(line, "ERROR")) {
       console.log("Found error in " + file + ": " + line);
