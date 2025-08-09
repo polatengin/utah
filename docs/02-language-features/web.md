@@ -5,93 +5,45 @@ parent: Language Features
 nav_order: 10
 ---
 
-Utah provides web-related functions for HTTP requests, URL manipulation, and web service integration.
+Utah provides web-related functions for HTTP requests and web service integration.
 
 ## HTTP Operations
 
-### Basic Requests
+### Available Functions
+
+Currently implemented web functions:
+
+#### web.get(url)
+
+Performs an HTTP GET request to the specified URL.
 
 ```typescript
-// GET request
+// Basic GET request
 let response: string = web.get("https://api.example.com/data");
+console.log(`Response: ${response}`);
 
-// POST request
-let result: string = web.post("https://api.example.com/create", {
-  name: "Utah",
-  version: "1.0"
-});
-
-// PUT request
-let updated: string = web.put("https://api.example.com/update/1", {
-  name: "Updated Utah"
-});
-
-// DELETE request
-let deleted: string = web.delete("https://api.example.com/delete/1");
+// Use with variables
+let apiUrl: string = "https://api.github.com/users/octocat";
+let userInfo: string = web.get(apiUrl);
+console.log(`User Info: ${userInfo}`);
 ```
 
-### Advanced Requests
+#### web.delete(url, options?)
+
+Performs an HTTP DELETE request to the specified URL with optional headers or curl options.
 
 ```typescript
-// Request with headers
-let response: string = web.get("https://api.example.com/protected", {
-  headers: {
-    "Authorization": "Bearer token123",
-    "Content-Type": "application/json"
-  }
-});
+// Basic DELETE request
+let response: string = web.delete("https://api.example.com/users/123");
+console.log(`Delete Response: ${response}`);
 
-// Request with timeout
-let result: string = web.get("https://slow-api.example.com", {
-  timeout: 30
-});
+// DELETE with authorization headers
+let authResponse: string = web.delete("https://api.example.com/users/123", "-H 'Authorization: Bearer token123'");
+console.log(`Authenticated Delete: ${authResponse}`);
 
-// Request with retry
-let data: string = web.get("https://unreliable-api.example.com", {
-  retry: 3
-});
-```
-
-## URL Operations
-
-### URL Manipulation
-
-```typescript
-// Parse URL components
-let protocol: string = web.urlProtocol("https://example.com/path");
-let domain: string = web.urlDomain("https://example.com/path");
-let path: string = web.urlPath("https://example.com/path");
-
-// Build URL
-let url: string = web.buildUrl("https://example.com", "/api/v1", {
-  param1: "value1",
-  param2: "value2"
-});
-```
-
-### URL Encoding
-
-```typescript
-// Encode URL component
-let encoded: string = web.urlEncode("hello world");
-
-// Decode URL component
-let decoded: string = web.urlDecode("hello%20world");
-```
-
-## Web Utilities
-
-### Download Operations
-
-```typescript
-// Download file
-web.download("https://example.com/file.zip", "/local/path/file.zip");
-
-// Download with progress
-web.downloadWithProgress("https://example.com/large-file.zip", "/local/path/");
-
-// Check if URL is accessible
-let accessible: boolean = web.isAccessible("https://example.com");
+// DELETE with multiple headers
+let fullResponse: string = web.delete("https://api.example.com/users/123", "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log(`Full Response: ${fullResponse}`);
 ```
 
 ## Generated Bash
@@ -100,27 +52,37 @@ Web functions compile to appropriate curl commands:
 
 ```bash
 # GET request
-response=$(curl -s "https://api.example.com/data")
+response=$(curl -s "https://api.example.com/data" 2>/dev/null || echo "")
 
-# POST request
-result=$(curl -s -X POST "https://api.example.com/create" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Utah","version":"1.0"}')
+# DELETE request
+response=$(curl -s -X DELETE "https://api.example.com/users/123" 2>/dev/null || echo "")
 
-# Request with headers
-response=$(curl -s "https://api.example.com/protected" \
-  -H "Authorization: Bearer token123" \
-  -H "Content-Type: application/json")
-
-# Download file
-curl -o "/local/path/file.zip" "https://example.com/file.zip"
+# DELETE with headers
+authResponse=$(curl -s -X DELETE "-H 'Authorization: Bearer token123'" "https://api.example.com/users/123" 2>/dev/null || echo "")
 ```
+
+## Error Handling
+
+All web functions include automatic error handling:
+
+- Errors are suppressed with `2>/dev/null`
+- Empty string is returned on failure using `|| echo ""`
+- This prevents scripts from failing on network issues
 
 ## Use Cases
 
 - API integration and testing
-- Web scraping and data extraction
-- File downloads and uploads
+- RESTful resource management
 - Web service monitoring
-- REST API consumption
-- Webhook processing
+- API endpoint testing
+- Simple HTTP operations
+
+## Future Functions
+
+The following web functions are planned for future releases:
+
+- `web.post()` - HTTP POST requests
+- `web.put()` - HTTP PUT requests
+- `web.patch()` - HTTP PATCH requests
+- URL manipulation functions
+- File download utilities

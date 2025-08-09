@@ -1,0 +1,12 @@
+// Test web.delete() function with URL
+let response: string = web.delete("https://httpbin.org/delete");
+console.log("Response length: ${string.length(response)}");
+
+// Test with variable URL
+let apiUrl: string = "https://httpbin.org/delete";
+let deleteResponse: string = web.delete(apiUrl);
+console.log("Delete Response: ${deleteResponse}");
+
+// Test with options (headers)
+let responseWithHeaders: string = web.delete("https://httpbin.org/delete", "-H 'Authorization: Bearer token123'");
+console.log("Response with headers: ${string.length(responseWithHeaders)}");

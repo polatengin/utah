@@ -532,6 +532,16 @@ public class FormatterVisitor
         }
       case WebGetExpression webGet:
         return $"web.get({VisitExpression(webGet.Url)})";
+      case WebDeleteExpression webDelete:
+        {
+          var result = $"web.delete({VisitExpression(webDelete.Url)}";
+          if (webDelete.Options != null)
+          {
+            result += $", {VisitExpression(webDelete.Options)}";
+          }
+          result += ")";
+          return result;
+        }
       case ProcessIdExpression:
         return "process.id()";
       case ProcessCpuExpression:

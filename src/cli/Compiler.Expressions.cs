@@ -144,6 +144,8 @@ public partial class Compiler
         return CompileUtilityBase64DecodeExpression(base64Decode);
       case WebGetExpression webGet:
         return CompileWebGetExpression(webGet);
+      case WebDeleteExpression webDelete:
+        return CompileWebDeleteExpression(webDelete);
       case ArrayJoinExpression arrayJoin:
         return CompileArrayJoinExpression(arrayJoin);
       case ArraySortExpression arraySort:
@@ -1142,6 +1144,57 @@ public partial class Compiler
 
     // Return a bash command substitution that uses curl to make the GET request
     return $"$(curl -s {curlUrl} 2>/dev/null || echo \"\")";
+  }
+
+  private string CompileWebDeleteExpression(WebDeleteExpression webDelete)
+  {
+    var url = CompileExpression(webDelete.Url);
+
+    // Handle different types of URL expressions
+    string curlUrl;
+    if (url.StartsWith("${") && url.EndsWith("}"))
+    {
+      // It's a variable reference like ${varName}
+      curlUrl = url;
+    }
+    else if (url.StartsWith("\"") && url.EndsWith("\""))
+    {
+      // It's a string literal like "http://example.com"
+      curlUrl = url; // Keep the quotes for curl
+    }
+    else
+    {
+      // It's a variable name without ${}, add $ prefix for bash
+      curlUrl = $"${{{url}}}";
+    }
+
+    // Build curl command with optional options
+    string curlCommand = $"curl -s -X DELETE {curlUrl}";
+    
+    // If options are provided, compile them and add to curl command
+    if (webDelete.Options != null)
+    {
+      var options = CompileExpression(webDelete.Options);
+      string curlOptions;
+      
+      if (options.StartsWith("${") && options.EndsWith("}"))
+      {
+        curlOptions = options;
+      }
+      else if (options.StartsWith("\"") && options.EndsWith("\""))
+      {
+        curlOptions = options;
+      }
+      else
+      {
+        curlOptions = $"${{{options}}}";
+      }
+      
+      curlCommand = $"curl -s -X DELETE {curlOptions} {curlUrl}";
+    }
+
+    // Return a bash command substitution that uses curl to make the DELETE request
+    return $"$({curlCommand} 2>/dev/null || echo \"\")";
   }
 
   private string CompileArrayJoinExpression(ArrayJoinExpression arrayJoin)

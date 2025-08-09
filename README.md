@@ -2354,6 +2354,7 @@ Utah provides web functions for making HTTP requests and interacting with web AP
 #### HTTP Requests
 
 - `web.get(url)` - Perform an HTTP GET request to the specified URL
+- `web.delete(url, options?)` - Perform an HTTP DELETE request to the specified URL with optional headers/options
 
 ### Web Functions Usage
 
@@ -2361,6 +2362,14 @@ Utah provides web functions for making HTTP requests and interacting with web AP
 // Make a simple GET request to a URL
 let response: string = web.get("https://api.github.com/users/octocat");
 console.log(`Response: ${response}`);
+
+// Make a DELETE request to remove a resource
+let deleteResponse: string = web.delete("https://api.example.com/users/123");
+console.log(`Delete Response: ${deleteResponse}`);
+
+// DELETE with additional headers or options
+let authDeleteResponse: string = web.delete("https://api.example.com/users/123", "-H 'Authorization: Bearer token123'");
+console.log(`Authenticated Delete: ${authDeleteResponse}`);
 
 // Use with variables
 let apiUrl: string = "https://httpbin.org/get";
@@ -4795,7 +4804,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [ ] `web.put()` function
 
-- [ ] `web.delete()` function
+- [x] `web.delete()` function
 
 - [ ] `web.speedTest()` function
 

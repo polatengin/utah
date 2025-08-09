@@ -311,6 +311,40 @@ public partial class Parser
         }
       }
 
+      // Special case for web.delete() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("delete(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(7, methodPart.Length - 8).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.delete() requires a URL argument");
+        }
+        else
+        {
+          // Parse the URL argument and optional options
+          var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(arg => arg.Trim())
+                                .ToList();
+          if (args.Count == 1)
+          {
+            // One argument: web.delete(url)
+            var urlExpr = ParseExpression(args[0]);
+            return new WebDeleteExpression(urlExpr);
+          }
+          else if (args.Count == 2)
+          {
+            // Two arguments: web.delete(url, options)
+            var urlExpr = ParseExpression(args[0]);
+            var optionsExpr = ParseExpression(args[1]);
+            return new WebDeleteExpression(urlExpr, optionsExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.delete() accepts 1-2 arguments (URL, optional options), got {args.Count}");
+          }
+        }
+      }
+
       // Special case for template.update() - handle this as a function call
       if (objectName == "template" && methodPart.StartsWith("update(") && methodPart.EndsWith(")"))
       {
