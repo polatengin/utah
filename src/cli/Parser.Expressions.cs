@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text;
 
 public partial class Parser
 {
@@ -322,9 +323,7 @@ public partial class Parser
         else
         {
           // Parse the URL argument and optional options
-          var args = argsContent.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                .Select(arg => arg.Trim())
-                                .ToList();
+          var args = ParseFunctionArguments(argsContent);
           if (args.Count == 1)
           {
             // One argument: web.delete(url)
@@ -341,6 +340,40 @@ public partial class Parser
           else
           {
             throw new InvalidOperationException($"web.delete() accepts 1-2 arguments (URL, optional options), got {args.Count}");
+          }
+        }
+      }
+
+      // Special case for web.post() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("post(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.post() requires URL and data arguments");
+        }
+        else
+        {
+          // Parse the URL, data, and optional options arguments
+          var args = ParseFunctionArguments(argsContent);
+          if (args.Count == 2)
+          {
+            // Two arguments: web.post(url, data)
+            var urlExpr = ParseExpression(args[0]);
+            var dataExpr = ParseExpression(args[1]);
+            return new WebPostExpression(urlExpr, dataExpr);
+          }
+          else if (args.Count == 3)
+          {
+            // Three arguments: web.post(url, data, options)
+            var urlExpr = ParseExpression(args[0]);
+            var dataExpr = ParseExpression(args[1]);
+            var optionsExpr = ParseExpression(args[2]);
+            return new WebPostExpression(urlExpr, dataExpr, optionsExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.post() accepts 2-3 arguments (URL, data, optional options), got {args.Count}");
           }
         }
       }
@@ -1685,5 +1718,66 @@ public partial class Parser
            variableName.Contains("Array", StringComparison.OrdinalIgnoreCase) ||
            variableName.Contains("List", StringComparison.OrdinalIgnoreCase) ||
            variableName.Contains("Items", StringComparison.OrdinalIgnoreCase);
+  }
+
+  private List<string> ParseFunctionArguments(string argsContent)
+  {
+    var args = new List<string>();
+    var current = new StringBuilder();
+    var inQuotes = false;
+    var quoteChar = '\0';
+    var depth = 0;
+
+    for (int i = 0; i < argsContent.Length; i++)
+    {
+      char c = argsContent[i];
+
+      if (!inQuotes)
+      {
+        if (c == '"' || c == '\'')
+        {
+          inQuotes = true;
+          quoteChar = c;
+          current.Append(c);
+        }
+        else if (c == '(' || c == '[' || c == '{')
+        {
+          depth++;
+          current.Append(c);
+        }
+        else if (c == ')' || c == ']' || c == '}')
+        {
+          depth--;
+          current.Append(c);
+        }
+        else if (c == ',' && depth == 0)
+        {
+          // Found a separator at the top level
+          args.Add(current.ToString().Trim());
+          current.Clear();
+        }
+        else
+        {
+          current.Append(c);
+        }
+      }
+      else
+      {
+        current.Append(c);
+        if (c == quoteChar && (i == 0 || argsContent[i - 1] != '\\'))
+        {
+          inQuotes = false;
+          quoteChar = '\0';
+        }
+      }
+    }
+
+    // Add the last argument
+    if (current.Length > 0)
+    {
+      args.Add(current.ToString().Trim());
+    }
+
+    return args;
   }
 }

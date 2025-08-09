@@ -59,6 +59,7 @@ public record OsGetLinuxVersionExpression() : Expression;
 public record OsGetOSExpression() : Expression;
 public record WebGetExpression(Expression Url) : Expression;
 public record WebDeleteExpression(Expression Url, Expression? Options = null) : Expression;
+public record WebPostExpression(Expression Url, Expression Data, Expression? Options = null) : Expression;
 public record FsDirnameExpression(Expression Path) : Expression;
 public record FsFileNameExpression(Expression Path) : Expression;
 public record FsExtensionExpression(Expression Path) : Expression;

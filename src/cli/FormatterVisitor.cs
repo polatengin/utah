@@ -542,6 +542,16 @@ public class FormatterVisitor
           result += ")";
           return result;
         }
+      case WebPostExpression webPost:
+        {
+          var result = $"web.post({VisitExpression(webPost.Url)}, {VisitExpression(webPost.Data)}";
+          if (webPost.Options != null)
+          {
+            result += $", {VisitExpression(webPost.Options)}";
+          }
+          result += ")";
+          return result;
+        }
       case ProcessIdExpression:
         return "process.id()";
       case ProcessCpuExpression:

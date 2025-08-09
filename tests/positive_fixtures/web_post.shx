@@ -1,0 +1,13 @@
+// Test web.post() function with URL and data
+let response: string = web.post("https://httpbin.org/post", '{"name": "Utah", "version": "1.0"}');
+console.log("Response length: ${string.length(response)}");
+
+// Test with variable URL and data
+let apiUrl: string = "https://httpbin.org/post";
+let postData: string = '{"user": "test", "action": "create"}';
+let createResponse: string = web.post(apiUrl, postData);
+console.log("Create Response: ${createResponse}");
+
+// Test with options (headers)
+let responseWithHeaders: string = web.post("https://httpbin.org/post", '{"authenticated": true}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log("Response with headers: ${string.length(responseWithHeaders)}");

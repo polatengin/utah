@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-110-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-112-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2355,6 +2355,7 @@ Utah provides web functions for making HTTP requests and interacting with web AP
 
 - `web.get(url)` - Perform an HTTP GET request to the specified URL
 - `web.delete(url, options?)` - Perform an HTTP DELETE request to the specified URL with optional headers/options
+- `web.post(url, data, options?)` - Perform an HTTP POST request to the specified URL with data and optional headers/options
 
 ### Web Functions Usage
 
@@ -2370,6 +2371,14 @@ console.log(`Delete Response: ${deleteResponse}`);
 // DELETE with additional headers or options
 let authDeleteResponse: string = web.delete("https://api.example.com/users/123", "-H 'Authorization: Bearer token123'");
 console.log(`Authenticated Delete: ${authDeleteResponse}`);
+
+// Make a POST request with JSON data
+let postResponse: string = web.post("https://api.example.com/users", '{"name": "Alice", "email": "alice@example.com"}');
+console.log(`Post Response: ${postResponse}`);
+
+// POST with authentication headers
+let authPostResponse: string = web.post("https://api.example.com/users", '{"name": "Bob"}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log(`Authenticated Post: ${authPostResponse}`);
 
 // Use with variables
 let apiUrl: string = "https://httpbin.org/get";
@@ -4800,7 +4809,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `web.get()` function
 
-- [ ] `web.post()` function
+- [x] `web.post()` function
 
 - [ ] `web.put()` function
 
