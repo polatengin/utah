@@ -19,17 +19,13 @@ A comprehensive DevOps automation script demonstrating advanced Utah features in
 
 A practical server monitoring script that performs health checks, logs issues, and executes automatic recovery procedures.
 
-### 🧵 [String Processing](examples/string-processing)
+### 📊 [Log Analytics Pipeline](examples/log-analytics-pipeline)
 
-A tutorial on string manipulation using Utah's powerful string functions for cleaning, formatting, and validating data.
+A comprehensive real-world example combining loops, string processing, filesystem operations, and arrays to analyze server logs. Demonstrates advanced pattern parsing, data aggregation, and automated reporting.
 
 ### 📚 [Log File Analyzer](examples/log-file-analyzer)
 
 A comprehensive guide to working with arrays in Utah through a practical log file analyzer, including creation, access, iteration, and built-in array methods.
-
-### 🔄 [Loops and Iteration](examples/loops)
-
-Examples of for loops, for-in loops, and array iteration patterns in Utah.
 
 ### 🎯 [DevOps Deployment Manager](examples/devops-deployment-manager)
 

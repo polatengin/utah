@@ -719,9 +719,9 @@ This log analyzer pattern can be adapted for many scenarios:
 
 ## Related Examples
 
-- [String Processing](string-processing) - Working with text arrays
+- [Log Analytics Pipeline](log-analytics-pipeline) - Comprehensive string processing and loops example
 - [System Health Monitor](system-health-monitor) - Arrays in monitoring
-- [Loops](loops) - Advanced iteration with arrays
+- [Log Analytics Pipeline](log-analytics-pipeline) - Comprehensive string processing and loops example
 
 ## Extension Ideas
 
