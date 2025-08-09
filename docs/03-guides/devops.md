@@ -39,7 +39,7 @@ jobs:
 
     - name: Health Check
       run: |
-        utah scripts/health-check.shx
+        utah scripts/server-health-check.shx
 ```
 
 ### GitLab CI/CD
@@ -303,7 +303,7 @@ checkHealth("production", "my-app");
 ### Health Checks
 
 ```typescript
-// monitoring/health-check.shx
+// monitoring/server-health-check.shx
 function checkWebservice(url: string): boolean {
   try {
     let response: string = web.get(url);

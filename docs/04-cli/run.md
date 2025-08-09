@@ -482,7 +482,7 @@ jobs:
 
     - name: Run smoke tests
       run: |
-        utah run scripts/health-check.shx
+        utah run scripts/server-health-check.shx
 ```
 
 ## Troubleshooting

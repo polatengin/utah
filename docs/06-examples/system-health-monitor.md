@@ -426,6 +426,6 @@ Utah provides all of this functionality built-in with clean, maintainable syntax
 
 ## Related Examples
 
-- [Server Health Check](health-check) - Focused server monitoring
+- [Server Health Check](server-health-check) - Focused server monitoring
 - [String Processing](string-processing) - Text manipulation techniques
 - [Log File Analyzer](log-file-analyzer) - Array operations and iteration

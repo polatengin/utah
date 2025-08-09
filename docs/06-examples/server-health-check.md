@@ -4,10 +4,26 @@ title: Server Health Check
 parent: Examples
 nav_order: 2
 description: "Practical server monitoring script with auto-recovery capabilities"
-permalink: /examples/health-check/
+permalink: /examples/server-health-check/
 ---
 
+import { AsciinemaPlayer } from '@site/src/components';
+
 A practical server monitoring script that performs comprehensive health checks, logs issues, and executes automatic recovery procedures. This example demonstrates Utah's error handling, environment configuration, and system monitoring capabilities.
+
+## 🎬 Interactive Demo
+
+Watch this script in action! The demo shows environment detection, privilege checking, resource monitoring, and intelligent auto-recovery procedures:
+
+<AsciinemaPlayer
+  src="/assets/server-health-check.cast"
+  autoPlay={false}
+  loop={false}
+  speed={1}
+  idleTimeLimit={3}
+  theme="asciinema"
+  poster="npt:0:01"
+/>
 
 ## Features Demonstrated
 
@@ -42,7 +58,7 @@ console.log(`⚙️  Configuration loaded - Log Level: ${defaultLogLevel}, Max R
 let hasAdminRights: boolean = console.isSudo();
 if (!hasAdminRights) {
   console.log("❌ Error: This script requires sudo privileges for system operations");
-  console.log("Please run: sudo utah compile health-check.shx && sudo ./health-check.sh");
+  console.log("Please run: sudo utah compile server-health-check.shx && sudo ./server-health-check.sh");
   exit(1);
 }
 
@@ -361,8 +377,8 @@ let configExt: string = fs.extension(configPath);
 ### Basic Health Check
 
 ```bash
-utah compile health-check.shx
-sudo ./health-check.sh
+utah compile server-health-check.shx
+sudo ./server-health-check.sh
 ```
 
 ### With Environment Variables
@@ -371,14 +387,14 @@ sudo ./health-check.sh
 export LOG_LEVEL="DEBUG"
 export MAX_RETRIES="5"
 export ALERT_EMAIL="ops@company.com"
-sudo ./health-check.sh
+sudo ./server-health-check.sh
 ```
 
 ### Automated Monitoring
 
 ```bash
 # Add to crontab for regular monitoring
-*/5 * * * * /usr/local/bin/utah run /opt/scripts/health-check.shx
+*/5 * * * * /usr/local/bin/utah run /opt/scripts/server-health-check.shx
 ```
 
 ## Environment Configuration
