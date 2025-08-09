@@ -448,6 +448,6 @@ for (let i: number = 0; i < array.length(items); i++) {
 
 ## Related Examples
 
-- [Arrays](arrays) - Working with array data structures
+- [Log File Analyzer](log-file-analyzer) - Working with array data structures
 - [String Processing](string-processing) - Processing string arrays
 - [System Health Monitor](system-health-monitor) - Loops in real-world monitoring

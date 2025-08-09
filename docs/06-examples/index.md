@@ -23,9 +23,9 @@ A practical server monitoring script that performs health checks, logs issues, a
 
 A tutorial on string manipulation using Utah's powerful string functions for cleaning, formatting, and validating data.
 
-### 📚 [Array Operations](arrays)
+### 📚 [Log File Analyzer](log-file-analyzer)
 
-A comprehensive guide to working with arrays in Utah, including creation, access, iteration, and built-in array methods.
+A comprehensive guide to working with arrays in Utah through a practical log file analyzer, including creation, access, iteration, and built-in array methods.
 
 ### 🔄 [Loops and Iteration](loops)
 

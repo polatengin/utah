@@ -439,4 +439,4 @@ ALERT_EMAIL=admin@company.com
 
 - [System Health Monitor](system-health-monitor) - Comprehensive monitoring suite
 - [String Processing](string-processing) - Text manipulation techniques
-- [Arrays](arrays) - Array operations and data structures
+- [Log File Analyzer](log-file-analyzer) - Array operations and data structures

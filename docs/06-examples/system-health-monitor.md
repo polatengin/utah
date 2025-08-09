@@ -386,4 +386,4 @@ Utah provides all of this functionality built-in with clean, maintainable syntax
 
 - [Server Health Check](health-check) - Focused server monitoring
 - [String Processing](string-processing) - Text manipulation techniques
-- [Arrays](arrays) - Array operations and iteration
+- [Log File Analyzer](log-file-analyzer) - Array operations and iteration

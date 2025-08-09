@@ -325,6 +325,6 @@ The Utah version is:
 
 ## Related Examples
 
-- [Arrays](arrays) - Working with string arrays and data structures
+- [Log File Analyzer](log-file-analyzer) - Working with string arrays and data structures
 - [Health Check](health-check) - Using strings in system monitoring
 - [Loops](loops) - Iterating over string collections
