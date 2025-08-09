@@ -22,7 +22,7 @@ class UtahApp
           HandleInlineCommand(args);
           break;
         case ArgumentType.File:
-          ExecuteShxFile(args[0]);
+          await ExecuteShxFileAsync(args[0]);
           break;
         case ArgumentType.Unknown:
           PrintUsage();
@@ -43,7 +43,10 @@ class UtahApp
     // Command flags
     if (firstArg == "--command" || firstArg == "-c") return ArgumentType.InlineCommand;
 
-    // File detection
+    // URL detection for remote .shx files
+    if (IsValidUrl(firstArg) && firstArg.EndsWith(".shx")) return ArgumentType.File;
+
+    // Local file detection
     if (firstArg.EndsWith(".shx") || File.Exists(firstArg)) return ArgumentType.File;
 
     return ArgumentType.Unknown;
@@ -58,6 +61,50 @@ class UtahApp
     };
   }
 
+  private bool IsValidUrl(string input)
+  {
+    return Uri.TryCreate(input, UriKind.Absolute, out var uri) &&
+           (uri.Scheme == "http" || uri.Scheme == "https");
+  }
+
+  private async Task<string> DownloadFileContentAsync(string url)
+  {
+    try
+    {
+      using var httpClient = new HttpClient();
+      httpClient.Timeout = TimeSpan.FromSeconds(30);
+
+      // Add User-Agent header for better compatibility
+      httpClient.DefaultRequestHeaders.Add("User-Agent", "Utah-CLI/1.0");
+
+      var response = await httpClient.GetAsync(url);
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      Console.WriteLine($"✅ Downloaded {content.Length} characters from {url}");
+
+      return content;
+    }
+    catch (HttpRequestException ex)
+    {
+      Console.WriteLine($"❌ HTTP error downloading {url}: {ex.Message}");
+      Environment.Exit(1);
+      return string.Empty;
+    }
+    catch (TaskCanceledException ex)
+    {
+      Console.WriteLine($"❌ Timeout downloading {url}: {ex.Message}");
+      Environment.Exit(1);
+      return string.Empty;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"❌ Error downloading {url}: {ex.Message}");
+      Environment.Exit(1);
+      return string.Empty;
+    }
+  }
+
   private async Task HandleKnownCommandAsync(string[] args)
   {
     switch (args[0])
@@ -66,14 +113,14 @@ class UtahApp
         await StartLanguageServerAsync();
         break;
       case "compile":
-        if (args.Length < 2 || !args[1].EndsWith(".shx"))
+        if (args.Length < 2 || (!args[1].EndsWith(".shx") && !IsValidUrl(args[1])))
         {
-          Console.WriteLine("Usage: utah compile <file.shx> [-o, --output <output.sh>]");
+          Console.WriteLine("Usage: utah compile <file.shx|url> [-o, --output <output.sh>]");
           return;
         }
         var inputPath = args[1];
         var outputPath = GetOutputPath(args);
-        CompileFile(inputPath, outputPath);
+        await CompileFileAsync(inputPath, outputPath);
         break;
       case "run":
         if (args.Length < 2)
@@ -95,9 +142,9 @@ class UtahApp
           var command = string.Join(" ", args.Skip(2));
           ExecuteInlineCommand(command);
         }
-        else if (args.Length == 2 && args[1].EndsWith(".shx"))
+        else if (args.Length == 2 && (args[1].EndsWith(".shx") || IsValidUrl(args[1])))
         {
-          ExecuteShxFile(args[1]);
+          await ExecuteShxFileAsync(args[1]);
         }
         else
         {
@@ -153,9 +200,9 @@ class UtahApp
     ExecuteInlineCommand(command);
   }
 
-  private void ExecuteShxFile(string filePath)
+  private async Task ExecuteShxFileAsync(string filePath)
   {
-    RunFile(filePath);
+    await RunFileAsync(filePath);
   }
 
   private void ExecuteInlineCommand(string command)
@@ -185,23 +232,34 @@ class UtahApp
     return null;
   }
 
-  private void CompileFile(string inputPath, string? outputPath = null)
+  private async Task CompileFileAsync(string inputPath, string? outputPath = null)
   {
-    if (!File.Exists(inputPath))
+    string content;
+
+    // Check if it's a URL
+    if (IsValidUrl(inputPath))
     {
-      Console.WriteLine($"File not found: {inputPath}");
-      return;
+      Console.WriteLine($"📥 Downloading: {inputPath}");
+      content = await DownloadFileContentAsync(inputPath);
+    }
+    else
+    {
+      if (!File.Exists(inputPath))
+      {
+        Console.WriteLine($"File not found: {inputPath}");
+        return;
+      }
+      content = ResolveImports(inputPath);
     }
 
     try
     {
-      var input = ResolveImports(inputPath);
-      var parser = new Parser(input);
+      var parser = new Parser(content);
       var ast = parser.Parse();
       var compiler = new Compiler();
       var output = compiler.Compile(ast);
 
-      var finalOutputPath = outputPath ?? Path.ChangeExtension(inputPath, ".sh");
+      var finalOutputPath = outputPath ?? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh");
       File.WriteAllText(finalOutputPath, output);
       Console.WriteLine($"✅ Compiled: {finalOutputPath}");
     }
@@ -217,18 +275,31 @@ class UtahApp
     }
   }
 
-  private void RunFile(string inputPath)
+  private async Task RunFileAsync(string inputPath)
   {
-    if (!File.Exists(inputPath))
+    string content;
+    string actualPath = inputPath;
+
+    // Check if it's a URL
+    if (IsValidUrl(inputPath))
     {
-      Console.WriteLine($"File not found: {inputPath}");
-      return;
+      Console.WriteLine($"📥 Downloading: {inputPath}");
+      content = await DownloadFileContentAsync(inputPath);
+      actualPath = $"<remote:{inputPath}>";
+    }
+    else
+    {
+      if (!File.Exists(inputPath))
+      {
+        Console.WriteLine($"File not found: {inputPath}");
+        return;
+      }
+      content = ResolveImports(inputPath);
     }
 
     try
     {
-      var input = ResolveImports(inputPath);
-      var parser = new Parser(input);
+      var parser = new Parser(content);
       var ast = parser.Parse();
       var compiler = new Compiler();
       var output = compiler.Compile(ast);
@@ -591,16 +662,17 @@ class UtahApp
 
   private void PrintUsage()
   {
-    Console.WriteLine("Usage: utah <command|file.shx>");
+    Console.WriteLine("Usage: utah <command|file.shx|url>");
     Console.WriteLine();
     Console.WriteLine("Direct Execution:");
     Console.WriteLine("  <file.shx>                   Compile and run a .shx file directly.");
+    Console.WriteLine("  <https://url/file.shx>       Download and run a .shx file from URL.");
     Console.WriteLine("  -c, --command <command>      Run a single shx command directly.");
     Console.WriteLine();
     Console.WriteLine("Commands:");
-    Console.WriteLine("  run <file.shx>               Compile and run a .shx file.");
+    Console.WriteLine("  run <file.shx|url>           Compile and run a .shx file or URL.");
     Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
-    Console.WriteLine("  compile <file.shx>           Compile a .shx file to a .sh file.");
+    Console.WriteLine("  compile <file.shx|url>       Compile a .shx file or URL to a .sh file.");
     Console.WriteLine("    Options:");
     Console.WriteLine("      -o, --output <file>      Write compiled output to a specific file.");
     Console.WriteLine("  format [file.shx]            Format .shx file(s) according to EditorConfig rules.");
@@ -611,6 +683,11 @@ class UtahApp
     Console.WriteLine("      --check                  Check if file(s) are formatted (exit 1 if not).");
     Console.WriteLine("  lsp                          Run the language server.");
     Console.WriteLine("  version (--version, -v)      Show version information.");
+    Console.WriteLine();
+    Console.WriteLine("Examples:");
+    Console.WriteLine("  utah script.shx");
+    Console.WriteLine("  utah run https://utahshx.com/examples/script.shx");
+    Console.WriteLine("  utah compile https://gist.githubusercontent.com/user/hash/raw/script.shx");
   }
 
   private void PrintVersion()
