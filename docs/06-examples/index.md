@@ -31,9 +31,9 @@ A comprehensive guide to working with arrays in Utah through a practical log fil
 
 Examples of for loops, for-in loops, and array iteration patterns in Utah.
 
-### 🎯 [Switch Statements](examples/switch-case)
+### 🎯 [DevOps Deployment Manager](examples/devops-deployment-manager)
 
-Conditional logic examples using switch/case statements with various data types.
+Comprehensive switch statement example: a DevOps deployment pipeline manager demonstrating conditional logic in real-world scenarios.
 
 ## How to Use These Examples
 
