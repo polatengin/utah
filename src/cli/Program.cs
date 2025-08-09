@@ -235,9 +235,10 @@ class UtahApp
   private async Task CompileFileAsync(string inputPath, string? outputPath = null)
   {
     string content;
+    bool isUrl = IsValidUrl(inputPath);
 
     // Check if it's a URL
-    if (IsValidUrl(inputPath))
+    if (isUrl)
     {
       Console.WriteLine($"📥 Downloading: {inputPath}");
       content = await DownloadFileContentAsync(inputPath);
@@ -259,7 +260,12 @@ class UtahApp
       var compiler = new Compiler();
       var output = compiler.Compile(ast);
 
-      var finalOutputPath = outputPath ?? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh");
+      // For local files, preserve directory structure; for URLs, use filename only
+      var finalOutputPath = outputPath ?? 
+        (isUrl 
+          ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
+          : Path.ChangeExtension(inputPath, ".sh"));
+      
       File.WriteAllText(finalOutputPath, output);
       Console.WriteLine($"✅ Compiled: {finalOutputPath}");
     }
