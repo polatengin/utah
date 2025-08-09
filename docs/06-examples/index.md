@@ -11,27 +11,27 @@ This section contains complete, working Utah script examples that demonstrate va
 
 ## Available Examples
 
-### 🏥 [System Health Monitor](system-health-monitor)
+### 🏥 [System Health Monitor](examples/system-health-monitor)
 
 A comprehensive DevOps automation script demonstrating advanced Utah features including log analysis, performance monitoring, user management, and CI/CD pipeline monitoring.
 
-### 🔍 [Server Health Check](health-check)
+### 🔍 [Server Health Check](examples/health-check)
 
 A practical server monitoring script that performs health checks, logs issues, and executes automatic recovery procedures.
 
-### 🧵 [String Processing](string-processing)
+### 🧵 [String Processing](examples/string-processing)
 
 A tutorial on string manipulation using Utah's powerful string functions for cleaning, formatting, and validating data.
 
-### 📚 [Log File Analyzer](log-file-analyzer)
+### 📚 [Log File Analyzer](examples/log-file-analyzer)
 
 A comprehensive guide to working with arrays in Utah through a practical log file analyzer, including creation, access, iteration, and built-in array methods.
 
-### 🔄 [Loops and Iteration](loops)
+### 🔄 [Loops and Iteration](examples/loops)
 
 Examples of for loops, for-in loops, and array iteration patterns in Utah.
 
-### 🎯 [Switch Statements](switch-case)
+### 🎯 [Switch Statements](examples/switch-case)
 
 Conditional logic examples using switch/case statements with various data types.
 
