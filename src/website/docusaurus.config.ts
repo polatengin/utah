@@ -72,13 +72,13 @@ const config: Config = {
           position: 'left',
         },
         {
-          label: 'Guides',
-          href: '/guides',
+          label: 'CLI Reference',
+          href: '/cli',
           position: 'left',
         },
         {
-          label: 'CLI Reference',
-          href: '/cli',
+          label: 'Guides',
+          href: '/guides',
           position: 'left',
         },
         {

@@ -399,7 +399,7 @@ utah run
 
 ## Related Documentation
 
-- **[Installation Guide](../01-getting-started/installation.md)** - Setup and installation
-- **[Language Features](../02-language-features/index.md)** - Utah syntax and features
-- **[Functions Reference](../02-language-features/index.md)** - Built-in function documentation
+- **[Installation Guide](../10-getting-started/installation.md)** - Setup and installation
+- **[Language Features](../20-language-features/index.md)** - Utah syntax and features
+- **[Functions Reference](../20-language-features/index.md)** - Built-in function documentation
 - **[VS Code Extension](vscode-extension.md)** - IDE integration details

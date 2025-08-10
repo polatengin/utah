@@ -32,7 +32,7 @@ Follow these guides in order to get started:
 Once you've completed the getting started guides, explore:
 
 - **[Language Features](../language-features/)** - Deep dive into Utah's features
-- **[Built-in Functions](../02-language-features/index.md)** - Explore the rich function library
+- **[Built-in Functions](../20-language-features/index.md)** - Explore the rich function library
 - **[Advanced Guides](../guides/)** - Learn advanced patterns and best practices
 
 ## Need Help?

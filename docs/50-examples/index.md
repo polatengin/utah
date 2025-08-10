@@ -40,7 +40,7 @@ Comprehensive switch statement example: a DevOps deployment pipeline manager dem
 
 ## Contributing Examples
 
-Have a great Utah script example? We'd love to include it! See our [contributing guidelines](../01-getting-started/contributing.md) for information on how to submit examples.
+Have a great Utah script example? We'd love to include it! See our [contributing guidelines](../10-getting-started/contributing.md) for information on how to submit examples.
 
 ---
 

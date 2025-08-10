@@ -151,46 +151,46 @@ fi
 
 ### Language Reference
 
-- [Arrays](./02-language-features/arrays.md)
-- [Console Functions](./02-language-features/console.md)
-- [Control Flow](./02-language-features/control-flow.md)
-- [Defer Statements](./02-language-features/defer.md)
-- [Error Handling](./02-language-features/error-handling.md)
-- [File System Functions](./02-language-features/filesystem.md)
-- [Functions](./02-language-features/functions.md)
-- [Git Functions](./02-language-features/git.md)
-- [Import System](./02-language-features/imports.md)
-- [JSON and YAML Processing](./02-language-features/json-yaml.md)
-- [Operating System Functions](./02-language-features/operating-system.md)
-- [Strings](./02-language-features/strings.md)
-- [System Functions](./02-language-features/system.md)
-- [Template Functions](./02-language-features/template.md)
-- [Utility Functions](./02-language-features/utilities.md)
-- [Variables and Types](./02-language-features/variables.md)
-- [Web Functions](./02-language-features/web.md)
+- [Arrays](./20-language-features/arrays.md)
+- [Console Functions](./20-language-features/console.md)
+- [Control Flow](./20-language-features/control-flow.md)
+- [Defer Statements](./20-language-features/defer.md)
+- [Error Handling](./20-language-features/error-handling.md)
+- [File System Functions](./20-language-features/filesystem.md)
+- [Functions](./20-language-features/functions.md)
+- [Git Functions](./20-language-features/git.md)
+- [Import System](./20-language-features/imports.md)
+- [JSON and YAML Processing](./20-language-features/json-yaml.md)
+- [Operating System Functions](./20-language-features/operating-system.md)
+- [Strings](./20-language-features/strings.md)
+- [System Functions](./20-language-features/system.md)
+- [Template Functions](./20-language-features/template.md)
+- [Utility Functions](./20-language-features/utilities.md)
+- [Variables and Types](./20-language-features/variables.md)
+- [Web Functions](./20-language-features/web.md)
 
 ### CLI Reference
 
-- [Overview](./04-cli/index.md)
-- [Compile Command](./04-cli/compile.md)
-- [Run Command](./04-cli/run.md)
-- [Format Command](./04-cli/format.md)
-- [VS Code Extension](./04-cli/vscode-extension.md)
+- [Overview](./30-cli/index.md)
+- [Compile Command](./30-cli/compile.md)
+- [Run Command](./30-cli/run.md)
+- [Format Command](./30-cli/format.md)
+- [VS Code Extension](./30-cli/vscode-extension.md)
 
 ### Guides
 
-- [Development Guides](./03-guides/index.md)
-- [Parallel Execution](./03-guides/parallel.md)
-- [Testing Scripts](./03-guides/testing.md)
-- [CI/CD Integration](./03-guides/cicd.md)
-- [DevOps Automation](./03-guides/devops.md)
-- [Best Practices](./03-guides/best-practices.md)
+- [Development Guides](./40-guides/index.md)
+- [Parallel Execution](./40-guides/parallel.md)
+- [Testing Scripts](./40-guides/testing.md)
+- [CI/CD Integration](./40-guides/cicd.md)
+- [DevOps Automation](./40-guides/devops.md)
+- [Best Practices](./40-guides/best-practices.md)
 
 ### Getting Started
 
-- [Installation Guide](./01-getting-started/installation.md)
-- [Your First Script](./01-getting-started/first-script.md)
-- [Basic Syntax](./01-getting-started/syntax.md)
+- [Installation Guide](./10-getting-started/installation.md)
+- [Your First Script](./10-getting-started/first-script.md)
+- [Basic Syntax](./10-getting-started/syntax.md)
 
 ## Community and Support
 

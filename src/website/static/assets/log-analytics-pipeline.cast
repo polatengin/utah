@@ -6,7 +6,7 @@
 [3.0, "o", "# Demonstrates advanced loops, string processing, and data analysis"]
 [3.5, "o", "\r\n"]
 [3.7, "o", "\u001b[?2004h\u001b[1;32mvscode\u001b[0m ➜ \u001b[1;34m/workspaces/utah\u001b[0m \u001b[1;35m(main)\u001b[0m $ "]
-[4.5, "o", "utah run docs/06-examples/log-analytics-pipeline.shx"]
+[4.5, "o", "utah run docs/50-examples/log-analytics-pipeline.shx"]
 [5.0, "o", "\r\n"]
 [5.5, "o", "\u001b[2J\u001b[H"]
 [6.0, "o", "\u001b[1;36m🔍 Starting Log Analytics Pipeline\u001b[0m\r\n"]

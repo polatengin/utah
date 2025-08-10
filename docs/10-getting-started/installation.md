@@ -246,7 +246,7 @@ Once Utah is installed, you're ready to:
 
 1. [Write your first script](first-script.md)
 2. [Learn the basic syntax](syntax.md)
-3. [Explore language features](../02-language-features/variables.md)
+3. [Explore language features](../20-language-features/variables.md)
 
 ## Getting Help
 
