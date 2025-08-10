@@ -552,6 +552,16 @@ public class FormatterVisitor
           result += ")";
           return result;
         }
+      case WebSpeedtestExpression webSpeedtest:
+        {
+          var result = $"web.speedtest({VisitExpression(webSpeedtest.Url)}";
+          if (webSpeedtest.Options != null)
+          {
+            result += $", {VisitExpression(webSpeedtest.Options)}";
+          }
+          result += ")";
+          return result;
+        }
       case ProcessIdExpression:
         return "process.id()";
       case ProcessCpuExpression:

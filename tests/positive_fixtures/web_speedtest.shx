@@ -1,0 +1,18 @@
+// Test web.speedtest() function with URL only
+let speedData: string = web.speedtest("https://httpbin.org/get");
+console.log("Speed test result: ${speedData}");
+
+// Test with variable URL
+let testUrl: string = "https://httpbin.org/delay/1";
+let speedResult: string = web.speedtest(testUrl);
+console.log("Variable URL speed test: ${speedResult}");
+
+// Test with options (timeout)
+let timedTest: string = web.speedtest("https://httpbin.org/get", "--max-time 5");
+console.log("Timed speed test: ${timedTest}");
+
+// Test parsing results with JSON functions
+let results: object = json.parse(speedData);
+let downloadSpeed: string = json.get(results, ".download_speed");
+let totalTime: string = json.get(results, ".time_total");
+console.log("Download speed: ${downloadSpeed} bytes/sec in ${totalTime} seconds");

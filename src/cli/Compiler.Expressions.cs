@@ -148,6 +148,8 @@ public partial class Compiler
         return CompileWebDeleteExpression(webDelete);
       case WebPostExpression webPost:
         return CompileWebPostExpression(webPost);
+      case WebSpeedtestExpression webSpeedtest:
+        return CompileWebSpeedtestExpression(webSpeedtest);
       case ArrayJoinExpression arrayJoin:
         return CompileArrayJoinExpression(arrayJoin);
       case ArraySortExpression arraySort:
@@ -1267,6 +1269,62 @@ public partial class Compiler
 
     // Return a bash command substitution that uses curl to make the POST request
     return $"$({curlCommand} 2>/dev/null || echo \"\")";
+  }
+
+  private string CompileWebSpeedtestExpression(WebSpeedtestExpression webSpeedtest)
+  {
+    var url = CompileExpression(webSpeedtest.Url);
+
+    // Handle different types of URL expressions
+    string curlUrl;
+    if (url.StartsWith("${") && url.EndsWith("}"))
+    {
+      // It's a variable reference like ${varName}
+      curlUrl = url;
+    }
+    else if (url.StartsWith("\"") && url.EndsWith("\""))
+    {
+      // It's a string literal like "http://example.com"
+      curlUrl = url; // Keep the quotes for curl
+    }
+    else
+    {
+      // It's a variable name without ${}, add $ prefix for bash
+      curlUrl = $"${{{url}}}";
+    }
+
+    // Build the curl command with speed test format
+    string curlCommand;
+    string writeOutFormat = "'{\"download_speed\":\"%{speed_download}\",\"upload_speed\":\"0\",\"time_total\":\"%{time_total}\",\"time_connect\":\"%{time_connect}\",\"time_pretransfer\":\"%{time_pretransfer}\",\"size_download\":\"%{size_download}\",\"response_code\":\"%{response_code}\"}'";
+    
+    if (webSpeedtest.Options != null)
+    {
+      var options = CompileExpression(webSpeedtest.Options);
+
+      // Handle different types of options expressions
+      string curlOptions;
+      if (options.StartsWith("${") && options.EndsWith("}"))
+      {
+        curlOptions = options;
+      }
+      else if (options.StartsWith("\"") && options.EndsWith("\""))
+      {
+        curlOptions = options;
+      }
+      else
+      {
+        curlOptions = $"${{{options}}}";
+      }
+
+      curlCommand = $"curl {curlOptions} -w {writeOutFormat} --silent --output /dev/null {curlUrl}";
+    }
+    else
+    {
+      curlCommand = $"curl -w {writeOutFormat} --silent --output /dev/null {curlUrl}";
+    }
+
+    // Return a bash command substitution that uses curl to measure speed
+    return $"$({curlCommand} 2>/dev/null || echo '{{\"error\":\"failed\"}}')";
   }
 
   private string CompileArrayJoinExpression(ArrayJoinExpression arrayJoin)

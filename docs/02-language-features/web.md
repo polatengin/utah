@@ -13,6 +13,11 @@ Utah provides web-related functions for HTTP requests and web service integratio
 
 Currently implemented web functions:
 
+- `web.get(url)` - HTTP GET requests
+- `web.delete(url, options?)` - HTTP DELETE requests
+- `web.post(url, data, options?)` - HTTP POST requests  
+- `web.speedtest(url, options?)` - Network speed testing
+
 #### web.get(url)
 
 Performs an HTTP GET request to the specified URL.
@@ -71,6 +76,51 @@ console.log(`Create Response: ${createResponse}`);
 console.log(`Full Response: ${fullResponse}`);
 ```
 
+#### web.speedtest(url, options?)
+
+Performs a network speed test to the specified URL and returns detailed performance metrics as JSON.
+
+```typescript
+// Basic speed test
+let speedData: string = web.speedtest("https://httpbin.org/get");
+console.log(`Speed test result: ${speedData}`);
+
+// Parse results with JSON functions
+let results: object = json.parse(speedData);
+let downloadSpeed: string = json.get(results, ".download_speed");
+let totalTime: string = json.get(results, ".time_total");
+let responseCode: string = json.get(results, ".response_code");
+console.log(`Download speed: ${downloadSpeed} bytes/sec in ${totalTime} seconds (HTTP ${responseCode})`);
+
+// Speed test with timeout option
+let timedTest: string = web.speedtest("https://httpbin.org/delay/1", "--max-time 5");
+console.log(`Timed speed test: ${timedTest}`);
+
+// Speed test with custom headers
+let authTest: string = web.speedtest("https://httpbin.org/bearer", "-H 'Authorization: Bearer token123'");
+console.log(`Authenticated speed test: ${authTest}`);
+
+// Test multiple endpoints for performance comparison
+let endpoints: string[] = ["https://httpbin.org/get", "https://www.google.com"];
+for (let endpoint: string in endpoints) {
+  let result: string = web.speedtest(endpoint);
+  let data: object = json.parse(result);
+  let speed: string = json.get(data, ".download_speed");
+  let time: string = json.get(data, ".time_total");
+  console.log(`${endpoint}: ${speed} bytes/sec in ${time} seconds`);
+}
+```
+
+The web.speedtest() function returns a JSON object with the following metrics:
+
+- `download_speed`: Download speed in bytes per second
+- `upload_speed`: Upload speed (always "0" for GET requests)
+- `time_total`: Total time for the request in seconds
+- `time_connect`: Time to establish connection in seconds
+- `time_pretransfer`: Time before transfer started in seconds
+- `size_download`: Number of bytes downloaded
+- `response_code`: HTTP response code
+
 ## Generated Bash
 
 Web functions compile to appropriate curl commands:
@@ -94,6 +144,12 @@ authResponse=$(curl -s -X POST "-H 'Authorization: Bearer token123' -H 'Content-
 # POST with variables
 userData='{"name": "Bob", "role": "admin"}'
 createResponse=$(curl -s -X POST -d ${userData} ${apiUrl} 2>/dev/null || echo "")
+
+# Speed test
+speedData=$(curl -w '{"download_speed":"%{speed_download}","upload_speed":"0","time_total":"%{time_total}","time_connect":"%{time_connect}","time_pretransfer":"%{time_pretransfer}","size_download":"%{size_download}","response_code":"%{response_code}"}' --silent --output /dev/null "https://httpbin.org/get" 2>/dev/null || echo '{"error":"failed"}')
+
+# Speed test with options
+timedTest=$(curl "--max-time 5" -w '{"download_speed":"%{speed_download}","upload_speed":"0","time_total":"%{time_total}","time_connect":"%{time_connect}","time_pretransfer":"%{time_pretransfer}","size_download":"%{size_download}","response_code":"%{response_code}"}' --silent --output /dev/null "https://httpbin.org/get" 2>/dev/null || echo '{"error":"failed"}')
 ```
 
 ## Error Handling
@@ -114,6 +170,10 @@ All web functions include automatic error handling:
 - Content management system integration
 - Web service monitoring
 - API endpoint testing
+- Network performance monitoring and diagnostics
+- Speed testing for multiple geographic endpoints
+- CI/CD pipeline performance gates
+- Load testing preparation and baseline measurements
 - Simple HTTP operations
 
 ## Future Functions

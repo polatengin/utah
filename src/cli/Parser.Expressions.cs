@@ -378,6 +378,38 @@ public partial class Parser
         }
       }
 
+      // Special case for web.speedtest() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("speedtest(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(10, methodPart.Length - 11).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.speedtest() requires a URL argument");
+        }
+        else
+        {
+          // Parse the URL argument and optional options
+          var args = ParseFunctionArguments(argsContent);
+          if (args.Count == 1)
+          {
+            // One argument: web.speedtest(url)
+            var urlExpr = ParseExpression(args[0]);
+            return new WebSpeedtestExpression(urlExpr);
+          }
+          else if (args.Count == 2)
+          {
+            // Two arguments: web.speedtest(url, options)
+            var urlExpr = ParseExpression(args[0]);
+            var optionsExpr = ParseExpression(args[1]);
+            return new WebSpeedtestExpression(urlExpr, optionsExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.speedtest() accepts 1-2 arguments (URL, optional options), got {args.Count}");
+          }
+        }
+      }
+
       // Special case for template.update() - handle this as a function call
       if (objectName == "template" && methodPart.StartsWith("update(") && methodPart.EndsWith(")"))
       {

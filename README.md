@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-112-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-113-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2356,6 +2356,7 @@ Utah provides web functions for making HTTP requests and interacting with web AP
 - `web.get(url)` - Perform an HTTP GET request to the specified URL
 - `web.delete(url, options?)` - Perform an HTTP DELETE request to the specified URL with optional headers/options
 - `web.post(url, data, options?)` - Perform an HTTP POST request to the specified URL with data and optional headers/options
+- `web.speedtest(url, options?)` - Perform a network speed test to the specified URL and return detailed metrics
 
 ### Web Functions Usage
 
@@ -2379,6 +2380,20 @@ console.log(`Post Response: ${postResponse}`);
 // POST with authentication headers
 let authPostResponse: string = web.post("https://api.example.com/users", '{"name": "Bob"}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
 console.log(`Authenticated Post: ${authPostResponse}`);
+
+// Perform a network speed test
+let speedData: string = web.speedtest("https://httpbin.org/get");
+console.log(`Speed test result: ${speedData}`);
+
+// Parse speed test results with JSON functions
+let results: object = json.parse(speedData);
+let downloadSpeed: string = json.get(results, ".download_speed");
+let totalTime: string = json.get(results, ".time_total");
+console.log(`Download speed: ${downloadSpeed} bytes/sec in ${totalTime} seconds`);
+
+// Speed test with timeout option
+let timedTest: string = web.speedtest("https://httpbin.org/delay/1", "--max-time 5");
+console.log(`Timed speed test: ${timedTest}`);
 
 // Use with variables
 let apiUrl: string = "https://httpbin.org/get";
@@ -2447,6 +2462,12 @@ for endpoint in "https://httpbin.org/get" "https://httpbin.org/uuid"; do
   result=$(curl -s "${endpoint}")
   echo "Endpoint ${endpoint}: ${result}"
 done
+
+# web.speedtest("https://httpbin.org/get")
+speedData=$(curl -w '{"download_speed":"%{speed_download}","upload_speed":"0","time_total":"%{time_total}","time_connect":"%{time_connect}","time_pretransfer":"%{time_pretransfer}","size_download":"%{size_download}","response_code":"%{response_code}"}' --silent --output /dev/null "https://httpbin.org/get" 2>/dev/null || echo '{"error":"failed"}')
+
+# web.speedtest() with options
+timedTest=$(curl "--max-time 5" -w '{"download_speed":"%{speed_download}","upload_speed":"0","time_total":"%{time_total}","time_connect":"%{time_connect}","time_pretransfer":"%{time_pretransfer}","size_download":"%{size_download}","response_code":"%{response_code}"}' --silent --output /dev/null "https://httpbin.org/get" 2>/dev/null || echo '{"error":"failed"}')
 ```
 
 ### Web Function Features
@@ -2465,6 +2486,8 @@ done
 - **Automation**: Integrate web requests into deployment and maintenance scripts
 - **Testing**: Verify API responses and web service functionality
 - **Data Collection**: Gather information from multiple web sources
+- **Performance Monitoring**: Measure network speeds and connection times for various endpoints
+- **Network Diagnostics**: Identify slow network connections or bottlenecks in CI/CD pipelines
 
 ## ⚡️ Parallel Function Calls
 
@@ -4815,7 +4838,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `web.delete()` function
 
-- [ ] `web.speedTest()` function
+- [x] `web.speedTest()` function
 
 - [x] `console.*` functions
 
