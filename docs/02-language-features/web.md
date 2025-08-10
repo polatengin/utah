@@ -15,7 +15,7 @@ Currently implemented web functions:
 
 - `web.get(url)` - HTTP GET requests
 - `web.delete(url, options?)` - HTTP DELETE requests
-- `web.post(url, data, options?)` - HTTP POST requests  
+- `web.post(url, data, options?)` - HTTP POST requests
 - `web.speedtest(url, options?)` - Network speed testing
 
 #### web.get(url)

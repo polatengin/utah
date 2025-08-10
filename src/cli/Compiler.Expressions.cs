@@ -1296,7 +1296,7 @@ public partial class Compiler
     // Build the curl command with speed test format
     string curlCommand;
     string writeOutFormat = "'{\"download_speed\":\"%{speed_download}\",\"upload_speed\":\"0\",\"time_total\":\"%{time_total}\",\"time_connect\":\"%{time_connect}\",\"time_pretransfer\":\"%{time_pretransfer}\",\"size_download\":\"%{size_download}\",\"response_code\":\"%{response_code}\"}'";
-    
+
     if (webSpeedtest.Options != null)
     {
       var options = CompileExpression(webSpeedtest.Options);
