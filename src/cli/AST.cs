@@ -88,6 +88,7 @@ public record ArgsHasExpression(string Flag) : Expression;
 public record ArgsGetExpression(string Flag) : Expression;
 public record ArgsAllExpression() : Expression;
 public record GitUndoLastCommitExpression() : Expression;
+public record SshConnectExpression(Expression Host, Expression? Port, Expression? Username, Expression? Password, Expression? KeyPath, Expression? ConfigName) : Expression;
 public record JsonParseExpression(Expression JsonString) : Expression;
 public record JsonStringifyExpression(Expression JsonObject) : Expression;
 public record JsonIsValidExpression(Expression JsonString) : Expression;

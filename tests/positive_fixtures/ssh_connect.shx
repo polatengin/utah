@@ -1,0 +1,15 @@
+# Test for ssh.connect() function
+# This script tests different SSH connection methods
+
+console.log("Testing SSH connection functionality");
+
+# Test basic SSH connection using SSH config
+let basicConn: object = ssh.connect("localhost");
+console.log("Basic connection created");
+
+# Test SSH connection with options object (simplified for initial implementation)
+let configConn: object = ssh.connect("localhost", {});
+console.log("Connection with options created");
+
+# Log the connection results
+console.log("SSH connection tests completed");

@@ -1105,6 +1105,29 @@ public partial class Parser
         return new GitUndoLastCommitExpression();
       }
 
+      // Special handling for ssh.connect()
+      if (functionName == "ssh.connect")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          // ssh.connect("host") - basic connection using SSH config or defaults
+          var hostExpr = ParseExpression(args[0]);
+          return new SshConnectExpression(hostExpr, null, null, null, null, null);
+        }
+        if (args.Count == 2)
+        {
+          // ssh.connect("host", {options}) - connection with options object
+          var hostExpr = ParseExpression(args[0]);
+          var optionsExpr = ParseExpression(args[1]);
+          
+          // For now, we'll parse this as a simple object literal
+          // The actual options parsing will be handled in the compiler
+          return new SshConnectExpression(hostExpr, optionsExpr, null, null, null, null);
+        }
+        throw new InvalidOperationException("ssh.connect() requires 1-2 arguments (host, options?)");
+      }
+
       // Special handling for json.parse()
       if (functionName == "json.parse")
       {

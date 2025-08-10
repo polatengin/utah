@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-113-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-114-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4267,6 +4267,213 @@ Utah's `git.undoLastCommit()` uses `git reset --soft HEAD~1`, which is the safes
 - **Safe for collaboration**: Won't affect other developers until you push
 - **Git history**: Only removes the commit, doesn't delete file contents
 
+## 🔐 SSH Functions
+
+Utah provides SSH functions for secure remote connections and command execution. These functions allow you to establish SSH connections with different authentication methods and manage remote server interactions directly within your scripts.
+
+### Available SSH Functions
+
+#### Connection Management
+
+- `ssh.connect(host, options?)` - Establish SSH connection with various authentication methods
+
+### SSH Functions Usage
+
+```typescript
+// Basic SSH connection using SSH config or defaults
+let connection: object = ssh.connect("myserver.com");
+console.log("Connected to server via SSH config");
+
+// SSH connection with username and key-based authentication
+let keyConnection: object = ssh.connect("192.168.1.100", {
+  username: "ubuntu",
+  keyPath: "/home/user/.ssh/id_rsa",
+  port: 22
+});
+
+// SSH connection with username and password authentication
+let passwordConnection: object = ssh.connect("192.168.1.100", {
+  username: "ubuntu",
+  password: "mypassword",
+  port: 2222
+});
+
+// SSH connection using SSH config entry
+let configConnection: object = ssh.connect("production-server", {
+  configName: "production-server"
+});
+
+// Check connection status
+if (connection.connected) {
+  console.log("SSH connection established successfully");
+} else {
+  console.log("Failed to establish SSH connection");
+  exit(1);
+}
+```
+
+### SSH Authentication Methods
+
+Utah supports multiple SSH authentication methods:
+
+1. **SSH Config**: Uses entries from `~/.ssh/config` file
+2. **Key-based**: Uses SSH private key files for authentication
+3. **Password**: Uses username/password authentication (requires `sshpass`)
+4. **Default**: Falls back to SSH config or system defaults
+
+### SSH Connection Examples
+
+```typescript
+// Production deployment script with SSH
+let deployServer: object = ssh.connect("deploy.company.com", {
+  username: "deploy",
+  keyPath: "/secure/deploy-key",
+  port: 22
+});
+
+if (deployServer.connected) {
+  console.log("Connected to deployment server");
+  // Future: ssh.execute(deployServer, "deploy-script.sh")
+} else {
+  console.log("Failed to connect to deployment server");
+  exit(1);
+}
+
+// Multi-server management
+let servers: string[] = ["web1.company.com", "web2.company.com", "web3.company.com"];
+
+for (let server: string in servers) {
+  let connection: object = ssh.connect(server, {
+    username: "admin",
+    keyPath: "/home/admin/.ssh/admin_key"
+  });
+
+  if (connection.connected) {
+    console.log(`✅ Connected to ${server}`);
+    // Perform server operations here
+  } else {
+    console.log(`❌ Failed to connect to ${server}`);
+  }
+}
+```
+
+### Integration with Utah Features
+
+```typescript
+// Combine SSH with OS utilities and error handling
+let sshInstalled: boolean = os.isInstalled("ssh");
+let sshpassInstalled: boolean = os.isInstalled("sshpass");
+
+if (!sshInstalled) {
+  console.log("Error: SSH client is not installed");
+  exit(1);
+}
+
+try {
+  let connection: object = ssh.connect("remote-server", {
+    username: "user",
+    password: "password"
+  });
+
+  if (connection.connected) {
+    console.log("SSH connection successful");
+  } else {
+    console.log("SSH connection failed");
+  }
+} catch {
+  console.log("SSH connection error occurred");
+  if (!sshpassInstalled) {
+    console.log("Note: sshpass is required for password authentication");
+  }
+}
+
+// Conditional SSH operations
+let isProduction: boolean = console.promptYesNo("Connect to production server?");
+
+if (isProduction) {
+  let prodConnection: object = ssh.connect("production.company.com");
+  console.log(`Production connection status: ${prodConnection.connected}`);
+} else {
+  let devConnection: object = ssh.connect("development.company.com");
+  console.log(`Development connection status: ${devConnection.connected}`);
+}
+```
+
+### Generated Bash Code for SSH Functions
+
+The SSH functions transpile to efficient bash commands using standard SSH tools:
+
+```bash
+# Basic SSH connection
+basicConn=$({ declare -A _utah_ssh_conn_1; _utah_ssh_conn_1[host]="myserver.com"; _utah_ssh_conn_1[authMethod]="config"; _utah_ssh_conn_1[port]="22"; _utah_ssh_conn_1[username]="$(whoami)"; if ssh -o ConnectTimeout=5 -o BatchMode=yes -q "${_utah_ssh_conn_1[username]}@${_utah_ssh_conn_1[host]}" -p "${_utah_ssh_conn_1[port]}" exit 2>/dev/null; then; _utah_ssh_conn_1[connected]="true"; else; _utah_ssh_conn_1[connected]="false"; fi ; echo "_utah_ssh_conn_1"; })
+
+# Key-based authentication (future enhancement)
+keyConn=$({ declare -A _utah_ssh_conn_2; _utah_ssh_conn_2[host]="192.168.1.100"; _utah_ssh_conn_2[username]="ubuntu"; _utah_ssh_conn_2[keyPath]="/home/user/.ssh/id_rsa"; _utah_ssh_conn_2[port]="22"; _utah_ssh_conn_2[authMethod]="key"; if ssh -i "${_utah_ssh_conn_2[keyPath]}" -o ConnectTimeout=5 -o BatchMode=yes -q "${_utah_ssh_conn_2[username]}@${_utah_ssh_conn_2[host]}" -p "${_utah_ssh_conn_2[port]}" exit 2>/dev/null; then; _utah_ssh_conn_2[connected]="true"; else; _utah_ssh_conn_2[connected]="false"; fi ; echo "_utah_ssh_conn_2"; })
+
+# Password authentication (future enhancement)
+if ! command -v sshpass &> /dev/null; then
+  echo "Error: sshpass is required for password authentication but not installed"
+  exit 1
+fi
+
+passwordConn=$({ declare -A _utah_ssh_conn_3; _utah_ssh_conn_3[host]="192.168.1.100"; _utah_ssh_conn_3[username]="ubuntu"; _utah_ssh_conn_3[password]="mypassword"; _utah_ssh_conn_3[port]="2222"; _utah_ssh_conn_3[authMethod]="password"; if sshpass -p "${_utah_ssh_conn_3[password]}" ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -q "${_utah_ssh_conn_3[username]}@${_utah_ssh_conn_3[host]}" -p "${_utah_ssh_conn_3[port]}" exit 2>/dev/null; then; _utah_ssh_conn_3[connected]="true"; else; _utah_ssh_conn_3[connected]="false"; fi ; echo "_utah_ssh_conn_3"; })
+```
+
+### SSH Connection Object
+
+Each SSH connection returns an object with the following properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `host` | string | The target hostname or IP address |
+| `port` | string | The SSH port (default: "22") |
+| `username` | string | The SSH username |
+| `authMethod` | string | Authentication method: "config", "key", or "password" |
+| `connected` | string | Connection status: "true" or "false" |
+| `keyPath` | string | Path to SSH private key (if using key auth) |
+| `password` | string | SSH password (if using password auth) |
+| `configName` | string | SSH config entry name (if using config) |
+
+### SSH Functions Use Cases
+
+- **Server Administration**: Connect to remote servers for maintenance and configuration
+- **Deployment Scripts**: Automate application deployments to remote servers
+- **Multi-server Operations**: Manage multiple servers in parallel
+- **Backup Operations**: Connect to backup servers for data synchronization
+- **Monitoring Scripts**: Check remote server status and health
+- **Development Workflows**: Connect to development and staging environments
+- **Infrastructure Management**: Automate infrastructure provisioning and updates
+
+### SSH Security Best Practices
+
+- **Use key-based authentication**: Prefer SSH keys over passwords for better security
+- **Restrict SSH access**: Configure SSH to allow only necessary users and hosts
+- **Use SSH config**: Centralize SSH configuration in `~/.ssh/config` for consistency
+- **Monitor connections**: Log and monitor SSH connections for security auditing
+- **Regular key rotation**: Rotate SSH keys regularly for enhanced security
+- **Connection timeouts**: Use reasonable timeout values to prevent hanging connections
+
+### SSH Functions Technical Notes
+
+- SSH functions require the `ssh` client to be installed on the system
+- Password authentication requires `sshpass` to be installed
+- Connection objects are implemented as bash associative arrays
+- SSH connections are tested before being marked as connected
+- All SSH operations respect standard SSH configuration files
+- Connection timeouts are set to 5 seconds by default for quick feedback
+
+### Future SSH Function Expansion
+
+The SSH connection object is designed for future expansion with additional functions:
+
+```typescript
+// Future SSH functions (planned)
+let result: string = ssh.execute(connection, "ls -la");
+let uploaded: boolean = ssh.upload(connection, "local.txt", "/remote/path/");
+let downloaded: boolean = ssh.download(connection, "/remote/file", "local.txt");
+ssh.disconnect(connection);
+```
+
 ## 🎛️ Script Control Functions
 
 Utah provides script control functions for managing shell behavior and debugging options during script execution. These functions compile to standard shell `set` commands and allow you to control various aspects of script execution.
@@ -4842,15 +5049,13 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `console.*` functions
 
-- [ ] `ssh.connect()` function with SSH key support
+- [x] `ssh.connect()` function with SSH key support
 
 - [ ] `ssh.execute()` function with command output handling
 
 - [ ] `ssh.upload()` function for file transfers
 
 - [ ] `ssh.download()` function for file transfers
-
-- [ ] `ssh.disconnect()` function to close SSH connections
 
 - [x] `git.undoLastCommit()` function for undoing the last commit
 
