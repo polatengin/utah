@@ -28,7 +28,7 @@ let connection: object = ssh.connect("production-server", {
 
 This method relies on entries in your `~/.ssh/config` file:
 
-```
+```text
 Host myserver
     HostName myserver.company.com
     User admin
