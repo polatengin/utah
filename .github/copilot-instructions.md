@@ -1,9 +1,10 @@
 # Utah Language Development Instructions
 
 ## Project Overview
-Utah is a CLI transpiler that converts TypeScript-like `.shx` files into bash `.sh` scripts. The project has two main components:
+Utah is a CLI transpiler that converts TypeScript-like `.shx` files into bash `.sh` scripts. The project has three main components:
 - **CLI Tool** (`src/cli/`): .NET 9 C# transpiler with parser → AST → compiler architecture
 - **VS Code Extension** (`src/vscode-extension/`): TypeScript extension providing syntax highlighting and language support
+- **Documentation Site** (`docs/`, `src/website/`): Comprehensive documentation hosted at utahshx.com
 
 ## Architecture Patterns
 
@@ -13,9 +14,9 @@ Utah is a CLI transpiler that converts TypeScript-like `.shx` files into bash `.
 - Example: `public record GitUndoLastCommitExpression() : Expression;`
 
 ### Three-Layer Transpilation
-1. **Parser** (`Parser.cs`, `Parser.Expressions.cs`, `Parser.Functions.cs`): Converts `.shx` → AST
-2. **AST** (`AST.cs`): Type-safe intermediate representation
-3. **Compiler** (`Compiler.cs`, `Compiler.Expressions.cs`, `Compiler.Statements.cs`): AST → bash code
+1. **Parser** (`Parser.cs`, `Parser.Expressions.cs`, `Parser.Functions.cs`): Converts `.shx` → AST using line-by-line parsing
+2. **AST** (`AST.cs`): Type-safe intermediate representation with ~157 lines of node definitions
+3. **Compiler** (`Compiler.cs`, `Compiler.Expressions.cs`, `Compiler.Statements.cs`): AST → bash code with smart feature detection
 
 ### Expression vs Statement Handling
 - **Expressions** return values: `${variable}`, `$(command)`, function calls
@@ -33,11 +34,16 @@ Utah is a CLI transpiler that converts TypeScript-like `.shx` files into bash `.
 
 ### Testing Commands
 ```bash
-make test                    # Run all tests
-make test FILE=feature_name  # Run specific test
+make test                    # Run all tests (113+ regression tests)
+make test FILE=feature_name  # Run specific test (positive or negative)
 make build                   # Build CLI only
 make build-extension         # Build VS Code extension
 ```
+
+### Development Environment Setup
+- Use VS Code tasks for extension development: `npm: watch:tsc` and `npm: esbuild` tasks
+- CLI builds with standard `dotnet build` in `src/cli/`
+- Extension builds with TypeScript + esbuild pipeline in `src/vscode-extension/`
 
 ### Function Pattern for Built-ins
 Built-in functions (like `git.undoLastCommit()`, `os.isInstalled()`) follow this pattern:
@@ -59,16 +65,20 @@ Built-in functions (like `git.undoLastCommit()`, `os.isInstalled()`) follow this
 - Uses `${}` variable expansion consistently
 - Generates unique variable names to avoid conflicts (e.g., `_utah_random_min_1`)
 - Function definitions use bash `function_name() { }` syntax
+- Defer statements use trap handlers: `trap '_utah_defer_cleanup_funcName_1' RETURN`
 
 ### Test Architecture
 - **Positive tests**: `.shx` files in `positive_fixtures/` with expected `.sh` output in `expected/`
 - **Negative tests**: `.shx` files in `negative_fixtures/` that should fail compilation
+- **Malformed tests**: `.shx` files in `malformed/` for parser error handling
 - Test runner compares generated output with expected files character-by-character
+- 113+ regression tests covering all language features
 
 ### Error Handling Patterns
 - Parser uses early returns with descriptive error messages
 - Compiler generates bash error handling (try/catch → subshells with `set -e`)
 - Range validation for functions like `utility.random()` exits with code 100
+- Built-in functions use `|| true` for defer statement safety
 
 ## Critical Integration Points
 
@@ -98,3 +108,23 @@ Built-in functions (like `git.undoLastCommit()`, `os.isInstalled()`) follow this
 
 ## Extension Development
 Use VS Code tasks: "watch" task runs both TypeScript compilation and esbuild bundling for the extension. The extension provides syntax highlighting and will eventually support language server features.
+
+## Advanced Language Features
+
+### Defer Statement Implementation
+- Uses bash trap handlers for cleanup: `trap '_utah_defer_cleanup_funcName_N' RETURN`
+- Function context tracking via `_functionStack` in compiler
+- Multiple defer statements get unique counter suffixes
+- Example: `defer console.log("cleanup")` → trap function with `|| true` safety
+
+### Built-in Function Categories
+- **Git operations**: `git.undoLastCommit()` → `git reset --soft HEAD~1`
+- **Console dialogs**: `console.showInfo()`, `console.promptYesNo()`, etc.
+- **File system**: `fs.exists()`, `fs.copy()`, `fs.find()` with proper bash implementations
+- **Utilities**: `utility.random()`, `utility.uuid()`, `utility.hash()` with validation
+- **OS detection**: `os.isInstalled()`, `os.getLinuxVersion()` for cross-platform scripts
+
+### Dynamic Feature Detection
+- Argument parsing infrastructure auto-injected when `args.*` functions detected
+- Template variables resolved via `envsubst` when template functions used
+- Error handling wrappers added only when try/catch blocks present
