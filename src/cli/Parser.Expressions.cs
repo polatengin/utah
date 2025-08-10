@@ -1120,7 +1120,7 @@ public partial class Parser
           // ssh.connect("host", {options}) - connection with options object
           var hostExpr = ParseExpression(args[0]);
           var optionsExpr = ParseExpression(args[1]);
-          
+
           // For now, we'll parse this as a simple object literal
           // The actual options parsing will be handled in the compiler
           return new SshConnectExpression(hostExpr, optionsExpr, null, null, null, null);

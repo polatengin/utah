@@ -133,7 +133,7 @@ console.log("Connecting to server farm...");
 
 let servers: string[] = [
   "web1.company.com",
-  "web2.company.com", 
+  "web2.company.com",
   "web3.company.com"
 ];
 
@@ -142,15 +142,15 @@ let successCount: number = 0;
 
 for (let server: string in servers) {
   console.log(`Connecting to ${server}...`);
-  
+
   let connection: object = ssh.connect(server, {
     username: "admin",
     keyPath: "/home/admin/.ssh/server_key",
     port: 22
   });
-  
+
   connections.push(connection);
-  
+
   if (connection.connected) {
     console.log(`✅ Connected to ${server}`);
     successCount = successCount + 1;
@@ -232,7 +232,7 @@ if (usePassword) {
 // Attempt connection with error handling
 try {
   let connection: object;
-  
+
   if (usePassword) {
     let password: string = console.promptPassword("Enter SSH password");
     connection = ssh.connect("myserver.com", {
@@ -245,7 +245,7 @@ try {
       keyPath: "/home/user/.ssh/id_rsa"
     });
   }
-  
+
   if (connection.connected) {
     console.log("SSH connection established successfully");
   } else {
@@ -325,7 +325,7 @@ let connection: object = ssh.connect(serverHost, {
 
 if (connection.connected) {
   console.log("Connected to production server");
-  
+
   // Update connection status in config
   config = json.set(config, ".production.lastConnected", "$(date)");
   let updatedConfig: string = json.stringify(config);
@@ -395,19 +395,19 @@ SSH functions transpile to efficient bash commands using standard SSH tools:
 #!/bin/bash
 
 # Basic SSH connection with config
-connection=$({ 
+connection=$({
   declare -A _utah_ssh_conn_1
   _utah_ssh_conn_1[host]="myserver.com"
   _utah_ssh_conn_1[authMethod]="config"
   _utah_ssh_conn_1[port]="22"
   _utah_ssh_conn_1[username]="$(whoami)"
-  
+
   if ssh -o ConnectTimeout=5 -o BatchMode=yes -q "${_utah_ssh_conn_1[username]}@${_utah_ssh_conn_1[host]}" -p "${_utah_ssh_conn_1[port]}" exit 2>/dev/null; then
     _utah_ssh_conn_1[connected]="true"
   else
     _utah_ssh_conn_1[connected]="false"
   fi
-  
+
   echo "_utah_ssh_conn_1"
 })
 ```
@@ -418,20 +418,20 @@ connection=$({
 #!/bin/bash
 
 # Key-based SSH connection
-keyConnection=$({ 
+keyConnection=$({
   declare -A _utah_ssh_conn_2
   _utah_ssh_conn_2[host]="192.168.1.100"
   _utah_ssh_conn_2[username]="ubuntu"
   _utah_ssh_conn_2[keyPath]="/home/user/.ssh/id_rsa"
   _utah_ssh_conn_2[port]="22"
   _utah_ssh_conn_2[authMethod]="key"
-  
+
   if ssh -i "${_utah_ssh_conn_2[keyPath]}" -o ConnectTimeout=5 -o BatchMode=yes -q "${_utah_ssh_conn_2[username]}@${_utah_ssh_conn_2[host]}" -p "${_utah_ssh_conn_2[port]}" exit 2>/dev/null; then
     _utah_ssh_conn_2[connected]="true"
   else
     _utah_ssh_conn_2[connected]="false"
   fi
-  
+
   echo "_utah_ssh_conn_2"
 })
 ```
@@ -448,20 +448,20 @@ if ! command -v sshpass &> /dev/null; then
 fi
 
 # Password-based SSH connection
-passwordConnection=$({ 
+passwordConnection=$({
   declare -A _utah_ssh_conn_3
   _utah_ssh_conn_3[host]="192.168.1.100"
   _utah_ssh_conn_3[username]="ubuntu"
   _utah_ssh_conn_3[password]="mypassword"
   _utah_ssh_conn_3[port]="2222"
   _utah_ssh_conn_3[authMethod]="password"
-  
+
   if sshpass -p "${_utah_ssh_conn_3[password]}" ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -q "${_utah_ssh_conn_3[username]}@${_utah_ssh_conn_3[host]}" -p "${_utah_ssh_conn_3[port]}" exit 2>/dev/null; then
     _utah_ssh_conn_3[connected]="true"
   else
     _utah_ssh_conn_3[connected]="false"
   fi
-  
+
   echo "_utah_ssh_conn_3"
 })
 ```
@@ -479,7 +479,7 @@ console.log("Starting server maintenance check...");
 
 for (let server: string in servers) {
   let connection: object = ssh.connect(server);
-  
+
   if (connection.connected) {
     console.log(`✅ ${server} is accessible`);
     // Future: Check disk space, memory, etc.
@@ -534,7 +534,7 @@ for (let server: string in devServers) {
     username: "developer",
     keyPath: "/home/dev/.ssh/dev_key"
   });
-  
+
   if (connection.connected) {
     console.log(`Setting up ${server}...`);
     // Future: Execute setup commands
