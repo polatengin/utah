@@ -7,7 +7,7 @@ let connection: object = ssh.connect("test.server.com", { async: true, username:
 
 if (connection.connected) {
   console.log("Connection established successfully");
-  
+
   # Test basic download
   let downloadSuccess: boolean = connection.download("/remote/file.txt", "/local/file.txt");
   if (downloadSuccess) {
@@ -15,23 +15,23 @@ if (connection.connected) {
   } else {
     console.log("Failed to download file");
   }
-  
+
   # Test download with complex paths
   let configDownload: boolean = connection.download("/etc/app/config.yml", "/tmp/downloaded_config.yml");
   if (configDownload) {
     console.log("Configuration file downloaded");
   }
-  
+
   # Test downloading multiple files
   let logDownload: boolean = connection.download("/var/log/app.log", "/local/logs/app.log");
   let scriptDownload: boolean = connection.download("/opt/scripts/deploy.sh", "/local/scripts/deploy.sh");
-  
+
   if (logDownload && scriptDownload) {
     console.log("All files downloaded successfully");
   } else {
     console.log("Some downloads failed");
   }
-  
+
 } else {
   console.log("Failed to connect to server");
   exit(1);
@@ -42,7 +42,7 @@ let syncConnection: object = ssh.connect("backup.server.com", { username: "backu
 
 if (syncConnection.connected) {
   console.log("Sync connection established");
-  
+
   let backupDownload: boolean = syncConnection.download("/backups/database.sql", "/local/database.sql");
   if (backupDownload) {
     console.log("Database backup downloaded");

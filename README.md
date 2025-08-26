@@ -4563,7 +4563,7 @@ if (deployServer.connected) {
     // Download deployment logs and configuration files
     let logDownload: boolean = deployServer.download("/var/log/myapp/deploy.log", "/local/logs/deploy.log");
     let configDownload: boolean = deployServer.download("/etc/myapp/runtime.conf", "/local/configs/runtime.conf");
-    
+
     if (logDownload && configDownload) {
       console.log("Deployment artifacts downloaded successfully");
     }

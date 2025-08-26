@@ -253,7 +253,7 @@ if (server.connected) {
 
   if (configDownload && logDownload) {
     console.log("Configuration and log files downloaded");
-    
+
     // Download application binaries
     let binDownload: boolean = server.download("/opt/app/app", "/local/bin/app");
     if (binDownload) {
