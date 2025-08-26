@@ -1,0 +1,90 @@
+# Test SSH upload functionality with different connection types and file scenarios
+
+console.log("Testing SSH upload functionality");
+
+# Test with async connection and various upload scenarios
+let connection: object = ssh.connect("test.server.com", { async: true, username: "testuser", keyPath: "/home/user/.ssh/test_key", port: 22 });
+
+if (connection.connected) {
+  console.log("Connection established successfully");
+
+  # Test basic file upload
+  fs.writeFile("/tmp/test_file.txt", "Hello World from Utah SSH upload test!");
+  let uploadSuccess: boolean = connection.upload("/tmp/test_file.txt", "/tmp/remote_test_file.txt");
+  if (uploadSuccess) {
+    console.log("Basic file upload successful");
+
+    # Verify upload by reading remote file
+    let remoteContent: string = connection.execute("cat /tmp/remote_test_file.txt");
+    console.log("Remote file content: " + remoteContent);
+  } else {
+    console.log("Basic file upload failed");
+  }
+
+  # Test uploading binary-like content
+  fs.writeFile("/tmp/binary_test.dat", "Binary content with special chars: \n\t!@#$%^&*()");
+  let binaryUpload: boolean = connection.upload("/tmp/binary_test.dat", "/tmp/remote_binary.dat");
+  if (binaryUpload) {
+    console.log("Binary file upload successful");
+  } else {
+    console.log("Binary file upload failed");
+  }
+
+  # Test uploading to different directories
+  let scriptContent: string = "#!/bin/bash\necho 'This is a test script'\ndate\n";
+  fs.writeFile("/tmp/test_script.sh", scriptContent);
+  let scriptUpload: boolean = connection.upload("/tmp/test_script.sh", "/tmp/scripts/test_script.sh");
+  console.log("Script upload result: " + scriptUpload);
+
+  # Test uploading configuration file
+  let configContent: string = "# Configuration file\nserver_name=test_server\nport=8080\ndebug=true\n";
+  fs.writeFile("/tmp/app.conf", configContent);
+  let configUpload: boolean = connection.upload("/tmp/app.conf", "/etc/app/app.conf");
+  console.log("Config upload result: " + configUpload);
+
+  # Test multiple file uploads
+  fs.writeFile("/tmp/file1.txt", "Content of file 1");
+  fs.writeFile("/tmp/file2.txt", "Content of file 2");
+  fs.writeFile("/tmp/file3.txt", "Content of file 3");
+
+  let upload1: boolean = connection.upload("/tmp/file1.txt", "/tmp/remote_file1.txt");
+  let upload2: boolean = connection.upload("/tmp/file2.txt", "/tmp/remote_file2.txt");
+  let upload3: boolean = connection.upload("/tmp/file3.txt", "/tmp/remote_file3.txt");
+
+  if (upload1 && upload2 && upload3) {
+    console.log("All multiple file uploads successful");
+  } else {
+    console.log("Some multiple file uploads failed");
+  }
+
+  # Test uploading larger content
+  let largeContent: string = "";
+  for (let i: number = 0; i < 100; i = i + 1) {
+    largeContent = largeContent + "Line with more content to test larger file uploads.\n";
+  }
+  fs.writeFile("/tmp/large_file.txt", largeContent);
+  let largeUpload: boolean = connection.upload("/tmp/large_file.txt", "/tmp/remote_large_file.txt");
+  console.log("Large file upload result: " + largeUpload);
+
+} else {
+  console.log("Failed to connect to server");
+  exit(1);
+}
+
+# Test with sync connection
+let syncConnection: object = ssh.connect("backup.server.com", { username: "backup", keyPath: "/secure/backup_key" });
+
+if (syncConnection.connected) {
+  console.log("Sync connection established");
+
+  # Test basic upload with sync connection
+  fs.writeFile("/tmp/sync_test.txt", "Sync connection upload test");
+  let syncUpload: boolean = syncConnection.upload("/tmp/sync_test.txt", "/tmp/remote_sync_test.txt");
+  if (syncUpload) {
+    console.log("Sync connection upload successful");
+  } else {
+    console.log("Sync connection upload failed");
+  }
+}
+
+console.log("SSH upload test completed");

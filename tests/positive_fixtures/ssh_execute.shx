@@ -1,0 +1,63 @@
+# Test SSH execute functionality with different connection types and commands
+
+console.log("Testing SSH execute functionality");
+
+# Test with async connection and comprehensive command execution
+let connection: object = ssh.connect("test.server.com", { async: true, username: "testuser", keyPath: "/home/user/.ssh/test_key", port: 22 });
+
+if (connection.connected) {
+  console.log("Connection established successfully");
+
+  # Test basic command execution
+  let hostnameResult: string = connection.execute("hostname");
+  console.log("Hostname: " + hostnameResult);
+
+  # Test complex command with pipes
+  let processCount: string = connection.execute("ps aux | wc -l");
+  console.log("Process count: " + processCount);
+
+  # Test directory operations
+  let currentDir: string = connection.execute("pwd");
+  console.log("Current directory: " + currentDir);
+
+  # Test file operations
+  let fileList: string = connection.execute("ls -la /tmp");
+  console.log("Temp directory listing completed");
+
+  # Test system information commands
+  let uptimeResult: string = connection.execute("uptime");
+  console.log("System uptime: " + uptimeResult);
+
+  let diskUsage: string = connection.execute("df -h /");
+  console.log("Disk usage retrieved");
+
+  # Test command with output redirection
+  let createResult: string = connection.execute("echo 'Test content' > /tmp/execute_test.txt");
+  let readResult: string = connection.execute("cat /tmp/execute_test.txt");
+  console.log("File content: " + readResult);
+
+  # Test command that might fail
+  let failResult: string = connection.execute("ls /nonexistent/directory 2>/dev/null || echo 'Directory not found'");
+  console.log("Fail test result: " + failResult);
+
+} else {
+  console.log("Failed to connect to server");
+  exit(1);
+}
+
+# Test with sync connection
+let syncConnection: object = ssh.connect("backup.server.com", { username: "backup", keyPath: "/secure/backup_key" });
+
+if (syncConnection.connected) {
+  console.log("Sync connection established");
+
+  # Test basic command on sync connection
+  let whoami: string = syncConnection.execute("whoami");
+  console.log("Current user on sync connection: " + whoami);
+
+  # Test date command
+  let dateResult: string = syncConnection.execute("date");
+  console.log("Server date: " + dateResult);
+}
+
+console.log("SSH execute test completed");

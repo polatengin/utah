@@ -51,5 +51,20 @@ if (asyncConn.connected) {
   }
 }
 
+# Test download() method on async connection
+if (asyncConn.connected) {
+  # First create a file on remote for download testing
+  let createResult: string = asyncConn.execute("echo 'Download test content' > /tmp/remote_download.txt");
+
+  let downloadSuccess: boolean = asyncConn.download("/tmp/remote_download.txt", "/tmp/local_download.txt");
+  console.log("Download result: " + downloadSuccess);
+
+  # Verify the download by reading the local file
+  if (downloadSuccess) {
+    let localExists: boolean = fs.exists("/tmp/local_download.txt");
+    console.log("Local file exists after download: " + localExists);
+  }
+}
+
 # Log the connection results
 console.log("SSH connection tests completed");
