@@ -186,6 +186,8 @@ public partial class Compiler
         return CompileFsRenameExpression(fsRename);
       case FsDeleteExpression fsDelete:
         return CompileFsDeleteExpression(fsDelete);
+      case FsChmodExpression fsChmod:
+        return CompileFsChmodExpression(fsChmod);
       case FsFindExpression fsFind:
         return CompileFsFindExpression(fsFind);
       case TimerCurrentExpression timerCurrent:
@@ -1729,6 +1731,13 @@ public partial class Compiler
   {
     var path = CompileExpression(fsDelete.Path);
     return $"$(rm -rf {path} && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileFsChmodExpression(FsChmodExpression fsChmod)
+  {
+    var path = CompileExpression(fsChmod.Path);
+    var permissions = CompileExpression(fsChmod.Permissions);
+    return $"$(chmod {permissions} {path} && echo \"true\" || echo \"false\")";
   }
 
   private string CompileFsFindExpression(FsFindExpression fsFind)

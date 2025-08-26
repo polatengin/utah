@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-116-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-117-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1640,6 +1640,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.move(sourcePath, targetPath)` - Move/rename a file or directory from source to target path, creates directories if needed, returns boolean
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.delete(path)` - Delete a file or directory recursively, returns boolean
+- `fs.chmod(path, permissions)` - Change file permissions using numeric (755) or symbolic (u+x) notation, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 - `fs.find(path, name?)` - Search for files and directories, with optional wildcard pattern, returns string[]
 - `fs.createTempFolder(prefix?, baseDir?)` - Create a secure temporary directory and return its absolute path
@@ -1721,6 +1722,21 @@ fs.delete("temp/processing.tmp");
 
 // Delete entire directory
 fs.delete("old-cache");
+
+// Change file permissions
+fs.chmod("script.sh", "755");  // rwxr-xr-x (executable)
+fs.chmod("config.txt", "600"); // rw------- (private config)
+
+// Set permissions conditionally
+if (fs.exists("secrets.txt")) {
+  fs.chmod("secrets.txt", "400"); // r-------- (read-only for owner)
+  console.log("Secured secrets file");
+}
+
+// Symbolic permissions
+fs.chmod("backup.sh", "u+x");    // Add execute for user
+fs.chmod("public.txt", "a+r");   // Add read for all users
+fs.chmod("private.log", "go-rwx"); // Remove all permissions for group/others
 
 // Create a temporary working directory
 let tmpDir: string = fs.createTempFolder();
@@ -1834,6 +1850,21 @@ echo "Extension: $extension"
 
 filename=$(basename "/home/user/documents/project/readme.txt")
 echo "Filename: $filename"
+
+# File permission operations:
+$(chmod "755" "script.sh" && echo "true" || echo "false")
+$(chmod "600" "config.txt" && echo "true" || echo "false")
+
+configExists=$([ -e "secrets.txt" ] && echo "true" || echo "false")
+if [ "$configExists" = "true" ]; then
+  $(chmod "400" "secrets.txt" && echo "true" || echo "false")
+  echo "Secured secrets file"
+fi
+
+# Symbolic permissions:
+$(chmod "u+x" "backup.sh" && echo "true" || echo "false")
+$(chmod "a+r" "public.txt" && echo "true" || echo "false")
+$(chmod "go-rwx" "private.log" && echo "true" || echo "false")
 ```
 
 ## 📝 Template Functions
@@ -5200,7 +5231,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `fs.find()` - Find files matching patterns or conditions
 
-- [ ] `fs.chmod()` - Change file permissions
+- [x] `fs.chmod()` - Change file permissions
 
 - [ ] `fs.chown()` - Change file ownership
 

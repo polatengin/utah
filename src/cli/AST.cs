@@ -74,6 +74,7 @@ public record FsCopyExpression(Expression SourcePath, Expression TargetPath) : E
 public record FsMoveExpression(Expression SourcePath, Expression TargetPath) : Expression;
 public record FsRenameExpression(Expression OldName, Expression NewName) : Expression;
 public record FsDeleteExpression(Expression Path) : Expression;
+public record FsChmodExpression(Expression Path, Expression Permissions) : Expression;
 public record FsFindExpression(Expression SearchPath, Expression? NamePattern) : Expression;
 public record StringNamespaceCallExpression(string FunctionName, List<Expression> Arguments) : Expression;
 public record FsCreateTempFolderExpression(Expression? Prefix, Expression? BaseDir) : Expression;

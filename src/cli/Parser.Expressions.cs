@@ -721,6 +721,19 @@ public partial class Parser
         throw new InvalidOperationException("fs.delete() requires exactly 1 argument (path)");
       }
 
+      // Special handling for fs.chmod()
+      if (functionName == "fs.chmod")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          var permissionsExpr = ParseExpression(args[1]);
+          return new FsChmodExpression(pathExpr, permissionsExpr);
+        }
+        throw new InvalidOperationException("fs.chmod() requires exactly 2 arguments (path, permissions)");
+      }
+
       // Special handling for fs.find()
       if (functionName == "fs.find")
       {

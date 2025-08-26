@@ -404,6 +404,131 @@ fi
 - File: `tests/positive_fixtures/fs_delete.shx`
 - Tests file deletion, directory deletion, return values, and dynamic path expressions
 
+### fs.chmod()
+
+Change file permissions using numeric (octal) or symbolic notation. Returns a boolean indicating success or failure:
+
+```typescript
+// Numeric permissions
+fs.chmod("script.sh", "755");  // rwxr-xr-x (executable script)
+fs.chmod("config.txt", "600"); // rw------- (owner read/write only)
+fs.chmod("public.txt", "644"); // rw-r--r-- (owner read/write, others read)
+fs.chmod("readonly.txt", "444"); // r--r--r-- (read-only for all)
+
+// Symbolic permissions
+fs.chmod("backup.sh", "u+x");    // Add execute permission for user
+fs.chmod("data.log", "g+w");     // Add write permission for group
+fs.chmod("secrets.txt", "o-r");  // Remove read permission for others
+fs.chmod("public.txt", "a+r");   // Add read permission for all
+fs.chmod("private.log", "go-rwx"); // Remove all permissions for group/others
+
+// Expression usage - check if permission change was successful
+let success: boolean = fs.chmod("important.sh", "700");
+if (success) {
+  console.log("File permissions updated successfully");
+} else {
+  console.log("Failed to update file permissions");
+}
+
+// Secure configuration files
+if (fs.exists("database.conf")) {
+  fs.chmod("database.conf", "600"); // Owner read/write only
+  console.log("Database configuration secured");
+}
+
+// Make scripts executable
+let scriptFiles: string[] = ["deploy.sh", "backup.sh", "cleanup.sh"];
+for (let script in scriptFiles) {
+  let result: boolean = fs.chmod(script, "755");
+  console.log(`Made ${script} executable: ${result}`);
+}
+```
+
+**Generated Bash:**
+
+```bash
+# Numeric permissions
+$(chmod "755" "script.sh" && echo "true" || echo "false")
+$(chmod "600" "config.txt" && echo "true" || echo "false")
+$(chmod "644" "public.txt" && echo "true" || echo "false")
+$(chmod "444" "readonly.txt" && echo "true" || echo "false")
+
+# Symbolic permissions
+$(chmod "u+x" "backup.sh" && echo "true" || echo "false")
+$(chmod "g+w" "data.log" && echo "true" || echo "false")
+$(chmod "o-r" "secrets.txt" && echo "true" || echo "false")
+$(chmod "a+r" "public.txt" && echo "true" || echo "false")
+$(chmod "go-rwx" "private.log" && echo "true" || echo "false")
+
+# Expression usage with conditional logic
+success=$(chmod "700" "important.sh" && echo "true" || echo "false")
+if [ "${success}" = "true" ]; then
+  echo "File permissions updated successfully"
+else
+  echo "Failed to update file permissions"
+fi
+
+# Secure configuration files
+if [ -e "database.conf" ]; then
+  $(chmod "600" "database.conf" && echo "true" || echo "false")
+  echo "Database configuration secured"
+fi
+
+# Make scripts executable in loop
+scriptFiles=("deploy.sh" "backup.sh" "cleanup.sh")
+for script in "${scriptFiles[@]}"; do
+  result=$(chmod "755" "${script}" && echo "true" || echo "false")
+  echo "Made ${script} executable: ${result}"
+done
+```
+
+**Permission Reference:**
+
+**Numeric Permissions (Octal):**
+- `755` = `rwxr-xr-x` - Owner: read/write/execute, Group/Others: read/execute
+- `644` = `rw-r--r--` - Owner: read/write, Group/Others: read only
+- `600` = `rw-------` - Owner: read/write, Group/Others: no access
+- `400` = `r--------` - Owner: read only, Group/Others: no access
+- `444` = `r--r--r--` - All: read only
+
+**Symbolic Permissions:**
+- `u+x` - Add execute permission for user (owner)
+- `g+w` - Add write permission for group
+- `o-r` - Remove read permission for others
+- `a+r` - Add read permission for all (user, group, others)
+- `go-rwx` - Remove all permissions for group and others
+
+**Key Features:**
+
+- **Multiple Formats**: Supports both numeric (755) and symbolic (u+x) permission notation
+- **Return Values**: Returns boolean indicating success/failure when used as expression
+- **Comprehensive**: Handles all standard Unix permission patterns
+- **Cross-platform**: Works on all Unix-like systems (Linux, macOS, BSD)
+- **Security**: Essential for securing configuration files, scripts, and sensitive data
+- **Error Handling**: Gracefully handles permission change failures
+
+**Use Cases:**
+
+- **Script Security**: Make shell scripts executable while restricting access
+- **Configuration Files**: Secure config files with appropriate read/write permissions
+- **Log Files**: Set proper permissions for log file access and rotation
+- **Backup Scripts**: Ensure backup scripts are executable but secure
+- **Database Security**: Restrict access to database configuration and data files
+- **DevOps Automation**: Set permissions as part of deployment and configuration scripts
+
+**Best Practices:**
+
+- **Principle of Least Privilege**: Grant only the minimum permissions necessary
+- **Secure Defaults**: Use `600` for configuration files, `644` for data files, `755` for executables
+- **Check Results**: Always check the return value when permission changes are critical
+- **Script Security**: Make scripts executable (`755`) but not world-writable
+- **Sensitive Files**: Use `400` or `600` for files containing passwords or keys
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_chmod.shx`
+- Tests numeric and symbolic permissions, expression usage, conditionals, and batch operations
+
 ### fs.find()
 
 Search for files and directories recursively with optional wildcard pattern matching. Returns an array of matching paths:

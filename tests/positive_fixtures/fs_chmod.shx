@@ -1,0 +1,59 @@
+#!/usr/bin/env utah
+
+// Test fs.chmod() as both expression and statement
+
+// Statement usage - set basic permissions
+fs.chmod("script.sh", "755");
+
+// Statement usage with variables
+let filePath = "config.txt";
+let permissions = "644";
+fs.chmod(filePath, permissions);
+
+// Expression usage - check if chmod was successful
+let success = fs.chmod("data.log", "600");
+console.log(success);
+
+// Expression usage in conditional
+if (fs.chmod("secrets.txt", "400")) {
+  console.log("File permissions updated successfully");
+} else {
+  console.log("Failed to update file permissions");
+}
+
+// Numeric permissions (common Linux/Unix patterns)
+fs.chmod("executable.sh", "755");    // rwxr-xr-x (executable script)
+fs.chmod("private.txt", "600");      // rw------- (owner read/write only)
+fs.chmod("public.txt", "644");       // rw-r--r-- (owner read/write, others read)
+fs.chmod("readonly.txt", "444");     // r--r--r-- (read-only for all)
+fs.chmod("directory", "755");        // rwxr-xr-x (directory permissions)
+
+// Symbolic permissions
+fs.chmod("file1.txt", "u+x");        // Add execute permission for user
+fs.chmod("file2.txt", "g+w");        // Add write permission for group
+fs.chmod("file3.txt", "o-r");        // Remove read permission for others
+fs.chmod("file4.txt", "a+r");        // Add read permission for all
+fs.chmod("file5.txt", "u+rw");       // Add read/write permission for user
+
+// Complex symbolic permissions
+fs.chmod("script.py", "u+x");        // Add execute for user
+fs.chmod("config.conf", "go-rwx");   // Remove all permissions for group and others
+
+// Using expressions as arguments
+let scriptFile = "automation.sh";
+let execPermissions = "755";
+fs.chmod(scriptFile, execPermissions);
+
+// Combined with other operations
+let configFile = "app.conf";
+if (fs.exists(configFile)) {
+  fs.chmod(configFile, "600"); // Secure the config file
+  console.log("Config file secured");
+}
+
+// Batch permission setting with loop
+let files = ["file1.txt", "file2.txt", "file3.txt"];
+for (let file in files) {
+  let result = fs.chmod(file, "644");
+  console.log("Permissions set for file: " + result);
+}
