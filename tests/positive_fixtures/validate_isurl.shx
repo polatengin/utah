@@ -1,0 +1,127 @@
+// validate.isURL() function tests
+// Tests various URL validation scenarios
+
+// Basic valid URL tests
+let url1: string = "https://www.example.com";
+let isValid1: boolean = validate.isURL(url1);
+console.log("Basic HTTPS: ${url1} is ${isValid1}");
+
+let url2: string = "http://example.com";
+let isValid2: boolean = validate.isURL(url2);
+console.log("Basic HTTP: ${url2} is ${isValid2}");
+
+let url3: string = "ftp://files.example.com";
+let isValid3: boolean = validate.isURL(url3);
+console.log("FTP protocol: ${url3} is ${isValid3}");
+
+let url4: string = "file:///home/user/document.txt";
+let isValid4: boolean = validate.isURL(url4);
+console.log("File protocol: ${url4} is ${isValid4}");
+
+// URLs with ports
+let urlPort1: string = "https://api.example.com:8080";
+let isValidPort1: boolean = validate.isURL(urlPort1);
+console.log("HTTPS with port: ${urlPort1} is ${isValidPort1}");
+
+let urlPort2: string = "http://localhost:3000";
+let isValidPort2: boolean = validate.isURL(urlPort2);
+console.log("HTTP localhost: ${urlPort2} is ${isValidPort2}");
+
+// URLs with paths
+let urlPath1: string = "https://www.example.com/path/to/resource";
+let isValidPath1: boolean = validate.isURL(urlPath1);
+console.log("With path: ${urlPath1} is ${isValidPath1}");
+
+let urlPath2: string = "https://api.example.com/v1/users/123";
+let isValidPath2: boolean = validate.isURL(urlPath2);
+console.log("API path: ${urlPath2} is ${isValidPath2}");
+
+// URLs with query parameters
+let urlQuery1: string = "https://search.example.com?q=utah&type=language";
+let isValidQuery1: boolean = validate.isURL(urlQuery1);
+console.log("With query: ${urlQuery1} is ${isValidQuery1}");
+
+let urlQuery2: string = "https://api.example.com/search?term=test&limit=10";
+let isValidQuery2: boolean = validate.isURL(urlQuery2);
+console.log("Multiple params: ${urlQuery2} is ${isValidQuery2}");
+
+// URLs with fragments
+let urlFragment1: string = "https://docs.example.com/guide#section1";
+let isValidFragment1: boolean = validate.isURL(urlFragment1);
+console.log("With fragment: ${urlFragment1} is ${isValidFragment1}");
+
+let urlFragment2: string = "https://app.example.com/dashboard?tab=overview#settings";
+let isValidFragment2: boolean = validate.isURL(urlFragment2);
+console.log("Query + fragment: ${urlFragment2} is ${isValidFragment2}");
+
+// Complex valid URLs
+let complexUrl1: string = "https://sub.domain.example.co.uk:8443/api/v2/resources?filter=active&sort=name#results";
+let isValidComplex1: boolean = validate.isURL(complexUrl1);
+console.log("Complex URL: ${complexUrl1} is ${isValidComplex1}");
+
+// Invalid URL tests
+let invalidUrl1: string = "not-a-url";
+let isInvalid1: boolean = validate.isURL(invalidUrl1);
+console.log("Not a URL: ${invalidUrl1} is ${isInvalid1}");
+
+let invalidUrl2: string = "httpexample.com";
+let isInvalid2: boolean = validate.isURL(invalidUrl2);
+console.log("Missing ://: ${invalidUrl2} is ${isInvalid2}");
+
+let invalidUrl3: string = "https://";
+let isInvalid3: boolean = validate.isURL(invalidUrl3);
+console.log("No domain: ${invalidUrl3} is ${isInvalid3}");
+
+let invalidUrl4: string = "smtp://mail.example.com";
+let isInvalid4: boolean = validate.isURL(invalidUrl4);
+console.log("Unsupported protocol: ${invalidUrl4} is ${isInvalid4}");
+
+let invalidUrl5: string = "https://.example.com";
+let isInvalid5: boolean = validate.isURL(invalidUrl5);
+console.log("Invalid domain start: ${invalidUrl5} is ${isInvalid5}");
+
+// Conditional usage
+if (validate.isURL("https://api.company.com")) {
+  console.log("API URL is valid");
+} else {
+  console.log("API URL is invalid");
+}
+
+// Variable usage
+let apiEndpoint: string = "https://jsonplaceholder.typicode.com/posts";
+if (validate.isURL(apiEndpoint)) {
+  console.log("API endpoint is valid");
+} else {
+  console.log("API endpoint is invalid");
+}
+
+// In assignment
+let urlCheckResult: boolean = validate.isURL("https://github.com/polatengin/utah");
+console.log("GitHub URL validation result: ${urlCheckResult}");
+
+// Complex validation chain
+let configUrl: string = "https://config.app.local:9000/settings";
+let isValidConfig: boolean = validate.isURL(configUrl);
+if (isValidConfig) {
+  console.log("Configuration URL is valid");
+} else {
+  console.log("Configuration URL needs correction");
+}
+
+// Edge case tests
+let edgeCase1: string = "http://a.b";
+let edgeValid1: boolean = validate.isURL(edgeCase1);
+console.log("Short URL: ${edgeCase1} is ${edgeValid1}");
+
+let edgeCase2: string = "https://very.long.subdomain.very.long.domain.example.com:8080/very/long/path/to/resource.html?very=long&query=parameters&with=multiple&values=here#verylongfragment";
+let edgeValid2: boolean = validate.isURL(edgeCase2);
+console.log("Long URL: ${edgeCase2} is ${edgeValid2}");
+
+// Numeric and special character cases
+let numericUrl: string = "https://192.168.1.100:8080";
+let numericValid: boolean = validate.isURL(numericUrl);
+console.log("IP URL: ${numericUrl} is ${numericValid}");
+
+let specialUrl: string = "https://api-v2.example-site.com/user_profile";
+let specialValid: boolean = validate.isURL(specialUrl);
+console.log("Special chars: ${specialUrl} is ${specialValid}");

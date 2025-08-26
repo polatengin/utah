@@ -118,6 +118,121 @@ while [ $(echo "${email}" | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z
 done
 ```
 
+## URL Validation
+
+### validate.isURL()
+
+Validates URL format supporting multiple protocols including HTTP, HTTPS, FTP, and FILE schemes.
+
+**Syntax:**
+
+```typescript
+validate.isURL(url: string) -> boolean
+```
+
+**Parameters:**
+
+- `url` - The URL string to validate
+
+**Returns:**
+
+- `true` if the URL format is valid
+- `false` if the URL format is invalid
+
+**Examples:**
+
+```typescript
+// Basic URL validation
+let apiUrl: string = "https://api.example.com";
+let isValid: boolean = validate.isURL(apiUrl);
+
+console.log(`URL ${apiUrl} is ${isValid ? "valid" : "invalid"}`);
+
+// Validate user input
+let userUrl: string = console.promptText("Enter website URL:");
+if (validate.isURL(userUrl)) {
+  console.log("Valid URL provided");
+} else {
+  console.log("Please enter a valid URL");
+  exit(1);
+}
+
+// Use in conditional logic
+if (validate.isURL("https://github.com/polatengin/utah")) {
+  console.log("GitHub repository URL is valid");
+}
+
+// Validate different protocols
+let httpUrl: string = "http://example.com";
+let httpsUrl: string = "https://secure.example.com:8080";
+let ftpUrl: string = "ftp://files.example.com";
+let fileUrl: string = "file:///home/user/document.txt";
+
+console.log(`HTTP URL: ${validate.isURL(httpUrl)}`);
+console.log(`HTTPS URL: ${validate.isURL(httpsUrl)}`);
+console.log(`FTP URL: ${validate.isURL(ftpUrl)}`);
+console.log(`File URL: ${validate.isURL(fileUrl)}`);
+
+// Validate complex URLs
+let complexUrl: string = "https://api.example.com:8080/v1/users?filter=active&sort=name#results";
+if (validate.isURL(complexUrl)) {
+  console.log("Complex URL with port, path, query, and fragment is valid");
+}
+```
+
+### URL Validation Patterns
+
+The `validate.isURL()` function validates URLs based on these components:
+
+- **Protocol**: Must be one of `http`, `https`, `ftp`, or `file`
+- **Domain**: Must contain valid domain name with optional subdomains
+- **Port**: Optional port number (e.g., `:8080`)
+- **Path**: Optional path component (e.g., `/api/v1/users`)
+- **Query**: Optional query parameters (e.g., `?param=value&other=data`)
+- **Fragment**: Optional fragment identifier (e.g., `#section`)
+
+### Valid URL Examples
+
+```typescript
+validate.isURL("https://www.example.com");                    // true
+validate.isURL("http://localhost:3000");                      // true
+validate.isURL("https://api.example.com/v1/users");           // true
+validate.isURL("ftp://files.company.com");                    // true
+validate.isURL("file:///home/user/document.txt");             // true
+validate.isURL("https://search.com?q=utah+language");         // true
+validate.isURL("https://docs.com/guide#section1");            // true
+```
+
+### Invalid URL Examples
+
+```typescript
+validate.isURL("not-a-url");                                  // false
+validate.isURL("httpexample.com");                           // false (missing ://)
+validate.isURL("https://");                                   // false (no domain)
+validate.isURL("smtp://mail.example.com");                   // false (unsupported protocol)
+validate.isURL("https://.example.com");                      // false (invalid domain)
+```
+
+### Generated Bash Code for URL Validation
+
+```bash
+# validate.isURL() compilation
+url="https://api.example.com"
+isValid=$(echo ${url} | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false")
+
+# In conditionals
+if [ $(echo "https://github.com/polatengin/utah" | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false") = "true" ]; then
+  echo "GitHub URL is properly formatted"
+fi
+
+# URL validation loop
+url=$(read -p "Enter website URL: " && echo $REPLY)
+while [ $(echo "${url}" | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false") != "true" ]; do
+  echo "Invalid URL format. Please try again."
+  url=$(read -p "Enter website URL: " && echo $REPLY)
+done
+```
+
 ## Use Cases
 
 ### User Registration Systems

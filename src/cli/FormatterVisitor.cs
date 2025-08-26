@@ -636,6 +636,8 @@ public class FormatterVisitor
         return $"array.{arrayNamespaceCall.FunctionName}({arrayArgs})";
       case ValidateIsEmailExpression validateIsEmail:
         return $"validate.isEmail({VisitExpression(validateIsEmail.Email)})";
+      case ValidateIsURLExpression validateIsURL:
+        return $"validate.isURL({VisitExpression(validateIsURL.Url)})";
       default:
         return expr.ToString() ?? "";
     }

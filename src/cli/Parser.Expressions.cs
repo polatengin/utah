@@ -1494,6 +1494,18 @@ public partial class Parser
         throw new InvalidOperationException("validate.isEmail() requires exactly 1 argument (email)");
       }
 
+      // Special handling for validate.isURL()
+      if (functionName == "validate.isURL")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var urlExpr = ParseExpression(args[0]);
+          return new ValidateIsURLExpression(urlExpr);
+        }
+        throw new InvalidOperationException("validate.isURL() requires exactly 1 argument (url)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

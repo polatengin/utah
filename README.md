@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-125-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-126-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4837,6 +4837,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isEmail(email)` - Validate email address format using RFC-compliant pattern matching
 
+#### URL Validation
+
+- `validate.isURL(url)` - Validate URL format supporting HTTP, HTTPS, FTP, and FILE protocols
+
 ### Email Validation Usage
 
 ```typescript
@@ -4888,6 +4892,59 @@ validate.isEmail("user@.com");                 // false (invalid domain)
 validate.isEmail("user@domain");               // false (no TLD)
 ```
 
+### URL Validation Usage
+
+```typescript
+// Basic URL validation
+let apiUrl: string = "https://api.example.com";
+let isValid: boolean = validate.isURL(apiUrl);
+
+if (isValid) {
+  console.log("URL is valid");
+} else {
+  console.log("Please enter a valid URL");
+  exit(1);
+}
+
+// Validate user input
+let inputUrl: string = console.promptText("Enter website URL:");
+if (validate.isURL(inputUrl)) {
+  console.log("Thank you! Your URL has been recorded.");
+} else {
+  console.log("Invalid URL format. Please try again.");
+}
+
+// Use in conditional chains
+let configUrl: string = "https://api.company.com:8080";
+if (validate.isURL(configUrl)) {
+  console.log("API endpoint URL validated");
+}
+
+// Validation in assignments
+let urlValid: boolean = validate.isURL("https://github.com/polatengin/utah");
+console.log(`GitHub URL is valid: ${urlValid}`);
+```
+
+### URL Validation Examples
+
+```typescript
+// Valid URLs
+validate.isURL("https://www.example.com");                    // true
+validate.isURL("http://localhost:3000");                      // true
+validate.isURL("https://api.example.com/v1/users");           // true
+validate.isURL("ftp://files.company.com");                    // true
+validate.isURL("file:///home/user/document.txt");             // true
+validate.isURL("https://search.com?q=utah+language");         // true
+validate.isURL("https://docs.com/guide#section1");            // true
+
+// Invalid URLs
+validate.isURL("not-a-url");                                  // false (no protocol)
+validate.isURL("httpexample.com");                           // false (missing ://)
+validate.isURL("https://");                                   // false (no domain)
+validate.isURL("smtp://mail.example.com");                   // false (unsupported protocol)
+validate.isURL("https://.example.com");                      // false (invalid domain)
+```
+
 ### Generated Bash Code for Validation Functions
 
 The validation functions transpile to efficient bash regex pattern matching:
@@ -4913,6 +4970,27 @@ fi
 # Validation assignment
 emailValid=$(echo "contact@business.org" | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' && echo "true" || echo "false")
 echo "Contact email is valid: ${emailValid}"
+
+# validate.isURL() becomes:
+apiUrl="https://api.example.com"
+isValid=$(echo ${apiUrl} | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false")
+
+if [ "${isValid}" = "true" ]; then
+  echo "URL is valid"
+else
+  echo "Please enter a valid URL"
+  exit 1
+fi
+
+# URL validation in conditionals
+configUrl="https://github.com/polatengin/utah"
+if [ $(echo "${configUrl}" | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false") = "true" ]; then
+  echo "GitHub URL validated"
+fi
+
+# URL validation assignment
+urlValid=$(echo "https://api.company.com:8080" | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false")
+echo "API URL is valid: ${urlValid}"
 ```
 
 ### Validation Functions Features
@@ -4932,14 +5010,28 @@ The email validation uses a simplified but robust regex pattern that covers most
 - **TLD requirement**: At least 2 alphabetic characters for the top-level domain
 - **Length limits**: Reasonable limits to prevent regex performance issues
 
+### URL Validation Technical Details
+
+The URL validation uses a comprehensive regex pattern that supports modern web standards:
+
+- **Protocol**: Must be one of `http`, `https`, `ftp`, or `file`
+- **Domain**: Valid domain names including subdomains and IP addresses
+- **Port**: Optional port specification (e.g., `:8080`, `:3000`)
+- **Path**: Optional path component with forward slashes
+- **Query**: Optional query parameters starting with `?`
+- **Fragment**: Optional fragment identifier starting with `#`
+- **Character support**: Alphanumeric characters, dots, hyphens, underscores
+
 ### Validation Functions Use Cases
 
 - **User Registration**: Validate email addresses during user account creation
-- **Configuration Validation**: Ensure configuration files contain valid email addresses
+- **Configuration Validation**: Ensure configuration files contain valid email addresses and URLs
 - **Contact Forms**: Validate email input in contact and feedback forms
-- **API Input Validation**: Validate email parameters in API requests
-- **Batch Processing**: Validate email addresses in bulk data processing
-- **Security**: Prevent malformed email addresses from being processed
+- **API Integration**: Validate API endpoint URLs and email parameters
+- **Web Development**: Validate URLs for webhooks, redirects, and external links
+- **Batch Processing**: Validate email addresses and URLs in bulk data processing
+- **Security**: Prevent malformed email addresses and URLs from being processed
+- **Infrastructure**: Validate service URLs and configuration endpoints
 
 ### Best Practices for Validation Functions
 
@@ -5199,6 +5291,8 @@ Current tests cover:
 - **utility_functions.shx** - Utility functions for UUID generation, hashing, and Base64 encoding/decoding
 - **utility_random.shx** - Utility random number generation with range parameters
 - **utils.shx** - General utility functions and helpers
+- **validate_isemail.shx** - Email validation function for validating email address formats
+- **validate_isurl.shx** - URL validation function for validating HTTP, HTTPS, FTP, and FILE URLs
 - **variable_declaration.shx** - Variable declarations and usage
 - **web_get.shx** - Web HTTP GET requests and API communication
 - **while_loop.shx** - While loops with break statements and conditional logic
@@ -5354,7 +5448,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isEmail()` function for email validation
 
-- [ ] `validate.isURL()` function for URL validation
+- [x] `validate.isURL()` function for URL validation
 
 - [ ] `validate.isUUID()` function for UUID validation
 

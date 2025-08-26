@@ -241,6 +241,8 @@ public partial class Compiler
         return CompileYamlInstallDependenciesExpression(yamlInstallDependencies);
       case ValidateIsEmailExpression validateIsEmail:
         return CompileValidateIsEmailExpression(validateIsEmail);
+      case ValidateIsURLExpression validateIsURL:
+        return CompileValidateIsURLExpression(validateIsURL);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2582,6 +2584,14 @@ fi
     var email = CompileExpression(validateIsEmail.Email);
     // Use a simplified but reliable email regex pattern
     return $"$(echo {email} | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{{2,}}$' && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileValidateIsURLExpression(ValidateIsURLExpression validateIsURL)
+  {
+    var url = CompileExpression(validateIsURL.Url);
+    // Comprehensive URL regex pattern supporting http/https/ftp/file protocols
+    // Matches: protocol://domain.tld[:port][/path][?query][#fragment]
+    return $"$(echo {url} | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo \"true\" || echo \"false\")";
   }
 
   private static int _uniqueIdCounter = 0;
