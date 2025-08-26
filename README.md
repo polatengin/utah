@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-115-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-116-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2434,6 +2434,7 @@ Utah provides web functions for making HTTP requests and interacting with web AP
 - `web.get(url)` - Perform an HTTP GET request to the specified URL
 - `web.delete(url, options?)` - Perform an HTTP DELETE request to the specified URL with optional headers/options
 - `web.post(url, data, options?)` - Perform an HTTP POST request to the specified URL with data and optional headers/options
+- `web.put(url, data, options?)` - Perform an HTTP PUT request to the specified URL with data and optional headers/options
 - `web.speedtest(url, options?)` - Perform a network speed test to the specified URL and return detailed metrics
 
 ### Web Functions Usage
@@ -2458,6 +2459,18 @@ console.log(`Post Response: ${postResponse}`);
 // POST with authentication headers
 let authPostResponse: string = web.post("https://api.example.com/users", '{"name": "Bob"}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
 console.log(`Authenticated Post: ${authPostResponse}`);
+
+// Make a PUT request to update a resource
+let putResponse: string = web.put("https://api.example.com/users/123", '{"name": "Updated Name", "email": "updated@example.com"}');
+console.log(`Put Response: ${putResponse}`);
+
+// PUT with authentication headers
+let authPutResponse: string = web.put("https://api.example.com/users/456", '{"status": "active"}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log(`Authenticated Put: ${authPutResponse}`);
+
+// PUT to update a configuration
+let configUpdate: string = web.put("https://api.example.com/config", '{"theme": "dark", "notifications": true}', "-H 'Content-Type: application/json'");
+console.log(`Config update response: ${configUpdate}`);
 
 // Perform a network speed test
 let speedData: string = web.speedtest("https://httpbin.org/get");
@@ -5119,7 +5132,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `web.post()` function
 
-- [ ] `web.put()` function
+- [x] `web.put()` function
 
 - [x] `web.delete()` function
 

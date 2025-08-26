@@ -16,6 +16,7 @@ Currently implemented web functions:
 - `web.get(url)` - HTTP GET requests
 - `web.delete(url, options?)` - HTTP DELETE requests
 - `web.post(url, data, options?)` - HTTP POST requests
+- `web.put(url, data, options?)` - HTTP PUT requests
 - `web.speedtest(url, options?)` - Network speed testing
 
 #### web.get(url)
@@ -73,7 +74,36 @@ let apiUrl: string = "https://api.example.com/create";
 let userData: string = '{"name": "Bob", "role": "admin"}';
 let createResponse: string = web.post(apiUrl, userData);
 console.log(`Create Response: ${createResponse}`);
-console.log(`Full Response: ${fullResponse}`);
+```
+
+#### web.put(url, data, options?)
+
+Performs an HTTP PUT request to the specified URL with data and optional headers or curl options. PUT requests are typically used to update or replace entire resources.
+
+```typescript
+// Basic PUT request to update a resource
+let response: string = web.put("https://api.example.com/users/123", '{"name": "Updated Name", "email": "updated@example.com"}');
+console.log(`Put Response: ${response}`);
+
+// PUT with form data
+let formResponse: string = web.put("https://api.example.com/config", "setting=value&enabled=true");
+console.log(`Form Response: ${formResponse}`);
+
+// PUT with authorization headers
+let authResponse: string = web.put("https://api.example.com/users/456", '{"status": "active"}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log(`Authenticated Put: ${authResponse}`);
+
+// PUT with variables
+let resourceUrl: string = "https://api.example.com/documents/789";
+let documentData: string = '{"title": "Updated Document", "content": "New content here"}';
+let updateResponse: string = web.put(resourceUrl, documentData);
+console.log(`Update Response: ${updateResponse}`);
+
+// PUT for configuration updates
+let configUrl: string = "https://api.example.com/settings";
+let configData: string = '{"theme": "dark", "notifications": true, "autoSave": false}';
+let configResponse: string = web.put(configUrl, configData, "-H 'Content-Type: application/json'");
+console.log(`Config Response: ${configResponse}`);
 ```
 
 #### web.speedtest(url, options?)

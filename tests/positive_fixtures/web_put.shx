@@ -1,0 +1,13 @@
+// Test web.put() function with URL and data
+let response: string = web.put("https://httpbin.org/put", '{"name": "Utah", "version": "1.0"}');
+console.log("Response length: ${string.length(response)}");
+
+// Test with variable URL and data
+let apiUrl: string = "https://httpbin.org/put";
+let putData: string = '{"user": "test", "action": "update"}';
+let updateResponse: string = web.put(apiUrl, putData);
+console.log("Update Response: ${updateResponse}");
+
+// Test with options (headers)
+let responseWithHeaders: string = web.put("https://httpbin.org/put", '{"authenticated": true}', "-H 'Authorization: Bearer token123' -H 'Content-Type: application/json'");
+console.log("Response with headers: ${string.length(responseWithHeaders)}");

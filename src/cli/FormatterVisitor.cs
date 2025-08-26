@@ -552,6 +552,16 @@ public class FormatterVisitor
           result += ")";
           return result;
         }
+      case WebPutExpression webPut:
+        {
+          var result = $"web.put({VisitExpression(webPut.Url)}, {VisitExpression(webPut.Data)}";
+          if (webPut.Options != null)
+          {
+            result += $", {VisitExpression(webPut.Options)}";
+          }
+          result += ")";
+          return result;
+        }
       case WebSpeedtestExpression webSpeedtest:
         {
           var result = $"web.speedtest({VisitExpression(webSpeedtest.Url)}";

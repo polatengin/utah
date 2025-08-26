@@ -378,6 +378,40 @@ public partial class Parser
         }
       }
 
+      // Special case for web.put() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("put(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(4, methodPart.Length - 5).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.put() requires URL and data arguments");
+        }
+        else
+        {
+          // Parse the URL, data, and optional options arguments
+          var args = ParseFunctionArguments(argsContent);
+          if (args.Count == 2)
+          {
+            // Two arguments: web.put(url, data)
+            var urlExpr = ParseExpression(args[0]);
+            var dataExpr = ParseExpression(args[1]);
+            return new WebPutExpression(urlExpr, dataExpr);
+          }
+          else if (args.Count == 3)
+          {
+            // Three arguments: web.put(url, data, options)
+            var urlExpr = ParseExpression(args[0]);
+            var dataExpr = ParseExpression(args[1]);
+            var optionsExpr = ParseExpression(args[2]);
+            return new WebPutExpression(urlExpr, dataExpr, optionsExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.put() accepts 2-3 arguments (URL, data, optional options), got {args.Count}");
+          }
+        }
+      }
+
       // Special case for web.speedtest() - handle this as a function call
       if (objectName == "web" && methodPart.StartsWith("speedtest(") && methodPart.EndsWith(")"))
       {
