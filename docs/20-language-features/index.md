@@ -67,6 +67,38 @@ Utah provides modern language features inspired by TypeScript, making shell scri
 - Code reuse across multiple scripts
 - Dependency management
 
+## Built-in Functions
+
+Utah provides comprehensive built-in functions organized by functionality:
+
+### Console and User Interface
+
+- **[Console Functions](console.md)** - User interaction and output
+- Interactive prompts, dialogs, and formatted output
+- Progress indicators and status messages
+
+### Data Processing
+
+- **[JSON/YAML](json-yaml.md)** - Structured data manipulation
+- **[Validation](validation.md)** - Data type and format validation
+- **[Template](template.md)** - Template processing and substitution
+
+### File and System Operations
+
+- **[Filesystem](filesystem.md)** - File and directory operations
+- **[System](system.md)** - Process and system management
+- **[Operating System](operating-system.md)** - OS detection and utilities
+
+### Development Tools
+
+- **[Git](git.md)** - Version control operations
+- **[SSH](ssh.md)** - Secure shell operations
+- **[Utilities](utilities.md)** - Common utility functions
+
+### Network and Web
+
+- **[Web](web.md)** - HTTP requests and web operations
+
 ## Language Philosophy
 
 ### TypeScript-Inspired Syntax
@@ -264,7 +296,8 @@ Utah combines the best of both worlds:
 3. **Organize code**: [Functions](functions.md)
 4. **Handle data**: [Arrays](arrays.md) and [Strings](strings.md)
 5. **Manage errors**: [Error Handling](error-handling.md)
-6. **Scale up**: [Import System](imports.md)
+6. **Use built-ins**: [Console](console.md), [Filesystem](filesystem.md), [Validation](validation.md)
+7. **Scale up**: [Import System](imports.md)
 
 ## Common Patterns
 
@@ -353,6 +386,8 @@ console.log("Processed ${array.length(results)} files successfully");
 
 Explore each language feature in detail:
 
+**Core Language Features:**
+
 1. **[Variables and Types](variables.md)** - Foundation of type-safe scripting
 2. **[Control Flow](control-flow.md)** - Logic and decision making
 3. **[Functions](functions.md)** - Code organization and reuse
@@ -360,3 +395,17 @@ Explore each language feature in detail:
 5. **[Strings](strings.md)** - String processing and manipulation
 6. **[Error Handling](error-handling.md)** - Robust error management
 7. **[Import System](imports.md)** - Modular development
+
+**Built-in Function Libraries:**
+
+1. **[Console Functions](console.md)** - User interaction and output
+2. **[Filesystem](filesystem.md)** - File and directory operations
+3. **[Validation](validation.md)** - Data type and format validation
+4. **[JSON/YAML](json-yaml.md)** - Structured data manipulation
+5. **[Git](git.md)** - Version control operations
+6. **[System](system.md)** - Process and system management
+7. **[Operating System](operating-system.md)** - OS detection and utilities
+8. **[Utilities](utilities.md)** - Common utility functions
+9. **[Web](web.md)** - HTTP requests and web operations
+10. **[SSH](ssh.md)** - Secure shell operations
+11. **[Template](template.md)** - Template processing and substitution

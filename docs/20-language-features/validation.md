@@ -1,4 +1,9 @@
-# Validation Functions
+---
+layout: default
+title: Validation Functions
+parent: Language Features
+nav_order: 15
+---
 
 Utah provides a comprehensive set of validation functions for common data types and formats. These functions help ensure data integrity and user input validation in your scripts.
 
