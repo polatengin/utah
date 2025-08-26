@@ -1,3 +1,11 @@
-import "nonexistent.shx";
+// Should fail - import errors
 
+// Missing file
+import "nonexistent.shx";
 console.log("This should not compile");
+
+// Invalid import syntax
+import;  // Missing file path
+import "";  // Empty file path
+import 123;  // Non-string import
+import "./utils.shx" as;  // Missing alias name

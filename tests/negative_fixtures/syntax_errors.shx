@@ -1,0 +1,15 @@
+// Should fail - various syntax errors in variable declarations
+let count: = "missing type";
+let : string = "missing name";  
+let count string = "missing colon";
+const = "missing everything";
+
+// Invalid variable names
+let 123name: string = "invalid";  // Variable name starting with number
+let var-name: string = "hyphen";  // Invalid character in name
+
+// Malformed string interpolation
+let name: string = "World";
+let greeting: string = "Hello ${name";  // Missing closing brace
+let message: string = "Test $name}";    // Missing opening brace
+let invalid: string = "Value ${${name}}"; // Nested interpolation

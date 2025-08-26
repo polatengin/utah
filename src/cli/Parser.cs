@@ -5,6 +5,7 @@ public partial class Parser
 {
   private string[] _lines;
   private readonly HashSet<string> _constVariables = new HashSet<string>();
+  private readonly Stack<string> _functionReturnTypeStack = new Stack<string>();
 
   public Parser(string input)
   {
@@ -157,10 +158,28 @@ public partial class Parser
     {
       var valueStr = line.Substring(7).TrimEnd(';');
       var value = string.IsNullOrEmpty(valueStr) ? null : ParseExpression(valueStr);
+      
+      // Validate return type if we're inside a function
+      if (_functionReturnTypeStack.Count > 0)
+      {
+        var expectedReturnType = _functionReturnTypeStack.Peek();
+        ValidateReturnType(value, expectedReturnType);
+      }
+      
       return new ReturnStatement(value);
     }
     if (line == "return;")
     {
+      // Validate void return if we're inside a function
+      if (_functionReturnTypeStack.Count > 0)
+      {
+        var expectedReturnType = _functionReturnTypeStack.Peek();
+        if (!string.IsNullOrEmpty(expectedReturnType) && expectedReturnType != "void")
+        {
+          throw new InvalidOperationException($"Function expects return type '{expectedReturnType}' but found void return.");
+        }
+      }
+      
       return new ReturnStatement(null);
     }
     if (line.StartsWith("exit "))
@@ -392,6 +411,9 @@ public partial class Parser
           ValidateArrayElementTypes(arrayLiteral, elementType, name);
         }
 
+        // Validate variable type assignment for non-array types
+        ValidateVariableTypeAssignment(value, type, name);
+
         return new VariableDeclaration(name, type, value, isConst);
       }
       throw new Exception($"Invalid multi-line variable declaration: {fullDeclaration}");
@@ -418,6 +440,9 @@ public partial class Parser
         var elementType = type.Substring(0, type.Length - 2); // Remove []
         ValidateArrayElementTypes(arrayLiteral, elementType, name);
       }
+
+      // Validate variable type assignment for non-array types
+      ValidateVariableTypeAssignment(value, type, name);
 
       return new VariableDeclaration(name, type, value, isConst);
     }
@@ -448,6 +473,9 @@ public partial class Parser
         ValidateArrayElementTypes(arrayLiteral, elementType, name);
       }
 
+      // Validate variable type assignment for non-array types
+      ValidateVariableTypeAssignment(value, type, name);
+
       return new VariableDeclaration(name, type, value, isConst);
     }
     throw new Exception($"Invalid variable declaration: {line}");
@@ -468,6 +496,9 @@ public partial class Parser
       parameters.Add((parts[0].Trim(), parts[1].Trim()));
     }
 
+    // Push return type onto stack for validation
+    _functionReturnTypeStack.Push(returnType ?? "void");
+
     var body = new List<Statement>();
     i++;
     while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
@@ -483,6 +514,10 @@ public partial class Parser
       }
       i++;
     }
+
+    // Pop return type from stack
+    _functionReturnTypeStack.Pop();
+
     return new FunctionDeclaration(name, parameters, body, returnType);
   }
 
@@ -1050,6 +1085,60 @@ public partial class Parser
       }
       // Add more checks for other expression types if needed
     }
+  }
+
+  private void ValidateVariableTypeAssignment(Expression value, string expectedType, string variableName)
+  {
+    // Skip validation if no type annotation is provided
+    if (string.IsNullOrEmpty(expectedType))
+      return;
+
+    // Skip validation for array types (handled separately)
+    if (expectedType.EndsWith("[]"))
+      return;
+
+    if (value is LiteralExpression literal)
+    {
+      var actualType = literal.Type;
+      
+      // Allow "unknown" types to pass (complex expressions, JSON strings, etc.)
+      if (actualType == "unknown")
+        return;
+        
+      if (actualType != expectedType)
+      {
+        throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType}' for value '{literal.Value}'.");
+      }
+    }
+    // Add more checks for other expression types as needed
+  }
+
+  private void ValidateReturnType(Expression? value, string expectedReturnType)
+  {
+    // Skip validation if no expected return type or it's void
+    if (string.IsNullOrEmpty(expectedReturnType) || expectedReturnType == "void")
+      return;
+
+    // If expecting a return value but got null
+    if (value == null)
+    {
+      throw new InvalidOperationException($"Function expects return type '{expectedReturnType}' but found void return.");
+    }
+
+    if (value is LiteralExpression literal)
+    {
+      var actualType = literal.Type;
+      
+      // Allow "unknown" types to pass (complex expressions, etc.)
+      if (actualType == "unknown")
+        return;
+        
+      if (actualType != expectedReturnType)
+      {
+        throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType}' for value '{literal.Value}'.");
+      }
+    }
+    // Add more checks for other expression types as needed
   }
 
   private bool IsRawBashStatement(string line)

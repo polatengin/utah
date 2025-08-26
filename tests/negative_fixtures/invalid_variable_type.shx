@@ -1,0 +1,4 @@
+// Should fail - type mismatches 
+let count: number = "not a number";
+let flag: boolean = 42;
+let name: string = true;

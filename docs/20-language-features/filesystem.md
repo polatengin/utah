@@ -485,6 +485,7 @@ done
 **Permission Reference:**
 
 **Numeric Permissions (Octal):**
+
 - `755` = `rwxr-xr-x` - Owner: read/write/execute, Group/Others: read/execute
 - `644` = `rw-r--r--` - Owner: read/write, Group/Others: read only
 - `600` = `rw-------` - Owner: read/write, Group/Others: no access
@@ -492,6 +493,7 @@ done
 - `444` = `r--r--r--` - All: read only
 
 **Symbolic Permissions:**
+
 - `u+x` - Add execute permission for user (owner)
 - `g+w` - Add write permission for group
 - `o-r` - Remove read permission for others

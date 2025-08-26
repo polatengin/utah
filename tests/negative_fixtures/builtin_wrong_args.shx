@@ -1,0 +1,23 @@
+// Should fail - various built-in function call errors
+
+// Wrong number of arguments
+console.log(fs.exists());  // Missing required file parameter
+console.log(utility.random(1, 2, 3, 4));  // Too many parameters
+console.log(validate.isEmail());  // Missing required email parameter
+
+// Malformed syntax in built-in calls
+let home: string = env.get(;  // Missing parameter and closing paren
+let invalid: string = env.(HOME);  // Missing function name
+let malformed: string = env.get(HOME;  // Missing closing paren
+
+// Malformed JSON function calls
+let jsonString: string = '{"name": "test"}';
+let obj: object = json.parse(;  // Missing parameter
+let value: string = json.get(obj;  // Missing second parameter and closing paren
+let result: object = json.set(obj, "property";  // Missing third parameter
+
+// Invalid script metadata
+script.description();  // Missing description parameter
+script.description(123);  // Non-string description  
+args.define();  // Missing required parameters
+args.define("--flag");  // Missing required description parameter

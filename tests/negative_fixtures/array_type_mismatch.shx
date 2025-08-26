@@ -1,5 +1,14 @@
+// Should fail - array type mismatches and malformed array operations
+
+// Type mismatches in array literals
 let flags: boolean[] = [true, false, "Test"];
 console.log(flags);
 
 let numbers: number[] = [1, 2, "three", 4];
 console.log(numbers);
+
+// Malformed array function calls  
+let strings: string[] = ["a", "b", "c"];
+let result: string = array.join(numbers,);  // Missing second parameter
+let found: boolean = array.(strings, "test");  // Missing function name
+let merged: number[] = array.merge(numbers;  // Missing closing paren

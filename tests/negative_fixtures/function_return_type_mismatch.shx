@@ -1,0 +1,12 @@
+// Should fail - function returning wrong type
+function getAge(): string {
+  return 25;  // Returning number instead of string
+}
+
+function getName(): number {
+  return "John";  // Returning string instead of number
+}
+
+function getFlag(): boolean {
+  return "true";  // Returning string instead of boolean
+}

@@ -1,0 +1,24 @@
+// Should fail - various function syntax errors
+
+// Malformed function declarations
+function (name: string): string {  // Missing function name
+  return name;
+}
+
+function test(): {  // Missing return type
+  return "test";
+}
+
+function add(a: number b: number): number {  // Missing comma in parameters
+  return a + b;
+}
+
+function multiply(a: number,): number {  // Trailing comma in parameters
+  return a * 2;
+}
+
+// Malformed function calls
+console.log("test",);  // Trailing comma
+fs.exists("file.txt",,);  // Double comma
+utility.random(,5);  // Leading comma
+array.join(["a", "b"],);  // Trailing comma with incomplete args

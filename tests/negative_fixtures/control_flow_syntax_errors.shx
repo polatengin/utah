@@ -1,0 +1,37 @@
+// Should fail - various control flow syntax errors
+
+// Malformed switch statement
+let value: string = "test";
+switch (value {  // Missing closing parenthesis
+  case "test":
+    console.log("test");
+    break;
+  default:
+    console.log("default");
+}
+
+// Malformed while loop  
+let count: number = 0;
+while count < 5 {  // Missing parentheses
+  count++;
+}
+
+while (count < 10  // Missing closing parenthesis
+  count++;
+}
+
+// Malformed for loop
+let items: string[] = ["a", "b", "c"];
+for item: string items {  // Missing 'in' keyword
+  console.log(item);
+}
+
+for (let i: number = 0 i < 5; i++) {  // Missing semicolon
+  console.log(i);
+}
+
+// Malformed ternary operator
+let age: number = 25;
+let status: string = age > 18 ? "adult" "minor";  // Missing colon
+let category: string = age > 21 ? : "minor";      // Missing true value
+let result: string = age > 18 "adult" : "minor";  // Missing question mark
