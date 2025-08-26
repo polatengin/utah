@@ -1659,6 +1659,18 @@ public partial class Parser
           var remotePathExpr = ParseExpression(arguments[1].Trim());
           return new SshUploadExpression(connectionExpr, localPathExpr, remotePathExpr);
         }
+        else if (methodName == "download")
+        {
+          var connectionExpr = new VariableExpression(objectName);
+          var arguments = SplitByComma(argsContent);
+          if (arguments.Count != 2)
+          {
+            throw new InvalidOperationException("download() requires exactly 2 arguments (remotePath, localPath)");
+          }
+          var remotePathExpr = ParseExpression(arguments[0].Trim());
+          var localPathExpr = ParseExpression(arguments[1].Trim());
+          return new SshDownloadExpression(connectionExpr, remotePathExpr, localPathExpr);
+        }
       }
 
       // Regular function call (not special built-in)

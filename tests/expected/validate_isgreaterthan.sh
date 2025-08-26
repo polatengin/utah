@@ -5,12 +5,12 @@ passing1=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -29,12 +29,12 @@ passing2=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -53,12 +53,12 @@ passing3=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -77,12 +77,12 @@ fever1=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -101,12 +101,12 @@ fever2=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -125,12 +125,12 @@ expensive1=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -149,12 +149,12 @@ isAdult=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -174,12 +174,12 @@ piGreater=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -199,12 +199,12 @@ negComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -224,12 +224,12 @@ negComparison2=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -249,12 +249,12 @@ mixedComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -274,12 +274,12 @@ equalComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -299,12 +299,12 @@ invalidComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -324,12 +324,12 @@ invalidThresholdComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -349,12 +349,12 @@ emptyComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -374,12 +374,12 @@ zeroComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -399,12 +399,12 @@ zeroComparison2=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -422,12 +422,12 @@ if [ $(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -450,12 +450,12 @@ if [ $(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -479,12 +479,12 @@ bothPassed=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -500,12 +500,12 @@ _utah_validate_greater_than ${result1} ${threshold}
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -525,12 +525,12 @@ largeComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)
@@ -550,12 +550,12 @@ preciseComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
   local threshold="$2"
-  
+
   # Check if both values are numeric (integer or float)
   if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
     echo "false" && return
   fi
-  
+
   # Use bc for floating-point comparison, awk as fallback
   if command -v bc >/dev/null 2>&1; then
     result=$(echo "$value > $threshold" | bc)

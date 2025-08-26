@@ -96,6 +96,7 @@ public record SshConnectExpression(Expression Host, Expression? Port, Expression
 public record ObjectPropertyAccessExpression(Expression Object, string PropertyName) : Expression;
 public record SshExecuteExpression(Expression Connection, Expression Command) : Expression;
 public record SshUploadExpression(Expression Connection, Expression LocalPath, Expression RemotePath) : Expression;
+public record SshDownloadExpression(Expression Connection, Expression RemotePath, Expression LocalPath) : Expression;
 public record JsonParseExpression(Expression JsonString) : Expression;
 public record JsonStringifyExpression(Expression JsonObject) : Expression;
 public record JsonIsValidExpression(Expression JsonString) : Expression;

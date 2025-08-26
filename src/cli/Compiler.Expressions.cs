@@ -201,6 +201,8 @@ public partial class Compiler
         return CompileSshExecuteExpression(sshExecute);
       case SshUploadExpression sshUpload:
         return CompileSshUploadExpression(sshUpload);
+      case SshDownloadExpression sshDownload:
+        return CompileSshDownloadExpression(sshDownload);
       case JsonParseExpression jsonParse:
         return CompileJsonParseExpression(jsonParse);
       case JsonStringifyExpression jsonStringify:
@@ -473,6 +475,45 @@ public partial class Compiler
     bashCode.AppendLine($"  upload_result=$?");
     bashCode.AppendLine($"fi");
     bashCode.AppendLine($"if [ $upload_result -eq 0 ]; then echo \"true\"; else echo \"false\"; fi");
+
+    return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} }})";
+  }
+
+  private string CompileSshDownloadExpression(SshDownloadExpression sshDownload)
+  {
+    var connectionExpr = CompileExpression(sshDownload.Connection);
+    var remotePathExpr = CompileExpression(sshDownload.RemotePath);
+    var localPathExpr = CompileExpression(sshDownload.LocalPath);
+
+    // Extract the variable name from ${varName} format
+    var connVarName = connectionExpr.StartsWith("${") && connectionExpr.EndsWith("}")
+      ? connectionExpr[2..^1]
+      : connectionExpr;
+
+    var bashCode = new StringBuilder();
+    bashCode.AppendLine($"conn_var={connectionExpr}");
+    bashCode.AppendLine($"if [ \"$(eval \"echo \\${{${{{connVarName}}}[async]}}\")\" = \"true\" ]; then");
+    bashCode.AppendLine($"  # Use control master for async connection");
+    bashCode.AppendLine($"  scp_cmd=\"scp -o ControlPath=$(eval \"echo \\${{${{{connVarName}}}[socket]}}\")\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
+    bashCode.AppendLine($"  download_result=$?");
+    bashCode.AppendLine($"else");
+    bashCode.AppendLine($"  # One-time connection");
+    bashCode.AppendLine($"  scp_cmd=\"scp\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
+    bashCode.AppendLine($"  download_result=$?");
+    bashCode.AppendLine($"fi");
+    bashCode.AppendLine($"if [ $download_result -eq 0 ]; then echo \"true\"; else echo \"false\"; fi");
 
     return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} }})";
   }

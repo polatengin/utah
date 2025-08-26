@@ -4482,6 +4482,14 @@ if (asyncConnection.connected) {
   } else {
     console.log("Failed to upload file");
   }
+
+  // Download files from remote server
+  let downloadSuccess: boolean = asyncConnection.download("/remote/config.yml", "/local/config.yml");
+  if (downloadSuccess) {
+    console.log("File downloaded successfully");
+  } else {
+    console.log("Failed to download file");
+  }
 } else {
   console.log("Failed to establish SSH connection");
   exit(1);
@@ -4551,6 +4559,14 @@ if (deployServer.connected) {
 
     console.log("Deployment completed");
     console.log("Service status: " + statusResult);
+
+    // Download deployment logs and configuration files
+    let logDownload: boolean = deployServer.download("/var/log/myapp/deploy.log", "/local/logs/deploy.log");
+    let configDownload: boolean = deployServer.download("/etc/myapp/runtime.conf", "/local/configs/runtime.conf");
+    
+    if (logDownload && configDownload) {
+      console.log("Deployment artifacts downloaded successfully");
+    }
   } else {
     console.log("Failed to upload deployment package");
     exit(1);
@@ -4677,6 +4693,7 @@ The following methods are available on SSH connection objects:
 |--------|-----------|-------------|
 | `execute()` | `execute(command: string): string` | Execute a command on the remote server and return output |
 | `upload()` | `upload(localPath: string, remotePath: string): boolean` | Upload a file to the remote server, returns true on success |
+| `download()` | `download(remotePath: string, localPath: string): boolean` | Download a file from the remote server, returns true on success |
 
 **Connection behavior:**
 
@@ -4693,9 +4710,15 @@ if (conn.connected) {
   console.log("Remote hostname: " + result);
 
   // Upload files
-  let success: boolean = conn.upload("/local/file.txt", "/remote/file.txt");
-  if (success) {
+  let uploadSuccess: boolean = conn.upload("/local/file.txt", "/remote/file.txt");
+  if (uploadSuccess) {
     console.log("File uploaded successfully");
+  }
+
+  // Download files
+  let downloadSuccess: boolean = conn.download("/remote/backup.tar.gz", "/local/backup.tar.gz");
+  if (downloadSuccess) {
+    console.log("File downloaded successfully");
   }
 }
 ```
@@ -5873,7 +5896,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `ssh.upload()` function for file transfers
 
-- [ ] `ssh.download()` function for file transfers
+- [x] `ssh.download()` function for file transfers
 
 - [x] `git.undoLastCommit()` function for undoing the last commit
 

@@ -12,6 +12,7 @@ Utah provides comprehensive SSH functions for secure remote connections, command
 
 - **`connection.execute(command)`** - Execute commands on remote server
 - **`connection.upload(localPath, remotePath)`** - Upload files to remote server
+- **`connection.download(remotePath, localPath)`** - Download files from remote server
 
 **Note:** Both sync and async connections support these methods, with different underlying implementations:
 
@@ -219,6 +220,55 @@ if (server.connected) {
 }
 ```
 
+## File Download Operations
+
+SSH connections support file downloads using the `download()` method:
+
+```typescript
+#!/usr/bin/env utah run
+
+let server: object = ssh.connect("backup.company.com", {
+  async: true,
+  username: "backup",
+  keyPath: "/home/user/.ssh/backup_key"
+});
+
+if (server.connected) {
+  // Download backup files
+  let backupDownload: boolean = server.download("/backups/database.sql", "/local/backups/database.sql");
+
+  if (backupDownload) {
+    console.log("Database backup downloaded successfully");
+
+    // Verify backup integrity
+    let verifyResult: string = server.execute("md5sum /backups/database.sql");
+    console.log("Backup checksum: " + verifyResult);
+  } else {
+    console.log("Failed to download database backup");
+  }
+
+  // Download configuration files
+  let configDownload: boolean = server.download("/etc/app/production.yml", "/local/configs/production.yml");
+  let logDownload: boolean = server.download("/var/log/app/app.log", "/local/logs/app.log");
+
+  if (configDownload && logDownload) {
+    console.log("Configuration and log files downloaded");
+    
+    // Download application binaries
+    let binDownload: boolean = server.download("/opt/app/app", "/local/bin/app");
+    if (binDownload) {
+      console.log("Application binary downloaded");
+    }
+  }
+
+  // Download archive files
+  let archiveDownload: boolean = server.download("/archives/data-$(date +%Y%m%d).tar.gz", "/local/archives/data.tar.gz");
+  if (archiveDownload) {
+    console.log("Data archive downloaded successfully");
+  }
+}
+```
+
 ## Connection Object Reference
 
 Each SSH connection returns an object with the following properties and methods:
@@ -243,6 +293,7 @@ Each SSH connection returns an object with the following properties and methods:
 |--------|-----------|---------|-------------|
 | `execute()` | `execute(command: string)` | `string` | Execute command on remote server and return output |
 | `upload()` | `upload(localPath: string, remotePath: string)` | `boolean` | Upload file to remote server, returns success status |
+| `download()` | `download(remotePath: string, localPath: string)` | `boolean` | Download file from remote server, returns success status |
 
 ## Basic Usage Examples
 
@@ -797,9 +848,9 @@ fi
 
 The SSH connection system is designed for expansion with additional functions:
 
-- `ssh.execute(connection, command)` - Execute commands on remote servers
-- `ssh.upload(connection, localPath, remotePath)` - Upload files to remote servers
-- `ssh.download(connection, remotePath, localPath)` - Download files from remote servers
+- ✅ `connection.execute(command)` - Execute commands on remote servers (**Implemented**)
+- ✅ `connection.upload(localPath, remotePath)` - Upload files to remote servers (**Implemented**)
+- ✅ `connection.download(remotePath, localPath)` - Download files from remote servers (**Implemented**)
 - `ssh.disconnect(connection)` - Explicitly close SSH connections
 - `ssh.tunnel(connection, localPort, remotePort)` - Create SSH tunnels
 
