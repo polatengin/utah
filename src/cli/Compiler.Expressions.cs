@@ -188,6 +188,8 @@ public partial class Compiler
         return CompileFsDeleteExpression(fsDelete);
       case FsChmodExpression fsChmod:
         return CompileFsChmodExpression(fsChmod);
+      case FsChownExpression fsChown:
+        return CompileFsChownExpression(fsChown);
       case FsFindExpression fsFind:
         return CompileFsFindExpression(fsFind);
       case TimerCurrentExpression timerCurrent:
@@ -1738,6 +1740,22 @@ public partial class Compiler
     var path = CompileExpression(fsChmod.Path);
     var permissions = CompileExpression(fsChmod.Permissions);
     return $"$(chmod {permissions} {path} && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileFsChownExpression(FsChownExpression fsChown)
+  {
+    var path = CompileExpression(fsChown.Path);
+    var owner = CompileExpression(fsChown.Owner);
+    
+    if (fsChown.Group != null)
+    {
+      var group = CompileExpression(fsChown.Group);
+      return $"$(chown {owner}:{group} {path} && echo \"true\" || echo \"false\")";
+    }
+    else
+    {
+      return $"$(chown {owner} {path} && echo \"true\" || echo \"false\")";
+    }
   }
 
   private string CompileFsFindExpression(FsFindExpression fsFind)

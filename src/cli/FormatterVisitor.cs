@@ -598,6 +598,11 @@ public class FormatterVisitor
         return $"fs.parentDirName({VisitExpression(fsParentDirName.Path)})";
       case FsChmodExpression fsChmod:
         return $"fs.chmod({VisitExpression(fsChmod.Path)}, {VisitExpression(fsChmod.Permissions)})";
+      case FsChownExpression fsChown:
+        if (fsChown.Group != null)
+          return $"fs.chown({VisitExpression(fsChown.Path)}, {VisitExpression(fsChown.Owner)}, {VisitExpression(fsChown.Group)})";
+        else
+          return $"fs.chown({VisitExpression(fsChown.Path)}, {VisitExpression(fsChown.Owner)})";
       case TimerStartExpression:
         return "timer.start()";
       case TimerStopExpression:

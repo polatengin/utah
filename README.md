@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-117-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-118-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1641,6 +1641,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.rename(oldName, newName)` - Rename a file or directory within the same location, returns boolean
 - `fs.delete(path)` - Delete a file or directory recursively, returns boolean
 - `fs.chmod(path, permissions)` - Change file permissions using numeric (755) or symbolic (u+x) notation, returns boolean
+- `fs.chown(path, owner, group?)` - Change file ownership with optional group, supports usernames and numeric IDs, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 - `fs.find(path, name?)` - Search for files and directories, with optional wildcard pattern, returns string[]
 - `fs.createTempFolder(prefix?, baseDir?)` - Create a secure temporary directory and return its absolute path
@@ -1737,6 +1738,24 @@ if (fs.exists("secrets.txt")) {
 fs.chmod("backup.sh", "u+x");    // Add execute for user
 fs.chmod("public.txt", "a+r");   // Add read for all users
 fs.chmod("private.log", "go-rwx"); // Remove all permissions for group/others
+
+// Change file ownership
+fs.chown("app.log", "appuser");           // Change owner only
+fs.chown("config.json", "root", "config"); // Change owner and group
+
+// Set ownership conditionally
+if (fs.exists("database.conf")) {
+  fs.chown("database.conf", "postgres", "postgres");
+  console.log("Database config ownership secured");
+}
+
+// Numeric user/group IDs
+fs.chown("sensitive.txt", "1000", "1000");  // UID:GID format
+fs.chown("backup.tar", "500");              // Owner only with UID
+
+// Web server setup
+fs.chown("web.sock", "www-data", "www-data");
+fs.chown("nginx.conf", "root", "nginx");
 
 // Create a temporary working directory
 let tmpDir: string = fs.createTempFolder();
@@ -1865,6 +1884,24 @@ fi
 $(chmod "u+x" "backup.sh" && echo "true" || echo "false")
 $(chmod "a+r" "public.txt" && echo "true" || echo "false")
 $(chmod "go-rwx" "private.log" && echo "true" || echo "false")
+
+# File ownership operations:
+$(chown "appuser" "app.log" && echo "true" || echo "false")
+$(chown "root:config" "config.json" && echo "true" || echo "false")
+
+configExists=$([ -e "database.conf" ] && echo "true" || echo "false")
+if [ "$configExists" = "true" ]; then
+  $(chown "postgres:postgres" "database.conf" && echo "true" || echo "false")
+  echo "Database config ownership secured"
+fi
+
+# Numeric user/group IDs:
+$(chown "1000:1000" "sensitive.txt" && echo "true" || echo "false")
+$(chown "500" "backup.tar" && echo "true" || echo "false")
+
+# System ownership:
+$(chown "www-data:www-data" "web.sock" && echo "true" || echo "false")
+$(chown "root:nginx" "nginx.conf" && echo "true" || echo "false")
 ```
 
 ## 📝 Template Functions
@@ -5233,7 +5270,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `fs.chmod()` - Change file permissions
 
-- [ ] `fs.chown()` - Change file ownership
+- [x] `fs.chown()` - Change file ownership
 
 - [ ] `process.start()` - Start a new process with command and arguments
 

@@ -529,6 +529,65 @@ done
 - File: `tests/positive_fixtures/fs_chmod.shx`
 - Tests numeric and symbolic permissions, expression usage, conditionals, and batch operations
 
+### fs.chown()
+
+Change file and directory ownership. Supports user-only ownership or user and group:
+
+```shx
+// Change owner only
+fs.chown("/path/to/file", "newowner");
+
+// Change owner and group
+fs.chown("/path/to/file", "newowner", "newgroup");
+
+// Using numeric IDs
+fs.chown("/var/log/app.log", "1000", "1000");
+
+// With variables
+let user = "webserver";
+let group = "www-data";
+fs.chown("/var/www/html", user, group);
+
+// In conditionals
+if (fs.chown("/etc/app.conf", "app", "app")) {
+    console.log("Ownership changed successfully");
+} else {
+    console.log("Failed to change ownership");
+}
+```
+
+**Generated Bash:**
+
+```bash
+# Owner only
+if chown newowner "/path/to/file" >/dev/null 2>&1; then echo "true"; else echo "false"; fi
+
+# Owner and group
+if chown newowner:newgroup "/path/to/file" >/dev/null 2>&1; then echo "true"; else echo "false"; fi
+
+# With numeric IDs
+if chown 1000:1000 "/var/log/app.log" >/dev/null 2>&1; then echo "true"; else echo "false"; fi
+```
+
+**Common Use Cases:**
+
+- **Web Server Setup**: Change ownership of web files to web server user
+- **Log File Management**: Set appropriate ownership for application logs
+- **Security Hardening**: Restrict file access to specific users/groups
+- **Service Configuration**: Set ownership for service-specific files
+
+**Best Practices:**
+
+- **Verify Users/Groups**: Ensure target users and groups exist before changing ownership
+- **Recursive Operations**: Use with `fs.find()` for recursive ownership changes
+- **Security**: Be cautious when changing ownership of system files
+- **Backup**: Consider backing up important files before ownership changes
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_chown.shx`
+- Tests owner-only, owner+group, numeric IDs, variables, and conditional usage
+
 ### fs.find()
 
 Search for files and directories recursively with optional wildcard pattern matching. Returns an array of matching paths:

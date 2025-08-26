@@ -1,0 +1,79 @@
+#!/usr/bin/env utah
+
+// Test fs.chown() as both expression and statement
+
+// Statement usage - change owner only
+fs.chown("logfile.txt", "appuser");
+
+// Statement usage - change owner and group
+fs.chown("config.json", "root", "config");
+
+// Statement usage with variables
+let filePath = "application.log";
+let owner = "service";
+let group = "service";
+fs.chown(filePath, owner, group);
+
+// Expression usage - check if chown was successful
+let success = fs.chown("database.conf", "postgres");
+console.log(success);
+
+// Expression usage with both owner and group
+let result = fs.chown("webfiles.html", "www-data", "www-data");
+console.log(result);
+
+// Expression usage in conditional
+if (fs.chown("secrets.txt", "root", "secure")) {
+  console.log("File ownership updated successfully");
+} else {
+  console.log("Failed to update file ownership");
+}
+
+// Common ownership patterns
+fs.chown("nginx.conf", "root", "nginx");        // System config with group access
+fs.chown("app.log", "appuser", "logs");         // Application logging
+fs.chown("backup.tar", "backup", "backup");     // Backup files
+fs.chown("script.sh", "deploy", "deploy");      // Deployment scripts
+
+// Numeric user/group IDs
+fs.chown("file1.txt", "1000");                  // User ID only
+fs.chown("file2.txt", "1000", "1000");          // User ID and Group ID
+fs.chown("file3.txt", "500", "100");            // Different UID/GID
+
+// System users and groups
+fs.chown("system.log", "syslog", "adm");        // System logging
+fs.chown("mail.conf", "postfix", "postfix");    // Mail system
+fs.chown("web.sock", "www-data", "www-data");   // Web server socket
+
+// Using expressions as arguments
+let configFile = "app.conf";
+let systemUser = "root";
+let appGroup = "myapp";
+fs.chown(configFile, systemUser, appGroup);
+
+// Combined with other operations
+if (fs.exists("important.txt")) {
+  fs.chown("important.txt", "root", "staff");
+  console.log("Important file secured");
+}
+
+// Conditional ownership based on file type
+let scriptFiles = ["deploy.sh", "backup.sh", "monitor.sh"];
+for (let script in scriptFiles) {
+  if (fs.exists(script)) {
+    let chownResult = fs.chown(script, "scripts", "automation");
+    console.log("Script ownership updated: " + chownResult);
+  }
+}
+
+// DevOps scenarios
+let services = ["api", "worker", "scheduler"];
+for (let service in services) {
+  let configPath = "/etc/service.conf";  // Simplified path
+  fs.chown(configPath, service, service);
+}
+
+// Security scenarios - owner only changes
+fs.chown("sensitive.key", "root");              // Root ownership for keys
+fs.chown("audit.log", "audit");                 // Audit user for logs
+fs.chown("backup.gpg", "backup");               // Backup user for encrypted files

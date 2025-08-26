@@ -734,6 +734,26 @@ public partial class Parser
         throw new InvalidOperationException("fs.chmod() requires exactly 2 arguments (path, permissions)");
       }
 
+      // Special handling for fs.chown()
+      if (functionName == "fs.chown")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          var ownerExpr = ParseExpression(args[1]);
+          return new FsChownExpression(pathExpr, ownerExpr);
+        }
+        else if (args.Count == 3)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          var ownerExpr = ParseExpression(args[1]);
+          var groupExpr = ParseExpression(args[2]);
+          return new FsChownExpression(pathExpr, ownerExpr, groupExpr);
+        }
+        throw new InvalidOperationException("fs.chown() requires 2 or 3 arguments (path, owner[, group])");
+      }
+
       // Special handling for fs.find()
       if (functionName == "fs.find")
       {
