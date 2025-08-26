@@ -1746,7 +1746,7 @@ public partial class Compiler
   {
     var path = CompileExpression(fsChown.Path);
     var owner = CompileExpression(fsChown.Owner);
-    
+
     if (fsChown.Group != null)
     {
       var group = CompileExpression(fsChown.Group);
