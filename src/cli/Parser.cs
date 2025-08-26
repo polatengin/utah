@@ -158,14 +158,14 @@ public partial class Parser
     {
       var valueStr = line.Substring(7).TrimEnd(';');
       var value = string.IsNullOrEmpty(valueStr) ? null : ParseExpression(valueStr);
-      
+
       // Validate return type if we're inside a function
       if (_functionReturnTypeStack.Count > 0)
       {
         var expectedReturnType = _functionReturnTypeStack.Peek();
         ValidateReturnType(value, expectedReturnType);
       }
-      
+
       return new ReturnStatement(value);
     }
     if (line == "return;")
@@ -179,7 +179,7 @@ public partial class Parser
           throw new InvalidOperationException($"Function expects return type '{expectedReturnType}' but found void return.");
         }
       }
-      
+
       return new ReturnStatement(null);
     }
     if (line.StartsWith("exit "))
@@ -1100,11 +1100,11 @@ public partial class Parser
     if (value is LiteralExpression literal)
     {
       var actualType = literal.Type;
-      
+
       // Allow "unknown" types to pass (complex expressions, JSON strings, etc.)
       if (actualType == "unknown")
         return;
-        
+
       if (actualType != expectedType)
       {
         throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType}' for value '{literal.Value}'.");
@@ -1128,11 +1128,11 @@ public partial class Parser
     if (value is LiteralExpression literal)
     {
       var actualType = literal.Type;
-      
+
       // Allow "unknown" types to pass (complex expressions, etc.)
       if (actualType == "unknown")
         return;
-        
+
       if (actualType != expectedReturnType)
       {
         throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType}' for value '{literal.Value}'.");
