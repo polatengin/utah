@@ -5869,9 +5869,9 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `ssh.connect()` function with SSH key support
 
-- [ ] `ssh.execute()` function with command output handling
+- [x] `ssh.execute()` function with command output handling
 
-- [ ] `ssh.upload()` function for file transfers
+- [x] `ssh.upload()` function for file transfers
 
 - [ ] `ssh.download()` function for file transfers
 
