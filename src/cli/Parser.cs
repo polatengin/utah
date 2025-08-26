@@ -203,18 +203,18 @@ public partial class Parser
       {
         var arrayArg = forEachMatch.Groups[1].Value.Trim();
         var paramsStr = forEachMatch.Groups[2].Value.Trim();
-        
+
         // Parse lambda parameters
         var parameters = new List<string>();
         if (!string.IsNullOrEmpty(paramsStr))
         {
           parameters.AddRange(paramsStr.Split(',').Select(p => p.Trim()));
         }
-        
+
         // Parse the lambda body (multi-line)
         var body = new List<Statement>();
         i++; // Move to next line
-        
+
         while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
         {
           var bodyLine = _lines[i].Trim();
@@ -230,13 +230,13 @@ public partial class Parser
           }
           i++;
         }
-        
+
         // Skip the closing }); line
         if (i < _lines.Length && _lines[i].Trim().StartsWith("}"))
         {
           i++;
         }
-        
+
         var arrayExpr = ParseExpression(arrayArg);
         var lambdaExpr = new LambdaExpression(parameters, body);
         return new ExpressionStatement(new ArrayForEachExpression(arrayExpr, lambdaExpr));

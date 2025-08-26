@@ -578,13 +578,13 @@ public partial class Parser
       {
         var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
         var args = SplitByComma(argsContent);
-        
+
         if (args.Count != 2)
           throw new InvalidOperationException("array.forEach() requires exactly 2 arguments: array and callback");
-        
+
         var arrayExpr = ParseExpression(args[0].Trim());
         var lambdaExpr = ParseLambdaExpression(args[1].Trim());
-        
+
         return new ArrayForEachExpression(arrayExpr, lambdaExpr);
       }
 

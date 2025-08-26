@@ -1531,16 +1531,16 @@ public partial class Compiler
     var compiledArray = CompileExpression(arrayForEach.Array);
     var uniqueId = GetUniqueId();
     var loopArrayVar = $"_utah_forEach_array_{uniqueId}";
-    
+
     // Get callback parameters
     var itemVar = arrayForEach.Callback.Parameters.Count > 0 ? arrayForEach.Callback.Parameters[0] : "item";
     var indexVar = arrayForEach.Callback.Parameters.Count > 1 ? arrayForEach.Callback.Parameters[1] : null;
-    
+
     var result = new StringBuilder();
-    
+
     // Start the forEach expression
     result.Append("(");
-    
+
     // Handle both simple variables and complex array expressions
     if (arrayForEach.Array is VariableExpression varExpr)
     {
@@ -1552,16 +1552,16 @@ public partial class Compiler
       // For command substitutions and complex expressions, capture array first
       result.Append($"{loopArrayVar}=({compiledArray}); ");
     }
-    
+
     // Add index initialization if needed
     if (indexVar != null)
     {
       result.Append($"{indexVar}=0; ");
     }
-    
+
     // Start the for loop
     result.Append($"for {itemVar} in \"${{{loopArrayVar}[@]}}\"; do ");
-    
+
     // Compile the callback body statements
     foreach (var statement in arrayForEach.Callback.Body)
     {
@@ -1575,16 +1575,16 @@ public partial class Compiler
         }
       }
     }
-    
+
     // Increment index if used
     if (indexVar != null)
     {
       result.Append($"(({indexVar}++)); ");
     }
-    
+
     // Close the for loop and the expression
     result.Append("done)");
-    
+
     return result.ToString();
   }
 
