@@ -1,6 +1,5 @@
 using OmniSharp.Extensions.LanguageServer.Server;
 using System.Diagnostics;
-using System.Reflection;
 
 var app = new UtahApp();
 await app.RunAsync(args);
@@ -37,16 +36,12 @@ class UtahApp
 
   private ArgumentType DetectArgumentType(string firstArg)
   {
-    // Known commands
     if (IsKnownCommand(firstArg)) return ArgumentType.KnownCommand;
 
-    // Command flags
     if (firstArg == "--command" || firstArg == "-c") return ArgumentType.InlineCommand;
 
-    // URL detection for remote .shx files
     if (IsValidUrl(firstArg) && firstArg.EndsWith(".shx")) return ArgumentType.File;
 
-    // Local file detection
     if (firstArg.EndsWith(".shx") || File.Exists(firstArg)) return ArgumentType.File;
 
     return ArgumentType.Unknown;
@@ -74,7 +69,6 @@ class UtahApp
       using var httpClient = new HttpClient();
       httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-      // Add User-Agent header for better compatibility
       httpClient.DefaultRequestHeaders.Add("User-Agent", "Utah-CLI/1.0");
 
       var response = await httpClient.GetAsync(url);
@@ -157,12 +151,10 @@ class UtahApp
       case "format":
         if (args.Length < 2)
         {
-          // No file provided, format all .shx files recursively
           FormatAllFiles(args);
         }
         else if (args[1].StartsWith("-"))
         {
-          // Options provided without file, format all .shx files recursively with options
           FormatAllFiles(args);
         }
         else if (!args[1].EndsWith(".shx"))
@@ -237,7 +229,6 @@ class UtahApp
     string content;
     bool isUrl = IsValidUrl(inputPath);
 
-    // Check if it's a URL
     if (isUrl)
     {
       Console.WriteLine($"📥 Downloading: {inputPath}");
@@ -260,7 +251,6 @@ class UtahApp
       var compiler = new Compiler();
       var output = compiler.Compile(ast);
 
-      // For local files, preserve directory structure; for URLs, use filename only
       var finalOutputPath = outputPath ??
         (isUrl
           ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
@@ -286,7 +276,6 @@ class UtahApp
     string content;
     string actualPath = inputPath;
 
-    // Check if it's a URL
     if (IsValidUrl(inputPath))
     {
       Console.WriteLine($"📥 Downloading: {inputPath}");
@@ -352,10 +341,8 @@ class UtahApp
   {
     try
     {
-      // Create a temporary .shx content with the command
       var shxContent = command;
 
-      // Parse and compile the command
       var parser = new Parser(shxContent);
       var ast = parser.Parse();
       var compiler = new Compiler();
@@ -406,7 +393,6 @@ class UtahApp
     bool inPlace = false;
     bool checkOnly = false;
 
-    // Parse additional arguments
     for (int i = 2; i < args.Length; i++)
     {
       switch (args[i])
@@ -416,7 +402,7 @@ class UtahApp
           if (i + 1 < args.Length)
           {
             outputPath = args[i + 1];
-            i++; // Skip the next argument as it's the output path
+            i++;
           }
           break;
         case "--in-place":
@@ -437,16 +423,13 @@ class UtahApp
 
     try
     {
-      // Get formatting options from EditorConfig
       var options = FormattingOptions.FromEditorConfig(inputPath);
       var formatter = new Formatter(options);
 
-      // Format the file
       var formattedContent = formatter.Format(inputPath);
 
       if (checkOnly)
       {
-        // Check if file is already formatted
         var originalContent = File.ReadAllText(inputPath);
         if (originalContent != formattedContent)
         {
@@ -460,10 +443,8 @@ class UtahApp
         return;
       }
 
-      // Determine output path
       var finalOutputPath = outputPath ?? (inPlace ? inputPath : Path.ChangeExtension(inputPath, ".formatted.shx"));
 
-      // Write formatted content
       File.WriteAllText(finalOutputPath, formattedContent);
 
       if (inPlace)
@@ -487,7 +468,6 @@ class UtahApp
     bool inPlace = false;
     bool checkOnly = false;
 
-    // Parse arguments (skip the first "format" argument)
     for (int i = 1; i < args.Length; i++)
     {
       switch (args[i])
@@ -508,7 +488,6 @@ class UtahApp
 
     try
     {
-      // Find all .shx files recursively starting from current directory
       var currentDirectory = Directory.GetCurrentDirectory();
       var shxFiles = Directory.GetFiles(currentDirectory, "*.shx", SearchOption.AllDirectories);
 
@@ -531,16 +510,13 @@ class UtahApp
           var relativePath = Path.GetRelativePath(currentDirectory, filePath);
           Console.Write($"  {relativePath}... ");
 
-          // Get formatting options from EditorConfig
           var options = FormattingOptions.FromEditorConfig(filePath);
           var formatter = new Formatter(options);
 
-          // Format the file
           var formattedContent = formatter.Format(filePath);
 
           if (checkOnly)
           {
-            // Check if file is already formatted
             var originalContent = File.ReadAllText(filePath);
             if (originalContent != formattedContent)
             {
@@ -555,7 +531,6 @@ class UtahApp
           }
           else
           {
-            // Check if formatting is needed
             var originalContent = File.ReadAllText(filePath);
             if (originalContent != formattedContent)
             {
@@ -625,7 +600,7 @@ class UtahApp
 
     if (resolvedFiles.Contains(absolutePath))
     {
-      return; // Avoid circular imports
+      return;
     }
 
     resolvedFiles.Add(absolutePath);
@@ -645,7 +620,6 @@ class UtahApp
 
       if (trimmedLine.StartsWith("import "))
       {
-        // Parse import statement
         var match = System.Text.RegularExpressions.Regex.Match(trimmedLine, @"import\s+([""']?)([^""';]+)\1;?");
         if (match.Success)
         {
@@ -654,13 +628,11 @@ class UtahApp
             ? importPath
             : Path.Combine(baseDirectory, importPath);
 
-          // Resolve the imported file recursively
           ResolveImportsRecursive(fullImportPath, resolvedFiles, result);
         }
       }
       else
       {
-        // Add non-import lines to result
         result.Add(line);
       }
     }
