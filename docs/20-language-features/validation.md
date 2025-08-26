@@ -5,6 +5,7 @@ Utah provides a comprehensive set of validation functions for common data types 
 ## Overview
 
 Validation functions in Utah:
+
 - Return boolean values (`true` or `false`)
 - Work with variables, literals, and expressions
 - Use native bash capabilities for maximum performance
@@ -20,18 +21,22 @@ Validation functions in Utah:
 Validates email address format using RFC-compliant pattern matching.
 
 **Syntax:**
+
 ```typescript
 validate.isEmail(email: string) -> boolean
 ```
 
 **Parameters:**
+
 - `email` - The email address string to validate
 
 **Returns:**
+
 - `true` if the email format is valid
 - `false` if the email format is invalid
 
 **Examples:**
+
 ```typescript
 // Basic validation
 let userEmail: string = "user@example.com";
@@ -61,6 +66,7 @@ console.log("Email validated successfully!");
 The `validate.isEmail()` function supports standard email formats including:
 
 ### Valid Formats
+
 - **Basic**: `user@domain.com`
 - **Subdomains**: `user@mail.domain.com`
 - **International TLDs**: `user@domain.co.uk`
@@ -71,12 +77,14 @@ The `validate.isEmail()` function supports standard email formats including:
 - **Numeric domains**: `user@123domain.com`
 
 ### Validation Rules
+
 - **Local part**: Must contain alphanumeric characters, dots, underscores, percent signs, plus signs, or hyphens
 - **@ symbol**: Required separator between local and domain parts
 - **Domain part**: Must contain alphanumeric characters, dots, or hyphens
 - **TLD**: Must be at least 2 alphabetic characters
 
 ### Invalid Formats
+
 - Missing @ symbol: `invalid.email`
 - Missing local part: `@domain.com`
 - Missing domain: `user@`
@@ -108,13 +116,14 @@ done
 ## Use Cases
 
 ### User Registration Systems
+
 ```typescript
 function validateUserRegistration(email: string, username: string): boolean {
   if (!validate.isEmail(email)) {
     console.log("Error: Invalid email address format");
     return false;
   }
-  
+
   console.log("User registration data validated successfully");
   return true;
 }
@@ -131,6 +140,7 @@ if (validateUserRegistration(userEmail, userName)) {
 ```
 
 ### Configuration File Validation
+
 ```typescript
 // Validate email addresses in configuration files
 let configFile: string = fs.readFile("config.json");
@@ -153,6 +163,7 @@ console.log("Configuration email addresses validated");
 ```
 
 ### Batch Email Processing
+
 ```typescript
 // Process and validate a list of email addresses
 let emails: string[] = ["user1@example.com", "user2@test.org", "invalid.email"];
@@ -167,6 +178,7 @@ for (let email: string in emails) {
 ```
 
 ### API Input Validation
+
 ```typescript
 // Validate API parameters
 function processContactForm(name: string, email: string, message: string): void {
@@ -175,14 +187,14 @@ function processContactForm(name: string, email: string, message: string): void 
     web.post("https://api.example.com/error", '{"error": "Invalid email"}');
     exit(1);
   }
-  
+
   // Process valid form data
   let formData: string = json.stringify({
     "name": name,
     "email": email,
     "message": message
   });
-  
+
   web.post("https://api.example.com/contact", formData);
   console.log("Contact form submitted successfully");
 }
@@ -191,6 +203,7 @@ function processContactForm(name: string, email: string, message: string): void 
 ## Best Practices
 
 ### 1. Validate Early and Often
+
 ```typescript
 // Good - validate immediately after receiving input
 let email: string = console.promptText("Enter email:");
@@ -204,6 +217,7 @@ console.log("Processing email: " + email);
 ```
 
 ### 2. Provide Clear Error Messages
+
 ```typescript
 // Good - specific error messages
 if (!validate.isEmail(userInput)) {
@@ -214,6 +228,7 @@ if (!validate.isEmail(userInput)) {
 ```
 
 ### 3. Combine with Business Logic
+
 ```typescript
 // Combine format validation with business rules
 let email: string = "user@competitor.com";
@@ -228,6 +243,7 @@ if (!validate.isEmail(email)) {
 ```
 
 ### 4. Handle Edge Cases
+
 ```typescript
 // Handle empty or null inputs gracefully
 function safeEmailValidation(input: string): boolean {
@@ -235,12 +251,13 @@ function safeEmailValidation(input: string): boolean {
     console.log("Email address is required");
     return false;
   }
-  
+
   return validate.isEmail(input);
 }
 ```
 
 ### 5. Use in Loops for Retry Logic
+
 ```typescript
 // Retry until valid input is provided
 let email: string = "";
@@ -249,12 +266,12 @@ let maxAttempts: number = 3;
 
 while (attempts < maxAttempts) {
   email = console.promptText("Enter your email:");
-  
+
   if (validate.isEmail(email)) {
     console.log("Email validated successfully");
     break;
   }
-  
+
   attempts = attempts + 1;
   console.log(`Invalid email format. Attempts remaining: ${maxAttempts - attempts}`);
 }
@@ -268,16 +285,19 @@ if (attempts >= maxAttempts) {
 ## Performance Considerations
 
 ### Regex Efficiency
+
 - Utah's email validation uses optimized regex patterns
 - Validation is performed using native bash `grep` for maximum speed
 - No external dependencies or network calls required
 
 ### Memory Usage
+
 - Validation functions have minimal memory overhead
 - Regex patterns are compiled once per validation call
 - No persistent state maintained between validations
 
 ### Scalability
+
 ```typescript
 // Efficient for batch processing
 let emails: string[] = loadEmailsFromFile("contacts.txt");
@@ -295,14 +315,15 @@ console.log(`Validated ${validEmails.length()} out of ${emails.length()} emails`
 ## Error Handling
 
 ### Integration with Try-Catch
+
 ```typescript
 try {
   let email: string = getEmailFromExternalSource();
-  
+
   if (!validate.isEmail(email)) {
     throw new Error("Invalid email format from external source");
   }
-  
+
   console.log("External email validated successfully");
 } catch {
   console.log("Email validation failed - using default");
@@ -311,6 +332,7 @@ try {
 ```
 
 ### Graceful Degradation
+
 ```typescript
 // Fallback validation for critical systems
 function validateEmailWithFallback(email: string): boolean {
@@ -318,13 +340,13 @@ function validateEmailWithFallback(email: string): boolean {
   if (validate.isEmail(email)) {
     return true;
   }
-  
+
   // Fallback: basic @ symbol check
   if (email.includes("@") && email.includes(".")) {
     console.log("Warning: Using fallback email validation");
     return true;
   }
-  
+
   return false;
 }
 ```
@@ -332,12 +354,15 @@ function validateEmailWithFallback(email: string): boolean {
 ## Technical Implementation
 
 ### Regex Pattern Details
+
 The email validation uses the following regex pattern:
-```
+
+```text
 ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$
 ```
 
 **Pattern Breakdown:**
+
 - `^` - Start of string
 - `[A-Za-z0-9._%+-]+` - Local part (one or more allowed characters)
 - `@` - Required @ symbol
@@ -347,6 +372,7 @@ The email validation uses the following regex pattern:
 - `$` - End of string
 
 ### Bash Implementation
+
 ```bash
 # Generated bash code structure
 email_to_validate="user@example.com"
@@ -358,7 +384,7 @@ validation_result=$(echo "${email_to_validate}" | grep -qE '^[A-Za-z0-9._%+-]+@[
 The validation framework is designed for extensibility. Planned additions include:
 
 - `validate.isURL()` - URL format validation
-- `validate.isUUID()` - UUID format validation  
+- `validate.isUUID()` - UUID format validation
 - `validate.isPhoneNumber()` - Phone number validation
 - `validate.isNumeric()` - Numeric value validation
 - `validate.isAlphaNumeric()` - Alphanumeric validation
