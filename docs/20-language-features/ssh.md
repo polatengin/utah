@@ -146,7 +146,7 @@ let connection: object = ssh.connect("legacy-server.com", {
 
 ## Remote Command Execution
 
-Async connections support remote command execution using the `execute()` method:
+SSH connections support remote command execution using the `execute()` method:
 
 ```typescript
 #!/usr/bin/env utah run
@@ -179,7 +179,7 @@ if (server.connected) {
 
 ## File Upload Operations
 
-Async connections support file uploads using the `upload()` method:
+SSH connections support file uploads using the `upload()` method:
 
 ```typescript
 #!/usr/bin/env utah run
