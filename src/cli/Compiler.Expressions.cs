@@ -12,15 +12,12 @@ public partial class Compiler
     switch (expr)
     {
       case AssignmentExpression assign:
-        // Handle array assignment specially
         if (assign.Left is ArrayAccess arrayAccess)
         {
           var arrayName = arrayAccess.Array is VariableExpression varExpr ? varExpr.Name : ExtractVariableName(CompileExpression(arrayAccess.Array));
           var index = CompileExpression(arrayAccess.Index);
           var value = CompileExpression(assign.Right);
 
-          // For array indices, we need to handle the compiled expression properly
-          // If it's an array length expression, it will be quoted and we need to remove quotes
           if (index.StartsWith("\"") && index.EndsWith("\""))
           {
             index = index[1..^1]; // Remove quotes
@@ -261,7 +258,6 @@ public partial class Compiler
 
   private string CompileGitUndoLastCommitExpression()
   {
-    // Generates bash code for git.undoLastCommit()
     return "$(git reset --soft HEAD~1)";
   }
 
@@ -274,11 +270,9 @@ public partial class Compiler
 
     var bashCode = new StringBuilder();
 
-    // Create connection object as associative array
     bashCode.AppendLine($"declare -A {connectionVar}");
     bashCode.AppendLine($"{connectionVar}[host]={host}");
 
-    // Handle simple host-only connection (uses SSH config or defaults)
     if (sshConnect.Port == null && sshConnect.Username == null &&
         sshConnect.Password == null && sshConnect.KeyPath == null &&
         sshConnect.ConfigName == null)
@@ -289,21 +283,17 @@ public partial class Compiler
     }
     else if (sshConnect.Port != null)
     {
-      // Handle options object (simplified - in real implementation would parse object)
       bashCode.AppendLine($"{connectionVar}[port]=\"22\"");
       bashCode.AppendLine($"{connectionVar}[username]=\"$(whoami)\"");
       bashCode.AppendLine($"{connectionVar}[authMethod]=\"config\"");
     }
 
-    // Test SSH connectivity
     bashCode.AppendLine($"if ssh -o ConnectTimeout=5 -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null; then");
     bashCode.AppendLine($"  {connectionVar}[connected]=\"true\"");
     bashCode.AppendLine($"else");
     bashCode.AppendLine($"  {connectionVar}[connected]=\"false\"");
     bashCode.AppendLine($"fi");
 
-    // For expressions, we need to return the connection variable name as a subshell
-    // This is a simplified approach - normally we'd handle the connection object differently
     return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} ; echo \"{connectionVar}\"; }})";
   }
 
@@ -319,28 +309,22 @@ public partial class Compiler
 
   private string CompileConsoleGetShellExpression(ConsoleGetShellExpression getShell)
   {
-    // Return the shell name by checking the SHELL environment variable and extracting the basename
-    // Falls back to checking $0 if SHELL is not available
     return "$(basename \"${SHELL:-$0}\")";
   }
 
   private string CompileConsolePromptYesNoExpression(ConsolePromptYesNoExpression prompt)
   {
-    // Compile the prompt text expression and extract the string value
     var promptText = CompileExpression(prompt.PromptText);
-    // Remove quotes if it's a string literal
     if (promptText.StartsWith("\"") && promptText.EndsWith("\""))
     {
       promptText = promptText[1..^1];
     }
 
-    // Automatically append " (y/n): " if not already present
     if (!promptText.EndsWith(" (y/n): ") && !promptText.EndsWith("(y/n): ") && !promptText.EndsWith(" (y/n):") && !promptText.EndsWith("(y/n):"))
     {
       promptText += " (y/n): ";
     }
 
-    // Generate bash code that prompts the user and returns true/false based on yes/no response
     return $"$(while true; do read -p \"{promptText}\" yn; case $yn in [Yy]* ) echo \"true\"; break;; [Nn]* ) echo \"false\"; break;; * ) echo \"Please answer yes or no.\";; esac; done)";
   }
 
@@ -349,7 +333,6 @@ public partial class Compiler
     var title = CompileExpression(showMessage.Title);
     var message = CompileExpression(showMessage.Message);
 
-    // Use a more robust approach that avoids very long single lines
     return $"$({{ if command -v dialog >/dev/null 2>&1; then dialog --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; elif command -v whiptail >/dev/null 2>&1; then whiptail --title {title} --msgbox {message} 10 60 2>&1 >/dev/tty; else echo {title}: {message}; read -p \"Press Enter...\"; fi; }} 2>/dev/null; echo \"\")";
   }
   private string CompileConsoleShowInfoExpression(ConsoleShowInfoExpression showInfo)
@@ -443,7 +426,7 @@ public partial class Compiler
   {
     var prompt = CompileExpression(promptText.Prompt);
     var defaultValue = promptText.DefaultValue != null ? CompileExpression(promptText.DefaultValue) : "\"\"";
-    var validation = promptText.ValidationPattern != null ? CompileExpression(promptText.ValidationPattern) : "\"\"";
+    _ = promptText.ValidationPattern != null ? CompileExpression(promptText.ValidationPattern) : "\"\"";
 
     return $"$(if command -v dialog >/dev/null 2>&1; then " +
            $"dialog --title \"Input\" --inputbox {prompt} 10 60 {defaultValue} 2>&1 >/dev/tty; " +
@@ -482,7 +465,7 @@ public partial class Compiler
   private string CompileConsolePromptFileExpression(ConsolePromptFileExpression promptFile)
   {
     var prompt = CompileExpression(promptFile.Prompt);
-    var filter = promptFile.Filter != null ? CompileExpression(promptFile.Filter) : "\"*\"";
+    _ = promptFile.Filter != null ? CompileExpression(promptFile.Filter) : "\"*\"";
 
     return $"$(if command -v dialog >/dev/null 2>&1; then " +
            $"dialog --title \"File Selection\" --fselect \"$(pwd)/\" 15 80 2>&1 >/dev/tty; " +
@@ -505,7 +488,6 @@ public partial class Compiler
 
   private string CompileOsIsInstalledExpression(OsIsInstalledExpression osInstalled)
   {
-    // Generate bash code that checks if a command exists and returns true/false
     string appReference;
 
     if (osInstalled.AppName is VariableExpression varExpr)
@@ -526,8 +508,6 @@ public partial class Compiler
 
   private string CompileProcessElapsedTimeExpression(ProcessElapsedTimeExpression elapsed)
   {
-    // Generate bash code that gets the elapsed time since the process started
-    // Using ps command to get the elapsed time of the current process
     return "$(ps -o etime -p $$ --no-headers | tr -d ' ')";
   }
 
@@ -575,7 +555,6 @@ public partial class Compiler
 
   private string CompileOsGetOSExpression(OsGetOSExpression osGetOS)
   {
-    // Generate the complex bash script for getting OS type
     return "$(" +
            "_uname_os_get_os=$(uname | tr '[:upper:]' '[:lower:]'); " +
            "case $_uname_os_get_os in " +
@@ -588,7 +567,6 @@ public partial class Compiler
 
   private string CompileUtilityRandomExpression(UtilityRandomExpression rand)
   {
-    // Generate unique variable names to avoid conflicts
     _randomCounter++;
     var minVar = $"_utah_random_min_{_randomCounter}";
     var maxVar = $"_utah_random_max_{_randomCounter}";
@@ -596,27 +574,20 @@ public partial class Compiler
     var minValue = "0";
     var maxValue = "32767";
 
-    // Handle parameters
     if (rand.MinValue != null && rand.MaxValue != null)
     {
-      // Both min and max provided: utility.random(min, max)
       minValue = CompileExpression(rand.MinValue);
       maxValue = CompileExpression(rand.MaxValue);
     }
     else if (rand.MaxValue != null)
     {
-      // Only one parameter provided: utility.random(max)
       minValue = "0";
       maxValue = CompileExpression(rand.MaxValue);
     }
-    // If no parameters, use defaults (0, 32767)
 
-    // Remove quotes from numeric values if present
     minValue = minValue.Trim('"');
     maxValue = maxValue.Trim('"');
 
-    // For variable references, we need to use the actual variable values
-    // If the value starts with ${, it's a variable reference
     if (minValue.StartsWith("${") && minValue.EndsWith("}"))
     {
       // Already in correct format ${varName}
@@ -1801,12 +1772,9 @@ public partial class Compiler
 
   private string CompileFsCreateTempFolderExpression(FsCreateTempFolderExpression expr)
   {
-    // Prepare optional inputs
     var prefixExpr = expr.Prefix != null ? CompileExpression(expr.Prefix) : null;
     var baseDirExpr = expr.BaseDir != null ? CompileExpression(expr.BaseDir) : null;
 
-    // Build bash script ensuring mktemp-first with secure fallback
-    // We inline the variables and sanitize prefix at runtime for dynamic inputs
     var setPrefix = prefixExpr != null ? $"_utah_prefix={prefixExpr};" : "_utah_prefix=utah;";
     var setBase = baseDirExpr != null ? $"_utah_tmp_base={baseDirExpr};" : "_utah_tmp_base=\"${TMPDIR:-/tmp}\";";
 
@@ -1846,7 +1814,6 @@ public partial class Compiler
           compiled = compiled[1..^1];
         }
 
-        // If the compiled expression already contains bash substitution (starts with $), use it directly
         if (compiled.StartsWith("$"))
         {
           parts.Add(compiled);
