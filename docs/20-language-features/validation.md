@@ -499,12 +499,145 @@ email_to_validate="user@example.com"
 validation_result=$(echo "${email_to_validate}" | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' && echo "true" || echo "false")
 ```
 
+## UUID Validation
+
+### validate.isUUID()
+
+Validates UUID (Universally Unique Identifier) format according to RFC 4122 standards.
+
+**Syntax:**
+
+```typescript
+validate.isUUID(uuid: string) -> boolean
+```
+
+**Parameters:**
+
+- `uuid` - The UUID string to validate
+
+**Returns:**
+
+- `true` if the UUID format is valid (RFC 4122 compliant)
+- `false` if the UUID format is invalid
+
+**Supported UUID Versions:** 1, 2, 3, 4, 5
+
+**Examples:**
+
+```typescript
+// Basic UUID validation
+let sessionId: string = "550e8400-e29b-41d4-a716-446655440000";
+let isValid: boolean = validate.isUUID(sessionId);
+
+console.log(`UUID ${sessionId} is ${isValid ? "valid" : "invalid"}`);
+
+// Use with generated UUIDs
+let generatedUUID: string = utility.uuid();
+if (validate.isUUID(generatedUUID)) {
+  console.log("Generated UUID is valid");
+  // Process with valid UUID
+} else {
+  console.log("UUID generation failed");
+  exit(1);
+}
+
+// Conditional validation
+if (validate.isUUID(requestId)) {
+  console.log("Processing request with valid UUID");
+} else {
+  console.log("Invalid UUID format in request");
+  exit(1);
+}
+
+// Integration with variables
+let transactionId: string = utility.uuid();
+let isValidTransaction: boolean = validate.isUUID(transactionId);
+console.log(`Transaction ${transactionId} valid: ${isValidTransaction}`);
+```
+
+### UUID Format Requirements
+
+The `validate.isUUID()` function validates UUIDs based on RFC 4122:
+
+- **Format**: `xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx`
+- **Length**: Exactly 36 characters including hyphens
+- **Characters**: Hexadecimal digits (0-9, a-f, A-F) only
+- **Version (M)**: Must be 1, 2, 3, 4, or 5 (third group, first digit)
+- **Variant (N)**: Must be 8, 9, a, b, A, or B (fourth group, first digit)
+- **Case**: Supports both uppercase and lowercase hexadecimal
+
+### Valid UUID Examples
+
+```typescript
+validate.isUUID("550e8400-e29b-41d4-a716-446655440000");     // true (version 1)
+validate.isUUID("6ba7b810-9dad-41d1-80b4-00c04fd430c8");     // true (version 4)
+validate.isUUID("6ba7b815-9dad-51d1-80b4-00c04fd430c8");     // true (version 5)
+validate.isUUID("550E8400-E29B-41D4-A716-446655440000");     // true (uppercase)
+validate.isUUID("550e8400-E29B-41d4-A716-446655440000");     // true (mixed case)
+validate.isUUID("00000000-0000-4000-8000-000000000000");     // true (zeros)
+validate.isUUID("ffffffff-ffff-4fff-bfff-ffffffffffff");     // true (all F's)
+```
+
+### Invalid UUID Examples
+
+```typescript
+validate.isUUID("550e8400-e29b-41d4-a716");                  // false (too short)
+validate.isUUID("550e8400-e29b-41d4-a716-44665544000g");     // false (invalid char 'g')
+validate.isUUID("550e8400-e29b-61d4-a716-446655440000");     // false (version 6 unsupported)
+validate.isUUID("550e8400-e29b-41d4-2716-446655440000");     // false (invalid variant 2)
+validate.isUUID("550e8400e29b41d4a716446655440000");         // false (no hyphens)
+validate.isUUID("550e840-0e29b-41d4-a716-446655440000");     // false (wrong hyphen position)
+validate.isUUID("");                                         // false (empty string)
+validate.isUUID("not-a-uuid-at-all");                        // false (completely invalid)
+```
+
+### UUID Validation Integration
+
+```typescript
+// Session management
+function createSession(): string {
+  let sessionId: string = utility.uuid();
+  if (validate.isUUID(sessionId)) {
+    return sessionId;
+  } else {
+    console.log("Failed to generate valid session ID");
+    exit(1);
+  }
+}
+
+// Request tracking
+let requestId: string = utility.uuid();
+let logEntry: string = validate.isUUID(requestId) ? `[${requestId}] Request started` : "[INVALID-ID] Request started";
+console.log(logEntry);
+
+// Database operations
+if (validate.isUUID(userId) && validate.isUUID(transactionId)) {
+  console.log("Proceeding with database operation");
+} else {
+  console.log("Invalid UUID format in database parameters");
+  exit(1);
+}
+```
+
+### UUID Validation Bash Output
+
+```bash
+# UUID validation compiles to efficient regex pattern matching
+sessionId="550e8400-e29b-41d4-a716-446655440000"
+isValid=$(echo ${sessionId} | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' && echo "true" || echo "false")
+
+if [ "${isValid}" = "true" ]; then
+  echo "UUID is valid"
+else
+  echo "Invalid UUID format"
+  exit 1
+fi
+```
+
 ## Future Validation Functions
 
 The validation framework is designed for extensibility. Planned additions include:
 
-- `validate.isURL()` - URL format validation
-- `validate.isUUID()` - UUID format validation
 - `validate.isPhoneNumber()` - Phone number validation
 - `validate.isNumeric()` - Numeric value validation
 - `validate.isAlphaNumeric()` - Alphanumeric validation

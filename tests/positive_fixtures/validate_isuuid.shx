@@ -1,0 +1,154 @@
+// validate.isUUID() function tests
+// Tests various UUID validation scenarios according to RFC 4122
+
+// Valid UUID tests - Version 1 (time-based)
+let uuid1: string = "550e8400-e29b-41d4-a716-446655440000";
+let isValid1: boolean = validate.isUUID(uuid1);
+console.log("Version 1 UUID: ${uuid1} is ${isValid1}");
+
+// Valid UUID tests - Version 4 (random)
+let uuid4v1: string = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+let isValid4v1: boolean = validate.isUUID(uuid4v1);
+console.log("Version 4 UUID: ${uuid4v1} is ${isValid4v1}");
+
+let uuid4v2: string = "6ba7b814-9dad-41d1-80b4-00c04fd430c8";
+let isValid4v2: boolean = validate.isUUID(uuid4v2);
+console.log("Another V4 UUID: ${uuid4v2} is ${isValid4v2}");
+
+// Valid UUID tests - Version 5 (name-based SHA-1)
+let uuid5: string = "6ba7b815-9dad-51d1-80b4-00c04fd430c8";
+let isValid5: boolean = validate.isUUID(uuid5);
+console.log("Version 5 UUID: ${uuid5} is ${isValid5}");
+
+// Valid UUID tests - Different cases
+let uuidUpper: string = "550E8400-E29B-41D4-A716-446655440000";
+let isValidUpper: boolean = validate.isUUID(uuidUpper);
+console.log("Uppercase UUID: ${uuidUpper} is ${isValidUpper}");
+
+let uuidMixed: string = "550e8400-E29B-41d4-A716-446655440000";
+let isValidMixed: boolean = validate.isUUID(uuidMixed);
+console.log("Mixed case UUID: ${uuidMixed} is ${isValidMixed}");
+
+// Valid UUID tests - All versions
+let uuidV2: string = "550e8400-e29b-21d4-a716-446655440000";
+let isValidV2: boolean = validate.isUUID(uuidV2);
+console.log("Version 2 UUID: ${uuidV2} is ${isValidV2}");
+
+let uuidV3: string = "550e8400-e29b-31d4-a716-446655440000";
+let isValidV3: boolean = validate.isUUID(uuidV3);
+console.log("Version 3 UUID: ${uuidV3} is ${isValidV3}");
+
+// Valid UUID tests - Different variants (8, 9, A, B)
+let uuidVariant8: string = "550e8400-e29b-41d4-8716-446655440000";
+let isValidVariant8: boolean = validate.isUUID(uuidVariant8);
+console.log("Variant 8 UUID: ${uuidVariant8} is ${isValidVariant8}");
+
+let uuidVariant9: string = "550e8400-e29b-41d4-9716-446655440000";
+let isValidVariant9: boolean = validate.isUUID(uuidVariant9);
+console.log("Variant 9 UUID: ${uuidVariant9} is ${isValidVariant9}");
+
+let uuidVariantA: string = "550e8400-e29b-41d4-a716-446655440000";
+let isValidVariantA: boolean = validate.isUUID(uuidVariantA);
+console.log("Variant A UUID: ${uuidVariantA} is ${isValidVariantA}");
+
+let uuidVariantB: string = "550e8400-e29b-41d4-b716-446655440000";
+let isValidVariantB: boolean = validate.isUUID(uuidVariantB);
+console.log("Variant B UUID: ${uuidVariantB} is ${isValidVariantB}");
+
+// Invalid UUID tests - Wrong length
+let invalidShort: string = "550e8400-e29b-41d4-a716";
+let isInvalidShort: boolean = validate.isUUID(invalidShort);
+console.log("Too short: ${invalidShort} is ${isInvalidShort}");
+
+let invalidLong: string = "550e8400-e29b-41d4-a716-446655440000-extra";
+let isInvalidLong: boolean = validate.isUUID(invalidLong);
+console.log("Too long: ${invalidLong} is ${isInvalidLong}");
+
+// Invalid UUID tests - Invalid characters
+let invalidChar: string = "550e8400-e29b-41d4-a716-44665544000g";
+let isInvalidChar: boolean = validate.isUUID(invalidChar);
+console.log("Invalid char: ${invalidChar} is ${isInvalidChar}");
+
+let invalidSpecial: string = "550e8400-e29b-41d4-a716-446655440#00";
+let isInvalidSpecial: boolean = validate.isUUID(invalidSpecial);
+console.log("Special char: ${invalidSpecial} is ${isInvalidSpecial}");
+
+// Invalid UUID tests - Wrong version
+let invalidVersion0: string = "550e8400-e29b-01d4-a716-446655440000";
+let isInvalidVersion0: boolean = validate.isUUID(invalidVersion0);
+console.log("Version 0: ${invalidVersion0} is ${isInvalidVersion0}");
+
+let invalidVersion6: string = "550e8400-e29b-61d4-a716-446655440000";
+let isInvalidVersion6: boolean = validate.isUUID(invalidVersion6);
+console.log("Version 6: ${invalidVersion6} is ${isInvalidVersion6}");
+
+let invalidVersion7: string = "550e8400-e29b-71d4-a716-446655440000";
+let isInvalidVersion7: boolean = validate.isUUID(invalidVersion7);
+console.log("Version 7: ${invalidVersion7} is ${isInvalidVersion7}");
+
+// Invalid UUID tests - Wrong variant
+let invalidVariant0: string = "550e8400-e29b-41d4-0716-446655440000";
+let isInvalidVariant0: boolean = validate.isUUID(invalidVariant0);
+console.log("Variant 0: ${invalidVariant0} is ${isInvalidVariant0}");
+
+let invalidVariant2: string = "550e8400-e29b-41d4-2716-446655440000";
+let isInvalidVariant2: boolean = validate.isUUID(invalidVariant2);
+console.log("Variant 2: ${invalidVariant2} is ${isInvalidVariant2}");
+
+let invalidVariantC: string = "550e8400-e29b-41d4-c716-446655440000";
+let isInvalidVariantC: boolean = validate.isUUID(invalidVariantC);
+console.log("Variant C: ${invalidVariantC} is ${isInvalidVariantC}");
+
+// Invalid UUID tests - Missing hyphens
+let noHyphens: string = "550e8400e29b41d4a716446655440000";
+let isNoHyphens: boolean = validate.isUUID(noHyphens);
+console.log("No hyphens: ${noHyphens} is ${isNoHyphens}");
+
+// Invalid UUID tests - Wrong hyphen positions
+let wrongHyphens1: string = "550e840-0e29b-41d4-a716-446655440000";
+let isWrongHyphens1: boolean = validate.isUUID(wrongHyphens1);
+console.log("Wrong hyphens 1: ${wrongHyphens1} is ${isWrongHyphens1}");
+
+let wrongHyphens2: string = "550e8400-e29b4-1d4-a716-446655440000";
+let isWrongHyphens2: boolean = validate.isUUID(wrongHyphens2);
+console.log("Wrong hyphens 2: ${wrongHyphens2} is ${isWrongHyphens2}");
+
+// Invalid UUID tests - Empty and special cases
+let emptyUuid: string = "";
+let isEmptyUuid: boolean = validate.isUUID(emptyUuid);
+console.log("Empty string: '${emptyUuid}' is ${isEmptyUuid}");
+
+let notUuidAtAll: string = "not-a-uuid-at-all";
+let isNotUuidAtAll: boolean = validate.isUUID(notUuidAtAll);
+console.log("Not UUID: ${notUuidAtAll} is ${isNotUuidAtAll}");
+
+// Usage in conditional statements
+if (validate.isUUID("550e8400-e29b-41d4-a716-446655440000")) {
+  console.log("Valid UUID in if statement");
+} else {
+  console.log("Invalid UUID in if statement");
+}
+
+// Integration with Utah's UUID generation
+let generatedUUID: string = utility.uuid();
+let isGeneratedValid: boolean = validate.isUUID(generatedUUID);
+console.log("Generated UUID: ${generatedUUID} is ${isGeneratedValid}");
+
+// Usage in assignment and comparison
+let testUUID: string = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+let validationResult: boolean = validate.isUUID(testUUID);
+if (validationResult) {
+  console.log("UUID validation passed");
+} else {
+  console.log("UUID validation failed");
+}
+
+// Edge case: UUID with zeros
+let zeroUUID: string = "00000000-0000-4000-8000-000000000000";
+let isZeroValid: boolean = validate.isUUID(zeroUUID);
+console.log("Zero UUID: ${zeroUUID} is ${isZeroValid}");
+
+// Edge case: UUID with all F's
+let maxUUID: string = "ffffffff-ffff-4fff-bfff-ffffffffffff";
+let isMaxValid: boolean = validate.isUUID(maxUUID);
+console.log("Max UUID: ${maxUUID} is ${isMaxValid}");

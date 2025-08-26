@@ -117,6 +117,7 @@ public record YamlMergeExpression(Expression YamlObject1, Expression YamlObject2
 public record YamlInstallDependenciesExpression() : Expression;
 public record ValidateIsEmailExpression(Expression Email) : Expression;
 public record ValidateIsURLExpression(Expression Url) : Expression;
+public record ValidateIsUUIDExpression(Expression Uuid) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 

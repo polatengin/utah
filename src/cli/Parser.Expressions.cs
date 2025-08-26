@@ -1506,6 +1506,18 @@ public partial class Parser
         throw new InvalidOperationException("validate.isURL() requires exactly 1 argument (url)");
       }
 
+      // Special handling for validate.isUUID()
+      if (functionName == "validate.isUUID")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var uuidExpr = ParseExpression(args[0]);
+          return new ValidateIsUUIDExpression(uuidExpr);
+        }
+        throw new InvalidOperationException("validate.isUUID() requires exactly 1 argument (uuid)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

@@ -243,6 +243,8 @@ public partial class Compiler
         return CompileValidateIsEmailExpression(validateIsEmail);
       case ValidateIsURLExpression validateIsURL:
         return CompileValidateIsURLExpression(validateIsURL);
+      case ValidateIsUUIDExpression validateIsUUID:
+        return CompileValidateIsUUIDExpression(validateIsUUID);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2592,6 +2594,16 @@ fi
     // Comprehensive URL regex pattern supporting http/https/ftp/file protocols
     // Matches: protocol://domain.tld[:port][/path][?query][#fragment]
     return $"$(echo {url} | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileValidateIsUUIDExpression(ValidateIsUUIDExpression validateIsUUID)
+  {
+    var uuid = CompileExpression(validateIsUUID.Uuid);
+    // RFC 4122 compliant UUID regex pattern
+    // Supports UUID versions 1-5: 8-4-4-4-12 hexadecimal format
+    // Pattern: xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
+    // where M is version (1-5) and N is variant (8,9,A,B)
+    return $"$(echo {uuid} | grep -qE '^[0-9a-fA-F]{{8}}-[0-9a-fA-F]{{4}}-[1-5][0-9a-fA-F]{{3}}-[89abAB][0-9a-fA-F]{{3}}-[0-9a-fA-F]{{12}}$' && echo \"true\" || echo \"false\")";
   }
 
   private static int _uniqueIdCounter = 0;

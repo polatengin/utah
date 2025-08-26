@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-126-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-127-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4841,6 +4841,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isURL(url)` - Validate URL format supporting HTTP, HTTPS, FTP, and FILE protocols
 
+#### UUID Validation
+
+- `validate.isUUID(uuid)` - Validate UUID format conforming to RFC 4122 standards (versions 1-5)
+
 ### Email Validation Usage
 
 ```typescript
@@ -4945,6 +4949,55 @@ validate.isURL("smtp://mail.example.com");                   // false (unsupport
 validate.isURL("https://.example.com");                      // false (invalid domain)
 ```
 
+### UUID Validation Usage
+
+```typescript
+// Basic UUID validation
+let sessionId: string = "550e8400-e29b-41d4-a716-446655440000";
+let isValid: boolean = validate.isUUID(sessionId);
+
+console.log(`UUID ${sessionId} is ${isValid ? "valid" : "invalid"}`);
+
+// Use with generated UUIDs
+let generatedUUID: string = utility.uuid();
+if (validate.isUUID(generatedUUID)) {
+  console.log("Generated UUID is valid");
+}
+
+// Conditional validation
+if (validate.isUUID(requestId)) {
+  console.log("Processing request with valid UUID");
+} else {
+  console.log("Invalid UUID format");
+  exit(1);
+}
+
+// Integration with variables
+let transactionId: string = utility.uuid();
+let isValidTransaction: boolean = validate.isUUID(transactionId);
+console.log(`Transaction ${transactionId} valid: ${isValidTransaction}`);
+```
+
+**Valid UUIDs:**
+
+```typescript
+validate.isUUID("550e8400-e29b-41d4-a716-446655440000");     // true (version 1)
+validate.isUUID("6ba7b810-9dad-41d1-80b4-00c04fd430c8");     // true (version 4)
+validate.isUUID("6ba7b815-9dad-51d1-80b4-00c04fd430c8");     // true (version 5)
+validate.isUUID("550E8400-E29B-41D4-A716-446655440000");     // true (uppercase)
+validate.isUUID("550e8400-E29B-41d4-A716-446655440000");     // true (mixed case)
+```
+
+**Invalid UUIDs:**
+
+```typescript
+validate.isUUID("550e8400-e29b-41d4-a716");                  // false (too short)
+validate.isUUID("550e8400-e29b-41d4-a716-44665544000g");     // false (invalid char)
+validate.isUUID("550e8400-e29b-61d4-a716-446655440000");     // false (version 6)
+validate.isUUID("550e8400-e29b-41d4-2716-446655440000");     // false (invalid variant)
+validate.isUUID("550e8400e29b41d4a716446655440000");         // false (no hyphens)
+```
+
 ### Generated Bash Code for Validation Functions
 
 The validation functions transpile to efficient bash regex pattern matching:
@@ -4991,6 +5044,23 @@ fi
 # URL validation assignment
 urlValid=$(echo "https://api.company.com:8080" | grep -qE '^(https?|ftp|file)://[A-Za-z0-9.-]+(:[0-9]+)?(/[^?#]*)?([?][^#]*)?([#].*)?$' && echo "true" || echo "false")
 echo "API URL is valid: ${urlValid}"
+
+# validate.isUUID() becomes:
+sessionId="550e8400-e29b-41d4-a716-446655440000"
+isValid=$(echo ${sessionId} | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' && echo "true" || echo "false")
+
+if [ "${isValid}" = "true" ]; then
+  echo "UUID is valid"
+else
+  echo "Please provide a valid UUID"
+  exit 1
+fi
+
+# UUID validation with generated UUIDs
+generatedUUID=$(if command -v uuidgen >/dev/null 2>&1; then uuidgen; elif command -v python3 >/dev/null 2>&1; then python3 -c "import uuid; print(uuid.uuid4())"; else echo "$(date +%s)-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))-$(($RANDOM * $RANDOM))"; fi)
+if [ $(echo "${generatedUUID}" | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' && echo "true" || echo "false") = "true" ]; then
+  echo "Generated UUID is valid"
+fi
 ```
 
 ### Validation Functions Features
@@ -5450,7 +5520,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isURL()` function for URL validation
 
-- [ ] `validate.isUUID()` function for UUID validation
+- [x] `validate.isUUID()` function for UUID validation
 
 - [ ] `validate.isPhoneNumber()` function for phone number validation
 

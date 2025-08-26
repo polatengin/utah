@@ -638,6 +638,8 @@ public class FormatterVisitor
         return $"validate.isEmail({VisitExpression(validateIsEmail.Email)})";
       case ValidateIsURLExpression validateIsURL:
         return $"validate.isURL({VisitExpression(validateIsURL.Url)})";
+      case ValidateIsUUIDExpression validateIsUUID:
+        return $"validate.isUUID({VisitExpression(validateIsUUID.Uuid)})";
       default:
         return expr.ToString() ?? "";
     }
