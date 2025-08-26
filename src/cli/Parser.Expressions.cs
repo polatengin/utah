@@ -1195,17 +1195,56 @@ public partial class Parser
         {
           // ssh.connect("host") - basic connection using SSH config or defaults
           var hostExpr = ParseExpression(args[0]);
-          return new SshConnectExpression(hostExpr, null, null, null, null, null);
+          return new SshConnectExpression(hostExpr, null, null, null, null, null, null);
         }
         if (args.Count == 2)
         {
           // ssh.connect("host", {options}) - connection with options object
           var hostExpr = ParseExpression(args[0]);
-          var optionsExpr = ParseExpression(args[1]);
+          var optionsText = args[1].Trim();
 
-          // For now, we'll parse this as a simple object literal
-          // The actual options parsing will be handled in the compiler
-          return new SshConnectExpression(hostExpr, optionsExpr, null, null, null, null);
+          // Parse options object to extract individual parameters
+          Expression? portExpr = null, usernameExpr = null, passwordExpr = null, keyPathExpr = null, configNameExpr = null, asyncExpr = null;
+
+          if (optionsText.StartsWith("{") && optionsText.EndsWith("}"))
+          {
+            var optionsContent = optionsText[1..^1]; // Remove { }
+            var optionPairs = SplitByComma(optionsContent);
+
+            foreach (var optionPair in optionPairs)
+            {
+              var colonIndex = optionPair.IndexOf(':');
+              if (colonIndex > 0)
+              {
+                var key = optionPair[..colonIndex].Trim();
+                var value = optionPair[(colonIndex + 1)..].Trim();
+
+                switch (key)
+                {
+                  case "port":
+                    portExpr = ParseExpression(value);
+                    break;
+                  case "username":
+                    usernameExpr = ParseExpression(value);
+                    break;
+                  case "password":
+                    passwordExpr = ParseExpression(value);
+                    break;
+                  case "keyPath":
+                    keyPathExpr = ParseExpression(value);
+                    break;
+                  case "configName":
+                    configNameExpr = ParseExpression(value);
+                    break;
+                  case "async":
+                    asyncExpr = ParseExpression(value);
+                    break;
+                }
+              }
+            }
+          }
+
+          return new SshConnectExpression(hostExpr, portExpr, usernameExpr, passwordExpr, keyPathExpr, configNameExpr, asyncExpr);
         }
         throw new InvalidOperationException("ssh.connect() requires 1-2 arguments (host, options?)");
       }
@@ -1560,6 +1599,43 @@ public partial class Parser
           return new ParallelFunctionCall(parallelFunctionName, parallelArguments);
         }
       }
+
+      // Check for SSH method calls (conn.execute(), conn.upload()) before general function calls
+      if (functionName.Contains("."))
+      {
+        var dotIndex = functionName.IndexOf('.');
+        var objectName = functionName.Substring(0, dotIndex);
+        var methodName = functionName.Substring(dotIndex + 1);
+
+        if (methodName == "execute")
+        {
+          var connectionExpr = new VariableExpression(objectName);
+          if (string.IsNullOrEmpty(argsContent))
+          {
+            throw new InvalidOperationException("execute() requires a command argument");
+          }
+          var arguments = SplitByComma(argsContent);
+          if (arguments.Count != 1)
+          {
+            throw new InvalidOperationException("execute() requires exactly 1 argument (command)");
+          }
+          var commandExpr = ParseExpression(arguments[0].Trim());
+          return new SshExecuteExpression(connectionExpr, commandExpr);
+        }
+        else if (methodName == "upload")
+        {
+          var connectionExpr = new VariableExpression(objectName);
+          var arguments = SplitByComma(argsContent);
+          if (arguments.Count != 2)
+          {
+            throw new InvalidOperationException("upload() requires exactly 2 arguments (localPath, remotePath)");
+          }
+          var localPathExpr = ParseExpression(arguments[0].Trim());
+          var remotePathExpr = ParseExpression(arguments[1].Trim());
+          return new SshUploadExpression(connectionExpr, localPathExpr, remotePathExpr);
+        }
+      }
+
       // Regular function call (not special built-in)
       if (Regex.IsMatch(functionName, @"^[\w\.]+$"))
       {
@@ -1570,6 +1646,17 @@ public partial class Parser
         }
         return new FunctionCall(functionName, arguments);
       }
+    }
+
+    // Object property access (obj.property) for simple property access only
+    // Only match simple identifier.property patterns, not complex expressions or string literals
+    if (Regex.IsMatch(input, @"^\w+\.\w+$"))
+    {
+      var dotIndex = input.IndexOf('.');
+      var objectName = input.Substring(0, dotIndex);
+      var propertyName = input.Substring(dotIndex + 1);
+      var objectExpr = new VariableExpression(objectName);
+      return new ObjectPropertyAccessExpression(objectExpr, propertyName);
     }
 
     // Variable reference
@@ -1743,9 +1830,9 @@ public partial class Parser
 
       if (!inQuotes)
       {
-        if (ch == '(' || ch == '[')
+        if (ch == '(' || ch == '[' || ch == '{')
           depth++;
-        else if (ch == ')' || ch == ']')
+        else if (ch == ')' || ch == ']' || ch == '}')
           depth--;
       }
 

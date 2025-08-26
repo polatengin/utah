@@ -195,6 +195,12 @@ public partial class Compiler
         return CompileGitUndoLastCommitExpression();
       case SshConnectExpression sshConnect:
         return CompileSshConnectExpression(sshConnect);
+      case ObjectPropertyAccessExpression objectProperty:
+        return CompileObjectPropertyAccessExpression(objectProperty);
+      case SshExecuteExpression sshExecute:
+        return CompileSshExecuteExpression(sshExecute);
+      case SshUploadExpression sshUpload:
+        return CompileSshUploadExpression(sshUpload);
       case JsonParseExpression jsonParse:
         return CompileJsonParseExpression(jsonParse);
       case JsonStringifyExpression jsonStringify:
@@ -271,36 +277,200 @@ public partial class Compiler
   {
     var uniqueId = GetUniqueId();
     var connectionVar = $"_utah_ssh_conn_{uniqueId}";
+    var socketPath = $"/tmp/utah_ssh_{uniqueId}";
 
     var host = CompileExpression(sshConnect.Host);
-
     var bashCode = new StringBuilder();
 
+    // Initialize connection object
     bashCode.AppendLine($"declare -A {connectionVar}");
     bashCode.AppendLine($"{connectionVar}[host]={host}");
+    bashCode.AppendLine($"{connectionVar}[socket]=\"{socketPath}\"");
+    bashCode.AppendLine($"{connectionVar}[port]=\"22\"");
+    bashCode.AppendLine($"{connectionVar}[username]=\"$(whoami)\"");
+    bashCode.AppendLine($"{connectionVar}[authMethod]=\"config\"");
+    bashCode.AppendLine($"{connectionVar}[async]=\"false\"");
 
-    if (sshConnect.Port == null && sshConnect.Username == null &&
-        sshConnect.Password == null && sshConnect.KeyPath == null &&
-        sshConnect.ConfigName == null)
+    // Parse options if provided
+    if (sshConnect.Port != null && sshConnect.Port is LiteralExpression optionsLiteral && optionsLiteral.Value.StartsWith("{"))
     {
-      bashCode.AppendLine($"{connectionVar}[authMethod]=\"config\"");
-      bashCode.AppendLine($"{connectionVar}[port]=\"22\"");
-      bashCode.AppendLine($"{connectionVar}[username]=\"$(whoami)\"");
-    }
-    else if (sshConnect.Port != null)
-    {
-      bashCode.AppendLine($"{connectionVar}[port]=\"22\"");
-      bashCode.AppendLine($"{connectionVar}[username]=\"$(whoami)\"");
-      bashCode.AppendLine($"{connectionVar}[authMethod]=\"config\"");
+      // Parse object literal for options
+      var optionsString = optionsLiteral.Value;
+
+      // Extract async option
+      if (optionsString.Contains("async:") && optionsString.Contains("true"))
+      {
+        bashCode.AppendLine($"{connectionVar}[async]=\"true\"");
+      }
+
+      // Extract other options (username, port, etc.)
+      if (optionsString.Contains("username:"))
+      {
+        var usernameMatch = System.Text.RegularExpressions.Regex.Match(optionsString, @"username:\s*""([^""]+)""");
+        if (usernameMatch.Success)
+        {
+          bashCode.AppendLine($"{connectionVar}[username]=\"{usernameMatch.Groups[1].Value}\"");
+        }
+      }
+
+      if (optionsString.Contains("port:"))
+      {
+        var portMatch = System.Text.RegularExpressions.Regex.Match(optionsString, @"port:\s*(\d+)");
+        if (portMatch.Success)
+        {
+          bashCode.AppendLine($"{connectionVar}[port]=\"{portMatch.Groups[1].Value}\"");
+        }
+      }
+
+      if (optionsString.Contains("keyPath:"))
+      {
+        var keyMatch = System.Text.RegularExpressions.Regex.Match(optionsString, @"keyPath:\s*""([^""]+)""");
+        if (keyMatch.Success)
+        {
+          bashCode.AppendLine($"{connectionVar}[keyPath]=\"{keyMatch.Groups[1].Value}\"");
+          bashCode.AppendLine($"{connectionVar}[authMethod]=\"key\"");
+        }
+      }
+
+      if (optionsString.Contains("password:"))
+      {
+        var passwordMatch = System.Text.RegularExpressions.Regex.Match(optionsString, @"password:\s*""([^""]+)""");
+        if (passwordMatch.Success)
+        {
+          bashCode.AppendLine($"{connectionVar}[password]=\"{passwordMatch.Groups[1].Value}\"");
+          bashCode.AppendLine($"{connectionVar}[authMethod]=\"password\"");
+        }
+      }
     }
 
-    bashCode.AppendLine($"if ssh -o ConnectTimeout=5 -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null; then");
-    bashCode.AppendLine($"  {connectionVar}[connected]=\"true\"");
+    // Test connection and establish persistent connection if async
+    bashCode.AppendLine($"if [ \"${{{connectionVar}[async]}}\" = \"true\" ]; then");
+
+    // Async connection with SSH control master
+    bashCode.AppendLine($"  ssh_cmd=\"ssh -M -S ${{{connectionVar}[socket]}} -o ControlPersist=600 -o ConnectTimeout=5\"");
+    bashCode.AppendLine($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
+    bashCode.AppendLine($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    bashCode.AppendLine($"  if [ $? -eq 0 ]; then");
+    bashCode.AppendLine($"    {connectionVar}[connected]=\"true\"");
+    bashCode.AppendLine($"  else");
+    bashCode.AppendLine($"    {connectionVar}[connected]=\"false\"");
+    bashCode.AppendLine($"  fi");
+
     bashCode.AppendLine($"else");
-    bashCode.AppendLine($"  {connectionVar}[connected]=\"false\"");
+
+    // Sync connection (one-time test)
+    bashCode.AppendLine($"  ssh_cmd=\"ssh -o ConnectTimeout=5\"");
+    bashCode.AppendLine($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
+    bashCode.AppendLine($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    bashCode.AppendLine($"  if [ $? -eq 0 ]; then");
+    bashCode.AppendLine($"    {connectionVar}[connected]=\"true\"");
+    bashCode.AppendLine($"  else");
+    bashCode.AppendLine($"    {connectionVar}[connected]=\"false\"");
+    bashCode.AppendLine($"  fi");
     bashCode.AppendLine($"fi");
 
     return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} ; echo \"{connectionVar}\"; }})";
+  }
+
+  private string CompileObjectPropertyAccessExpression(ObjectPropertyAccessExpression objectProperty)
+  {
+    var propertyName = objectProperty.PropertyName;
+
+    if (objectProperty.Object is VariableExpression varExpr)
+    {
+      // For SSH connection objects, conn contains the array name (e.g., "_utah_ssh_conn_1")
+      // To access conn.connected, we need: ${array_name[connected]} where array_name=${conn}
+      // This translates to: $(eval "echo \${${conn}[connected]}")
+      var arrayNameVar = varExpr.Name;
+      return $"$(eval \"echo \\${{${{{arrayNameVar}}}[{propertyName}]}}\")";
+    }
+    else
+    {
+      var objectExpr = CompileExpression(objectProperty.Object);
+      return $"$(eval \"echo \\${{{objectExpr}}}[{propertyName}]\")";
+    }
+  }
+
+  private string CompileSshExecuteExpression(SshExecuteExpression sshExecute)
+  {
+    var connectionExpr = CompileExpression(sshExecute.Connection);
+    var commandExpr = CompileExpression(sshExecute.Command);
+
+    // Extract the variable name from ${varName} format
+    var connVarName = connectionExpr.StartsWith("${") && connectionExpr.EndsWith("}")
+      ? connectionExpr[2..^1]
+      : connectionExpr;
+
+    var bashCode = new StringBuilder();
+    bashCode.AppendLine($"conn_var={connectionExpr}");
+    bashCode.AppendLine($"if [ \"$(eval \"echo \\${{${{{connVarName}}}[async]}}\")\" = \"true\" ]; then");
+    bashCode.AppendLine($"  # Use control master for async connection");
+    bashCode.AppendLine($"  ssh_cmd=\"ssh -S $(eval \"echo \\${{${{{connVarName}}}[socket]}}\")\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $ssh_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
+    bashCode.AppendLine($"else");
+    bashCode.AppendLine($"  # One-time connection");
+    bashCode.AppendLine($"  ssh_cmd=\"ssh\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $ssh_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
+    bashCode.AppendLine($"fi");
+
+    return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} }})";
+  }
+
+  private string CompileSshUploadExpression(SshUploadExpression sshUpload)
+  {
+    var connectionExpr = CompileExpression(sshUpload.Connection);
+    var localPathExpr = CompileExpression(sshUpload.LocalPath);
+    var remotePathExpr = CompileExpression(sshUpload.RemotePath);
+
+    // Extract the variable name from ${varName} format
+    var connVarName = connectionExpr.StartsWith("${") && connectionExpr.EndsWith("}")
+      ? connectionExpr[2..^1]
+      : connectionExpr;
+
+    var bashCode = new StringBuilder();
+    bashCode.AppendLine($"conn_var={connectionExpr}");
+    bashCode.AppendLine($"if [ \"$(eval \"echo \\${{${{{connVarName}}}[async]}}\")\" = \"true\" ]; then");
+    bashCode.AppendLine($"  # Use control master for async connection");
+    bashCode.AppendLine($"  scp_cmd=\"scp -o ControlPath=$(eval \"echo \\${{${{{connVarName}}}[socket]}}\")\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
+    bashCode.AppendLine($"  upload_result=$?");
+    bashCode.AppendLine($"else");
+    bashCode.AppendLine($"  # One-time connection");
+    bashCode.AppendLine($"  scp_cmd=\"scp\"");
+    bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
+    bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"  fi");
+    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
+    bashCode.AppendLine($"  upload_result=$?");
+    bashCode.AppendLine($"fi");
+    bashCode.AppendLine($"if [ $upload_result -eq 0 ]; then echo \"true\"; else echo \"false\"; fi");
+
+    return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} }})";
   }
 
   private string CompileConsoleIsSudoExpression(ConsoleIsSudoExpression sudo)

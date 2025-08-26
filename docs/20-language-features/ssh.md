@@ -1,12 +1,69 @@
 # SSH Functions
 
-Utah provides comprehensive SSH functions for secure remote connections and command execution. These functions enable you to establish SSH connections with various authentication methods and manage remote server interactions directly within your scripts.
+Utah provides comprehensive SSH functions for secure remote connections, command execution, and file transfers. These functions enable you to establish both synchronous and asynchronous SSH connections with various authentication methods and perform remote operations directly within your scripts.
 
 ## Available SSH Functions
 
 ### Connection Management
 
-- **`ssh.connect(host, options?)`** - Establish SSH connection with various authentication methods
+- **`ssh.connect(host, options?)`** - Establish SSH connection with sync/async support
+
+### Connection Object Methods
+
+- **`connection.execute(command)`** - Execute commands on remote server
+- **`connection.upload(localPath, remotePath)`** - Upload files to remote server
+
+**Note:** Both sync and async connections support these methods, with different underlying implementations:
+
+- Sync connections create one-time SSH sessions for each operation
+- Async connections use persistent SSH control masters for better performance
+
+### Connection Object Properties
+
+- **`connection.connected`** - Connection status (boolean)
+- **`connection.host`** - Target hostname or IP
+- **`connection.port`** - SSH port number
+- **`connection.username`** - SSH username
+- **`connection.authMethod`** - Authentication method used
+- **`connection.async`** - Connection mode (sync/async)
+
+## SSH Connection Modes
+
+Utah supports two connection modes to optimize for different use cases:
+
+### Synchronous Connections (Default)
+
+One-time connection tests suitable for checking connectivity:
+
+```typescript
+// Basic connectivity test
+let connection: object = ssh.connect("myserver.com");
+if (connection.connected) {
+  console.log("Server is reachable");
+}
+```
+
+### Asynchronous Connections (Persistent)
+
+Long-lived connections using SSH control masters for multiple operations:
+
+```typescript
+// Persistent connection for multiple operations
+let connection: object = ssh.connect("myserver.com", {
+  async: true,
+  username: "admin",
+  keyPath: "/home/user/.ssh/id_rsa"
+});
+
+if (connection.connected) {
+  // Execute multiple commands efficiently
+  let uptime: string = connection.execute("uptime");
+  let diskSpace: string = connection.execute("df -h");
+
+  // Upload files
+  let success: boolean = connection.upload("/local/app.zip", "/remote/app.zip");
+}
+```
 
 ## SSH Connection Methods
 
@@ -20,8 +77,9 @@ The simplest method uses your existing SSH configuration:
 // Connect using SSH config entry
 let connection: object = ssh.connect("myserver");
 
-// Connect using explicit config name
+// Async connection using SSH config
 let connection: object = ssh.connect("production-server", {
+  async: true,
   configName: "production-server"
 });
 ```
@@ -47,15 +105,16 @@ Host production-server
 Use SSH private keys for secure authentication:
 
 ```typescript
-// Connect with SSH key
+// Sync connection with SSH key
 let connection: object = ssh.connect("192.168.1.100", {
   username: "ubuntu",
   keyPath: "/home/user/.ssh/id_rsa",
   port: 22
 });
 
-// Connect with custom key and port
+// Async connection with SSH key
 let connection: object = ssh.connect("myserver.com", {
+  async: true,
   username: "admin",
   keyPath: "/secure/admin_key",
   port: 2222
@@ -67,15 +126,16 @@ let connection: object = ssh.connect("myserver.com", {
 Use username and password for authentication (requires `sshpass`):
 
 ```typescript
-// Connect with password
+// Sync connection with password
 let connection: object = ssh.connect("192.168.1.100", {
   username: "user",
   password: "mypassword",
   port: 22
 });
 
-// Password with custom port
+// Async connection with password
 let connection: object = ssh.connect("legacy-server.com", {
+  async: true,
   username: "admin",
   password: "admin123",
   port: 2222
@@ -84,9 +144,86 @@ let connection: object = ssh.connect("legacy-server.com", {
 
 **Note**: Password authentication requires the `sshpass` utility to be installed on your system.
 
-## Connection Object Properties
+## Remote Command Execution
 
-Each SSH connection returns an object with the following properties:
+Async connections support remote command execution using the `execute()` method:
+
+```typescript
+#!/usr/bin/env utah run
+
+let server: object = ssh.connect("myserver.com", {
+  async: true,
+  username: "admin",
+  keyPath: "/home/user/.ssh/id_rsa"
+});
+
+if (server.connected) {
+  // Execute system commands
+  let hostname: string = server.execute("hostname");
+  let uptime: string = server.execute("uptime");
+  let diskUsage: string = server.execute("df -h");
+
+  console.log("Server: " + hostname);
+  console.log("Uptime: " + uptime);
+  console.log("Disk usage: " + diskUsage);
+
+  // Complex command chains
+  let logCount: string = server.execute("cd /var/log && find . -name '*.log' | wc -l");
+  console.log("Log files found: " + logCount);
+
+  // Execute scripts
+  let scriptResult: string = server.execute("bash /opt/scripts/health-check.sh");
+  console.log("Health check result: " + scriptResult);
+}
+```
+
+## File Upload Operations
+
+Async connections support file uploads using the `upload()` method:
+
+```typescript
+#!/usr/bin/env utah run
+
+let server: object = ssh.connect("deploy.company.com", {
+  async: true,
+  username: "deploy",
+  keyPath: "/home/user/.ssh/deploy_key"
+});
+
+if (server.connected) {
+  // Upload application package
+  let uploadSuccess: boolean = server.upload("/local/app.tar.gz", "/tmp/app.tar.gz");
+
+  if (uploadSuccess) {
+    console.log("Application package uploaded successfully");
+
+    // Extract and deploy
+    let extractResult: string = server.execute("cd /tmp && tar -xzf app.tar.gz");
+    let deployResult: string = server.execute("sudo systemctl restart myapp");
+
+    console.log("Application deployed and restarted");
+  } else {
+    console.log("Failed to upload application package");
+  }
+
+  // Upload configuration files
+  let configUpload: boolean = server.upload("/local/config.yml", "/etc/myapp/config.yml");
+  let scriptUpload: boolean = server.upload("/local/deploy.sh", "/tmp/deploy.sh");
+
+  if (configUpload && scriptUpload) {
+    // Make script executable and run it
+    let chmodResult: string = server.execute("chmod +x /tmp/deploy.sh");
+    let deployScript: string = server.execute("/tmp/deploy.sh");
+    console.log("Deployment script executed");
+  }
+}
+```
+
+## Connection Object Reference
+
+Each SSH connection returns an object with the following properties and methods:
+
+### Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -95,9 +232,17 @@ Each SSH connection returns an object with the following properties:
 | `username` | string | The SSH username for authentication |
 | `authMethod` | string | Authentication method: "config", "key", or "password" |
 | `connected` | string | Connection status: "true" or "false" |
+| `async` | string | Connection mode: "true" for persistent, "false" for one-time |
+| `socket` | string | SSH control socket path (async connections only) |
 | `keyPath` | string | Path to SSH private key (key authentication only) |
 | `password` | string | SSH password (password authentication only) |
-| `configName` | string | SSH config entry name (config authentication only) |
+
+### Methods (Async Connections Only)
+
+| Method | Signature | Returns | Description |
+|--------|-----------|---------|-------------|
+| `execute()` | `execute(command: string)` | `string` | Execute command on remote server and return output |
+| `upload()` | `upload(localPath: string, remotePath: string)` | `boolean` | Upload file to remote server, returns success status |
 
 ## Basic Usage Examples
 
@@ -109,6 +254,7 @@ Each SSH connection returns an object with the following properties:
 console.log("Connecting to web server...");
 
 let webServer: object = ssh.connect("web.company.com", {
+  async: true,
   username: "webadmin",
   keyPath: "/home/user/.ssh/web_key"
 });
@@ -118,6 +264,11 @@ if (webServer.connected) {
   console.log(`Connected to: ${webServer.host}:${webServer.port}`);
   console.log(`Username: ${webServer.username}`);
   console.log(`Auth method: ${webServer.authMethod}`);
+  console.log(`Async mode: ${webServer.async}`);
+
+  // Execute commands since it's an async connection
+  let serverInfo: string = webServer.execute("uname -a");
+  console.log(`Server info: ${serverInfo}`);
 } else {
   console.log("❌ Failed to connect to web server");
   exit(1);
@@ -153,6 +304,9 @@ for (let server: string in servers) {
 
   if (connection.connected) {
     console.log(`✅ Connected to ${server}`);
+    console.log(`Connected to: ${connection.host}:${connection.port}`);
+    console.log(`Username: ${connection.username}`);
+    console.log(`Auth method: ${connection.authMethod}`);
     successCount = successCount + 1;
   } else {
     console.log(`❌ Failed to connect to ${server}`);

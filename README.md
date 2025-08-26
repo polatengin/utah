@@ -4442,29 +4442,46 @@ Utah provides SSH functions for secure remote connections and command execution.
 // Basic SSH connection using SSH config or defaults
 let connection: object = ssh.connect("myserver.com");
 console.log("Connected to server via SSH config");
+console.log("Connection status: " + connection.connected);
 
-// SSH connection with username and key-based authentication
-let keyConnection: object = ssh.connect("192.168.1.100", {
+// Async SSH connection with persistent session
+let asyncConnection: object = ssh.connect("192.168.1.100", {
+  async: true,
   username: "ubuntu",
   keyPath: "/home/user/.ssh/id_rsa",
   port: 22
 });
 
-// SSH connection with username and password authentication
+// SSH connection with password authentication
 let passwordConnection: object = ssh.connect("192.168.1.100", {
+  async: true,
   username: "ubuntu",
   password: "mypassword",
   port: 2222
 });
 
-// SSH connection using SSH config entry
-let configConnection: object = ssh.connect("production-server", {
-  configName: "production-server"
-});
-
-// Check connection status
-if (connection.connected) {
+// Check connection status and access properties
+if (asyncConnection.connected) {
   console.log("SSH connection established successfully");
+  console.log("Host: " + asyncConnection.host);
+  console.log("Username: " + asyncConnection.username);
+  console.log("Auth method: " + asyncConnection.authMethod);
+  console.log("Async mode: " + asyncConnection.async);
+
+  // Execute commands on remote server
+  let result: string = asyncConnection.execute("uptime");
+  console.log("Server uptime: " + result);
+
+  let diskUsage: string = asyncConnection.execute("df -h");
+  console.log("Disk usage: " + diskUsage);
+
+  // Upload files to remote server
+  let uploadSuccess: boolean = asyncConnection.upload("/local/file.txt", "/remote/path/file.txt");
+  if (uploadSuccess) {
+    console.log("File uploaded successfully");
+  } else {
+    console.log("Failed to upload file");
+  }
 } else {
   console.log("Failed to establish SSH connection");
   exit(1);
@@ -4480,11 +4497,40 @@ Utah supports multiple SSH authentication methods:
 3. **Password**: Uses username/password authentication (requires `sshpass`)
 4. **Default**: Falls back to SSH config or system defaults
 
+### Async vs Sync Connections
+
+```typescript
+// Sync connection (one-time test, no persistent session)
+let syncConn: object = ssh.connect("server.com", {
+  username: "user",
+  keyPath: "/home/user/.ssh/id_rsa"
+});
+
+// Async connection (persistent session using SSH control master)
+let asyncConn: object = ssh.connect("server.com", {
+  async: true,
+  username: "user",
+  keyPath: "/home/user/.ssh/id_rsa"
+});
+
+// Both sync and async connections support execute() and upload() methods
+// Async connections use persistent sessions, sync connections create one-time connections
+if (syncConn.connected) {
+  let result: string = syncConn.execute("ls -la");  // One-time SSH connection
+}
+
+if (asyncConn.connected) {
+  let result: string = asyncConn.execute("ls -la");  // Uses persistent SSH control master
+  let success: boolean = asyncConn.upload("local.txt", "remote.txt");
+}
+```
+
 ### SSH Connection Examples
 
 ```typescript
 // Production deployment script with SSH
 let deployServer: object = ssh.connect("deploy.company.com", {
+  async: true,
   username: "deploy",
   keyPath: "/secure/deploy-key",
   port: 22
@@ -4492,24 +4538,53 @@ let deployServer: object = ssh.connect("deploy.company.com", {
 
 if (deployServer.connected) {
   console.log("Connected to deployment server");
-  // Future: ssh.execute(deployServer, "deploy-script.sh")
+
+  // Upload deployment package
+  let uploadSuccess: boolean = deployServer.upload("/local/app.tar.gz", "/tmp/app.tar.gz");
+  if (uploadSuccess) {
+    console.log("Deployment package uploaded");
+
+    // Execute deployment commands
+    let extractResult: string = deployServer.execute("cd /tmp && tar -xzf app.tar.gz");
+    let deployResult: string = deployServer.execute("/tmp/deploy-script.sh");
+    let statusResult: string = deployServer.execute("systemctl status myapp");
+
+    console.log("Deployment completed");
+    console.log("Service status: " + statusResult);
+  } else {
+    console.log("Failed to upload deployment package");
+    exit(1);
+  }
 } else {
   console.log("Failed to connect to deployment server");
   exit(1);
 }
 
-// Multi-server management
+// Multi-server management with remote execution
 let servers: string[] = ["web1.company.com", "web2.company.com", "web3.company.com"];
 
 for (let server: string in servers) {
   let connection: object = ssh.connect(server, {
+    async: true,
     username: "admin",
     keyPath: "/home/admin/.ssh/admin_key"
   });
 
   if (connection.connected) {
     console.log(`✅ Connected to ${server}`);
-    // Perform server operations here
+
+    // Check server health
+    let uptime: string = connection.execute("uptime");
+    let diskSpace: string = connection.execute("df -h /");
+    let memoryUsage: string = connection.execute("free -h");
+
+    console.log(`${server} uptime: ${uptime}`);
+
+    // Update and restart services
+    let updateResult: string = connection.execute("sudo apt update && sudo apt upgrade -y");
+    let restartResult: string = connection.execute("sudo systemctl restart nginx");
+
+    console.log(`${server} updated and restarted`);
   } else {
     console.log(`❌ Failed to connect to ${server}`);
   }
@@ -4589,9 +4664,41 @@ Each SSH connection returns an object with the following properties:
 | `username` | string | The SSH username |
 | `authMethod` | string | Authentication method: "config", "key", or "password" |
 | `connected` | string | Connection status: "true" or "false" |
+| `async` | string | Connection mode: "true" for persistent, "false" for one-time |
 | `keyPath` | string | Path to SSH private key (if using key auth) |
 | `password` | string | SSH password (if using password auth) |
-| `configName` | string | SSH config entry name (if using config) |
+| `socket` | string | SSH control socket path (for async connections) |
+
+### SSH Connection Methods
+
+The following methods are available on SSH connection objects:
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `execute()` | `execute(command: string): string` | Execute a command on the remote server and return output |
+| `upload()` | `upload(localPath: string, remotePath: string): boolean` | Upload a file to the remote server, returns true on success |
+
+**Connection behavior:**
+
+- **Async connections** (`async: true`): Use SSH control masters for persistent sessions with better performance for multiple operations
+- **Sync connections** (`async: false` or not specified): Create one-time SSH connections for each operation
+
+```typescript
+// Example usage of connection methods
+let conn: object = ssh.connect("server.com", { async: true });
+
+if (conn.connected) {
+  // Execute remote commands
+  let result: string = conn.execute("hostname");
+  console.log("Remote hostname: " + result);
+
+  // Upload files
+  let success: boolean = conn.upload("/local/file.txt", "/remote/file.txt");
+  if (success) {
+    console.log("File uploaded successfully");
+  }
+}
+```
 
 ### SSH Functions Use Cases
 
@@ -4620,18 +4727,17 @@ Each SSH connection returns an object with the following properties:
 - SSH connections are tested before being marked as connected
 - All SSH operations respect standard SSH configuration files
 - Connection timeouts are set to 5 seconds by default for quick feedback
+- Async connections use SSH control masters for persistent sessions
+- Control socket files are automatically managed and cleaned up
 
-### Future SSH Function Expansion
+### SSH Implementation Notes
 
-The SSH connection object is designed for future expansion with additional functions:
+Utah's SSH implementation provides both sync and async connection modes:
 
-```typescript
-// Future SSH functions (planned)
-let result: string = ssh.execute(connection, "ls -la");
-let uploaded: boolean = ssh.upload(connection, "local.txt", "/remote/path/");
-let downloaded: boolean = ssh.download(connection, "/remote/file", "local.txt");
-ssh.disconnect(connection);
-```
+- **Sync connections**: One-time connection tests, suitable for checking connectivity
+- **Async connections**: Persistent sessions using SSH control masters, support remote execution and file uploads
+- **Security**: All authentication methods are supported (config, key, password)
+- **Performance**: Async connections reuse the same session for multiple operations
 
 ## 🎛️ Script Control Functions
 

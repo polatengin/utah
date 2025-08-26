@@ -42,6 +42,16 @@ public class CompletionHandler : ICompletionHandler
         // Show only string.* function completions
         completionItems.AddRange(GetStringNamespaceCompletions());
       }
+      else if (context.StartsWith("conn") || context.StartsWith("connection") || context.EndsWith("Conn") || context.EndsWith("Connection"))
+      {
+        // Show SSH connection object completions
+        completionItems.AddRange(GetSshConnectionCompletions());
+      }
+      else if (context == "ssh")
+      {
+        // Show SSH namespace completions
+        completionItems.AddRange(GetSshNamespaceCompletions());
+      }
       else
       {
         // Show all method completions for backward compatibility
@@ -581,6 +591,86 @@ public class CompletionHandler : ICompletionHandler
         Kind = CompletionItemKind.Method,
         Detail = "repeat(value: string, count: number): string",
         Documentation = "Repeat the string the specified number of times"
+      }
+    };
+  }
+
+  private List<CompletionItem> GetSshNamespaceCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      new CompletionItem
+      {
+        Label = "connect",
+        Kind = CompletionItemKind.Method,
+        Detail = "connect(host: string, options?: object): object",
+        Documentation = "Establish SSH connection with optional async support"
+      }
+    };
+  }
+
+  private List<CompletionItem> GetSshConnectionCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      // Connection properties
+      new CompletionItem
+      {
+        Label = "connected",
+        Kind = CompletionItemKind.Property,
+        Detail = "connected: boolean",
+        Documentation = "Connection status - true if connected, false otherwise"
+      },
+      new CompletionItem
+      {
+        Label = "host",
+        Kind = CompletionItemKind.Property,
+        Detail = "host: string",
+        Documentation = "The target hostname or IP address"
+      },
+      new CompletionItem
+      {
+        Label = "port",
+        Kind = CompletionItemKind.Property,
+        Detail = "port: string",
+        Documentation = "The SSH port (default: '22')"
+      },
+      new CompletionItem
+      {
+        Label = "username",
+        Kind = CompletionItemKind.Property,
+        Detail = "username: string",
+        Documentation = "The SSH username for authentication"
+      },
+      new CompletionItem
+      {
+        Label = "authMethod",
+        Kind = CompletionItemKind.Property,
+        Detail = "authMethod: string",
+        Documentation = "Authentication method: 'config', 'key', or 'password'"
+      },
+      new CompletionItem
+      {
+        Label = "async",
+        Kind = CompletionItemKind.Property,
+        Detail = "async: boolean",
+        Documentation = "Whether the connection is persistent (async: true) or one-time"
+      },
+
+      // Connection methods
+      new CompletionItem
+      {
+        Label = "execute",
+        Kind = CompletionItemKind.Method,
+        Detail = "execute(command: string): string",
+        Documentation = "Execute a command on the remote server and return the output"
+      },
+      new CompletionItem
+      {
+        Label = "upload",
+        Kind = CompletionItemKind.Method,
+        Detail = "upload(localPath: string, remotePath: string): boolean",
+        Documentation = "Upload a file to the remote server, returns true on success"
       }
     };
   }

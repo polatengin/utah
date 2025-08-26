@@ -60,6 +60,11 @@ public partial class Compiler
             lines.Add($"{v.Name}=$((_utah_timer_end - _utah_timer_start))");
           }
         }
+        // Special handling for SSH connections in variable declarations
+        else if (v.Value is SshConnectExpression sshConnect)
+        {
+          lines.AddRange(CompileSshConnectionDeclaration(v.Name, sshConnect, v.IsConst));
+        }
         else
         {
           var expressionValue = CompileExpression(v.Value);
@@ -895,6 +900,110 @@ public partial class Compiler
 
     // Close the for loop
     lines.Add("done");
+
+    return lines;
+  }
+
+  private List<string> CompileSshConnectionDeclaration(string variableName, SshConnectExpression sshConnect, bool isConst)
+  {
+    var uniqueId = GetUniqueId();
+    var connectionVar = $"_utah_ssh_conn_{uniqueId}";
+    var socketPath = $"/tmp/utah_ssh_{uniqueId}";
+
+    var host = CompileExpression(sshConnect.Host);
+    var lines = new List<string>();
+
+    // Initialize connection object
+    lines.Add($"declare -A {connectionVar}");
+    lines.Add($"{connectionVar}[host]={host}");
+    lines.Add($"{connectionVar}[socket]=\"{socketPath}\"");
+    lines.Add($"{connectionVar}[port]=\"22\"");
+    lines.Add($"{connectionVar}[username]=\"$(whoami)\"");
+    lines.Add($"{connectionVar}[authMethod]=\"config\"");
+    lines.Add($"{connectionVar}[async]=\"false\"");
+
+    // Handle optional parameters
+    if (sshConnect.Port != null)
+    {
+      var port = CompileExpression(sshConnect.Port);
+      lines.Add($"{connectionVar}[port]={port}");
+    }
+
+    if (sshConnect.Username != null)
+    {
+      var username = CompileExpression(sshConnect.Username);
+      lines.Add($"{connectionVar}[username]={username}");
+    }
+
+    if (sshConnect.Password != null)
+    {
+      var password = CompileExpression(sshConnect.Password);
+      lines.Add($"{connectionVar}[password]={password}");
+      lines.Add($"{connectionVar}[authMethod]=\"password\"");
+    }
+
+    if (sshConnect.KeyPath != null)
+    {
+      var keyPath = CompileExpression(sshConnect.KeyPath);
+      lines.Add($"{connectionVar}[keyPath]={keyPath}");
+      lines.Add($"{connectionVar}[authMethod]=\"key\"");
+    }
+
+    if (sshConnect.ConfigName != null)
+    {
+      var configName = CompileExpression(sshConnect.ConfigName);
+      lines.Add($"{connectionVar}[configName]={configName}");
+    }
+
+    if (sshConnect.Async != null)
+    {
+      var async = CompileExpression(sshConnect.Async);
+      lines.Add($"{connectionVar}[async]={async}");
+    }
+
+    // Connection logic
+    lines.Add($"if [ \"${{{connectionVar}[async]}}\" = \"true\" ]; then");
+
+    // Async connection (persistent)
+    lines.Add($"  ssh_cmd=\"ssh -M -S ${{{connectionVar}[socket]}} -o ControlPersist=600 -o ConnectTimeout=5\"");
+    lines.Add($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
+    lines.Add($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
+    lines.Add($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
+    lines.Add($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    lines.Add($"  fi");
+    lines.Add($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    lines.Add($"  if [ $? -eq 0 ]; then");
+    lines.Add($"    {connectionVar}[connected]=\"true\"");
+    lines.Add($"  else");
+    lines.Add($"    {connectionVar}[connected]=\"false\"");
+    lines.Add($"  fi");
+
+    lines.Add($"else");
+
+    // Sync connection (one-time test)
+    lines.Add($"  ssh_cmd=\"ssh -o ConnectTimeout=5\"");
+    lines.Add($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
+    lines.Add($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
+    lines.Add($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
+    lines.Add($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    lines.Add($"  fi");
+    lines.Add($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    lines.Add($"  if [ $? -eq 0 ]; then");
+    lines.Add($"    {connectionVar}[connected]=\"true\"");
+    lines.Add($"  else");
+    lines.Add($"    {connectionVar}[connected]=\"false\"");
+    lines.Add($"  fi");
+    lines.Add($"fi");
+
+    // Assign the connection variable name to the user variable
+    if (isConst)
+    {
+      lines.Add($"readonly {variableName}=\"{connectionVar}\"");
+    }
+    else
+    {
+      lines.Add($"{variableName}=\"{connectionVar}\"");
+    }
 
     return lines;
   }

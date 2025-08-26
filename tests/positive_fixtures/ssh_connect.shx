@@ -1,15 +1,55 @@
 # Test for ssh.connect() function
-# This script tests different SSH connection methods
+# This script tests different SSH connection methods and new async functionality
 
 console.log("Testing SSH connection functionality");
 
 # Test basic SSH connection using SSH config
 let basicConn: object = ssh.connect("localhost");
 console.log("Basic connection created");
+console.log("Basic connection status: " + basicConn.connected);
 
 # Test SSH connection with options object (simplified for initial implementation)
 let configConn: object = ssh.connect("localhost", {});
 console.log("Connection with options created");
+console.log("Config connection status: " + configConn.connected);
+
+# Test async SSH connection with persistent session
+let asyncConn: object = ssh.connect("localhost", { async: true, username: "testuser" });
+console.log("Async connection created");
+console.log("Async connection status: " + asyncConn.connected);
+console.log("Async connection host: " + asyncConn.host);
+console.log("Async connection username: " + asyncConn.username);
+console.log("Async connection auth method: " + asyncConn.authMethod);
+
+# Test connection with key-based authentication
+let keyConn: object = ssh.connect("localhost", { async: true, username: "testuser", keyPath: "/home/user/.ssh/id_rsa" });
+console.log("Key-based connection created");
+console.log("Key connection auth method: " + keyConn.authMethod);
+
+# Test execute() method on async connection
+if (asyncConn.connected) {
+  let result: string = asyncConn.execute("echo 'Hello from remote'");
+  console.log("Execute result: " + result);
+  
+  let dirList: string = asyncConn.execute("ls -la /tmp");
+  console.log("Directory listing completed");
+}
+
+# Test upload() method on async connection
+if (asyncConn.connected) {
+  # Create a test file first
+  let testContent: string = "Hello World from Utah!";
+  fs.writeFile("/tmp/test_upload.txt", testContent);
+  
+  let uploadSuccess: boolean = asyncConn.upload("/tmp/test_upload.txt", "/tmp/remote_test.txt");
+  console.log("Upload result: " + uploadSuccess);
+  
+  # Verify the upload by reading the remote file
+  if (uploadSuccess) {
+    let remoteContent: string = asyncConn.execute("cat /tmp/remote_test.txt");
+    console.log("Remote file content: " + remoteContent);
+  }
+}
 
 # Log the connection results
 console.log("SSH connection tests completed");
