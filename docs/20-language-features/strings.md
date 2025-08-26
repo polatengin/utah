@@ -34,14 +34,14 @@ let len: number = string.length(message);
 console.log("Message length: ${len}");
 ```
 
-#### `string.includes()`
+#### `string.contains()`
 
 Check if a string contains a substring:
 
 ```typescript
 let filepath: string = "/home/user/script.shx";
 
-if (string.includes(filepath, ".shx")) {
+if (string.contains(filepath, ".shx")) {
   console.log("This is a Utah script file");
 }
 ```
@@ -205,7 +205,7 @@ let message: string = "Hello, ${name}! You are ${age} years old.";
 ```typescript
 let filePath: string = "/home/user/documents/report.pdf";
 
-if (string.includes(filePath, "/home/")) {
+if (string.contains(filePath, "/home/")) {
   console.log("File is in user directory");
 }
 
@@ -304,7 +304,7 @@ function validateInput(input: string): boolean {
 
 function isValidIdentifier(name: string): boolean {
   // Check for valid identifier pattern
-  if (string.includes(name, " ")) {
+  if (string.contains(name, " ")) {
     return false;
   }
 
@@ -442,11 +442,11 @@ function isValidEmail(email: string): boolean {
   }
 
   // Basic email validation
-  if (!string.includes(email, "@")) {
+  if (!string.contains(email, "@")) {
     return false;
   }
 
-  if (!string.includes(email, ".")) {
+  if (!string.contains(email, ".")) {
     return false;
   }
 

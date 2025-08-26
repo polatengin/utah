@@ -437,7 +437,7 @@ array.forEach(users, (user) => {
   console.log("Uppercase: ${upperUser}");
 
   // Use any Utah language features within forEach
-  if (string.includes(user, "a")) {
+  if (string.contains(user, "a")) {
     console.log("User ${user} contains 'a'");
   }
 });

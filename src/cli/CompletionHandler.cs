@@ -510,9 +510,9 @@ public class CompletionHandler : ICompletionHandler
       },
       new CompletionItem
       {
-        Label = "includes",
+        Label = "contains",
         Kind = CompletionItemKind.Method,
-        Detail = "includes(value: string, searchValue: string): boolean",
+        Detail = "contains(value: string, searchValue: string): boolean",
         Documentation = "Check if string contains the specified substring"
       },
       new CompletionItem

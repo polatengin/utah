@@ -207,10 +207,10 @@ validate.isURL("https://docs.com/guide#section1");            // true
 
 ```typescript
 validate.isURL("not-a-url");                                  // false
-validate.isURL("httpexample.com");                           // false (missing ://)
+validate.isURL("httpexample.com");                            // false (missing ://)
 validate.isURL("https://");                                   // false (no domain)
-validate.isURL("smtp://mail.example.com");                   // false (unsupported protocol)
-validate.isURL("https://.example.com");                      // false (invalid domain)
+validate.isURL("smtp://mail.example.com");                    // false (unsupported protocol)
+validate.isURL("https://.example.com");                       // false (invalid domain)
 ```
 
 ### Generated Bash Code for URL Validation

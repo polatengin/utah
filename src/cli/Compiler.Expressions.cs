@@ -1873,7 +1873,7 @@ public partial class Compiler
       "toLowerCase" => CompileStringToLowerCaseFunction(args),
       "startsWith" => CompileStringStartsWithFunction(args),
       "endsWith" => CompileStringEndsWithFunction(args),
-      "includes" => CompileStringIncludesFunction(args),
+      "contains" => CompileStringContainsFunction(args),
       "replace" => CompileStringReplaceFunction(args),
       "replaceAll" => CompileStringReplaceAllFunction(args),
       "split" => CompileStringSplitFunction(args),
@@ -1966,10 +1966,10 @@ public partial class Compiler
     return $"$([[ \"${{{varName}}}\" == *{suffixStr} ]] && echo \"true\" || echo \"false\")";
   }
 
-  private string CompileStringIncludesFunction(List<string> args)
+  private string CompileStringContainsFunction(List<string> args)
   {
     if (args.Count != 2)
-      throw new InvalidOperationException("string.includes() requires exactly 2 arguments");
+      throw new InvalidOperationException("string.contains() requires exactly 2 arguments");
 
     var varName = ExtractVariableName(args[0]);
     var searchStr = args[1].StartsWith("\"") && args[1].EndsWith("\"") ? args[1][1..^1] : args[1];

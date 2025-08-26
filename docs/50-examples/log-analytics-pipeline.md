@@ -392,8 +392,8 @@ console.log("Domain: " + domain);
 console.log("Display name: " + capitalizedUsername);
 
 // Validate email format
-let hasAt: boolean = string.includes(normalizedEmail, "@");
-let hasValidDomain: boolean = string.includes(domain, ".");
+let hasAt: boolean = string.contains(normalizedEmail, "@");
+let hasValidDomain: boolean = string.contains(domain, ".");
 
 if (hasAt && hasValidDomain) {
     console.log("✅ Email format appears valid");
@@ -736,7 +736,7 @@ for (let file: string in fileList) {
   let lines: string[] = string.split(content, "\n");
 
   for (let line: string in lines) {
-    if (string.includes(line, "ERROR")) {
+    if (string.contains(line, "ERROR")) {
       console.log("Found error in " + file + ": " + line);
     }
   }
@@ -744,7 +744,7 @@ for (let file: string in fileList) {
 
 // String processing with built-in functions
 let email: string = string.trim(userInput);
-let isValid: boolean = string.includes(email, "@");
+let isValid: boolean = string.contains(email, "@");
 ```
 
 ### Bash Approach (Complex and Error-Prone)
@@ -795,7 +795,7 @@ This pattern can be adapted for:
 | `string.split(text, delimiter)` | Split into array | Parse CSV data |
 | `string.indexOf(text, search)` | Find position | Locate patterns |
 | `string.substring(text, start, end)` | Extract portion | Parse structured data |
-| `string.includes(text, search)` | Check contains | Validate content |
+| `string.contains(text, search)` | Check contains | Validate content |
 | `string.replace(text, old, new)` | Replace text | Format output |
 | `string.toLowerCase(text)` | Normalize case | Case-insensitive comparison |
 | `string.isEmpty(text)` | Check empty | Input validation |

@@ -108,7 +108,7 @@ function processLogFile(logFile: string): void {
   let errorCount: number = 0;
 
   for (let line: string in lines) {
-    if (string.includes(line, "ERROR")) {
+    if (string.contains(line, "ERROR")) {
       errorCount++;
     }
   }

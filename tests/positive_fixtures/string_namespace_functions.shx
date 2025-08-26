@@ -36,13 +36,13 @@ console.log("Capitalized name: " + nameCapitalized);
 let searchText: string = "The quick brown fox";
 let startsWithThe: boolean = string.startsWith(searchText, "The");
 let endsWithFox: boolean = string.endsWith(searchText, "fox");
-let containsQuick: boolean = string.includes(searchText, "quick");
+let containsQuick: boolean = string.contains(searchText, "quick");
 let indexOfBrown: number = string.indexOf(searchText, "brown");
 
 // Additional search tests
 let starts: boolean = string.startsWith(text, "  Hello");
 let ends: boolean = string.endsWith(text, "  ");
-let includes: boolean = string.includes(text, "World");
+let includes: boolean = string.contains(text, "World");
 let index: number = string.indexOf(text, "World");
 
 console.log("=== Search and Test Operations ===");

@@ -98,14 +98,14 @@ function createSampleData(
     array.push(allEntries, log);
 
     // Categorize by log level
-    if (string.includes(log, "ERROR")) {
+    if (string.contains(log, "ERROR")) {
       array.push(errors, log);
-    } else if (string.includes(log, "WARN")) {
+    } else if (string.contains(log, "WARN")) {
       array.push(warnings, log);
     }
 
     // Extract sample IP addresses
-    if (string.includes(log, "192.168.1.100")) {
+    if (string.contains(log, "192.168.1.100")) {
       if (!array.contains(ips, "192.168.1.100")) {
         array.push(ips, "192.168.1.100");
       }
@@ -191,10 +191,10 @@ function analyzeErrors(errors: string[]): void {
 
 function extractErrorType(errorLine: string): string {
   // Extract error type from log line (simplified)
-  if (string.includes(errorLine, "404")) return "404 Not Found";
-  if (string.includes(errorLine, "500")) return "500 Internal Server Error";
-  if (string.includes(errorLine, "timeout")) return "Timeout Error";
-  if (string.includes(errorLine, "connection")) return "Connection Error";
+  if (string.contains(errorLine, "404")) return "404 Not Found";
+  if (string.contains(errorLine, "500")) return "500 Internal Server Error";
+  if (string.contains(errorLine, "timeout")) return "Timeout Error";
+  if (string.contains(errorLine, "connection")) return "Connection Error";
   return "Other Error";
 }
 
@@ -631,9 +631,9 @@ let warnings: string[] = [];
 let info: string[] = [];
 
 for (let entry: string in allEntries) {
-  if (string.includes(entry, "ERROR")) {
+  if (string.contains(entry, "ERROR")) {
     array.push(errors, entry);
-  } else if (string.includes(entry, "WARN")) {
+  } else if (string.contains(entry, "WARN")) {
     array.push(warnings, entry);
   } else {
     array.push(info, entry);

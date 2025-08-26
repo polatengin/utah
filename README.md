@@ -1386,7 +1386,7 @@ array.forEach(users, (user) => {
   console.log(`Uppercase: ${upperUser}`);
 
   // You can use any Utah language features within forEach
-  if (string.includes(user, "a")) {
+  if (string.contains(user, "a")) {
     console.log(`User ${user} contains 'a'`);
   }
 });
@@ -1554,7 +1554,7 @@ Utah provides a comprehensive set of string manipulation functions through the `
 
 - `string.startsWith(value, prefix)` - Check if string starts with prefix
 - `string.endsWith(value, suffix)` - Check if string ends with suffix
-- `string.includes(value, substring)` - Check if string contains substring
+- `string.contains(value, substring)` - Check if string contains substring
 - `string.indexOf(value, substring)` - Find index of first occurrence
 
 #### Extraction and Manipulation
@@ -1590,7 +1590,7 @@ let capitalized: string = string.capitalize("hello"); // "Hello"
 // Search and testing
 let startsWithHello: boolean = string.startsWith(message, "Hello"); // true
 let endsWithExclamation: boolean = string.endsWith(message, "!"); // true
-let containsWorld: boolean = string.includes(message, "World"); // true
+let containsWorld: boolean = string.contains(message, "World"); // true
 let worldIndex: number = string.indexOf(message, "World"); // 7
 
 // Extraction and manipulation
@@ -4869,7 +4869,7 @@ if (validate.isEmail(inputEmail)) {
 
 // Use in conditional chains
 let configEmail: string = "admin@company.com";
-if (validate.isEmail(configEmail) && configEmail.includes("company.com")) {
+if (validate.isEmail(configEmail) && string.contains(configEmail, "company.com")) {
   console.log("Corporate email validated");
 }
 
