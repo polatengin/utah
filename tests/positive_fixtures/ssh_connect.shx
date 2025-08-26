@@ -30,7 +30,7 @@ console.log("Key connection auth method: " + keyConn.authMethod);
 if (asyncConn.connected) {
   let result: string = asyncConn.execute("echo 'Hello from remote'");
   console.log("Execute result: " + result);
-  
+
   let dirList: string = asyncConn.execute("ls -la /tmp");
   console.log("Directory listing completed");
 }
@@ -40,10 +40,10 @@ if (asyncConn.connected) {
   # Create a test file first
   let testContent: string = "Hello World from Utah!";
   fs.writeFile("/tmp/test_upload.txt", testContent);
-  
+
   let uploadSuccess: boolean = asyncConn.upload("/tmp/test_upload.txt", "/tmp/remote_test.txt");
   console.log("Upload result: " + uploadSuccess);
-  
+
   # Verify the upload by reading the remote file
   if (uploadSuccess) {
     let remoteContent: string = asyncConn.execute("cat /tmp/remote_test.txt");
