@@ -460,7 +460,7 @@ public partial class Parser
         var arrayFunctionName = methodPart.Substring(0, parenIndex).Trim();
 
         // Skip functions that have dedicated AST node handling
-        if (arrayFunctionName != "sort" && arrayFunctionName != "shuffle")
+        if (arrayFunctionName != "sort" && arrayFunctionName != "shuffle" && arrayFunctionName != "forEach")
         {
           var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
 
@@ -571,6 +571,21 @@ public partial class Parser
       if (methodPart == "shuffle()")
       {
         return new ArrayShuffleExpression(new VariableExpression(objectName));
+      }
+
+      // Handle array.forEach() namespace function calls
+      if (objectName == "array" && methodPart.StartsWith("forEach(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(8, methodPart.Length - 9).Trim();
+        var args = SplitByComma(argsContent);
+        
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.forEach() requires exactly 2 arguments: array and callback");
+        
+        var arrayExpr = ParseExpression(args[0].Trim());
+        var lambdaExpr = ParseLambdaExpression(args[1].Trim());
+        
+        return new ArrayForEachExpression(arrayExpr, lambdaExpr);
       }
 
       // Handle timer methods

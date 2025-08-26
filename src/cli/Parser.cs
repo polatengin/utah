@@ -194,6 +194,54 @@ public partial class Parser
         return new ConsoleLog(ParseExpression(raw));
       }
     }
+    if (line.StartsWith("array.forEach"))
+    {
+      // Parse multi-line array.forEach statements
+      // Handle the opening line: array.forEach(array, (params) => {
+      var forEachMatch = Regex.Match(line, @"array\.forEach\((.+),\s*\(([^)]*)\)\s*=>\s*\{");
+      if (forEachMatch.Success)
+      {
+        var arrayArg = forEachMatch.Groups[1].Value.Trim();
+        var paramsStr = forEachMatch.Groups[2].Value.Trim();
+        
+        // Parse lambda parameters
+        var parameters = new List<string>();
+        if (!string.IsNullOrEmpty(paramsStr))
+        {
+          parameters.AddRange(paramsStr.Split(',').Select(p => p.Trim()));
+        }
+        
+        // Parse the lambda body (multi-line)
+        var body = new List<Statement>();
+        i++; // Move to next line
+        
+        while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))
+        {
+          var bodyLine = _lines[i].Trim();
+          if (!string.IsNullOrEmpty(bodyLine) && !bodyLine.StartsWith("//"))
+          {
+            // Avoid infinite recursion by creating a temporary parser for the body
+            var tempParser = new Parser(bodyLine);
+            var tempProgram = tempParser.Parse();
+            if (tempProgram.Statements.Count > 0)
+            {
+              body.Add(tempProgram.Statements[0]);
+            }
+          }
+          i++;
+        }
+        
+        // Skip the closing }); line
+        if (i < _lines.Length && _lines[i].Trim().StartsWith("}"))
+        {
+          i++;
+        }
+        
+        var arrayExpr = ParseExpression(arrayArg);
+        var lambdaExpr = new LambdaExpression(parameters, body);
+        return new ExpressionStatement(new ArrayForEachExpression(arrayExpr, lambdaExpr));
+      }
+    }
     if (line == "timer.start();")
     {
       return new TimerStartStatement();
@@ -277,6 +325,10 @@ public partial class Parser
       if (expression is FsDeleteExpression deleteExpr)
       {
         return new FsDeleteStatement(deleteExpr.Path);
+      }
+      if (expression is ArrayForEachExpression forEachExpr)
+      {
+        return new ExpressionStatement(forEachExpr);
       }
       return new ExpressionStatement(expression);
     }

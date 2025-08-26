@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-114-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-115-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1358,6 +1358,84 @@ let colors: string[] = ["red", "green", "blue"];
 for (let color: string in colors) {
   console.log(`Color: ${color}`);
 }
+```
+
+Iterate over arrays with advanced control using the `array.forEach()` function:
+
+```typescript
+// Basic forEach with single parameter
+let fruits: string[] = ["apple", "banana", "cherry"];
+
+array.forEach(fruits, (fruit) => {
+  console.log(`Processing: ${fruit}`);
+});
+
+// forEach with index parameter
+let numbers: number[] = [10, 20, 30];
+
+array.forEach(numbers, (num, index) => {
+  console.log(`Item ${index}: ${num}`);
+});
+
+// Multi-line callback body for complex operations
+let users: string[] = ["alice", "bob", "charlie"];
+
+array.forEach(users, (user) => {
+  console.log(`Processing user: ${user}`);
+  let upperUser: string = string.toUpperCase(user);
+  console.log(`Uppercase: ${upperUser}`);
+
+  // You can use any Utah language features within forEach
+  if (string.includes(user, "a")) {
+    console.log(`User ${user} contains 'a'`);
+  }
+});
+
+// forEach with complex array expressions
+array.forEach(string.split("red,green,blue", ","), (color, idx) => {
+  console.log(`Color ${idx}: ${color}`);
+});
+
+// Nested operations and function calls
+let servers: string[] = ["web1", "web2", "web3"];
+
+array.forEach(servers, (server) => {
+  console.log(`Checking server: ${server}`);
+  let status: string = "online";  // This could be from web.get() or other functions
+  console.log(`Status of ${server}: ${status}`);
+
+  // Use any Utah functions within forEach
+  if (os.isInstalled("curl")) {
+    console.log(`Can check ${server} with curl`);
+  }
+});
+
+// forEach with different array types
+let flags: boolean[] = [true, false, true];
+
+array.forEach(flags, (flag, position) => {
+  console.log(`Flag at position ${position}: ${flag}`);
+});
+
+// Combine forEach with other array functions
+let data: number[] = [5, 2, 8, 1, 9];
+let sortedData: number[] = array.sort(data);
+
+array.forEach(sortedData, (value) => {
+  console.log(`Sorted value: ${value}`);
+});
+
+// Use forEach for data processing and transformation
+let logFiles: string[] = ["app.log", "error.log", "access.log"];
+
+array.forEach(logFiles, (logFile) => {
+  if (fs.exists(logFile)) {
+    console.log(`Processing log file: ${logFile}`);
+    // Could read and process the file here
+  } else {
+    console.log(`Log file not found: ${logFile}`);
+  }
+});
 ```
 
 ### Arrays from String Split
@@ -5015,7 +5093,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.unique()` function to remove duplicate elements
 
-- [ ] `array.forEach()` function to iterate over elements
+- [x] `array.forEach()` function to iterate over elements
 
 - [ ] Multiline string support with triple-double quotes (`"""`)
 

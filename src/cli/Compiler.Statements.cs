@@ -102,6 +102,11 @@ public partial class Compiler
 
           lines.Add($"echo {writeContent} > {writeFilePath}");
         }
+        // Handle array.forEach() as a statement
+        else if (exprStmt.Expression is ArrayForEachExpression arrayForEach)
+        {
+          lines.AddRange(CompileArrayForEachStatement(arrayForEach));
+        }
         // For function calls in statement context, don't wrap in $()
         else if (exprStmt.Expression is FunctionCall funcCall)
         {
@@ -834,6 +839,63 @@ public partial class Compiler
       "fi"
     });
 
+    return lines;
+  }
+
+  private List<string> CompileArrayForEachStatement(ArrayForEachExpression arrayForEach)
+  {
+    var lines = new List<string>();
+    var compiledArray = CompileExpression(arrayForEach.Array);
+    var uniqueId = GetUniqueId();
+    var loopArrayVar = $"_utah_forEach_array_{uniqueId}";
+    
+    // Get callback parameters
+    var itemVar = arrayForEach.Callback.Parameters.Count > 0 ? arrayForEach.Callback.Parameters[0] : "item";
+    var indexVar = arrayForEach.Callback.Parameters.Count > 1 ? arrayForEach.Callback.Parameters[1] : null;
+    
+    // Handle both simple variables and complex array expressions
+    if (arrayForEach.Array is VariableExpression varExpr)
+    {
+      // For simple variables, use directly
+      lines.Add($"{loopArrayVar}=(\"${{{varExpr.Name}[@]}}\")");
+    }
+    else
+    {
+      // For command substitutions and complex expressions, capture array first
+      lines.Add($"{loopArrayVar}=({compiledArray})");
+    }
+    
+    // Add index initialization if needed
+    if (indexVar != null)
+    {
+      lines.Add($"{indexVar}=0");
+    }
+    
+    // Start the for loop
+    lines.Add($"for {itemVar} in \"${{{loopArrayVar}[@]}}\"; do");
+    
+    // Compile the callback body statements
+    foreach (var statement in arrayForEach.Callback.Body)
+    {
+      var compiledStatements = CompileStatement(statement);
+      foreach (var line in compiledStatements)
+      {
+        if (!string.IsNullOrWhiteSpace(line))
+        {
+          lines.Add($"  {line}");  // Add proper indentation
+        }
+      }
+    }
+    
+    // Increment index if used
+    if (indexVar != null)
+    {
+      lines.Add($"  (({indexVar}++))");
+    }
+    
+    // Close the for loop
+    lines.Add("done");
+    
     return lines;
   }
 }

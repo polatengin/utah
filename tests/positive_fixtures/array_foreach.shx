@@ -1,0 +1,47 @@
+// Test array.forEach functionality
+script.description("Test script for array.forEach implementation");
+
+// Test basic forEach with single parameter
+let fruits: string[] = ["apple", "banana", "cherry"];
+console.log("=== Basic forEach Test ===");
+
+array.forEach(fruits, (fruit) => {
+  console.log("Fruit: ${fruit}");
+});
+
+// Test forEach with index parameter
+let numbers: number[] = [10, 20, 30];
+console.log("=== forEach with Index Test ===");
+
+array.forEach(numbers, (num, index) => {
+  console.log("Index ${index}: ${num}");
+});
+
+// Test forEach with multi-line callback body
+let users: string[] = ["alice", "bob", "charlie"];
+console.log("=== Multi-line forEach Test ===");
+
+array.forEach(users, (user) => {
+  console.log("Processing user: ${user}");
+  let upperUser: string = string.toUpperCase(user);
+  console.log("Uppercase: ${upperUser}");
+});
+
+// Test forEach with complex array expression
+console.log("=== forEach with Array Expression Test ===");
+
+array.forEach(string.split("red,green,blue", ","), (color, idx) => {
+  console.log("Color ${idx}: ${color}");
+});
+
+// Test nested operations within forEach
+let servers: string[] = ["web1", "web2", "web3"];
+console.log("=== Nested Operations Test ===");
+
+array.forEach(servers, (server) => {
+  console.log("Checking server: ${server}");
+  let status: string = "online";
+  console.log("Status of ${server}: ${status}");
+});
+
+console.log("forEach tests completed!");

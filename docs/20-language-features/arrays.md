@@ -409,6 +409,71 @@ for (let i: number = 0; i < array.length(files); i++) {
 }
 ```
 
+#### forEach Function
+
+Iterate over arrays with advanced control using the `array.forEach()` function:
+
+```typescript
+// Basic forEach with single parameter
+let fruits: string[] = ["apple", "banana", "cherry"];
+
+array.forEach(fruits, (fruit) => {
+  console.log("Processing: ${fruit}");
+});
+
+// forEach with index parameter
+let servers: string[] = ["web1", "web2", "web3"];
+
+array.forEach(servers, (server, index) => {
+  console.log("Server ${index}: ${server}");
+});
+
+// Multi-line callback for complex operations
+let users: string[] = ["alice", "bob", "charlie"];
+
+array.forEach(users, (user) => {
+  console.log("Processing user: ${user}");
+  let upperUser: string = string.toUpperCase(user);
+  console.log("Uppercase: ${upperUser}");
+  
+  // Use any Utah language features within forEach
+  if (string.includes(user, "a")) {
+    console.log("User ${user} contains 'a'");
+  }
+});
+
+// forEach with complex array expressions
+array.forEach(string.split("red,green,blue", ","), (color, idx) => {
+  console.log("Color ${idx}: ${color}");
+});
+
+// Data processing with forEach
+let logFiles: string[] = ["app.log", "error.log", "access.log"];
+
+array.forEach(logFiles, (logFile) => {
+  if (fs.exists(logFile)) {
+    console.log("Processing log file: ${logFile}");
+    // Process the file content here
+  } else {
+    console.log("Log file not found: ${logFile}");
+  }
+});
+
+// Combine forEach with other array functions
+let numbers: number[] = [5, 2, 8, 1, 9];
+let sortedNumbers: number[] = array.sort(numbers);
+
+array.forEach(sortedNumbers, (value, position) => {
+  console.log("Position ${position}: ${value}");
+});
+```
+
+#### When to Use Each Iteration Method
+
+- **For-in loops**: Simple iteration when you only need the element value
+- **Traditional for loops**: When you need precise index control or complex loop logic
+- **forEach function**: When you need both element and index, or when performing complex operations on each element
+
 ## Common Array Patterns
 
 ### Processing File Lists

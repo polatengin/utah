@@ -48,6 +48,7 @@ public record ArraySortExpression(Expression Array, Expression? SortOrder) : Exp
 public record ArrayMergeExpression(Expression Array1, Expression Array2) : Expression;
 public record ArrayShuffleExpression(Expression Array) : Expression;
 public record ArrayUniqueExpression(Expression Array) : Expression;
+public record ArrayForEachExpression(Expression Array, LambdaExpression Callback) : Expression;
 public record OsIsInstalledExpression(Expression AppName) : Expression;
 public record ProcessElapsedTimeExpression() : Expression;
 public record ProcessIdExpression() : Expression;
