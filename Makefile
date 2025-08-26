@@ -103,85 +103,94 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 			fi; \
 		fi; \
 	else \
-		echo "$(BLUE)Running positive tests...$(NC)"; \
-		for fixture in $(FIXTURES_DIR)/*.shx; do \
-			if [ -f "$$fixture" ]; then \
-				test_name=$$(basename "$$fixture" .shx); \
-				expected_file="$(EXPECTED_DIR)/$$test_name.sh"; \
-				actual_file="$(TEMP_DIR)/$$test_name.sh"; \
-				total=$$((total + 1)); \
-				echo -n "🔍 Testing $$test_name... "; \
-				if [ ! -f "$$expected_file" ]; then \
-					printf "$(RED)❌ Expected file not found$(NC)\n"; \
-					failed=$$((failed + 1)); \
-					continue; \
-				fi; \
-				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
-					printf "$(RED)❌ Compilation failed$(NC)\n"; \
-					failed=$$((failed + 1)); \
-					continue; \
-				fi; \
-				generated_file="$(FIXTURES_DIR)/$$test_name.sh"; \
-				mv "$$generated_file" "$$actual_file"; \
-				if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
-					printf "$(GREEN)✅ PASS$(NC)\n"; \
-					passed=$$((passed + 1)); \
-				else \
-					printf "$(RED)❌ FAIL$(NC)\n"; \
-					printf "$(YELLOW)Expected vs Actual differences:$(NC)\n"; \
-					diff -u "$$expected_file" "$$actual_file" | head -20; \
-					echo; \
-					failed=$$((failed + 1)); \
-				fi; \
-			fi; \
-		done; \
+		MAX_JOBS=$$(nproc 2>/dev/null || echo "4"); \
+		MAX_JOBS=$$([ $$MAX_JOBS -gt 16 ] && echo 16 || echo $$MAX_JOBS); \
+		echo "$(BLUE)Running tests with up to $$MAX_JOBS concurrent jobs$(NC)"; \
 		echo; \
-		echo "$(BLUE)Running negative tests (should fail compilation)...$(NC)"; \
-		for fixture in $(NEGATIVE_TESTS_DIR)/*.shx; do \
-			if [ -f "$$fixture" ]; then \
-				test_name=$$(basename "$$fixture" .shx); \
-				total=$$((total + 1)); \
-				echo -n "🔍 Testing $$test_name (expect failure)... "; \
-				if dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$fixture" > /dev/null 2>&1; then \
-					printf "$(RED)❌ FAIL (should have failed compilation)$(NC)\n"; \
-					failed=$$((failed + 1)); \
+		total=0; passed=0; failed=0; \
+		run_test() { \
+			local file="$$1" type="$$2"; \
+			name=$$(basename "$$file" .shx); \
+			case "$$type" in \
+			positive) \
+				expected="$(EXPECTED_DIR)/$$name.sh"; actual="$(TEMP_DIR)/$$name.sh"; \
+				if [ -f "$$expected" ] && dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$file" >/dev/null 2>&1; then \
+					mv "$(FIXTURES_DIR)/$$name.sh" "$$actual" 2>/dev/null || true; \
+					if diff -u "$$expected" "$$actual" >/dev/null 2>&1; then \
+						echo "PASS" > "$$actual.result"; \
+					else \
+						echo "FAIL" > "$$actual.result"; \
+					fi; \
 				else \
-					printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
-					passed=$$((passed + 1)); \
-				fi; \
-			fi; \
-		done; \
-		echo; \
-		echo "$(BLUE)Running format tests...$(NC)"; \
-		for malformed_file in $(MALFORMED_DIR)/*.shx; do \
-			if [ -f "$$malformed_file" ]; then \
-				test_name=$$(basename "$$malformed_file" .shx); \
-				expected_file="$(EXPECTED_DIR)/$$test_name.formatted.shx"; \
-				actual_file="$(TEMP_DIR)/$$test_name.formatted.shx"; \
-				total=$$((total + 1)); \
-				echo -n "🔍 Testing format for $$test_name... "; \
-				if [ ! -f "$$expected_file" ]; then \
-					printf "$(RED)❌ Expected formatted file not found$(NC)\n"; \
-					failed=$$((failed + 1)); \
-					continue; \
-				fi; \
-				if ! dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$malformed_file" -o "$$actual_file" > /dev/null 2>&1; then \
-					printf "$(RED)❌ Formatting failed$(NC)\n"; \
-					failed=$$((failed + 1)); \
-					continue; \
-				fi; \
-				if diff -u "$$expected_file" "$$actual_file" > /dev/null; then \
-					printf "$(GREEN)✅ PASS$(NC)\n"; \
-					passed=$$((passed + 1)); \
+					echo "FAIL" > "$$actual.result"; \
+				fi ;; \
+			negative) \
+				result="$(TEMP_DIR)/$$name.result"; \
+				if dotnet run --project $(CLI_DIR) --verbosity quiet -- compile "$$file" >/dev/null 2>&1; then \
+					echo "FAIL" > "$$result"; \
 				else \
-					printf "$(RED)❌ FAIL$(NC)\n"; \
-					printf "$(YELLOW)Expected vs Actual formatting differences:$(NC)\n"; \
-					diff -u "$$expected_file" "$$actual_file" | head -20; \
-					echo; \
-					failed=$$((failed + 1)); \
+					echo "PASS" > "$$result"; \
+				fi ;; \
+			format) \
+				expected="$(EXPECTED_DIR)/$$name.formatted.shx"; actual="$(TEMP_DIR)/$$name.formatted.shx"; \
+				if [ -f "$$expected" ] && dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$file" -o "$$actual" >/dev/null 2>&1; then \
+					if diff -u "$$expected" "$$actual" >/dev/null 2>&1; then \
+						echo "PASS" > "$$actual.result"; \
+					else \
+						echo "FAIL" > "$$actual.result"; \
+					fi; \
+				else \
+					echo "FAIL" > "$$actual.result"; \
+				fi ;; \
+			esac; \
+		}; \
+		run_test_group() { \
+			local test_dir="$$1" test_type="$$2" group_name="$$3"; \
+			local group_pids="" group_count=0 group_total=0 group_passed=0 group_failed=0; \
+			echo "$(BLUE)Running $$group_name...$(NC)"; \
+			for file in "$$test_dir"/*.shx; do \
+				[ -f "$$file" ] || continue; \
+				run_test "$$file" "$$test_type" & \
+				pid=$$!; \
+				group_pids="$$group_pids $$pid"; \
+				group_count=$$((group_count + 1)); \
+				if [ $$group_count -ge $$MAX_JOBS ]; then \
+					set -- $$group_pids; wait "$$1"; \
+					shift; group_pids="$$*"; group_count=$$((group_count - 1)); \
 				fi; \
-			fi; \
-		done; \
+			done; \
+			for pid in $$group_pids; do wait "$$pid" 2>/dev/null || true; done; \
+			for file in "$$test_dir"/*.shx; do \
+				[ -f "$$file" ] || continue; \
+				name=$$(basename "$$file" .shx); \
+				case "$$test_type" in \
+					positive) result_file="$(TEMP_DIR)/$$name.sh.result"; label="$$name";; \
+					negative) result_file="$(TEMP_DIR)/$$name.result"; label="$$name (expect failure)";; \
+					format) result_file="$(TEMP_DIR)/$$name.formatted.shx.result"; label="$$name format";; \
+				esac; \
+				[ -f "$$result_file" ] || continue; \
+				printf "🔍 Testing $$label... "; \
+				if [ "$$(cat "$$result_file" 2>/dev/null)" = "PASS" ]; then \
+					case "$$label" in \
+						*"(expect failure)"*) echo "$(GREEN)✅ PASS (failed as expected)$(NC)"; group_passed=$$((group_passed + 1));; \
+						*) echo "$(GREEN)✅ PASS$(NC)"; group_passed=$$((group_passed + 1));; \
+					esac; \
+				else \
+					case "$$label" in \
+						*"(expect failure)"*) echo "$(RED)❌ FAIL (should have failed)$(NC)"; group_failed=$$((group_failed + 1));; \
+						*) echo "$(RED)❌ FAIL$(NC)"; group_failed=$$((group_failed + 1));; \
+					esac; \
+				fi; \
+				group_total=$$((group_total + 1)); \
+			done; \
+			echo; \
+			total=$$((total + group_total)); \
+			passed=$$((passed + group_passed)); \
+			failed=$$((failed + group_failed)); \
+		}; \
+		run_test_group "$(FIXTURES_DIR)" "positive" "positive tests"; \
+		run_test_group "$(NEGATIVE_TESTS_DIR)" "negative" "negative tests (should fail compilation)"; \
+		run_test_group "$(MALFORMED_DIR)" "format" "format tests"; \
 	fi; \
 	echo; \
 	echo "📊 Test Results"; \
