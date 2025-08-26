@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-127-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-128-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4951,6 +4951,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isUUID(uuid)` - Validate UUID format conforming to RFC 4122 standards (versions 1-5)
 
+#### Emptiness Validation
+
+- `validate.isEmpty(value)` - Check if a value is empty (works with strings, arrays, and other data types)
+
 ### Email Validation Usage
 
 ```typescript
@@ -4988,7 +4992,7 @@ console.log(`Contact email is valid: ${emailValid}`);
 
 ```typescript
 // Valid email addresses
-validate.isEmail("user@example.com");           // true
+validate.isEmail("user@example.com");          // true
 validate.isEmail("first.last@domain.co.uk");   // true
 validate.isEmail("user+tag@example.org");      // true
 validate.isEmail("test_user@sub.example.com"); // true
@@ -5104,6 +5108,82 @@ validate.isUUID("550e8400-e29b-41d4-2716-446655440000");     // false (invalid v
 validate.isUUID("550e8400e29b41d4a716446655440000");         // false (no hyphens)
 ```
 
+### Emptiness Validation Usage
+
+```typescript
+// Basic string validation
+let emptyString: string = "";
+let nonEmptyString: string = "hello";
+let whitespaceString: string = "   ";
+
+let emptyCheck: boolean = validate.isEmpty(emptyString);        // true
+let nonEmptyCheck: boolean = validate.isEmpty(nonEmptyString);  // false
+let whitespaceCheck: boolean = validate.isEmpty(whitespaceString); // false (whitespace is not empty)
+
+console.log(`Empty string is empty: ${emptyCheck}`);
+console.log(`Non-empty string is empty: ${nonEmptyCheck}`);
+console.log(`Whitespace string is empty: ${whitespaceCheck}`);
+
+// Array validation
+let emptyArray: string[] = [];
+let filledArray: string[] = ["item"];
+let arrayWithEmptyString: string[] = [""];
+
+let emptyArrayCheck: boolean = validate.isEmpty(emptyArray);           // true
+let filledArrayCheck: boolean = validate.isEmpty(filledArray);         // false
+let arrayWithEmptyCheck: boolean = validate.isEmpty(arrayWithEmptyString); // false (array has element)
+
+console.log(`Empty array is empty: ${emptyArrayCheck}`);
+console.log(`Filled array is empty: ${filledArrayCheck}`);
+console.log(`Array with empty string is empty: ${arrayWithEmptyCheck}`);
+
+// Conditional usage
+if (validate.isEmpty(userInput)) {
+  console.log("Please provide some input");
+} else {
+  console.log(`Processing: ${userInput}`);
+}
+
+// Array conditional usage
+let dataList: string[] = [];
+if (validate.isEmpty(dataList)) {
+  console.log("Data list is empty, initializing defaults");
+} else {
+  console.log("Data list has items");
+}
+
+// Integration with variables
+let config: string[] = [];
+let hasDefaults: boolean = true;
+
+if (validate.isEmpty(config) && hasDefaults) {
+  console.log("Using default configuration");
+}
+```
+
+### Emptiness Validation Examples
+
+```typescript
+// String validation examples
+validate.isEmpty("");                    // true (empty string)
+validate.isEmpty("hello");               // false (has content)
+validate.isEmpty("   ");                 // false (whitespace is not empty)
+validate.isEmpty("0");                   // false (zero as string is not empty)
+validate.isEmpty("false");               // false (boolean as string is not empty)
+
+// Array validation examples
+validate.isEmpty([]);                    // true (empty array)
+validate.isEmpty(["item"]);              // false (has element)
+validate.isEmpty([""]);                  // false (has empty string element)
+validate.isEmpty([0]);                   // false (has zero element)
+validate.isEmpty([false]);               // false (has false element)
+
+// Edge cases
+validate.isEmpty("a");                   // false (single character)
+validate.isEmpty("\n");                  // false (newline character)
+validate.isEmpty("\t");                  // false (tab character)
+```
+
 ### Generated Bash Code for Validation Functions
 
 The validation functions transpile to efficient bash regex pattern matching:
@@ -5167,6 +5247,56 @@ generatedUUID=$(if command -v uuidgen >/dev/null 2>&1; then uuidgen; elif comman
 if [ $(echo "${generatedUUID}" | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' && echo "true" || echo "false") = "true" ]; then
   echo "Generated UUID is valid"
 fi
+
+# validate.isEmpty() becomes:
+emptyString=""
+emptyCheck=$(
+_utah_validate_empty() {
+  local val="$1"
+  # Check if it's an empty string
+  [ -z "$val" ] && echo "true" && return
+  # Check if it's an empty array (empty parentheses with optional whitespace)
+  if [[ "$val" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo "true" && return
+  fi
+  # Check if it's the literal string '()'
+  [ "$val" = "()" ] && echo "true" && return
+  echo "false"
+}
+_utah_validate_empty ${emptyString}
+)
+
+# isEmpty validation in conditionals
+if [ $(
+_utah_validate_empty() {
+  local val="$1"
+  [ -z "$val" ] && echo "true" && return
+  if [[ "$val" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo "true" && return
+  fi
+  [ "$val" = "()" ] && echo "true" && return
+  echo "false"
+}
+_utah_validate_empty ""
+) = "true" ]; then
+  echo "Input is empty, please provide some data"
+fi
+
+# isEmpty with arrays
+emptyArray=()
+arrayIsEmpty=$(
+_utah_validate_empty() {
+  local val="$1"
+  [ -z "$val" ] && echo "true" && return
+  if [[ "$val" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo "true" && return
+  fi
+  [ "$val" = "()" ] && echo "true" && return
+  echo "false"
+}
+_utah_validate_empty "()"
+)
+echo "Array is empty: ${arrayIsEmpty}"
 ```
 
 ### Validation Functions Features
@@ -5468,7 +5598,9 @@ Current tests cover:
 - **utility_random.shx** - Utility random number generation with range parameters
 - **utils.shx** - General utility functions and helpers
 - **validate_isemail.shx** - Email validation function for validating email address formats
+- **validate_isempty.shx** - Emptiness validation function for checking if values are empty (strings, arrays)
 - **validate_isurl.shx** - URL validation function for validating HTTP, HTTPS, FTP, and FILE URLs
+- **validate_isuuid.shx** - UUID validation function for validating RFC 4122 compliant UUIDs
 - **variable_declaration.shx** - Variable declarations and usage
 - **web_get.shx** - Web HTTP GET requests and API communication
 - **while_loop.shx** - While loops with break statements and conditional logic
@@ -5628,9 +5760,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isUUID()` function for UUID validation
 
-- [ ] `validate.isPhoneNumber()` function for phone number validation
-
-- [ ] `validate.isNull()` function for null checks
+- [x] `validate.isEmpty()` function for empty checks
 
 - [ ] `validate.isGreaterThan()` function for numeric comparisons
 

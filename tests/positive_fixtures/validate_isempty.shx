@@ -1,0 +1,106 @@
+// validate.isEmpty() function tests
+// Tests various emptiness validation scenarios for different data types
+
+// Basic string validation tests
+let emptyString: string = "";
+let emptyCheck: boolean = validate.isEmpty(emptyString);
+console.log("Empty string: " + emptyCheck);
+
+let nonEmptyString: string = "hello";
+let nonEmptyCheck: boolean = validate.isEmpty(nonEmptyString);
+console.log("Non-empty string: " + nonEmptyCheck);
+
+let whitespaceString: string = "   ";
+let whitespaceCheck: boolean = validate.isEmpty(whitespaceString);
+console.log("Whitespace string: " + whitespaceCheck);
+
+// Array validation tests
+let emptyArray: string[] = [];
+let emptyArrayCheck: boolean = validate.isEmpty(emptyArray);
+console.log("Empty array: " + emptyArrayCheck);
+
+let filledArray: string[] = ["item"];
+let filledArrayCheck: boolean = validate.isEmpty(filledArray);
+console.log("Filled array: " + filledArrayCheck);
+
+let arrayWithEmptyString: string[] = [""];
+let arrayWithEmptyStringCheck: boolean = validate.isEmpty(arrayWithEmptyString);
+console.log("Array with empty string: " + arrayWithEmptyStringCheck);
+
+// Number array tests
+let emptyNumbers: number[] = [];
+let emptyNumbersCheck: boolean = validate.isEmpty(emptyNumbers);
+console.log("Empty number array: " + emptyNumbersCheck);
+
+let numbersWithZero: number[] = [0];
+let numbersWithZeroCheck: boolean = validate.isEmpty(numbersWithZero);
+console.log("Number array with zero: " + numbersWithZeroCheck);
+
+// Boolean array tests
+let emptyBooleans: boolean[] = [];
+let emptyBooleansCheck: boolean = validate.isEmpty(emptyBooleans);
+console.log("Empty boolean array: " + emptyBooleansCheck);
+
+let booleansWithFalse: boolean[] = [false];
+let booleansWithFalseCheck: boolean = validate.isEmpty(booleansWithFalse);
+console.log("Boolean array with false: " + booleansWithFalseCheck);
+
+// Conditional usage tests
+if (validate.isEmpty("")) {
+  console.log("Empty string detected in conditional");
+}
+
+if (!validate.isEmpty(["a", "b"])) {
+  console.log("Array has contents");
+}
+
+// Variable usage in conditionals
+let userInput: string = "";
+if (validate.isEmpty(userInput)) {
+  console.log("User provided no input");
+} else {
+  console.log("User provided input: " + userInput);
+}
+
+// Array conditional usage
+let dataList: string[] = [];
+if (validate.isEmpty(dataList)) {
+  console.log("Data list is empty, initializing defaults");
+} else {
+  console.log("Data list has items");
+}
+
+// Assignment usage
+let stringIsEmpty: boolean = validate.isEmpty("");
+let arrayIsEmpty: boolean = validate.isEmpty([]);
+let stringIsNotEmpty: boolean = validate.isEmpty("test");
+let arrayIsNotEmpty: boolean = validate.isEmpty(["test"]);
+
+console.log("String isEmpty result: " + stringIsEmpty);
+console.log("Array isEmpty result: " + arrayIsEmpty);
+console.log("String isNotEmpty result: " + stringIsNotEmpty);
+console.log("Array isNotEmpty result: " + arrayIsNotEmpty);
+
+// Edge case: single character
+let singleChar: string = "a";
+let singleCharCheck: boolean = validate.isEmpty(singleChar);
+console.log("Single character: " + singleCharCheck);
+
+// Edge case: number as string
+let numberString: string = "0";
+let numberStringCheck: boolean = validate.isEmpty(numberString);
+console.log("Number as string: " + numberStringCheck);
+
+// Complex conditional logic
+let config: string[] = [];
+let hasDefaults: boolean = true;
+
+if (validate.isEmpty(config) && hasDefaults) {
+  console.log("Using default configuration");
+} else {
+  console.log("Using custom configuration");
+}
+
+// Function-like usage in expressions
+console.log("Direct call result: " + validate.isEmpty("test"));
+console.log("Direct array call result: " + validate.isEmpty([]));

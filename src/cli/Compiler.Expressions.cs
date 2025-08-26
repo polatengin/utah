@@ -251,6 +251,8 @@ public partial class Compiler
         return CompileValidateIsURLExpression(validateIsURL);
       case ValidateIsUUIDExpression validateIsUUID:
         return CompileValidateIsUUIDExpression(validateIsUUID);
+      case ValidateIsEmptyExpression validateIsEmpty:
+        return CompileValidateIsEmptyExpression(validateIsEmpty);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2774,6 +2776,29 @@ fi
     // Pattern: xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
     // where M is version (1-5) and N is variant (8,9,A,B)
     return $"$(echo {uuid} | grep -qE '^[0-9a-fA-F]{{8}}-[0-9a-fA-F]{{4}}-[1-5][0-9a-fA-F]{{3}}-[89abAB][0-9a-fA-F]{{3}}-[0-9a-fA-F]{{12}}$' && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileValidateIsEmptyExpression(ValidateIsEmptyExpression validateIsEmpty)
+  {
+    var value = CompileExpression(validateIsEmpty.Value);
+
+    // Use a bash function that checks multiple empty conditions
+    // This handles both strings and arrays with proper type detection
+    return $@"$(
+_utah_validate_empty() {{
+  local val=""$1""
+  # Check if it's an empty string
+  [ -z ""$val"" ] && echo ""true"" && return
+  # Check if it's an empty array (empty parentheses with optional whitespace)
+  if [[ ""$val"" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo ""true"" && return
+  fi
+  # Check if it's the literal string '()'
+  [ ""$val"" = ""()"" ] && echo ""true"" && return
+  echo ""false""
+}}
+_utah_validate_empty {value}
+)";
   }
 
   private static int _uniqueIdCounter = 0;

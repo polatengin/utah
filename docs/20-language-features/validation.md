@@ -634,6 +634,130 @@ else
 fi
 ```
 
+### Emptiness Validation
+
+#### validate.isEmpty()
+
+Checks if a value is empty. Works with strings, arrays, and other data types to provide universal emptiness validation.
+
+**Syntax:**
+
+```typescript
+validate.isEmpty(value: any) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The value to check for emptiness (can be string, array, or other types)
+
+**Returns:**
+
+- `true` if the value is empty
+- `false` if the value has content
+
+**Examples:**
+
+```typescript
+// String validation
+let emptyString: string = "";
+let isStringEmpty: boolean = validate.isEmpty(emptyString);  // true
+
+let nonEmptyString: string = "hello";
+let isStringNotEmpty: boolean = validate.isEmpty(nonEmptyString);  // false
+
+let whitespaceString: string = "   ";
+let isWhitespaceEmpty: boolean = validate.isEmpty(whitespaceString);  // false (whitespace is not empty)
+
+// Array validation
+let emptyArray: string[] = [];
+let isArrayEmpty: boolean = validate.isEmpty(emptyArray);  // true
+
+let filledArray: string[] = ["item"];
+let isArrayNotEmpty: boolean = validate.isEmpty(filledArray);  // false
+
+let arrayWithEmptyString: string[] = [""];
+let isArrayWithEmptyEmpty: boolean = validate.isEmpty(arrayWithEmptyString);  // false (has element)
+
+// Conditional usage
+if (validate.isEmpty(userInput)) {
+  console.log("Please provide some input");
+} else {
+  console.log("Processing: " + userInput);
+}
+
+// Integration with other logic
+let config: string[] = [];
+let hasDefaults: boolean = true;
+
+if (validate.isEmpty(config) && hasDefaults) {
+  console.log("Using default configuration");
+}
+```
+
+The `validate.isEmpty()` function uses intelligent type detection:
+
+**String Emptiness:**
+
+- Empty string `""` returns `true`
+- Non-empty strings return `false`
+- Whitespace-only strings return `false` (whitespace is considered content)
+
+**Array Emptiness:**
+
+- Empty arrays `[]` return `true`
+- Arrays with any elements return `false`
+- Arrays containing empty strings still return `false` (they have elements)
+
+**Edge Cases:**
+
+```typescript
+validate.isEmpty("");                    // true (empty string)
+validate.isEmpty("0");                   // false (zero as string)
+validate.isEmpty("false");               // false (boolean as string)
+validate.isEmpty("   ");                 // false (whitespace)
+validate.isEmpty([]);                    // true (empty array)
+validate.isEmpty([""]);                  // false (array with empty string)
+validate.isEmpty([0]);                   // false (array with zero)
+validate.isEmpty([false]);               // false (array with false)
+```
+
+### Emptiness Validation Bash Output
+
+```bash
+# String emptiness validation
+emptyString=""
+emptyCheck=$(
+_utah_validate_empty() {
+  local val="$1"
+  # Check if it's an empty string
+  [ -z "$val" ] && echo "true" && return
+  # Check if it's an empty array (empty parentheses with optional whitespace)
+  if [[ "$val" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo "true" && return
+  fi
+  # Check if it's the literal string '()'
+  [ "$val" = "()" ] && echo "true" && return
+  echo "false"
+}
+_utah_validate_empty ${emptyString}
+)
+
+# Array emptiness validation
+emptyArray=()
+arrayIsEmpty=$(
+_utah_validate_empty() {
+  local val="$1"
+  [ -z "$val" ] && echo "true" && return
+  if [[ "$val" =~ ^[[:space:]]*\(\)[[:space:]]*$ ]]; then
+    echo "true" && return
+  fi
+  [ "$val" = "()" ] && echo "true" && return
+  echo "false"
+}
+_utah_validate_empty "()"
+)
+```
+
 ## Future Validation Functions
 
 The validation framework is designed for extensibility. Planned additions include:
