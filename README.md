@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-118-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-119-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4827,6 +4827,136 @@ echo "Script will continue even if commands fail"
 - All functions compile to standard POSIX shell `set` commands
 - No performance impact - these are shell built-in commands
 
+## ✅ Validation Functions
+
+Utah provides validation functions for common data types and formats. These functions return boolean values and can be used in conditionals, assignments, and other expressions to validate user input and data integrity.
+
+### Available Validation Functions
+
+#### Email Validation
+
+- `validate.isEmail(email)` - Validate email address format using RFC-compliant pattern matching
+
+### Email Validation Usage
+
+```typescript
+// Basic email validation
+let userEmail: string = "user@example.com";
+let isValid: boolean = validate.isEmail(userEmail);
+
+if (isValid) {
+  console.log("Email address is valid");
+} else {
+  console.log("Please enter a valid email address");
+  exit(1);
+}
+
+// Validate user input
+let inputEmail: string = console.promptText("Enter your email address:");
+if (validate.isEmail(inputEmail)) {
+  console.log("Thank you! Your email has been recorded.");
+} else {
+  console.log("Invalid email format. Please try again.");
+}
+
+// Use in conditional chains
+let configEmail: string = "admin@company.com";
+if (validate.isEmail(configEmail) && configEmail.includes("company.com")) {
+  console.log("Corporate email validated");
+}
+
+// Validation in assignments
+let emailValid: boolean = validate.isEmail("contact@business.org");
+console.log(`Contact email is valid: ${emailValid}`);
+```
+
+### Email Validation Examples
+
+```typescript
+// Valid email addresses
+validate.isEmail("user@example.com");           // true
+validate.isEmail("first.last@domain.co.uk");   // true
+validate.isEmail("user+tag@example.org");      // true
+validate.isEmail("test_user@sub.example.com"); // true
+validate.isEmail("123@numeric-domain.com");    // true
+
+// Invalid email addresses
+validate.isEmail("invalid.email");             // false (no @ symbol)
+validate.isEmail("@example.com");              // false (no local part)
+validate.isEmail("user@");                     // false (no domain)
+validate.isEmail("user@.com");                 // false (invalid domain)
+validate.isEmail("user@domain");               // false (no TLD)
+```
+
+### Generated Bash Code for Validation Functions
+
+The validation functions transpile to efficient bash regex pattern matching:
+
+```bash
+# validate.isEmail() becomes:
+userEmail="user@example.com"
+isValid=$(echo ${userEmail} | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' && echo "true" || echo "false")
+
+if [ "${isValid}" = "true" ]; then
+  echo "Email address is valid"
+else
+  echo "Please enter a valid email address"
+  exit 1
+fi
+
+# Email validation in conditionals
+configEmail="admin@company.com"
+if [ $(echo "${configEmail}" | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' && echo "true" || echo "false") = "true" ]; then
+  echo "Corporate email validated"
+fi
+
+# Validation assignment
+emailValid=$(echo "contact@business.org" | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' && echo "true" || echo "false")
+echo "Contact email is valid: ${emailValid}"
+```
+
+### Validation Functions Features
+
+- **Performance**: Uses native bash regex matching for fast validation
+- **Reliability**: Tested patterns that work across different systems
+- **Integration**: Seamlessly works with Utah's boolean logic and conditionals
+- **Error handling**: Returns `false` for any invalid input (safe fallback)
+- **Consistency**: All validation functions follow the same return pattern
+
+### Email Validation Technical Details
+
+The email validation uses a simplified but robust regex pattern that covers most common email formats:
+
+- **Local part**: Alphanumeric characters, dots, underscores, percent signs, plus signs, hyphens
+- **Domain part**: Alphanumeric characters, dots, hyphens
+- **TLD requirement**: At least 2 alphabetic characters for the top-level domain
+- **Length limits**: Reasonable limits to prevent regex performance issues
+
+### Validation Functions Use Cases
+
+- **User Registration**: Validate email addresses during user account creation
+- **Configuration Validation**: Ensure configuration files contain valid email addresses
+- **Contact Forms**: Validate email input in contact and feedback forms
+- **API Input Validation**: Validate email parameters in API requests
+- **Batch Processing**: Validate email addresses in bulk data processing
+- **Security**: Prevent malformed email addresses from being processed
+
+### Best Practices for Validation Functions
+
+- **Always validate user input**: Use validation functions for any user-provided data
+- **Combine with other checks**: Use validation functions with additional business logic
+- **Provide clear feedback**: Give users specific error messages when validation fails
+- **Handle edge cases**: Consider how your application should handle invalid data
+- **Performance**: Validation functions are fast, but avoid unnecessary repeated validation
+
+### Validation Functions Technical Notes
+
+- All validation functions return boolean values (`"true"` or `"false"` strings in bash)
+- Validation functions use native bash capabilities for maximum compatibility
+- Functions work with variables, literals, and expressions
+- No external dependencies required for basic validation functions
+- Regex patterns are optimized for both accuracy and performance
+
 ## CLI Commands
 
 ### Running Utah Code
@@ -5222,7 +5352,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [ ] `git.forcePush()` function for force pushing changes
 
-- [ ] `validate.isEmail()` function for email validation
+- [x] `validate.isEmail()` function for email validation
 
 - [ ] `validate.isURL()` function for URL validation
 

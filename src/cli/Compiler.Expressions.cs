@@ -239,6 +239,8 @@ public partial class Compiler
         return CompileYamlMergeExpression(yamlMerge);
       case YamlInstallDependenciesExpression yamlInstallDependencies:
         return CompileYamlInstallDependenciesExpression(yamlInstallDependencies);
+      case ValidateIsEmailExpression validateIsEmail:
+        return CompileValidateIsEmailExpression(validateIsEmail);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2573,6 +2575,13 @@ else
   echo ""jq is already installed""
 fi
 )";
+  }
+
+  private string CompileValidateIsEmailExpression(ValidateIsEmailExpression validateIsEmail)
+  {
+    var email = CompileExpression(validateIsEmail.Email);
+    // Use a simplified but reliable email regex pattern
+    return $"$(echo {email} | grep -qE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{{2,}}$' && echo \"true\" || echo \"false\")";
   }
 
   private static int _uniqueIdCounter = 0;

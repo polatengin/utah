@@ -634,6 +634,8 @@ public class FormatterVisitor
       case ArrayNamespaceCallExpression arrayNamespaceCall:
         var arrayArgs = string.Join(", ", arrayNamespaceCall.Arguments.Select(VisitExpression));
         return $"array.{arrayNamespaceCall.FunctionName}({arrayArgs})";
+      case ValidateIsEmailExpression validateIsEmail:
+        return $"validate.isEmail({VisitExpression(validateIsEmail.Email)})";
       default:
         return expr.ToString() ?? "";
     }

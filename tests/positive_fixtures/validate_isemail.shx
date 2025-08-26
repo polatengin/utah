@@ -1,0 +1,83 @@
+// validate.isEmail() function tests
+// Tests various email validation scenarios
+
+// Basic valid email tests
+let email1: string = "user@example.com";
+let isValid1: boolean = validate.isEmail(email1);
+console.log("Basic email: " + email1 + " is " + isValid1);
+
+let email2: string = "first.last@subdomain.example.co.uk";
+let isValid2: boolean = validate.isEmail(email2);
+console.log("Complex domain: " + email2 + " is " + isValid2);
+
+let email3: string = "user+tag@example.org";
+let isValid3: boolean = validate.isEmail(email3);
+console.log("Plus tag: " + email3 + " is " + isValid3);
+
+let email4: string = "user_name@example-site.com";
+let isValid4: boolean = validate.isEmail(email4);
+console.log("Underscore and hyphen: " + email4 + " is " + isValid4);
+
+// Invalid email tests
+let invalidEmail1: string = "invalid.email";
+let isInvalid1: boolean = validate.isEmail(invalidEmail1);
+console.log("No @ symbol: " + invalidEmail1 + " is " + isInvalid1);
+
+let invalidEmail2: string = "@example.com";
+let isInvalid2: boolean = validate.isEmail(invalidEmail2);
+console.log("No local part: " + invalidEmail2 + " is " + isInvalid2);
+
+let invalidEmail3: string = "user@";
+let isInvalid3: boolean = validate.isEmail(invalidEmail3);
+console.log("No domain: " + invalidEmail3 + " is " + isInvalid3);
+
+let invalidEmail4: string = "user@.com";
+let isInvalid4: boolean = validate.isEmail(invalidEmail4);
+console.log("Invalid domain: " + invalidEmail4 + " is " + isInvalid4);
+
+// Conditional usage
+if (validate.isEmail("admin@company.com")) {
+  console.log("Admin email is valid");
+} else {
+  console.log("Admin email is invalid");
+}
+
+// Variable usage
+let userInput: string = "test@email.com";
+if (validate.isEmail(userInput)) {
+  console.log("User provided valid email");
+} else {
+  console.log("User provided invalid email");
+}
+
+// In assignment
+let emailCheckResult: boolean = validate.isEmail("contact@business.org");
+console.log("Contact email validation result: " + emailCheckResult);
+
+// Complex validation chain
+let configEmail: string = "config@app.local";
+let isValidConfig: boolean = validate.isEmail(configEmail);
+if (isValidConfig) {
+  console.log("Configuration email is valid");
+} else {
+  console.log("Configuration email needs correction");
+}
+
+// Edge case tests
+let edgeCase1: string = "a@b.co";
+let edgeValid1: boolean = validate.isEmail(edgeCase1);
+console.log("Short email: " + edgeCase1 + " is " + edgeValid1);
+
+let edgeCase2: string = "very.long.email.address@very.long.domain.name.example.com";
+let edgeValid2: boolean = validate.isEmail(edgeCase2);
+console.log("Long email: " + edgeCase2 + " is " + edgeValid2);
+
+// Numeric cases
+let numericEmail: string = "user123@123domain.com";
+let numericValid: boolean = validate.isEmail(numericEmail);
+console.log("Numeric email: " + numericEmail + " is " + numericValid);
+
+// Special characters
+let specialEmail: string = "test.email!#$%&*+-/=?^_`{|}~@example.com";
+let specialValid: boolean = validate.isEmail(specialEmail);
+console.log("Special chars: " + specialEmail + " is " + specialValid);

@@ -1482,6 +1482,18 @@ public partial class Parser
         throw new InvalidOperationException("yaml.installDependencies() requires no arguments");
       }
 
+      // Special handling for validate.isEmail()
+      if (functionName == "validate.isEmail")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var emailExpr = ParseExpression(args[0]);
+          return new ValidateIsEmailExpression(emailExpr);
+        }
+        throw new InvalidOperationException("validate.isEmail() requires exactly 1 argument (email)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {
