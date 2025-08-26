@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-128-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-129-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4955,6 +4955,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isEmpty(value)` - Check if a value is empty (works with strings, arrays, and other data types)
 
+#### Numeric Comparison Validation
+
+- `validate.isGreaterThan(value, threshold)` - Check if a numeric value is greater than a threshold
+
 ### Email Validation Usage
 
 ```typescript
@@ -5116,8 +5120,8 @@ let emptyString: string = "";
 let nonEmptyString: string = "hello";
 let whitespaceString: string = "   ";
 
-let emptyCheck: boolean = validate.isEmpty(emptyString);        // true
-let nonEmptyCheck: boolean = validate.isEmpty(nonEmptyString);  // false
+let emptyCheck: boolean = validate.isEmpty(emptyString);           // true
+let nonEmptyCheck: boolean = validate.isEmpty(nonEmptyString);     // false
 let whitespaceCheck: boolean = validate.isEmpty(whitespaceString); // false (whitespace is not empty)
 
 console.log(`Empty string is empty: ${emptyCheck}`);
@@ -5182,6 +5186,73 @@ validate.isEmpty([false]);               // false (has false element)
 validate.isEmpty("a");                   // false (single character)
 validate.isEmpty("\n");                  // false (newline character)
 validate.isEmpty("\t");                  // false (tab character)
+```
+
+### Numeric Comparison Validation Usage
+
+```typescript
+// Basic integer comparison
+let score: number = 85;
+let passing: boolean = validate.isGreaterThan(score, 70);
+
+if (passing) {
+  console.log("Student passed the exam");
+} else {
+  console.log("Student failed the exam");
+}
+
+// Float comparison
+let temperature: number = 98.7;
+let fever: boolean = validate.isGreaterThan(temperature, 98.6);
+
+if (fever) {
+  console.log("Patient has fever");
+} else {
+  console.log("Patient temperature is normal");
+}
+
+// String number comparison
+let userAge: string = "25";
+let canDrink: boolean = validate.isGreaterThan(userAge, "21");
+
+if (canDrink) {
+  console.log("User can purchase alcohol");
+} else {
+  console.log("User is too young to purchase alcohol");
+}
+
+// Use in conditional chains
+let minScore: number = 80;
+let actualScore: number = 92;
+if (validate.isGreaterThan(actualScore, minScore)) {
+  console.log("High score achieved!");
+}
+
+// Validation in assignments
+let aboveThreshold: boolean = validate.isGreaterThan(150, 100);
+console.log(`Value is above threshold: ${aboveThreshold}`);
+```
+
+### Numeric Comparison Validation Examples
+
+```typescript
+// Valid numeric comparisons
+validate.isGreaterThan(85, 70);          // true (85 > 70)
+validate.isGreaterThan(98.7, 98.6);      // true (98.7 > 98.6)
+validate.isGreaterThan("25", "18");      // true (string numbers)
+validate.isGreaterThan(6, 5.9);          // true (mixed int/float)
+validate.isGreaterThan(-10, -20);        // true (-10 > -20)
+
+// False comparisons
+validate.isGreaterThan(65, 70);          // false (65 < 70)
+validate.isGreaterThan(70, 70);          // false (equal values)
+validate.isGreaterThan(-20, -10);        // false (-20 < -10)
+validate.isGreaterThan(0, 1);            // false (0 < 1)
+
+// Invalid inputs (return false)
+validate.isGreaterThan("abc", 5);        // false (non-numeric value)
+validate.isGreaterThan(10, "xyz");       // false (non-numeric threshold)
+validate.isGreaterThan("", "");          // false (empty strings)
 ```
 
 ### Generated Bash Code for Validation Functions
@@ -5297,6 +5368,61 @@ _utah_validate_empty() {
 _utah_validate_empty "()"
 )
 echo "Array is empty: ${arrayIsEmpty}"
+
+# validate.isGreaterThan() becomes:
+score=85
+passing=$(
+_utah_validate_greater_than() {
+  local value="$1"
+  local threshold="$2"
+  
+  # Check if both values are numeric (integer or float)
+  if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "false" && return
+  fi
+  
+  # Use bc for floating-point comparison, awk as fallback
+  if command -v bc >/dev/null 2>&1; then
+    result=$(echo "$value > $threshold" | bc)
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  else
+    # Fallback using awk for float comparison
+    result=$(awk "BEGIN { print ($value > $threshold) ? 1 : 0 }")
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  fi
+}
+_utah_validate_greater_than ${score} 70
+)
+
+if [ "${passing}" = "true" ]; then
+  echo "Student passed the exam"
+else
+  echo "Student failed the exam"
+fi
+
+# isGreaterThan validation in conditionals
+userAge="25"
+if [ $(
+_utah_validate_greater_than() {
+  local value="$1"
+  local threshold="$2"
+  
+  if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "false" && return
+  fi
+  
+  if command -v bc >/dev/null 2>&1; then
+    result=$(echo "$value > $threshold" | bc)
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  else
+    result=$(awk "BEGIN { print ($value > $threshold) ? 1 : 0 }")
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  fi
+}
+_utah_validate_greater_than "${userAge}" "21"
+) = "true" ]; then
+  echo "User can purchase alcohol"
+fi
 ```
 
 ### Validation Functions Features
@@ -5601,6 +5727,7 @@ Current tests cover:
 - **validate_isempty.shx** - Emptiness validation function for checking if values are empty (strings, arrays)
 - **validate_isurl.shx** - URL validation function for validating HTTP, HTTPS, FTP, and FILE URLs
 - **validate_isuuid.shx** - UUID validation function for validating RFC 4122 compliant UUIDs
+- **validate_isgreaterthan.shx** - Numeric comparison validation function for checking if a value is greater than a threshold
 - **variable_declaration.shx** - Variable declarations and usage
 - **web_get.shx** - Web HTTP GET requests and API communication
 - **while_loop.shx** - While loops with break statements and conditional logic
@@ -5762,7 +5889,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isEmpty()` function for empty checks
 
-- [ ] `validate.isGreaterThan()` function for numeric comparisons
+- [x] `validate.isGreaterThan()` function for numeric comparisons
 
 - [ ] `validate.isLessThan()` function for numeric comparisons
 

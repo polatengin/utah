@@ -758,14 +758,113 @@ _utah_validate_empty "()"
 )
 ```
 
+### Numeric Comparison Validation
+
+#### validate.isGreaterThan()
+
+Checks if a numeric value is greater than a specified threshold. Supports both integer and floating-point comparisons with automatic type detection.
+
+**Syntax:**
+
+```typescript
+validate.isGreaterThan(value: number | string, threshold: number | string) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The value to compare (must be numeric or numeric string)
+- `threshold` - The threshold value for comparison
+
+**Returns:** `true` if value > threshold, `false` otherwise
+
+**Basic Usage:**
+
+```typescript
+// Integer comparisons
+let score: number = 85;
+let passing: boolean = validate.isGreaterThan(score, 70);  // true
+
+// Float comparisons
+let temperature: number = 98.7;
+let fever: boolean = validate.isGreaterThan(temperature, 98.6);  // true
+
+// String number comparisons
+let userAge: string = "25";
+let canDrink: boolean = validate.isGreaterThan(userAge, "21");  // true
+
+// Conditional usage
+if (validate.isGreaterThan(actualScore, minScore)) {
+  console.log("High score achieved!");
+}
+```
+
+**Edge Cases:**
+
+The `validate.isGreaterThan()` function handles various edge cases safely:
+
+- **Equal values**: Returns `false` (5 is not greater than 5)
+- **Negative numbers**: Properly compares (-10 > -20 is `true`)
+- **Mixed types**: Compares integers with floats (6 > 5.9 is `true`)
+- **Non-numeric values**: Returns `false` for invalid inputs
+- **Empty strings**: Returns `false` for empty or invalid strings
+
+**Examples:**
+
+```typescript
+validate.isGreaterThan(85, 70);          // true
+validate.isGreaterThan(70, 70);          // false (equal)
+validate.isGreaterThan(-10, -20);        // true
+validate.isGreaterThan(6, 5.9);          // true (mixed types)
+validate.isGreaterThan("abc", 5);        // false (invalid)
+validate.isGreaterThan(10, "xyz");       // false (invalid)
+validate.isGreaterThan("", "");          // false (empty)
+```
+
+**Generated Bash Code:**
+
+```bash
+# Example: validate.isGreaterThan(score, 70)
+score=85
+passing=$(
+_utah_validate_greater_than() {
+  local value="$1"
+  local threshold="$2"
+
+  # Check if both values are numeric (integer or float)
+  if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "false" && return
+  fi
+
+  # Use bc for floating-point comparison, awk as fallback
+  if command -v bc >/dev/null 2>&1; then
+    result=$(echo "$value > $threshold" | bc)
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  else
+    # Fallback using awk for float comparison
+    result=$(awk "BEGIN { print ($value > $threshold) ? 1 : 0 }")
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  fi
+}
+_utah_validate_greater_than ${score} 70
+)
+```
+
+**Technical Implementation:**
+
+The function uses a comprehensive numeric validation approach:
+
+1. **Numeric Validation**: Uses regex to ensure both parameters are valid numbers
+2. **Precision Handling**: Prefers `bc` command for high-precision floating-point arithmetic
+3. **Fallback Strategy**: Uses `awk` when `bc` is not available
+4. **Error Safety**: Returns `false` for any invalid input instead of throwing errors
+5. **Performance**: Efficient bash implementation with minimal overhead
+
 ## Future Validation Functions
 
 The validation framework is designed for extensibility. Planned additions include:
 
-- `validate.isPhoneNumber()` - Phone number validation
 - `validate.isNumeric()` - Numeric value validation
 - `validate.isAlphaNumeric()` - Alphanumeric validation
-- `validate.isNull()` - Null/empty validation
 - `validate.isInRange()` - Range validation for numbers
 - `validate.matches()` - Custom regex pattern validation
 

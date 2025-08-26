@@ -253,6 +253,8 @@ public partial class Compiler
         return CompileValidateIsUUIDExpression(validateIsUUID);
       case ValidateIsEmptyExpression validateIsEmpty:
         return CompileValidateIsEmptyExpression(validateIsEmpty);
+      case ValidateIsGreaterThanExpression validateIsGreaterThan:
+        return CompileValidateIsGreaterThanExpression(validateIsGreaterThan);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2798,6 +2800,37 @@ _utah_validate_empty() {{
   echo ""false""
 }}
 _utah_validate_empty {value}
+)";
+  }
+
+  private string CompileValidateIsGreaterThanExpression(ValidateIsGreaterThanExpression validateIsGreaterThan)
+  {
+    var value = CompileExpression(validateIsGreaterThan.Value);
+    var threshold = CompileExpression(validateIsGreaterThan.Threshold);
+
+    // Use a bash function that handles both integer and floating-point comparisons
+    // Validates that both arguments are numeric before performing comparison
+    return $@"$(
+_utah_validate_greater_than() {{
+  local value=""$1""
+  local threshold=""$2""
+  
+  # Check if both values are numeric (integer or float)
+  if ! [[ ""$value"" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ ""$threshold"" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo ""false"" && return
+  fi
+  
+  # Use bc for floating-point comparison, awk as fallback
+  if command -v bc >/dev/null 2>&1; then
+    result=$(echo ""$value > $threshold"" | bc)
+    [ ""$result"" = ""1"" ] && echo ""true"" || echo ""false""
+  else
+    # Fallback using awk for float comparison
+    result=$(awk ""BEGIN {{ print ($value > $threshold) ? 1 : 0 }}"")
+    [ ""$result"" = ""1"" ] && echo ""true"" || echo ""false""
+  fi
+}}
+_utah_validate_greater_than {value} {threshold}
 )";
   }
 

@@ -1,0 +1,124 @@
+// validate.isGreaterThan() function tests
+// Tests numeric comparisons with two parameters
+
+// Basic integer comparisons
+let score1: number = 85;
+let passing1: boolean = validate.isGreaterThan(score1, 70);
+console.log("Score 85 > 70: " + passing1);
+
+let score2: number = 65;
+let passing2: boolean = validate.isGreaterThan(score2, 70);
+console.log("Score 65 > 70: " + passing2);
+
+let score3: number = 70;
+let passing3: boolean = validate.isGreaterThan(score3, 70);
+console.log("Score 70 > 70: " + passing3);
+
+// Float comparisons
+let temp1: number = 98.7;
+let fever1: boolean = validate.isGreaterThan(temp1, 98.6);
+console.log("Temperature 98.7 > 98.6: " + fever1);
+
+let temp2: number = 98.5;
+let fever2: boolean = validate.isGreaterThan(temp2, 98.6);
+console.log("Temperature 98.5 > 98.6: " + fever2);
+
+let price1: number = 5.1;
+let expensive1: boolean = validate.isGreaterThan(price1, 5);
+console.log("Price 5.1 > 5: " + expensive1);
+
+// String number comparisons
+let userAge: string = "25";
+let isAdult: boolean = validate.isGreaterThan(userAge, "18");
+console.log("Age 25 > 18: " + isAdult);
+
+let stringFloat1: string = "3.14";
+let stringFloat2: string = "3.0";
+let piGreater: boolean = validate.isGreaterThan(stringFloat1, stringFloat2);
+console.log("String 3.14 > 3.0: " + piGreater);
+
+// Negative number comparisons
+let neg1: number = -10;
+let neg2: number = -20;
+let negComparison: boolean = validate.isGreaterThan(neg1, neg2);
+console.log("Negative -10 > -20: " + negComparison);
+
+let neg3: number = -20;
+let neg4: number = -10;
+let negComparison2: boolean = validate.isGreaterThan(neg3, neg4);
+console.log("Negative -20 > -10: " + negComparison2);
+
+// Mixed integer and float
+let mixedInt: number = 6;
+let mixedFloat: number = 5.9;
+let mixedComparison: boolean = validate.isGreaterThan(mixedInt, mixedFloat);
+console.log("Mixed 6 > 5.9: " + mixedComparison);
+
+// Edge cases - Equal values (should return false)
+let equal1: number = 100;
+let equal2: number = 100;
+let equalComparison: boolean = validate.isGreaterThan(equal1, equal2);
+console.log("Equal 100 > 100: " + equalComparison);
+
+// Edge cases - Non-numeric values (should return false)
+let invalidValue: string = "abc";
+let numericThreshold: number = 5;
+let invalidComparison: boolean = validate.isGreaterThan(invalidValue, numericThreshold);
+console.log("Invalid 'abc' > 5: " + invalidComparison);
+
+let validValue: number = 10;
+let invalidThreshold: string = "xyz";
+let invalidThresholdComparison: boolean = validate.isGreaterThan(validValue, invalidThreshold);
+console.log("Invalid 10 > 'xyz': " + invalidThresholdComparison);
+
+// Empty string comparisons (should return false)
+let emptyString1: string = "";
+let emptyString2: string = "";
+let emptyComparison: boolean = validate.isGreaterThan(emptyString1, emptyString2);
+console.log("Empty strings comparison: " + emptyComparison);
+
+// Zero comparisons
+let zero1: number = 0;
+let zero2: number = -1;
+let zeroComparison: boolean = validate.isGreaterThan(zero1, zero2);
+console.log("Zero 0 > -1: " + zeroComparison);
+
+let zero3: number = -1;
+let zero4: number = 0;
+let zeroComparison2: boolean = validate.isGreaterThan(zero3, zero4);
+console.log("Zero -1 > 0: " + zeroComparison2);
+
+// Conditional usage
+if (validate.isGreaterThan(userAge, "21")) {
+  console.log("User can drink alcohol");
+} else {
+  console.log("User cannot drink alcohol");
+}
+
+// Variable usage in conditionals
+let minScore: number = 80;
+let actualScore: number = 92;
+if (validate.isGreaterThan(actualScore, minScore)) {
+  console.log("Student passed with high score");
+} else {
+  console.log("Student did not meet minimum score");
+}
+
+// Integration with expressions
+let threshold: number = 50;
+let result1: number = 75;
+let result2: number = 25;
+let bothPassed: boolean = validate.isGreaterThan(result1, threshold) && validate.isGreaterThan(result2, threshold);
+console.log("Both results passed threshold: " + bothPassed);
+
+// Large number comparisons
+let largeNumber1: number = 999999;
+let largeNumber2: number = 999998;
+let largeComparison: boolean = validate.isGreaterThan(largeNumber1, largeNumber2);
+console.log("Large numbers 999999 > 999998: " + largeComparison);
+
+// Decimal precision testing
+let precise1: number = 1.0000001;
+let precise2: number = 1.0000000;
+let preciseComparison: boolean = validate.isGreaterThan(precise1, precise2);
+console.log("Precision 1.0000001 > 1.0000000: " + preciseComparison);

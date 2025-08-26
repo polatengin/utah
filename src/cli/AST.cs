@@ -122,6 +122,7 @@ public record ValidateIsEmailExpression(Expression Email) : Expression;
 public record ValidateIsURLExpression(Expression Url) : Expression;
 public record ValidateIsUUIDExpression(Expression Uuid) : Expression;
 public record ValidateIsEmptyExpression(Expression Value) : Expression;
+public record ValidateIsGreaterThanExpression(Expression Value, Expression Threshold) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 
