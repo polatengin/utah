@@ -859,6 +859,106 @@ The function uses a comprehensive numeric validation approach:
 4. **Error Safety**: Returns `false` for any invalid input instead of throwing errors
 5. **Performance**: Efficient bash implementation with minimal overhead
 
+#### validate.isLessThan()
+
+Validates if a numeric value is less than a specified threshold.
+
+**Syntax:**
+
+```typescript
+validate.isLessThan(value: number | string, threshold: number | string) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The numeric value to check (number or string representation)
+- `threshold` - The threshold to compare against (number or string representation)
+
+**Returns:**
+
+- `true` if value < threshold
+- `false` if value >= threshold OR if either input is non-numeric
+
+**Examples:**
+
+```typescript
+// Basic integer comparison
+let score: number = 65;
+let needsImprovement: boolean = validate.isLessThan(score, 70);  // true
+
+// Float comparison
+let temperature: number = 98.5;
+let belowFever: boolean = validate.isLessThan(temperature, 98.6);  // true
+
+// String number comparison
+let userAge: string = "17";
+let isMinor: boolean = validate.isLessThan(userAge, "18");  // true
+
+// Conditional usage
+if (validate.isLessThan(actualScore, minScore)) {
+  console.log("Score needs improvement");
+}
+```
+
+**Edge Case Examples:**
+
+The `validate.isLessThan()` function handles various edge cases safely:
+
+- **Equal values**: `validate.isLessThan(70, 70)` returns `false`
+- **Non-numeric inputs**: `validate.isLessThan("abc", 5)` returns `false`
+- **Mixed types**: `validate.isLessThan(5, 5.1)` returns `true`
+- **Negative numbers**: `validate.isLessThan(-20, -10)` returns `true`
+
+```typescript
+// Example edge cases
+validate.isLessThan(65, 70);          // true
+validate.isLessThan(70, 70);          // false (equal)
+validate.isLessThan(-20, -10);        // true
+validate.isLessThan(5, 5.1);          // true (mixed types)
+validate.isLessThan("abc", 5);        // false (invalid)
+validate.isLessThan(10, "xyz");       // false (invalid)
+validate.isLessThan("", "");          // false (empty)
+```
+
+**Generated Bash Code:**
+
+```bash
+# Example: validate.isLessThan(score, 70)
+score=65
+needsImprovement=$(
+_utah_validate_less_than() {
+  local value="$1"
+  local threshold="$2"
+
+  # Check if both values are numeric (integer or float)
+  if ! [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ "$threshold" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "false" && return
+  fi
+
+  # Use bc for floating-point comparison, awk as fallback
+  if command -v bc >/dev/null 2>&1; then
+    result=$(echo "$value < $threshold" | bc)
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  else
+    # Fallback using awk for float comparison
+    result=$(awk "BEGIN { print ($value < $threshold) ? 1 : 0 }")
+    [ "$result" = "1" ] && echo "true" || echo "false"
+  fi
+}
+_utah_validate_less_than ${score} 70
+)
+```
+
+**Technical Implementation:**
+
+Both `validate.isGreaterThan()` and `validate.isLessThan()` use the same robust validation approach:
+
+1. **Numeric Validation**: Uses regex to ensure both parameters are valid numbers
+2. **Precision Handling**: Prefers `bc` command for high-precision floating-point arithmetic
+3. **Fallback Strategy**: Uses `awk` when `bc` is not available
+4. **Error Safety**: Returns `false` for any invalid input instead of throwing errors
+5. **Performance**: Efficient bash implementation with minimal overhead
+
 ## Future Validation Functions
 
 The validation framework is designed for extensibility. Planned additions include:
@@ -868,4 +968,4 @@ The validation framework is designed for extensibility. Planned additions includ
 - `validate.isInRange()` - Range validation for numbers
 - `validate.matches()` - Custom regex pattern validation
 
-Each function will follow the same patterns established by `validate.isEmail()` for consistency and reliability.
+Each function will follow the same patterns established by the existing validation functions for consistency and reliability.

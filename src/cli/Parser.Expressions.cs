@@ -1582,6 +1582,19 @@ public partial class Parser
         throw new InvalidOperationException("validate.isGreaterThan() requires exactly 2 arguments (value, threshold)");
       }
 
+      // Special handling for validate.isLessThan()
+      if (functionName == "validate.isLessThan")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var valueExpr = ParseExpression(args[0]);
+          var thresholdExpr = ParseExpression(args[1]);
+          return new ValidateIsLessThanExpression(valueExpr, thresholdExpr);
+        }
+        throw new InvalidOperationException("validate.isLessThan() requires exactly 2 arguments (value, threshold)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

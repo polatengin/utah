@@ -1,0 +1,152 @@
+// validate.isLessThan() function tests
+// Tests numeric comparisons with two parameters
+
+// Basic integer comparisons
+let score1: number = 65;
+let passing1: boolean = validate.isLessThan(score1, 70);
+console.log("Score 65 < 70: " + passing1);
+
+let score2: number = 85;
+let passing2: boolean = validate.isLessThan(score2, 70);
+console.log("Score 85 < 70: " + passing2);
+
+let score3: number = 70;
+let passing3: boolean = validate.isLessThan(score3, 70);
+console.log("Score 70 < 70: " + passing3);
+
+// Float comparisons
+let temp1: number = 98.5;
+let fever1: boolean = validate.isLessThan(temp1, 98.6);
+console.log("Temperature 98.5 < 98.6: " + fever1);
+
+let temp2: number = 98.7;
+let fever2: boolean = validate.isLessThan(temp2, 98.6);
+console.log("Temperature 98.7 < 98.6: " + fever2);
+
+let price1: number = 4.9;
+let affordable1: boolean = validate.isLessThan(price1, 5);
+console.log("Price 4.9 < 5: " + affordable1);
+
+// String number comparisons
+let userAge: string = "17";
+let isMinor: boolean = validate.isLessThan(userAge, "18");
+console.log("Age 17 < 18: " + isMinor);
+
+let stringFloat1: string = "2.8";
+let stringFloat2: string = "3.0";
+let piLess: boolean = validate.isLessThan(stringFloat1, stringFloat2);
+console.log("String 2.8 < 3.0: " + piLess);
+
+// Negative number comparisons
+let neg1: number = -20;
+let neg2: number = -10;
+let negComparison: boolean = validate.isLessThan(neg1, neg2);
+console.log("Negative -20 < -10: " + negComparison);
+
+let neg3: number = -10;
+let neg4: number = -20;
+let negComparison2: boolean = validate.isLessThan(neg3, neg4);
+console.log("Negative -10 < -20: " + negComparison2);
+
+// Mixed integer and float
+let mixedInt: number = 5;
+let mixedFloat: number = 5.1;
+let mixedComparison: boolean = validate.isLessThan(mixedInt, mixedFloat);
+console.log("Mixed 5 < 5.1: " + mixedComparison);
+
+// Edge cases - Equal values (should return false)
+let equal1: number = 100;
+let equal2: number = 100;
+let equalComparison: boolean = validate.isLessThan(equal1, equal2);
+console.log("Equal 100 < 100: " + equalComparison);
+
+// Edge cases - Non-numeric values (should return false)
+let invalidValue: string = "abc";
+let numericThreshold: number = 5;
+let invalidComparison: boolean = validate.isLessThan(invalidValue, numericThreshold);
+console.log("Invalid 'abc' < 5: " + invalidComparison);
+
+let validValue: number = 10;
+let invalidThreshold: string = "xyz";
+let invalidThresholdComparison: boolean = validate.isLessThan(validValue, invalidThreshold);
+console.log("Invalid 10 < 'xyz': " + invalidThresholdComparison);
+
+// Empty string comparisons (should return false)
+let emptyString1: string = "";
+let emptyString2: string = "";
+let emptyComparison: boolean = validate.isLessThan(emptyString1, emptyString2);
+console.log("Empty strings comparison: " + emptyComparison);
+
+// Zero comparisons
+let zero1: number = -1;
+let zero2: number = 0;
+let zeroComparison: boolean = validate.isLessThan(zero1, zero2);
+console.log("Zero -1 < 0: " + zeroComparison);
+
+let zero3: number = 0;
+let zero4: number = -1;
+let zeroComparison2: boolean = validate.isLessThan(zero3, zero4);
+console.log("Zero 0 < -1: " + zeroComparison2);
+
+// Conditional usage
+if (validate.isLessThan(userAge, "18")) {
+  console.log("User is a minor");
+} else {
+  console.log("User is an adult");
+}
+
+// Variable usage in conditionals
+let maxScore: number = 80;
+let actualScore: number = 65;
+if (validate.isLessThan(actualScore, maxScore)) {
+  console.log("Student scored below maximum");
+} else {
+  console.log("Student achieved maximum or higher score");
+}
+
+// Integration with expressions
+let threshold: number = 50;
+let result1: number = 25;
+let result2: number = 75;
+let bothBelow: boolean = validate.isLessThan(result1, threshold) && validate.isLessThan(result2, threshold);
+console.log("Both results below threshold: " + bothBelow);
+
+// Large number comparisons
+let largeNumber1: number = 999998;
+let largeNumber2: number = 999999;
+let largeComparison: boolean = validate.isLessThan(largeNumber1, largeNumber2);
+console.log("Large numbers 999998 < 999999: " + largeComparison);
+
+// Decimal precision testing
+let precise1: number = 1.0000000;
+let precise2: number = 1.0000001;
+let preciseComparison: boolean = validate.isLessThan(precise1, precise2);
+console.log("Precision 1.0000000 < 1.0000001: " + preciseComparison);
+
+// Age verification example
+let studentAge: number = 16;
+let minimumAge: number = 18;
+if (validate.isLessThan(studentAge, minimumAge)) {
+  console.log("Student needs parental consent");
+}
+
+// Performance threshold example
+let responseTime: number = 250;
+let performanceLimit: number = 500;
+let isPerformant: boolean = validate.isLessThan(responseTime, performanceLimit);
+console.log("Response time is within limits: " + isPerformant);
+
+// Temperature monitoring example
+let currentTemp: number = 75;
+let maxTemp: number = 85;
+if (validate.isLessThan(currentTemp, maxTemp)) {
+  console.log("Temperature is safe");
+} else {
+  console.log("Temperature warning!");
+}
+
+// Resource usage example
+let memoryUsage: number = 78;
+let memoryLimit: number = 90;
+let memoryOk: boolean = validate.isLessThan(memoryUsage, memoryLimit);
+console.log("Memory usage is acceptable: " + memoryOk);
