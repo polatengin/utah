@@ -261,6 +261,8 @@ public partial class Compiler
         return CompileValidateIsLessThanExpression(validateIsLessThan);
       case ValidateIsInRangeExpression validateIsInRange:
         return CompileValidateIsInRangeExpression(validateIsInRange);
+      case ValidateIsNumericExpression validateIsNumeric:
+        return CompileValidateIsNumericExpression(validateIsNumeric);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2959,6 +2961,19 @@ _utah_validate_in_range() {{
 }}
 _utah_validate_in_range {value} {min} {max}
 )";
+  }
+
+  private string CompileValidateIsNumericExpression(ValidateIsNumericExpression validateIsNumeric)
+  {
+    var value = CompileExpression(validateIsNumeric.Value);
+    // Use a regex pattern that matches integers and floating-point numbers
+    // Pattern: ^-?[0-9]+(\.[0-9]+)?$
+    // - ^-? : optional negative sign at start
+    // - [0-9]+ : one or more digits
+    // - (\.[0-9]+)? : optional decimal part (dot followed by one or more digits)
+    // - $ : end of string
+    // Note: Using quotes around ${value} to preserve spaces and special characters
+    return $"$(echo \"{value}\" | grep -qE '^-?[0-9]+(\\.[0-9]+)?$' && echo \"true\" || echo \"false\")";
   }
 
   private static int _uniqueIdCounter = 0;

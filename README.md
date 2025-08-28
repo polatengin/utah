@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-134-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-135-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4978,6 +4978,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isEmpty(value)` - Check if a value is empty (works with strings, arrays, and other data types)
 
+#### Numeric Validation
+
+- `validate.isNumeric(value)` - Check if a value is a valid number (integer or floating-point)
+
 #### Numeric Comparison Validation
 
 - `validate.isGreaterThan(value, threshold)` - Check if a numeric value is greater than a threshold
@@ -5213,6 +5217,99 @@ validate.isEmpty("\n");                  // false (newline character)
 validate.isEmpty("\t");                  // false (tab character)
 ```
 
+### Numeric Validation Usage
+
+```typescript
+// Basic numeric validation with integers
+let positiveInt: number = 42;
+let isValidInt: boolean = validate.isNumeric(positiveInt);
+
+if (isValidInt) {
+  console.log("Value is a valid number");
+} else {
+  console.log("Value is not a valid number");
+}
+
+// Validate negative numbers
+let negativeInt: number = -42;
+let isValidNeg: boolean = validate.isNumeric(negativeInt);
+console.log(`Negative integer is numeric: ${isValidNeg}`); // true
+
+// Validate floating-point numbers
+let floatValue: number = 123.456;
+let isValidFloat: boolean = validate.isNumeric(floatValue);
+console.log(`Float value is numeric: ${isValidFloat}`); // true
+
+let negativeFloat: number = -123.456;
+let isValidNegFloat: boolean = validate.isNumeric(negativeFloat);
+console.log(`Negative float is numeric: ${isValidNegFloat}`); // true
+
+// Validate string numbers
+let stringNumber: string = "789";
+let isValidString: boolean = validate.isNumeric(stringNumber);
+console.log(`String number is numeric: ${isValidString}`); // true
+
+let stringFloat: string = "123.789";
+let isValidStringFloat: boolean = validate.isNumeric(stringFloat);
+console.log(`String float is numeric: ${isValidStringFloat}`); // true
+
+let stringNegative: string = "-456.789";
+let isValidStringNeg: boolean = validate.isNumeric(stringNegative);
+console.log(`String negative is numeric: ${isValidStringNeg}`); // true
+
+// Validate user input
+let userInput: string = console.promptText("Enter a number:");
+if (validate.isNumeric(userInput)) {
+  console.log("Thank you! Your number has been accepted.");
+} else {
+  console.log("Please enter a valid numeric value.");
+}
+
+// Use in conditional chains
+if (validate.isNumeric(inputValue) && Number(inputValue) > 0) {
+  console.log("Positive number validated");
+}
+
+// Validation in assignments
+let numericValid: boolean = validate.isNumeric("42.5");
+console.log(`Value is numeric: ${numericValid}`);
+```
+
+### Numeric Validation Examples
+
+```typescript
+// Valid numeric values
+validate.isNumeric(42);                  // true (positive integer)
+validate.isNumeric(-42);                 // true (negative integer)
+validate.isNumeric(0);                   // true (zero)
+validate.isNumeric(123.456);             // true (positive float)
+validate.isNumeric(-123.456);            // true (negative float)
+validate.isNumeric(0.0);                 // true (zero float)
+validate.isNumeric(0.5);                 // true (decimal only)
+validate.isNumeric(-0.5);                // true (negative decimal)
+validate.isNumeric("789");               // true (string integer)
+validate.isNumeric("123.789");           // true (string float)
+validate.isNumeric("-456.789");          // true (string negative)
+validate.isNumeric("999999999999999");   // true (large number)
+validate.isNumeric("0.000001");          // true (small decimal)
+validate.isNumeric("5");                 // true (single digit)
+
+// Invalid numeric values
+validate.isNumeric("");                  // false (empty string)
+validate.isNumeric("abc");               // false (alphabetic)
+validate.isNumeric("123abc");            // false (alphanumeric)
+validate.isNumeric(" 123 ");             // false (with spaces)
+validate.isNumeric("123.45.67");         // false (multiple decimals)
+validate.isNumeric("--123");             // false (multiple negatives)
+validate.isNumeric("123.");              // false (trailing decimal)
+validate.isNumeric(".123");              // false (leading decimal)
+validate.isNumeric("1.23e10");           // false (scientific notation)
+validate.isNumeric("0x1A");              // false (hexadecimal)
+validate.isNumeric("+123");              // false (plus sign)
+validate.isNumeric("NaN");               // false (not a number)
+validate.isNumeric("Infinity");          // false (infinity)
+```
+
 ### Numeric Comparison Validation Usage
 
 ```typescript
@@ -5424,6 +5521,35 @@ generatedUUID=$(if command -v uuidgen >/dev/null 2>&1; then uuidgen; elif comman
 if [ $(echo "${generatedUUID}" | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' && echo "true" || echo "false") = "true" ]; then
   echo "Generated UUID is valid"
 fi
+
+# validate.isNumeric() becomes:
+positiveInt=42
+isValidInt=$(echo "${positiveInt}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+
+if [ "${isValidInt}" = "true" ]; then
+  echo "Value is a valid number"
+else
+  echo "Value is not a valid number"
+fi
+
+# Numeric validation with floating-point numbers
+floatValue=123.456
+isValidFloat=$(echo "${floatValue}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+echo "Float value is numeric: ${isValidFloat}"
+
+# Numeric validation with string numbers
+stringNumber="789"
+isValidString=$(echo "${stringNumber}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+echo "String number is numeric: ${isValidString}"
+
+# Numeric validation in conditionals
+if [ $(echo "${inputValue}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false") = "true" ]; then
+  echo "Input is a valid number"
+fi
+
+# Numeric validation assignment
+numericValid=$(echo "42.5" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+echo "Value is numeric: ${numericValid}"
 
 # validate.isEmpty() becomes:
 emptyString=""
@@ -6028,6 +6154,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 - [x] `validate.isLessThan()` function for numeric comparisons
 
 - [x] `validate.isInRange()` function for numeric range checks
+
+- [x] `validate.isNumeric()` function for numeric checks
 
 - [ ] `validate.isAlphaNumeric()` function for alphanumeric checks
 

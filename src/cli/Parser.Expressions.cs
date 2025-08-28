@@ -1609,6 +1609,18 @@ public partial class Parser
         throw new InvalidOperationException("validate.isInRange() requires exactly 3 arguments (value, min, max)");
       }
 
+      // Special handling for validate.isNumeric()
+      if (functionName == "validate.isNumeric")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var valueExpr = ParseExpression(args[0]);
+          return new ValidateIsNumericExpression(valueExpr);
+        }
+        throw new InvalidOperationException("validate.isNumeric() requires exactly 1 argument (value)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

@@ -758,6 +758,127 @@ _utah_validate_empty "()"
 )
 ```
 
+### Numeric Validation
+
+#### validate.isNumeric()
+
+Checks if a value is a valid number, supporting both integers and floating-point numbers with optional negative signs.
+
+**Syntax:**
+
+```typescript
+validate.isNumeric(value: any) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The value to validate (can be number, string, or any type)
+
+**Returns:**
+
+- `true` if the value is a valid numeric format
+- `false` if the value is not numeric
+
+**Examples:**
+
+```typescript
+// Integer validation
+let positiveInt: number = 42;
+let isValidInt: boolean = validate.isNumeric(positiveInt);
+console.log(`${positiveInt} is numeric: ${isValidInt}`); // true
+
+let negativeInt: number = -42;
+let isValidNeg: boolean = validate.isNumeric(negativeInt);
+console.log(`${negativeInt} is numeric: ${isValidNeg}`); // true
+
+// Floating-point validation
+let floatValue: number = 123.456;
+let isValidFloat: boolean = validate.isNumeric(floatValue);
+console.log(`${floatValue} is numeric: ${isValidFloat}`); // true
+
+let negativeFloat: number = -123.456;
+let isValidNegFloat: boolean = validate.isNumeric(negativeFloat);
+console.log(`${negativeFloat} is numeric: ${isValidNegFloat}`); // true
+
+// String number validation
+let stringNumber: string = "789";
+let isValidString: boolean = validate.isNumeric(stringNumber);
+console.log(`"${stringNumber}" is numeric: ${isValidString}`); // true
+
+let stringFloat: string = "123.789";
+let isValidStringFloat: boolean = validate.isNumeric(stringFloat);
+console.log(`"${stringFloat}" is numeric: ${isValidStringFloat}`); // true
+
+// Invalid cases
+let alphabetic: string = "abc";
+let isValidAlpha: boolean = validate.isNumeric(alphabetic);
+console.log(`"${alphabetic}" is numeric: ${isValidAlpha}`); // false
+
+let withSpaces: string = " 123 ";
+let isValidSpaces: boolean = validate.isNumeric(withSpaces);
+console.log(`"${withSpaces}" is numeric: ${isValidSpaces}`); // false (spaces not allowed)
+
+let multipleDecimals: string = "123.45.67";
+let isValidMulti: boolean = validate.isNumeric(multipleDecimals);
+console.log(`"${multipleDecimals}" is numeric: ${isValidMulti}`); // false
+
+// Conditional usage
+let userInput: string = console.promptText("Enter a number:");
+if (validate.isNumeric(userInput)) {
+  console.log("Valid number entered");
+} else {
+  console.log("Please enter a valid numeric value");
+}
+```
+
+**Valid Numeric Formats:**
+
+- Positive integers: `42`, `123`, `5`
+- Negative integers: `-42`, `-123`, `-5`
+- Zero: `0`
+- Positive floats: `123.456`, `0.5`, `999.001`
+- Negative floats: `-123.456`, `-0.5`, `-999.001`
+- String numbers: `"789"`, `"-456.789"`, `"0.123"`
+
+**Invalid Formats:**
+
+- Empty strings: `""`
+- Alphabetic: `"abc"`, `"test"`
+- Alphanumeric: `"123abc"`, `"abc123"`
+- With spaces: `" 123 "`, `"1 23"`
+- Multiple decimals: `"123.45.67"`
+- Multiple negatives: `"--123"`
+- Trailing decimal: `"123."`
+- Leading decimal: `".123"`
+- Scientific notation: `"1.23e10"`
+- Hexadecimal: `"0x1A"`
+- Plus signs: `"+123"`
+- Special values: `"NaN"`, `"Infinity"`
+
+#### Numeric Validation Bash Output
+
+```bash
+# Basic numeric validation
+positiveInt=42
+isValidInt=$(echo "${positiveInt}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+
+# String number validation
+stringNumber="789"
+isValidString=$(echo "${stringNumber}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
+
+# Conditional validation
+if [ $(echo "${userInput}" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false") = "true" ]; then
+  echo "Valid number entered"
+fi
+```
+
+The regex pattern `^-?[0-9]+(\.[0-9]+)?$` matches:
+
+- `^-?` - Optional negative sign at start
+- `[0-9]+` - One or more digits
+- `(\.[0-9]+)?` - Optional decimal part (dot + digits)
+- `$` - End of string
+
 ### Numeric Comparison Validation
 
 #### validate.isGreaterThan()

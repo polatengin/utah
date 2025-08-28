@@ -17,7 +17,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -47,7 +47,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -77,7 +77,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -108,7 +108,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -136,7 +136,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -167,7 +167,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -197,7 +197,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -227,7 +227,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -257,7 +257,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -287,7 +287,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -317,7 +317,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -347,7 +347,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -377,7 +377,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -407,7 +407,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -437,7 +437,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -467,7 +467,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -497,7 +497,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -527,7 +527,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -557,7 +557,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -587,7 +587,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -617,7 +617,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -647,7 +647,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -677,7 +677,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -706,7 +706,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -735,7 +735,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -765,7 +765,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -795,7 +795,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -826,7 +826,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -857,7 +857,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -887,7 +887,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -917,7 +917,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -950,7 +950,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -983,7 +983,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1012,7 +1012,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1041,7 +1041,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1074,7 +1074,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1105,7 +1105,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1133,7 +1133,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1164,7 +1164,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1194,7 +1194,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1224,7 +1224,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1257,7 +1257,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"
@@ -1284,7 +1284,7 @@ _utah_validate_in_range() {
     # Check valid range (min <= max)
     valid_range=$(echo "$min <= $max" | bc)
     [ "$valid_range" != "1" ] && echo "false" && return
-    
+
     # Check if value is in range (inclusive: min <= value <= max)
     result=$(echo "$min <= $value && $value <= $max" | bc)
     [ "$result" = "1" ] && echo "true" || echo "false"

@@ -1,0 +1,159 @@
+// Test validate.isNumeric() function with comprehensive coverage
+// Testing integers, floats, negative numbers, edge cases, and invalid inputs
+
+// Test basic integers
+let positiveInt: number = 42;
+let isValidPosInt: boolean = validate.isNumeric(positiveInt);
+console.log("Positive integer validation:");
+console.log(isValidPosInt);
+
+let negativeInt: number = -42;
+let isValidNegInt: boolean = validate.isNumeric(negativeInt);
+console.log("Negative integer validation:");
+console.log(isValidNegInt);
+
+let zero: number = 0;
+let isValidZero: boolean = validate.isNumeric(zero);
+console.log("Zero validation:");
+console.log(isValidZero);
+
+// Test floating-point numbers
+let positiveFloat: number = 123.456;
+let isValidPosFloat: boolean = validate.isNumeric(positiveFloat);
+console.log("Positive float validation:");
+console.log(isValidPosFloat);
+
+let negativeFloat: number = -123.456;
+let isValidNegFloat: boolean = validate.isNumeric(negativeFloat);
+console.log("Negative float validation:");
+console.log(isValidNegFloat);
+
+let zeroFloat: number = 0.0;
+let isValidZeroFloat: boolean = validate.isNumeric(zeroFloat);
+console.log("Zero float validation:");
+console.log(isValidZeroFloat);
+
+// Test decimal-only numbers
+let decimalOnly: number = 0.5;
+let isValidDecimal: boolean = validate.isNumeric(decimalOnly);
+console.log("Decimal validation:");
+console.log(isValidDecimal);
+
+let negativeDecimal: number = -0.5;
+let isValidNegDecimal: boolean = validate.isNumeric(negativeDecimal);
+console.log("Negative decimal validation:");
+console.log(isValidNegDecimal);
+
+// Test string numbers
+let stringInt: string = "789";
+let isValidStringInt: boolean = validate.isNumeric(stringInt);
+console.log("String integer validation:");
+console.log(isValidStringInt);
+
+let stringFloat: string = "123.789";
+let isValidStringFloat: boolean = validate.isNumeric(stringFloat);
+console.log("String float validation:");
+console.log(isValidStringFloat);
+
+let stringNegative: string = "-456.789";
+let isValidStringNeg: boolean = validate.isNumeric(stringNegative);
+console.log("String negative validation:");
+console.log(isValidStringNeg);
+
+// Test edge cases - valid
+let largeNumber: string = "999999999999999";
+let isValidLarge: boolean = validate.isNumeric(largeNumber);
+console.log("Large number validation:");
+console.log(isValidLarge);
+
+let smallDecimal: string = "0.000001";
+let isValidSmall: boolean = validate.isNumeric(smallDecimal);
+console.log("Small decimal validation:");
+console.log(isValidSmall);
+
+let singleDigit: string = "5";
+let isValidSingle: boolean = validate.isNumeric(singleDigit);
+console.log("Single digit validation:");
+console.log(isValidSingle);
+
+// Test invalid inputs
+let emptyString: string = "";
+let isValidEmpty: boolean = validate.isNumeric(emptyString);
+console.log("Empty string validation:");
+console.log(isValidEmpty);
+
+let alphabetic: string = "abc";
+let isValidAlpha: boolean = validate.isNumeric(alphabetic);
+console.log("Alphabetic validation:");
+console.log(isValidAlpha);
+
+let alphanumeric: string = "123abc";
+let isValidAlphaNum: boolean = validate.isNumeric(alphanumeric);
+console.log("Alphanumeric validation:");
+console.log(isValidAlphaNum);
+
+let withSpaces: string = " 123 ";
+let isValidSpaces: boolean = validate.isNumeric(withSpaces);
+console.log("With spaces validation:");
+console.log(isValidSpaces);
+
+let multipleDecimals: string = "123.45.67";
+let isValidMultiDec: boolean = validate.isNumeric(multipleDecimals);
+console.log("Multiple decimals validation:");
+console.log(isValidMultiDec);
+
+let multipleNegatives: string = "--123";
+let isValidMultiNeg: boolean = validate.isNumeric(multipleNegatives);
+console.log("Multiple negatives validation:");
+console.log(isValidMultiNeg);
+
+let trailingDecimal: string = "123.";
+let isValidTrailingDec: boolean = validate.isNumeric(trailingDecimal);
+console.log("Trailing decimal validation:");
+console.log(isValidTrailingDec);
+
+let leadingDecimal: string = ".123";
+let isValidLeadingDec: boolean = validate.isNumeric(leadingDecimal);
+console.log("Leading decimal validation:");
+console.log(isValidLeadingDec);
+
+let scientificNotation: string = "1.23e10";
+let isValidScientific: boolean = validate.isNumeric(scientificNotation);
+console.log("Scientific notation validation:");
+console.log(isValidScientific);
+
+let hexadecimal: string = "0x1A";
+let isValidHex: boolean = validate.isNumeric(hexadecimal);
+console.log("Hexadecimal validation:");
+console.log(isValidHex);
+
+let plusSign: string = "+123";
+let isValidPlus: boolean = validate.isNumeric(plusSign);
+console.log("Plus sign validation:");
+console.log(isValidPlus);
+
+// Test conditional usage
+let userInput: string = "42.5";
+if (validate.isNumeric(userInput)) {
+  console.log("Input is valid number");
+} else {
+  console.log("Input is not valid number");
+}
+
+// Test with variables in conditionals
+let testValue: string = "invalid123";
+if (!validate.isNumeric(testValue)) {
+  console.log("Value failed numeric validation");
+}
+
+// Test assignment variations
+let result1: boolean = validate.isNumeric("100");
+let result2: boolean = validate.isNumeric("-50.25");
+let result3: boolean = validate.isNumeric("not_a_number");
+
+console.log("Direct assignment results:");
+console.log(result1);
+console.log(result2);
+console.log(result3);
+
+console.log("validate.isNumeric() testing complete");
