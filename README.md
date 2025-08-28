@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-135-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-136-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4982,6 +4982,10 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isNumeric(value)` - Check if a value is a valid number (integer or floating-point)
 
+#### Alphanumeric Validation
+
+- `validate.isAlphaNumeric(value)` - Check if a value contains only letters and numbers (no spaces or special characters)
+
 #### Numeric Comparison Validation
 
 - `validate.isGreaterThan(value, threshold)` - Check if a numeric value is greater than a threshold
@@ -5310,6 +5314,68 @@ validate.isNumeric("NaN");               // false (not a number)
 validate.isNumeric("Infinity");          // false (infinity)
 ```
 
+### Alphanumeric Validation Usage
+
+```typescript
+// Basic alphanumeric validation
+let username: string = "user123";
+let isValid: boolean = validate.isAlphaNumeric(username);
+
+if (isValid) {
+  console.log("Username contains only letters and numbers");
+} else {
+  console.log("Username contains invalid characters");
+  exit(1);
+}
+
+// Validate user input
+let inputCode: string = console.promptText("Enter product code:");
+if (validate.isAlphaNumeric(inputCode)) {
+  console.log("Thank you! Your product code has been recorded.");
+} else {
+  console.log("Invalid code format. Only letters and numbers are allowed.");
+}
+
+// Use in conditional chains
+let productCode: string = "PROD123ABC";
+if (validate.isAlphaNumeric(productCode) && productCode.length >= 6) {
+  console.log("Product code format is valid");
+}
+
+// Validation in assignments
+let codeValid: boolean = validate.isAlphaNumeric("ABC123XYZ");
+console.log(`Product code is valid: ${codeValid}`);
+```
+
+### Alphanumeric Validation Examples
+
+```typescript
+// Valid alphanumeric values
+validate.isAlphaNumeric("abc123");        // true (mixed letters and numbers)
+validate.isAlphaNumeric("ABC");           // true (uppercase letters only)
+validate.isAlphaNumeric("xyz");           // true (lowercase letters only)
+validate.isAlphaNumeric("123");           // true (numbers only)
+validate.isAlphaNumeric("a1B2c3");        // true (mixed case and numbers)
+validate.isAlphaNumeric("username123");   // true (typical username format)
+validate.isAlphaNumeric("A");             // true (single letter)
+validate.isAlphaNumeric("9");             // true (single digit)
+validate.isAlphaNumeric("ABC123XYZ789");  // true (long alphanumeric)
+
+// Invalid alphanumeric values
+validate.isAlphaNumeric("");              // false (empty string)
+validate.isAlphaNumeric("abc 123");       // false (contains space)
+validate.isAlphaNumeric("user-name");     // false (contains hyphen)
+validate.isAlphaNumeric("user_name");     // false (contains underscore)
+validate.isAlphaNumeric("user@name");     // false (contains special character)
+validate.isAlphaNumeric("user.name");     // false (contains period)
+validate.isAlphaNumeric("123!");          // false (contains exclamation)
+validate.isAlphaNumeric(" abc123");       // false (leading space)
+validate.isAlphaNumeric("abc123 ");       // false (trailing space)
+validate.isAlphaNumeric(" abc123 ");      // false (leading and trailing spaces)
+validate.isAlphaNumeric("αβγ123");        // false (non-ASCII characters)
+validate.isAlphaNumeric("user@domain.com"); // false (email format)
+```
+
 ### Numeric Comparison Validation Usage
 
 ```typescript
@@ -5551,6 +5617,31 @@ fi
 numericValid=$(echo "42.5" | grep -qE '^-?[0-9]+(\.[0-9]+)?$' && echo "true" || echo "false")
 echo "Value is numeric: ${numericValid}"
 
+# validate.isAlphaNumeric() becomes:
+username="user123"
+isValid=$(echo "${username}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false")
+
+if [ "${isValid}" = "true" ]; then
+  echo "Username contains only letters and numbers"
+else
+  echo "Username contains invalid characters"
+  exit 1
+fi
+
+# Alphanumeric validation with mixed case
+productCode="PROD123ABC"
+isValidCode=$(echo "${productCode}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false")
+echo "Product code is valid: ${isValidCode}"
+
+# Alphanumeric validation in conditionals
+if [ $(echo "${inputCode}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false") = "true" ]; then
+  echo "Code format is valid"
+fi
+
+# Alphanumeric validation assignment
+codeValid=$(echo "ABC123XYZ" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false")
+echo "Product code is valid: ${codeValid}"
+
 # validate.isEmpty() becomes:
 emptyString=""
 emptyCheck=$(
@@ -5720,12 +5811,16 @@ The URL validation uses a comprehensive regex pattern that supports modern web s
 ### Validation Functions Use Cases
 
 - **User Registration**: Validate email addresses during user account creation
+- **Username Validation**: Ensure usernames contain only letters and numbers using `validate.isAlphaNumeric()`
+- **Product Code Validation**: Validate product/serial numbers and SKUs for alphanumeric format
 - **Configuration Validation**: Ensure configuration files contain valid email addresses and URLs
 - **Contact Forms**: Validate email input in contact and feedback forms
 - **API Integration**: Validate API endpoint URLs and email parameters
+- **Identifier Validation**: Check system identifiers, tokens, and codes for valid alphanumeric format
 - **Web Development**: Validate URLs for webhooks, redirects, and external links
 - **Batch Processing**: Validate email addresses and URLs in bulk data processing
-- **Security**: Prevent malformed email addresses and URLs from being processed
+- **Security**: Prevent malformed email addresses, URLs, and injection attacks with alphanumeric validation
+- **Data Cleaning**: Filter records to ensure alphanumeric-only fields meet requirements
 - **Infrastructure**: Validate service URLs and configuration endpoints
 
 ### Best Practices for Validation Functions
@@ -5986,6 +6081,7 @@ Current tests cover:
 - **utility_functions.shx** - Utility functions for UUID generation, hashing, and Base64 encoding/decoding
 - **utility_random.shx** - Utility random number generation with range parameters
 - **utils.shx** - General utility functions and helpers
+- **validate_isalphanumeric.shx** - Alphanumeric validation function for checking if values contain only letters and numbers
 - **validate_isemail.shx** - Email validation function for validating email address formats
 - **validate_isempty.shx** - Emptiness validation function for checking if values are empty (strings, arrays)
 - **validate_isurl.shx** - URL validation function for validating HTTP, HTTPS, FTP, and FILE URLs
@@ -6157,7 +6253,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isNumeric()` function for numeric checks
 
-- [ ] `validate.isAlphaNumeric()` function for alphanumeric checks
+- [x] `validate.isAlphaNumeric()` function for alphanumeric checks
 
 - [x] Error handling: try/catch, subshell
 

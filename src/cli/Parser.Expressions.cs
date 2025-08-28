@@ -1621,6 +1621,18 @@ public partial class Parser
         throw new InvalidOperationException("validate.isNumeric() requires exactly 1 argument (value)");
       }
 
+      // Special handling for validate.isAlphaNumeric()
+      if (functionName == "validate.isAlphaNumeric")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          var valueExpr = ParseExpression(args[0]);
+          return new ValidateIsAlphaNumericExpression(valueExpr);
+        }
+        throw new InvalidOperationException("validate.isAlphaNumeric() requires exactly 1 argument (value)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

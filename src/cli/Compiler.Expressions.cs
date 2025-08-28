@@ -263,6 +263,8 @@ public partial class Compiler
         return CompileValidateIsInRangeExpression(validateIsInRange);
       case ValidateIsNumericExpression validateIsNumeric:
         return CompileValidateIsNumericExpression(validateIsNumeric);
+      case ValidateIsAlphaNumericExpression validateIsAlphaNumeric:
+        return CompileValidateIsAlphaNumericExpression(validateIsAlphaNumeric);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -2974,6 +2976,19 @@ _utah_validate_in_range {value} {min} {max}
     // - $ : end of string
     // Note: Using quotes around ${value} to preserve spaces and special characters
     return $"$(echo \"{value}\" | grep -qE '^-?[0-9]+(\\.[0-9]+)?$' && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileValidateIsAlphaNumericExpression(ValidateIsAlphaNumericExpression validateIsAlphaNumeric)
+  {
+    var value = CompileExpression(validateIsAlphaNumeric.Value);
+    // Use a regex pattern that matches only alphanumeric characters
+    // Pattern: ^[A-Za-z0-9]+$
+    // - ^ : start of string
+    // - [A-Za-z0-9]+ : one or more letters (upper/lowercase) or digits
+    // - $ : end of string
+    // Note: Using quotes around ${value} to preserve spaces and special characters
+    // Empty strings return false since the pattern requires at least one character
+    return $"$(echo \"{value}\" | grep -qE '^[A-Za-z0-9]+$' && echo \"true\" || echo \"false\")";
   }
 
   private static int _uniqueIdCounter = 0;

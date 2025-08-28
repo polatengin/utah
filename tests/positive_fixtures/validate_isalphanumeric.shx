@@ -1,0 +1,134 @@
+// Test validate.isAlphaNumeric() function with comprehensive coverage
+// Testing valid alphanumeric strings, edge cases, and invalid inputs
+
+// Test valid alphanumeric strings
+let validAlphaNum1: string = "abc123";
+let isValid1: boolean = validate.isAlphaNumeric(validAlphaNum1);
+console.log("Mixed letters and numbers:");
+console.log(isValid1); // true
+
+let validAlphaNum2: string = "ABC";
+let isValid2: boolean = validate.isAlphaNumeric(validAlphaNum2);
+console.log("Uppercase letters only:");
+console.log(isValid2); // true
+
+let validAlphaNum3: string = "xyz";
+let isValid3: boolean = validate.isAlphaNumeric(validAlphaNum3);
+console.log("Lowercase letters only:");
+console.log(isValid3); // true
+
+let validAlphaNum4: string = "123";
+let isValid4: boolean = validate.isAlphaNumeric(validAlphaNum4);
+console.log("Numbers only:");
+console.log(isValid4); // true
+
+let validAlphaNum5: string = "a1B2c3";
+let isValid5: boolean = validate.isAlphaNumeric(validAlphaNum5);
+console.log("Mixed case and numbers:");
+console.log(isValid5); // true
+
+let validAlphaNum6: string = "username123";
+let isValid6: boolean = validate.isAlphaNumeric(validAlphaNum6);
+console.log("Typical username format:");
+console.log(isValid6); // true
+
+let validAlphaNum7: string = "A";
+let isValid7: boolean = validate.isAlphaNumeric(validAlphaNum7);
+console.log("Single letter:");
+console.log(isValid7); // true
+
+let validAlphaNum8: string = "9";
+let isValid8: boolean = validate.isAlphaNumeric(validAlphaNum8);
+console.log("Single digit:");
+console.log(isValid8); // true
+
+// Test invalid inputs
+let invalidEmpty: string = "";
+let isEmpty: boolean = validate.isAlphaNumeric(invalidEmpty);
+console.log("Empty string:");
+console.log(isEmpty); // false
+
+let invalidSpace: string = "abc 123";
+let hasSpace: boolean = validate.isAlphaNumeric(invalidSpace);
+console.log("Contains space:");
+console.log(hasSpace); // false
+
+let invalidHyphen: string = "user-name";
+let hasHyphen: boolean = validate.isAlphaNumeric(invalidHyphen);
+console.log("Contains hyphen:");
+console.log(hasHyphen); // false
+
+let invalidUnderscore: string = "user_name";
+let hasUnderscore: boolean = validate.isAlphaNumeric(invalidUnderscore);
+console.log("Contains underscore:");
+console.log(hasUnderscore); // false
+
+let invalidSpecial: string = "user@name";
+let hasSpecial: boolean = validate.isAlphaNumeric(invalidSpecial);
+console.log("Contains special character:");
+console.log(hasSpecial); // false
+
+let invalidPeriod: string = "user.name";
+let hasPeriod: boolean = validate.isAlphaNumeric(invalidPeriod);
+console.log("Contains period:");
+console.log(hasPeriod); // false
+
+let invalidExclamation: string = "123!";
+let hasExclamation: boolean = validate.isAlphaNumeric(invalidExclamation);
+console.log("Contains exclamation:");
+console.log(hasExclamation); // false
+
+let invalidLeadingSpace: string = " abc123";
+let hasLeadingSpace: boolean = validate.isAlphaNumeric(invalidLeadingSpace);
+console.log("Leading space:");
+console.log(hasLeadingSpace); // false
+
+let invalidTrailingSpace: string = "abc123 ";
+let hasTrailingSpace: boolean = validate.isAlphaNumeric(invalidTrailingSpace);
+console.log("Trailing space:");
+console.log(hasTrailingSpace); // false
+
+let invalidSpaces: string = " abc123 ";
+let hasSpaces: boolean = validate.isAlphaNumeric(invalidSpaces);
+console.log("Leading and trailing spaces:");
+console.log(hasSpaces); // false
+
+// Test edge cases with numbers
+let validLargeNumber: string = "999999999999999";
+let isValidLarge: boolean = validate.isAlphaNumeric(validLargeNumber);
+console.log("Large number string:");
+console.log(isValidLarge); // true
+
+let validMixedLarge: string = "ABC999DEF888";
+let isValidMixedLarge: boolean = validate.isAlphaNumeric(validMixedLarge);
+console.log("Large mixed alphanumeric:");
+console.log(isValidMixedLarge); // true
+
+// Test conditional usage
+if (validate.isAlphaNumeric("productCode123")) {
+  console.log("Product code format is valid");
+}
+
+if (!validate.isAlphaNumeric("invalid-code")) {
+  console.log("Invalid product code format detected");
+}
+
+// Test assignment usage
+let usernameValid: boolean = validate.isAlphaNumeric("user123");
+let passwordValid: boolean = validate.isAlphaNumeric("pass@word");
+console.log("Username validation result:");
+console.log(usernameValid); // true
+console.log("Password validation result:");
+console.log(passwordValid); // false
+
+// Test with variables
+let testInput1: string = "validInput123";
+let testInput2: string = "invalid input";
+let result1: boolean = validate.isAlphaNumeric(testInput1);
+let result2: boolean = validate.isAlphaNumeric(testInput2);
+console.log("Variable test 1:");
+console.log(result1); // true
+console.log("Variable test 2:");
+console.log(result2); // false
+
+console.log("All alphanumeric validation tests completed");

@@ -127,6 +127,7 @@ public record ValidateIsGreaterThanExpression(Expression Value, Expression Thres
 public record ValidateIsLessThanExpression(Expression Value, Expression Threshold) : Expression;
 public record ValidateIsInRangeExpression(Expression Value, Expression Min, Expression Max) : Expression;
 public record ValidateIsNumericExpression(Expression Value) : Expression;
+public record ValidateIsAlphaNumericExpression(Expression Value) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 

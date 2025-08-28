@@ -879,6 +879,95 @@ The regex pattern `^-?[0-9]+(\.[0-9]+)?$` matches:
 - `(\.[0-9]+)?` - Optional decimal part (dot + digits)
 - `$` - End of string
 
+### Alphanumeric Validation
+
+#### validate.isAlphaNumeric()
+
+Validates if a string contains only alphanumeric characters (letters A-Z, a-z, and digits 0-9). This is useful for validating usernames, product codes, identifiers, and other inputs that should only contain letters and numbers without spaces or special characters.
+
+**Syntax:**
+
+```typescript
+validate.isAlphaNumeric(value: string) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The string to validate for alphanumeric content
+
+**Returns:** `true` if the string contains only letters and numbers, `false` otherwise
+
+**Usage Examples:**
+
+```typescript
+// Valid alphanumeric strings
+let username: string = "user123";
+let isValidUsername: boolean = validate.isAlphaNumeric(username); // true
+
+let productCode: string = "ABC123XYZ";
+let isValidCode: boolean = validate.isAlphaNumeric(productCode); // true
+
+let lettersOnly: string = "ABC";
+let isValidLetters: boolean = validate.isAlphaNumeric(lettersOnly); // true
+
+let numbersOnly: string = "123";
+let isValidNumbers: boolean = validate.isAlphaNumeric(numbersOnly); // true
+
+// Invalid inputs (contain spaces or special characters)
+let withSpace: string = "user 123";
+let isValidSpace: boolean = validate.isAlphaNumeric(withSpace); // false
+
+let withHyphen: string = "user-name";
+let isValidHyphen: boolean = validate.isAlphaNumeric(withHyphen); // false
+
+let withUnderscore: string = "user_name";
+let isValidUnderscore: boolean = validate.isAlphaNumeric(withUnderscore); // false
+
+let withSpecial: string = "user@domain";
+let isValidSpecial: boolean = validate.isAlphaNumeric(withSpecial); // false
+
+let emptyString: string = "";
+let isValidEmpty: boolean = validate.isAlphaNumeric(emptyString); // false
+
+// Conditional usage
+if (validate.isAlphaNumeric(userInput)) {
+  console.log("Valid alphanumeric input");
+} else {
+  console.log("Input contains invalid characters");
+}
+```
+
+**Generated Bash Code:**
+
+```bash
+# Basic alphanumeric validation
+username="user123"
+isValid=$(echo "${username}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false")
+
+# Product code validation
+productCode="ABC123XYZ"
+isValidCode=$(echo "${productCode}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false")
+
+# Conditional validation
+if [ $(echo "${userInput}" | grep -qE '^[A-Za-z0-9]+$' && echo "true" || echo "false") = "true" ]; then
+  echo "Valid alphanumeric input"
+fi
+```
+
+The regex pattern `^[A-Za-z0-9]+$` matches:
+
+- `^` - Start of string
+- `[A-Za-z0-9]+` - One or more letters (upper/lowercase) or digits
+- `$` - End of string
+
+**Use Cases:**
+
+- Username validation (ensuring no spaces or special characters)
+- Product code/SKU validation
+- System identifier validation
+- Security token validation (basic format checking)
+- Data cleaning for alphanumeric-only fields
+
 ### Numeric Comparison Validation
 
 #### validate.isGreaterThan()
@@ -1171,8 +1260,6 @@ fi
 
 The validation framework is designed for extensibility. Planned additions include:
 
-- `validate.isNumeric()` - Numeric value validation
-- `validate.isAlphaNumeric()` - Alphanumeric validation
 - `validate.matches()` - Custom regex pattern validation
 
 Each function will follow the same patterns established by the existing validation functions for consistency and reliability.
