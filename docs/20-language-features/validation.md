@@ -959,13 +959,99 @@ Both `validate.isGreaterThan()` and `validate.isLessThan()` use the same robust 
 4. **Error Safety**: Returns `false` for any invalid input instead of throwing errors
 5. **Performance**: Efficient bash implementation with minimal overhead
 
+### Range Validation
+
+#### validate.isInRange()
+
+Checks if a numeric value falls within an inclusive range (min ≤ value ≤ max).
+
+**Syntax:**
+
+```typescript
+validate.isInRange(value: number | string, min: number | string, max: number | string) -> boolean
+```
+
+**Parameters:**
+
+- `value` - The numeric value to check
+- `min` - The minimum value of the range (inclusive)
+- `max` - The maximum value of the range (inclusive)
+
+**Returns:**
+
+- `true` if the value is within the range [min, max]
+- `false` if the value is outside the range or any parameter is invalid
+
+**Examples:**
+
+```typescript
+// Basic range validation
+let score: number = 85;
+let passing: boolean = validate.isInRange(score, 60, 100);  // true
+
+// Temperature monitoring
+let cpuTemp: number = 72;
+let safeTemp: boolean = validate.isInRange(cpuTemp, 0, 85);  // true
+
+// Age verification
+let userAge: string = "25";
+let workingAge: boolean = validate.isInRange(userAge, "18", "65");  // true
+
+// Conditional usage
+if (validate.isInRange(batteryLevel, 20, 100)) {
+  console.log("Battery level is acceptable");
+}
+```
+
+**Edge Cases:**
+
+The `validate.isInRange()` function handles various scenarios:
+
+- **Boundary values**: `validate.isInRange(60, 60, 100)` returns `true` (inclusive)
+- **Invalid range**: `validate.isInRange(75, 100, 50)` returns `false` (min > max)
+- **Non-numeric inputs**: `validate.isInRange("abc", 1, 10)` returns `false`
+- **Float precision**: `validate.isInRange(98.6, 97.0, 99.0)` returns `true`
+- **Negative ranges**: `validate.isInRange(-5, -10, 0)` returns `true`
+- **Single-point range**: `validate.isInRange(50, 50, 50)` returns `true`
+
+```typescript
+// Example edge cases
+validate.isInRange(75, 60, 100);      // true
+validate.isInRange(50, 60, 100);      // false (below range)
+validate.isInRange(110, 60, 100);     // false (above range)
+validate.isInRange(60, 60, 100);      // true (at minimum)
+validate.isInRange(100, 60, 100);     // true (at maximum)
+validate.isInRange(75, 100, 50);      // false (invalid range)
+validate.isInRange("abc", 1, 10);     // false (non-numeric)
+validate.isInRange(5, "xyz", 10);     // false (non-numeric min)
+validate.isInRange(5, 1, "abc");      // false (non-numeric max)
+```
+
+**Generated Bash Code:**
+
+```bash
+# Example: validate.isInRange(value, 60, 100)
+if [[ "$value" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] && [[ "$60" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] && [[ "$100" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+  if (( $(echo "$60 <= $100" | bc -l 2>/dev/null || awk "BEGIN {print ($60 <= $100)}") )); then
+    if (( $(echo "$60 <= $value && $value <= $100" | bc -l 2>/dev/null || awk "BEGIN {print ($60 <= $value && $value <= $100)}") )); then
+      echo "true"
+    else
+      echo "false"
+    fi
+  else
+    echo "false"
+  fi
+else
+  echo "false"
+fi
+```
+
 ## Future Validation Functions
 
 The validation framework is designed for extensibility. Planned additions include:
 
 - `validate.isNumeric()` - Numeric value validation
 - `validate.isAlphaNumeric()` - Alphanumeric validation
-- `validate.isInRange()` - Range validation for numbers
 - `validate.matches()` - Custom regex pattern validation
 
 Each function will follow the same patterns established by the existing validation functions for consistency and reliability.

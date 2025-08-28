@@ -125,6 +125,7 @@ public record ValidateIsUUIDExpression(Expression Uuid) : Expression;
 public record ValidateIsEmptyExpression(Expression Value) : Expression;
 public record ValidateIsGreaterThanExpression(Expression Value, Expression Threshold) : Expression;
 public record ValidateIsLessThanExpression(Expression Value, Expression Threshold) : Expression;
+public record ValidateIsInRangeExpression(Expression Value, Expression Min, Expression Max) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 

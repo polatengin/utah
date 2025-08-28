@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-133-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-134-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -4982,6 +4982,7 @@ Utah provides validation functions for common data types and formats. These func
 
 - `validate.isGreaterThan(value, threshold)` - Check if a numeric value is greater than a threshold
 - `validate.isLessThan(value, threshold)` - Check if a numeric value is less than a threshold
+- `validate.isInRange(value, min, max)` - Check if a numeric value is within an inclusive range
 
 ### Email Validation Usage
 
@@ -5288,11 +5289,24 @@ if (validate.isLessThan(testScore, maxScore)) {
   console.log("Score is below maximum");
 }
 
+// Range validation usage
+let playerScore: number = 85;
+if (validate.isInRange(playerScore, 80, 100)) {
+  console.log("Score is in A grade range!");
+}
+
+let temperature: number = 72;
+if (validate.isInRange(temperature, 68, 78)) {
+  console.log("Temperature is comfortable");
+}
+
 // Validation in assignments
 let aboveThreshold: boolean = validate.isGreaterThan(150, 100);
 let belowLimit: boolean = validate.isLessThan(75, 100);
+let inRange: boolean = validate.isInRange(25, 18, 65);
 console.log(`Value is above threshold: ${aboveThreshold}`);
 console.log(`Value is below limit: ${belowLimit}`);
+console.log(`Age is in working range: ${inRange}`);
 ```
 
 ### Numeric Comparison Validation Examples
@@ -5331,6 +5345,20 @@ validate.isGreaterThan(10, "xyz");       // false (non-numeric threshold)
 validate.isLessThan(10, "xyz");          // false (non-numeric threshold)
 validate.isGreaterThan("", "");          // false (empty strings)
 validate.isLessThan("", "");             // false (empty strings)
+
+// Range validation examples
+validate.isInRange(75, 60, 100);         // true (75 is in [60,100])
+validate.isInRange(50, 60, 100);         // false (50 < 60)
+validate.isInRange(110, 60, 100);        // false (110 > 100)
+validate.isInRange(60, 60, 100);         // true (exactly at min bound)
+validate.isInRange(100, 60, 100);        // true (exactly at max bound)
+validate.isInRange(98.6, 97.0, 99.0);    // true (float in float range)
+validate.isInRange("25", "18", "65");    // true (string numbers)
+validate.isInRange(-5, -10, 0);          // true (negative ranges)
+validate.isInRange(0, -5, 5);            // true (zero-crossing range)
+validate.isInRange(50, 50, 50);          // true (single-point range)
+validate.isInRange(75, 100, 50);         // false (invalid range: min > max)
+validate.isInRange("abc", 1, 10);        // false (non-numeric value)
 ```
 
 ### Generated Bash Code for Validation Functions
@@ -5999,7 +6027,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `validate.isLessThan()` function for numeric comparisons
 
-- [ ] `validate.isInRange()` function for numeric range checks
+- [x] `validate.isInRange()` function for numeric range checks
 
 - [ ] `validate.isAlphaNumeric()` function for alphanumeric checks
 

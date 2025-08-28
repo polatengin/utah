@@ -67,7 +67,32 @@ public partial class Compiler
         }
         else
         {
-          var expressionValue = CompileExpression(v.Value);
+          string expressionValue;
+
+          // Handle negative number literals that get parsed as BinaryExpression with "-" operator
+          // and empty/whitespace left operand
+          if (v.Value is BinaryExpression binExpr &&
+              binExpr.Operator == "-" &&
+              binExpr.Left is LiteralExpression leftLit &&
+              string.IsNullOrWhiteSpace(leftLit.Value) &&
+              binExpr.Right is LiteralExpression rightLit &&
+              rightLit.Type == "number")
+          {
+            expressionValue = $"-{rightLit.Value}";
+          }
+          // For unary minus on number literals in assignments, just use the direct value
+          else if (v.Value is UnaryExpression unaryExpr &&
+              unaryExpr.Operator == "-" &&
+              unaryExpr.Operand is LiteralExpression litExpr &&
+              litExpr.Type == "number")
+          {
+            expressionValue = $"-{litExpr.Value}";
+          }
+          else
+          {
+            expressionValue = CompileExpression(v.Value);
+          }
+
           if (v.Value is ArrayAccess)
           {
             expressionValue = $"\"{expressionValue}\"";
@@ -77,7 +102,7 @@ public partial class Compiler
             expressionValue = $"\"{expressionValue}\"";
           }
           // For boolean assignments from binary expressions, wrap in command substitution
-          if (v.Value is BinaryExpression binExpr && IsBooleanComparison(binExpr))
+          if (v.Value is BinaryExpression binExprBool && IsBooleanComparison(binExprBool))
           {
             expressionValue = $"$({expressionValue} && echo \"true\" || echo \"false\")";
           }

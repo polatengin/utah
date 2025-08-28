@@ -1595,6 +1595,20 @@ public partial class Parser
         throw new InvalidOperationException("validate.isLessThan() requires exactly 2 arguments (value, threshold)");
       }
 
+      // Special handling for validate.isInRange()
+      if (functionName == "validate.isInRange")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 3)
+        {
+          var valueExpr = ParseExpression(args[0]);
+          var minExpr = ParseExpression(args[1]);
+          var maxExpr = ParseExpression(args[2]);
+          return new ValidateIsInRangeExpression(valueExpr, minExpr, maxExpr);
+        }
+        throw new InvalidOperationException("validate.isInRange() requires exactly 3 arguments (value, min, max)");
+      }
+
       // Special handling for scheduler.cron()
       if (functionName == "scheduler.cron" && !string.IsNullOrEmpty(argsContent))
       {

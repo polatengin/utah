@@ -193,8 +193,8 @@ _utah_validate_greater_than() {
 _utah_validate_greater_than ${stringFloat1} ${stringFloat2}
 )
 echo "String 3.14 > 3.0: ${piGreater}"
-neg1=$(( - 10))
-neg2=$(( - 20))
+neg1=-10
+neg2=-20
 negComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
@@ -218,8 +218,8 @@ _utah_validate_greater_than() {
 _utah_validate_greater_than ${neg1} ${neg2}
 )
 echo "Negative -10 > -20: ${negComparison}"
-neg3=$(( - 20))
-neg4=$(( - 10))
+neg3=-20
+neg4=-10
 negComparison2=$(
 _utah_validate_greater_than() {
   local value="$1"
@@ -369,7 +369,7 @@ _utah_validate_greater_than ${emptyString1} ${emptyString2}
 )
 echo "Empty strings comparison: ${emptyComparison}"
 zero1=0
-zero2=$(( - 1))
+zero2=-1
 zeroComparison=$(
 _utah_validate_greater_than() {
   local value="$1"
@@ -393,7 +393,7 @@ _utah_validate_greater_than() {
 _utah_validate_greater_than ${zero1} ${zero2}
 )
 echo "Zero 0 > -1: ${zeroComparison}"
-zero3=$(( - 1))
+zero3=-1
 zero4=0
 zeroComparison2=$(
 _utah_validate_greater_than() {

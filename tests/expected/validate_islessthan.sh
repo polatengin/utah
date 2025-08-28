@@ -193,8 +193,8 @@ _utah_validate_less_than() {
 _utah_validate_less_than ${stringFloat1} ${stringFloat2}
 )
 echo "String 2.8 < 3.0: ${piLess}"
-neg1=$(( - 20))
-neg2=$(( - 10))
+neg1=-20
+neg2=-10
 negComparison=$(
 _utah_validate_less_than() {
   local value="$1"
@@ -218,8 +218,8 @@ _utah_validate_less_than() {
 _utah_validate_less_than ${neg1} ${neg2}
 )
 echo "Negative -20 < -10: ${negComparison}"
-neg3=$(( - 10))
-neg4=$(( - 20))
+neg3=-10
+neg4=-20
 negComparison2=$(
 _utah_validate_less_than() {
   local value="$1"
@@ -368,7 +368,7 @@ _utah_validate_less_than() {
 _utah_validate_less_than ${emptyString1} ${emptyString2}
 )
 echo "Empty strings comparison: ${emptyComparison}"
-zero1=$(( - 1))
+zero1=-1
 zero2=0
 zeroComparison=$(
 _utah_validate_less_than() {
@@ -394,7 +394,7 @@ _utah_validate_less_than ${zero1} ${zero2}
 )
 echo "Zero -1 < 0: ${zeroComparison}"
 zero3=0
-zero4=$(( - 1))
+zero4=-1
 zeroComparison2=$(
 _utah_validate_less_than() {
   local value="$1"

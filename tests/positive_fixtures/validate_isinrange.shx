@@ -1,0 +1,199 @@
+// validate.isInRange() function tests
+// Tests numeric range validation with three parameters (value, min, max)
+
+// Basic integer range checks (inclusive)
+let score1: number = 75;
+let passing1: boolean = validate.isInRange(score1, 60, 100);
+console.log("Score 75 in range [60,100]: " + passing1);
+
+let score2: number = 50;
+let passing2: boolean = validate.isInRange(score2, 60, 100);
+console.log("Score 50 in range [60,100]: " + passing2);
+
+let score3: number = 110;
+let passing3: boolean = validate.isInRange(score3, 60, 100);
+console.log("Score 110 in range [60,100]: " + passing3);
+
+// Boundary testing (inclusive bounds)
+let minBound: number = 60;
+let maxBound: number = 100;
+let atMin: boolean = validate.isInRange(60, minBound, maxBound);
+let atMax: boolean = validate.isInRange(100, minBound, maxBound);
+console.log("Value 60 at min bound [60,100]: " + atMin);
+console.log("Value 100 at max bound [60,100]: " + atMax);
+
+// Float range validation
+let temp1: number = 98.6;
+let normalTemp: boolean = validate.isInRange(temp1, 97.0, 99.0);
+console.log("Temperature 98.6 in range [97.0,99.0]: " + normalTemp);
+
+let temp2: number = 96.5;
+let lowTemp: boolean = validate.isInRange(temp2, 97.0, 99.0);
+console.log("Temperature 96.5 in range [97.0,99.0]: " + lowTemp);
+
+let temp3: number = 99.8;
+let highTemp: boolean = validate.isInRange(temp3, 97.0, 99.0);
+console.log("Temperature 99.8 in range [97.0,99.0]: " + highTemp);
+
+// Precise decimal testing
+let precise1: number = 3.14159;
+let piInRange: boolean = validate.isInRange(precise1, 3.0, 4.0);
+console.log("Pi 3.14159 in range [3.0,4.0]: " + piInRange);
+
+let precise2: number = 2.99999;
+let almostThree: boolean = validate.isInRange(precise2, 3.0, 4.0);
+console.log("Value 2.99999 in range [3.0,4.0]: " + almostThree);
+
+// String number range validation
+let age1: string = "25";
+let workingAge: boolean = validate.isInRange(age1, "18", "65");
+console.log("Age 25 in working range [18,65]: " + workingAge);
+
+let age2: string = "16";
+let underAge: boolean = validate.isInRange(age2, "18", "65");
+console.log("Age 16 in working range [18,65]: " + underAge);
+
+let age3: string = "70";
+let retirement: boolean = validate.isInRange(age3, "18", "65");
+console.log("Age 70 in working range [18,65]: " + retirement);
+
+// Mixed integer and float ranges
+let mixedValue: number = 5;
+let mixedRange: boolean = validate.isInRange(mixedValue, 4.5, 5.5);
+console.log("Integer 5 in float range [4.5,5.5]: " + mixedRange);
+
+let floatValue: number = 4.75;
+let intRange: boolean = validate.isInRange(floatValue, 4, 6);
+console.log("Float 4.75 in integer range [4,6]: " + intRange);
+
+// Negative number ranges
+let negValue1: number = -5;
+let negRange1: boolean = validate.isInRange(negValue1, -10, 0);
+console.log("Negative -5 in range [-10,0]: " + negRange1);
+
+let negValue2: number = -15;
+let negRange2: boolean = validate.isInRange(negValue2, -10, 0);
+console.log("Negative -15 in range [-10,0]: " + negRange2);
+
+let negValue3: number = 5;
+let negRange3: boolean = validate.isInRange(negValue3, -10, 0);
+console.log("Positive 5 in negative range [-10,0]: " + negRange3);
+
+// Zero crossing ranges
+let crossValue1: number = 0;
+let crossRange1: boolean = validate.isInRange(crossValue1, -5, 5);
+console.log("Zero in range [-5,5]: " + crossRange1);
+
+let crossValue2: number = -3;
+let crossRange2: boolean = validate.isInRange(crossValue2, -5, 5);
+console.log("Value -3 in range [-5,5]: " + crossRange2);
+
+let crossValue3: number = 3;
+let crossRange3: boolean = validate.isInRange(crossValue3, -5, 5);
+console.log("Value 3 in range [-5,5]: " + crossRange3);
+
+// Equal bounds (single point range)
+let singleValue1: number = 50;
+let singlePoint: boolean = validate.isInRange(singleValue1, 50, 50);
+console.log("Value 50 in single point range [50,50]: " + singlePoint);
+
+let singleValue2: number = 49;
+let outsideSingle: boolean = validate.isInRange(singleValue2, 50, 50);
+console.log("Value 49 in single point range [50,50]: " + outsideSingle);
+
+// Invalid range (min > max) - should return false
+let invalidRange1: boolean = validate.isInRange(75, 100, 50);
+console.log("Value 75 in invalid range [100,50]: " + invalidRange1);
+
+let invalidRange2: boolean = validate.isInRange(75, 80, 70);
+console.log("Value 75 in invalid range [80,70]: " + invalidRange2);
+
+// Large number ranges
+let largeValue: number = 999999;
+let largeRange: boolean = validate.isInRange(largeValue, 999998, 1000000);
+console.log("Large number 999999 in range [999998,1000000]: " + largeRange);
+
+// Edge cases - Non-numeric values (should return false)
+let invalidValue: string = "abc";
+let nonNumeric1: boolean = validate.isInRange(invalidValue, 1, 10);
+console.log("Invalid value 'abc' in range [1,10]: " + nonNumeric1);
+
+let validValue: number = 5;
+let invalidMin: string = "xyz";
+let nonNumeric2: boolean = validate.isInRange(validValue, invalidMin, 10);
+console.log("Valid value 5 with invalid min 'xyz': " + nonNumeric2);
+
+let validValue2: number = 5;
+let invalidMax: string = "abc";
+let nonNumeric3: boolean = validate.isInRange(validValue2, 1, invalidMax);
+console.log("Valid value 5 with invalid max 'abc': " + nonNumeric3);
+
+// Empty string validation (should return false)
+let emptyValue: string = "";
+let emptyRange: boolean = validate.isInRange(emptyValue, "", "");
+console.log("Empty strings in range: " + emptyRange);
+
+// Real-world use cases
+// Age verification for different contexts
+let studentAge: number = 20;
+if (validate.isInRange(studentAge, 18, 25)) {
+  console.log("Student eligible for college discount");
+} else {
+  console.log("Student not eligible for college discount");
+}
+
+// Temperature monitoring
+let cpuTemp: number = 72;
+if (validate.isInRange(cpuTemp, 0, 85)) {
+  console.log("CPU temperature is safe");
+} else {
+  console.log("CPU temperature is dangerous");
+}
+
+// Score grading
+let examScore: number = 88;
+if (validate.isInRange(examScore, 90, 100)) {
+  console.log("Grade: A");
+} else if (validate.isInRange(examScore, 80, 89)) {
+  console.log("Grade: B");
+} else if (validate.isInRange(examScore, 70, 79)) {
+  console.log("Grade: C");
+} else {
+  console.log("Grade: Below C");
+}
+
+// Percentage validation
+let completion: number = 75;
+let validPercent: boolean = validate.isInRange(completion, 0, 100);
+console.log("Completion percentage is valid: " + validPercent);
+
+// Geographic coordinate validation
+let latitude: number = 40.7128;
+let longitude: number = -74.0060;
+let validLat: boolean = validate.isInRange(latitude, -90, 90);
+let validLon: boolean = validate.isInRange(longitude, -180, 180);
+console.log("Latitude is valid: " + validLat);
+console.log("Longitude is valid: " + validLon);
+
+// Price range validation
+let productPrice: number = 49.99;
+let affordableRange: boolean = validate.isInRange(productPrice, 25.0, 75.0);
+console.log("Product price in affordable range: " + affordableRange);
+
+// Time window validation (24-hour format)
+let currentHour: number = 14;
+let businessHours: boolean = validate.isInRange(currentHour, 9, 17);
+console.log("Current time is during business hours: " + businessHours);
+
+// Memory usage monitoring
+let memoryUsage: number = 78.5;
+let memoryOk: boolean = validate.isInRange(memoryUsage, 0, 90);
+console.log("Memory usage is within limits: " + memoryOk);
+
+// Integration with expressions
+let threshold1: number = 50;
+let threshold2: number = 90;
+let value1: number = 60;
+let value2: number = 80;
+let bothInRange: boolean = validate.isInRange(value1, threshold1, threshold2) && validate.isInRange(value2, threshold1, threshold2);
+console.log("Both values in range [50,90]: " + bothInRange);

@@ -259,6 +259,8 @@ public partial class Compiler
         return CompileValidateIsGreaterThanExpression(validateIsGreaterThan);
       case ValidateIsLessThanExpression validateIsLessThan:
         return CompileValidateIsLessThanExpression(validateIsLessThan);
+      case ValidateIsInRangeExpression validateIsInRange:
+        return CompileValidateIsInRangeExpression(validateIsInRange);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -961,6 +963,17 @@ public partial class Compiler
 
   private string CompileBinaryExpression(BinaryExpression bin)
   {
+    // Handle negative number literals that get parsed as BinaryExpression with "-" operator
+    // and empty/whitespace left operand
+    if (bin.Operator == "-" &&
+        bin.Left is LiteralExpression leftLit &&
+        string.IsNullOrWhiteSpace(leftLit.Value) &&
+        bin.Right is LiteralExpression rightLit &&
+        rightLit.Type == "number")
+    {
+      return $"-{rightLit.Value}";
+    }
+
     var left = CompileExpression(bin.Left);
     var right = CompileExpression(bin.Right);
 
@@ -991,7 +1004,9 @@ public partial class Compiler
     return un.Operator switch
     {
       "!" => $"! {operand}",
-      "-" => $"$((-${operand}))",
+      "-" => un.Operand is LiteralExpression lit && lit.Type == "number"
+             ? $"-{lit.Value}"
+             : $"$((-${operand}))",
       _ => throw new NotSupportedException($"Unary operator {un.Operator} is not supported")
     };
   }
@@ -2905,6 +2920,44 @@ _utah_validate_less_than() {{
   fi
 }}
 _utah_validate_less_than {value} {threshold}
+)";
+  }
+
+  private string CompileValidateIsInRangeExpression(ValidateIsInRangeExpression validateIsInRange)
+  {
+    var value = CompileExpression(validateIsInRange.Value);
+    var min = CompileExpression(validateIsInRange.Min);
+    var max = CompileExpression(validateIsInRange.Max);
+
+    // Use a bash function that handles range validation with both integer and floating-point comparisons
+    // Validates that all arguments are numeric and that min <= max before performing range check
+    return $@"$(
+_utah_validate_in_range() {{
+  local value=""$1""
+  local min=""$2""
+  local max=""$3""
+
+  # Check if all values are numeric (integer or float)
+  if ! [[ ""$value"" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ ""$min"" =~ ^-?[0-9]+(\.[0-9]+)?$ ]] || ! [[ ""$max"" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo ""false"" && return
+  fi
+
+  # Use bc for floating-point comparison, awk as fallback
+  if command -v bc >/dev/null 2>&1; then
+    # Check valid range (min <= max)
+    valid_range=$(echo ""$min <= $max"" | bc)
+    [ ""$valid_range"" != ""1"" ] && echo ""false"" && return
+
+    # Check if value is in range (inclusive: min <= value <= max)
+    result=$(echo ""$min <= $value && $value <= $max"" | bc)
+    [ ""$result"" = ""1"" ] && echo ""true"" || echo ""false""
+  else
+    # Fallback using awk for float comparison
+    result=$(awk ""BEGIN {{ if ($min <= $max && $min <= $value && $value <= $max) print 1; else print 0 }}"")
+    [ ""$result"" = ""1"" ] && echo ""true"" || echo ""false""
+  fi
+}}
+_utah_validate_in_range {value} {min} {max}
 )";
   }
 
