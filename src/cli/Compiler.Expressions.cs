@@ -772,23 +772,23 @@ public partial class Compiler
   private string CompileProcessStartExpression(ProcessStartExpression processStart)
   {
     var commandCode = CompileExpression(processStart.Command);
-    
+
     // Remove surrounding quotes if the command is a string literal
     if (commandCode.StartsWith("\"") && commandCode.EndsWith("\""))
     {
       commandCode = commandCode[1..^1]; // Remove quotes
     }
-    
+
     // Start building the bash command
     var bashCommand = new StringBuilder();
-    
+
     // If cwd is specified, change directory
     if (processStart.Cwd != null)
     {
       var cwdCode = CompileExpression(processStart.Cwd);
       bashCommand.Append($"(cd {cwdCode} && ");
     }
-    
+
     // Handle input redirection
     string inputRedirection = "";
     if (processStart.Input != null)
@@ -796,7 +796,7 @@ public partial class Compiler
       var inputCode = CompileExpression(processStart.Input);
       inputRedirection = $" < {inputCode}";
     }
-    
+
     // Handle output redirection
     string outputRedirection = "";
     if (processStart.Output != null)
@@ -804,7 +804,7 @@ public partial class Compiler
       var outputCode = CompileExpression(processStart.Output);
       outputRedirection = $" > {outputCode}";
     }
-    
+
     // Handle error redirection
     string errorRedirection = "";
     if (processStart.Error != null)
@@ -812,19 +812,19 @@ public partial class Compiler
       var errorCode = CompileExpression(processStart.Error);
       errorRedirection = $" 2> {errorCode}";
     }
-    
+
     // Build the complete command
     bashCommand.Append($"{commandCode}{inputRedirection}{outputRedirection}{errorRedirection} &");
-    
+
     // Close the subshell if cwd was specified
     if (processStart.Cwd != null)
     {
       bashCommand.Append(")");
     }
-    
+
     // Return the PID of the background process
     bashCommand.Append("; echo $!");
-    
+
     return $"$({bashCommand})";
   }
 

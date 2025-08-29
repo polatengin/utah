@@ -183,18 +183,19 @@ make test FILE=your_test_name
 ### Building Documentation
 
 ```bash
-cd docs
+cd ./src/website
 npm install
 npm run build
+npm run start
 ```
 
 ### Documentation Structure
 
 - **Getting Started**: Installation and basic usage
 - **Language Features**: Core language concepts
-- **Functions**: Built-in function reference
+- **CLI Reference**: Command-line interface documentation
 - **Guides**: Advanced usage patterns
-- **CLI**: Command-line interface documentation
+- **Examples**: Code examples and use cases
 
 ## Release Process
 
@@ -210,7 +211,6 @@ Utah follows semantic versioning:
 
 - **GitHub Issues**: Report bugs and request features
 - **GitHub Discussions**: Ask questions and share ideas
-- **Discord**: Real-time chat with the community
 
 ### Code of Conduct
 
@@ -245,6 +245,5 @@ If you have questions about contributing:
 
 1. Check existing GitHub issues and discussions
 2. Create a new issue with the "question" label
-3. Join our Discord community for real-time help
 
 Thank you for contributing to Utah! 🚀

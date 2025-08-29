@@ -516,8 +516,8 @@ public partial class Parser
 
       // Array methods should use namespace syntax (e.g., array.isEmpty(myArray))
       // But allow namespace calls (where objectName is "array")
-      if (objectName != "array" && 
-          (methodPart == "isEmpty()" || 
+      if (objectName != "array" &&
+          (methodPart == "isEmpty()" ||
            methodPart.StartsWith("contains(") ||
            methodPart == "reverse()" ||
            methodPart.StartsWith("join(") ||
