@@ -510,53 +510,22 @@ public partial class Parser
       // Handle .length property
       if (methodPart == "length" || methodPart == "length()")
       {
-        var targetExpr = new VariableExpression(objectName);
-        // Arrays should use array.length() namespace function
-        if (IsLikelyArray(objectName))
-        {
-          return new ArrayLength(targetExpr);
-        }
-        // Strings should use string.length() namespace function
+        // Only strings should use this syntax - arrays should use array.length() namespace function
         throw new InvalidOperationException($"Use string.length({objectName}) instead of {objectName}.length()");
       }
 
-      // Handle .isEmpty() method
-      if (methodPart == "isEmpty()")
+      // Array methods should use namespace syntax (e.g., array.isEmpty(myArray))
+      // But allow namespace calls (where objectName is "array")
+      if (objectName != "array" && 
+          (methodPart == "isEmpty()" || 
+           methodPart.StartsWith("contains(") ||
+           methodPart == "reverse()" ||
+           methodPart.StartsWith("join(") ||
+           methodPart.StartsWith("sort(") ||
+           methodPart == "shuffle()"))
       {
-        return new ArrayIsEmpty(new VariableExpression(objectName));
-      }
-
-      // Handle .contains() method
-      if (methodPart.StartsWith("contains(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
-        var itemExpr = ParseExpression(argsContent);
-        return new ArrayContains(new VariableExpression(objectName), itemExpr);
-      }
-
-      // Handle .reverse() method
-      if (methodPart == "reverse()")
-      {
-        return new ArrayReverse(new VariableExpression(objectName));
-      }
-
-      // Handle .join() method
-      if (methodPart.StartsWith("join(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
-        Expression separatorExpr;
-
-        // If no arguments provided, use default comma separator
-        if (string.IsNullOrEmpty(argsContent))
-        {
-          separatorExpr = new LiteralExpression(",", "string");
-        }
-        else
-        {
-          separatorExpr = ParseExpression(argsContent);
-        }
-
-        return new ArrayJoinExpression(new VariableExpression(objectName), separatorExpr);
+        string methodName = methodPart.Contains("(") ? methodPart.Split('(')[0] : methodPart.Replace("()", "");
+        throw new InvalidOperationException($"Array methods should use namespace syntax. Use array.{methodName}({objectName}, ...) instead of {objectName}.{methodPart}");
       }
 
       // Handle array.sort() namespace function calls
@@ -584,27 +553,6 @@ public partial class Parser
         var arrayExpr = ParseExpression(argsContent);
 
         return new ArrayShuffleExpression(arrayExpr);
-      }
-
-      // Handle .sort() method on variables (e.g., myArray.sort())
-      if (methodPart.StartsWith("sort(") && methodPart.EndsWith(")"))
-      {
-        var argsContent = methodPart.Substring(5, methodPart.Length - 6).Trim();
-        Expression? sortOrderExpr = null;
-
-        // If no arguments provided, use default ascending sort
-        if (!string.IsNullOrEmpty(argsContent))
-        {
-          sortOrderExpr = ParseExpression(argsContent);
-        }
-
-        return new ArraySortExpression(new VariableExpression(objectName), sortOrderExpr);
-      }
-
-      // Handle .shuffle() method on variables (e.g., myArray.shuffle())
-      if (methodPart == "shuffle()")
-      {
-        return new ArrayShuffleExpression(new VariableExpression(objectName));
       }
 
       // Handle array.forEach() namespace function calls
@@ -2140,16 +2088,6 @@ public partial class Parser
     var parser = new Parser(input);
     var program = parser.Parse();
     return program.Statements;
-  }
-
-  private bool IsLikelyArray(string variableName)
-  {
-    // Simple heuristic: variable names ending with 's' or containing 'Array', 'List', etc.
-    // This is a basic implementation - in a full language, we'd use a symbol table
-    return variableName.EndsWith("s", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("Array", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("List", StringComparison.OrdinalIgnoreCase) ||
-           variableName.Contains("Items", StringComparison.OrdinalIgnoreCase);
   }
 
   private List<string> ParseFunctionArguments(string argsContent)

@@ -24,14 +24,25 @@ let items: object[] = [];
 
 ### Array Methods
 
+Utah supports array functions in two equivalent syntaxes:
+
+1. **Namespace syntax**: `array.function(arrayVariable, ...args)` - Recommended for clarity
+2. **Method syntax**: `arrayVariable.function(...args)` - Familiar to JavaScript/TypeScript developers
+
+Both forms work identically and transpile to the same bash code.
+
 #### `array.length()`
 
 Get the number of elements in an array:
 
 ```typescript
 let fruits: string[] = ["apple", "banana", "orange"];
-let count: number = array.length(fruits);
-console.log("We have ${count} fruits");
+
+// Both syntaxes work identically:
+let count1: number = array.length(fruits);    // Namespace syntax
+let count2: number = fruits.length();         // Method syntax
+
+console.log("We have ${count1} fruits");
 ```
 
 #### `array.contains()`
@@ -53,8 +64,13 @@ Check if an array is empty:
 ```typescript
 let tasks: string[] = [];
 
-if (array.isEmpty(tasks)) {
+// Both syntaxes work:
+if (array.isEmpty(tasks)) {         // Namespace syntax
   console.log("No tasks pending");
+}
+
+if (tasks.isEmpty()) {              // Method syntax
+  console.log("Tasks list is empty");
 }
 ```
 

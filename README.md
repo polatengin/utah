@@ -2234,10 +2234,10 @@ The process functions transpile to efficient `ps` commands:
 pid=$(ps -o pid -p $$ --no-headers | tr -d ' ')
 
 # process.cpu() becomes:
-cpuUsage=$(ps -o pcpu -p $$ --no-headers | tr -d ' ')
+cpuUsage=$(ps -o pcpu -p $$ --no-headers | tr -d ' ' | awk '{printf("%d", $1 + 0.5)}')
 
 # process.memory() becomes:
-memoryUsage=$(ps -o pmem -p $$ --no-headers | tr -d ' ')
+memoryUsage=$(ps -o pmem -p $$ --no-headers | tr -d ' ' | awk '{printf("%d", $1 + 0.5)}')
 
 # process.elapsedTime() becomes:
 elapsed=$(ps -o etime -p $$ --no-headers | tr -d ' ')
