@@ -108,9 +108,9 @@ utah run --command "fs.exists('/path/to/file')"
 - `utah <file.shx>`: Execute a .shx file directly
 - `utah -c <command>`: Execute a single command directly
 - `utah --command <command>`: Execute a single command directly (long form)
-- `utah run <file.shx>`: Execute a .shx file (legacy)
-- `utah run -c <command>`: Execute a single command directly (legacy)
-- `utah run --command <command>`: Execute a single command directly (legacy long form)
+- `utah run <file.shx>`: Execute a .shx file
+- `utah run -c <command>`: Execute a single command directly
+- `utah run --command <command>`: Execute a single command directly
 
 ### Format Command
 
@@ -293,11 +293,11 @@ utah format --in-place
 # Check all files are formatted recursively (recommended)
 utah format --check
 
-# Legacy: Format with find (still works)
+# Format with find
 find . -name "*.shx" -exec utah format {} --in-place \;
 ```
 
-**Note**: The new `utah format` without a filename automatically processes all `.shx` files recursively, providing better progress reporting and error handling than the legacy `find` approach.
+**Note**: The new `utah format` without a filename automatically processes all `.shx` files recursively, providing better progress reporting and error handling than the `find` approach.
 
 ### Output Redirection
 

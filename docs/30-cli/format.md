@@ -225,22 +225,6 @@ When no `.editorconfig` is found, Utah uses these defaults:
 - **Trim whitespace:** Yes
 - **Final newline:** Yes
 
-### Custom Configuration
-
-Create `.utah-format.json` for Utah-specific rules:
-
-```json
-{
-  "indentSize": 4,
-  "maxLineLength": 120,
-  "semicolons": "always",
-  "quotes": "double",
-  "trailingCommas": "es5",
-  "bracketSpacing": true,
-  "bracketSameLine": false
-}
-```
-
 ## Integration Examples
 
 ### Pre-commit Hook
@@ -298,7 +282,7 @@ format-summary:
   @echo "Formatting all Utah files..."
   @utah format --in-place
 
-# Legacy: Format specific directory
+# Format specific directory
 format-src:
   cd src && utah format --in-place
 
@@ -424,20 +408,6 @@ Found 5 .shx file(s) to format:
 
 Summary: 3 properly formatted, 2 need formatting, 0 errors
 Run 'utah format --in-place' to format all files.
-```
-
-### Legacy Batch Formatting
-
-For specific use cases, you can still use traditional approaches:
-
-```bash
-# Format all .shx files in current directory only (non-recursive)
-for file in *.shx; do
-  utah format "$file" --in-place
-done
-
-# Format with backup using find
-find . -name "*.shx" -exec cp {} {}.backup \; -exec utah format {} --in-place \;
 ```
 
 ### Conditional Formatting
