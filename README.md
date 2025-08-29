@@ -6369,6 +6369,8 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Deferred execution
 
+- [ ] `--verbose` flag for detailed output
+
 - [x] `scheduler.cron()` - Cron job scheduling with persistent jobs
 
 - [x] Time and Resource monitoring
