@@ -50,6 +50,21 @@ let result: string = system.execute("ls -la");
 // Start a process in the background and get its PID
 let backgroundPid: number = process.start("echo 'Hello World'");
 
+// Check if a process is running
+let isRunning: boolean = process.isRunning(backgroundPid);
+console.log("Process running: " + isRunning);
+
+// Check if system init process is running (always true)
+let initRunning: boolean = process.isRunning(1);
+
+// Process monitoring workflow
+let longRunningPid: number = process.start("sleep 30");
+while (process.isRunning(longRunningPid)) {
+  console.log("Process still running...");
+  // Do other work or sleep for a bit
+}
+console.log("Process finished");
+
 // Start process with working directory
 let pid1: number = process.start("pwd", { cwd: "/tmp" });
 

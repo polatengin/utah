@@ -1,0 +1,83 @@
+// Test process.isRunning() function with various scenarios
+
+// Start a background process and check if it's running
+let longPid: number = process.start("sleep 10");
+console.log("Started sleep process with PID:");
+console.log(longPid);
+
+let isRunning1: boolean = process.isRunning(longPid);
+console.log("Sleep process running:");
+console.log(isRunning1);
+
+// Start a quick process that will finish immediately
+let quickPid: number = process.start("echo 'Quick task done'");
+console.log("Started quick process with PID:");
+console.log(quickPid);
+
+// Check immediately (might still be running)
+let isRunning2: boolean = process.isRunning(quickPid);
+console.log("Quick process running:");
+console.log(isRunning2);
+
+// Test with literal PID values
+let runningCheck1: boolean = process.isRunning(1);  // init process, always running
+console.log("Init process (PID 1) running:");
+console.log(runningCheck1);
+
+let runningCheck2: boolean = process.isRunning(99999);  // invalid PID
+console.log("Invalid PID (99999) running:");
+console.log(runningCheck2);
+
+// Test with variables
+let testPid: number = 1;
+let variableCheck: boolean = process.isRunning(testPid);
+console.log("Variable PID check:");
+console.log(variableCheck);
+
+// Use in conditional statements
+if (process.isRunning(1)) {
+  console.log("System init process is running (as expected)");
+}
+
+if (!process.isRunning(99999)) {
+  console.log("Invalid PID correctly returns false");
+}
+
+// Process monitoring workflow
+let monitorPid: number = process.start("sleep 2");
+console.log("Started 2-second process for monitoring");
+
+let monitoring: boolean = true;
+let checkCount: number = 0;
+while (monitoring && checkCount < 5) {
+  let stillRunning: boolean = process.isRunning(monitorPid);
+  console.log("Monitor check:");
+  console.log(checkCount);
+  console.log("Result:");
+  console.log(stillRunning);
+  
+  if (!stillRunning) {
+    monitoring = false;
+    console.log("Process finished, stopping monitor");
+  }
+  
+  checkCount = checkCount + 1;
+}
+
+console.log("Process monitoring test completed");
+
+// Test with process ID from current process
+let currentProcessId: number = process.id();
+let currentRunning: boolean = process.isRunning(currentProcessId);
+console.log("Current process running:");
+console.log(currentRunning);
+
+// Integration with other process functions
+let testCmd: number = process.start("echo 'Integration test'");
+if (process.isRunning(testCmd)) {
+  console.log("Process integration test: process is running");
+} else {
+  console.log("Process integration test: process finished quickly");
+}
+
+console.log("All process.isRunning() tests completed");

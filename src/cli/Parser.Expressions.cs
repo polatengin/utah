@@ -1145,6 +1145,19 @@ public partial class Parser
         throw new InvalidOperationException("process.start() requires 1-2 arguments (command, options?)");
       }
 
+      // Special handling for process.isRunning()
+      if (functionName == "process.isRunning")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          // process.isRunning(pid) - check if process with PID is running
+          var pidExpr = ParseExpression(args[0]);
+          return new ProcessIsRunningExpression(pidExpr);
+        }
+        throw new InvalidOperationException("process.isRunning() requires exactly 1 argument (pid)");
+      }
+
       // Special handling for os.getLinuxVersion()
       if (functionName == "os.getLinuxVersion" && string.IsNullOrEmpty(argsContent))
       {

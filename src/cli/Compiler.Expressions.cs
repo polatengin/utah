@@ -125,6 +125,8 @@ public partial class Compiler
         return CompileProcessStatusExpression(processStatus);
       case ProcessStartExpression processStart:
         return CompileProcessStartExpression(processStart);
+      case ProcessIsRunningExpression processIsRunning:
+        return CompileProcessIsRunningExpression(processIsRunning);
       case TimerStopExpression:
         return CompileTimerStopExpression();
       case OsGetLinuxVersionExpression osLinuxVersion:
@@ -824,6 +826,28 @@ public partial class Compiler
     bashCommand.Append("; echo $!");
     
     return $"$({bashCommand})";
+  }
+
+  private string CompileProcessIsRunningExpression(ProcessIsRunningExpression processIsRunning)
+  {
+    string pidReference;
+
+    if (processIsRunning.Pid is VariableExpression varExpr)
+    {
+      pidReference = $"${{{varExpr.Name}}}";
+    }
+    else if (processIsRunning.Pid is LiteralExpression literal && literal.Type == "number")
+    {
+      pidReference = literal.Value;
+    }
+    else
+    {
+      pidReference = CompileExpression(processIsRunning.Pid);
+    }
+
+    // Use ps command to check if process exists and is running
+    // This approach works across different Unix-like systems
+    return $"$(ps -p {pidReference} -o pid= > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
   }
 
   private string CompileOsGetLinuxVersionExpression(OsGetLinuxVersionExpression osLinuxVersion)
