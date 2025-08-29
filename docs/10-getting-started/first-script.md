@@ -392,7 +392,9 @@ if (isProduction) {
 ### Backup Operations
 
 ```typescript
-let timestamp: string = timer.current().toString();
+timer.start();
+// More complex operations...
+let timestamp: string = timer.current();
 let backupDir: string = "backup_${timestamp}";
 
 if (!fs.exists(backupDir)) {
