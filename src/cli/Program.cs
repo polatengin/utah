@@ -299,9 +299,8 @@ class UtahApp
 
   private string FormatInlineCommandForFile(string command)
   {
-    // Handle function definitions
-    command = Regex.Replace(command, @"function\s+(\w+)\s*\(([^)]*)\)\s*\{\s*([^}]+)\s*\}",
-                           "function $1($2) {\n  $3\n}");
+    // Handle function definitions with proper brace matching
+    command = FormatFunctionDefinitions(command);
 
     // Handle try-catch blocks
     command = Regex.Replace(command, @"try\s*\{\s*([^}]+)\s*\}\s*catch\s*\{\s*([^}]+)\s*\}",
@@ -323,6 +322,138 @@ class UtahApp
     command = Regex.Replace(command, @"\n\s*\n", "\n");
 
     return command;
+  }
+
+  private string FormatFunctionDefinitions(string command)
+  {
+    var functionPattern = @"function\s+(\w+)\s*\(([^)]*)\)\s*\{";
+    var match = Regex.Match(command, functionPattern);
+
+    if (!match.Success) return command;
+
+    var funcName = match.Groups[1].Value;
+    var parameters = match.Groups[2].Value;
+    var startIndex = match.Index;
+    var openBraceIndex = match.Index + match.Length - 1;
+
+    // Find the matching closing brace
+    var braceCount = 1;
+    var endIndex = openBraceIndex + 1;
+
+    while (endIndex < command.Length && braceCount > 0)
+    {
+      if (command[endIndex] == '{')
+        braceCount++;
+      else if (command[endIndex] == '}')
+        braceCount--;
+      endIndex++;
+    }
+
+    if (braceCount == 0)
+    {
+      var functionBody = command.Substring(openBraceIndex + 1, endIndex - openBraceIndex - 2);
+
+      // Split function body into statements and format each one properly
+      var statements = SplitStatements(functionBody.Trim());
+      var formattedStatements = string.Join("\n  ", statements.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+      var formattedFunction = $"function {funcName}({parameters}) {{\n  {formattedStatements}\n}}";
+
+      return command.Substring(0, startIndex) + formattedFunction + command.Substring(endIndex);
+    }
+
+    return command;
+  }
+
+  private List<string> SplitStatements(string body)
+  {
+    var statements = new List<string>();
+    var current = "";
+    var braceCount = 0;
+    var inString = false;
+    var escapeNext = false;
+
+    for (int i = 0; i < body.Length; i++)
+    {
+      var c = body[i];
+
+      if (escapeNext)
+      {
+        current += c;
+        escapeNext = false;
+        continue;
+      }
+
+      if (c == '\\')
+      {
+        escapeNext = true;
+        current += c;
+        continue;
+      }
+
+      if (c == '"' && !escapeNext)
+      {
+        inString = !inString;
+        current += c;
+        continue;
+      }
+
+      if (inString)
+      {
+        current += c;
+        continue;
+      }
+
+      if (c == '{')
+      {
+        braceCount++;
+        current += c;
+      }
+      else if (c == '}')
+      {
+        braceCount--;
+        current += c;
+
+        // If we're back to balanced braces and this looks like a statement end
+        if (braceCount == 0 && (i == body.Length - 1 || IsStatementBoundary(body, i + 1)))
+        {
+          statements.Add(current.Trim());
+          current = "";
+        }
+      }
+      else if (c == ';' && braceCount == 0)
+      {
+        current += c;
+        statements.Add(current.Trim());
+        current = "";
+      }
+      else
+      {
+        current += c;
+      }
+    }
+
+    if (!string.IsNullOrWhiteSpace(current))
+    {
+      statements.Add(current.Trim());
+    }
+
+    return statements;
+  }
+
+  private bool IsStatementBoundary(string text, int index)
+  {
+    while (index < text.Length && char.IsWhiteSpace(text[index]))
+      index++;
+
+    if (index >= text.Length) return true;
+
+    // Check if next non-whitespace character starts a new statement
+    var remaining = text.Substring(index);
+    return remaining.StartsWith("if ") || remaining.StartsWith("return ") ||
+           remaining.StartsWith("let ") || remaining.StartsWith("const ") ||
+           remaining.StartsWith("throw ") || remaining.StartsWith("try ") ||
+           remaining.StartsWith("console.");
   }
 
   private async Task StartLanguageServerAsync()
