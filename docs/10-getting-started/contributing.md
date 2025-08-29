@@ -19,7 +19,7 @@ Thank you for your interest in contributing to Utah! This guide will help you ge
 2. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/utah-lang/utah.git
+   git clone https://github.com/polatengin/utah.git
    cd utah
    ```
 
@@ -44,7 +44,6 @@ Utah is organized into several main components:
 - **src/mcp-server/** - Model Context Protocol server for AI assistant integration
 - **tests/** - Test suite with positive and negative test cases
 - **docs/** - Documentation website built with Docusaurus
-- **examples/** - Sample Utah scripts
 
 ## Development Workflow
 
@@ -60,6 +59,7 @@ Follow the established patterns in the codebase:
 
 - **CLI Changes**: Modify files in `src/cli/`
 - **Language Features**: Add AST nodes, parser logic, and compiler output
+- **Tests**: Add or update tests in the `tests/` directory
 - **VS Code Extension**: Update files in `src/vscode-extension/`
 - **MCP Server**: Update Model Context Protocol server in `src/mcp-server/`
 - **Documentation**: Update relevant `.md` files
@@ -74,9 +74,8 @@ For new language features:
 
 ### 4. Update Documentation
 
-- Add examples to `examples/`
 - Update [README.md](https://github.com/polatengin/utah/blob/main/README.md) if needed
-- Update function documentation in `docs/functions/`
+- Update documentation in `docs/` folder
 
 ### 5. Submit a Pull Request
 
@@ -163,12 +162,6 @@ make test
 
 # Run specific test
 make test FILE=your_test_name
-
-# Run CLI tests only
-dotnet test src/cli/
-
-# Run VS Code extension tests
-cd src/vscode-extension && npm test
 ```
 
 ### Test Types
@@ -176,6 +169,7 @@ cd src/vscode-extension && npm test
 - **Positive Tests**: Valid Utah code that should compile successfully
 - **Negative Tests**: Invalid code that should fail compilation
 - **Format Tests**: Malformed code that should be formatted correctly
+- **Command Tests**: Tests for CLI commands and their output
 
 ### Adding New Tests
 
