@@ -199,7 +199,13 @@ class UtahApp
 
   private void ExecuteInlineCommand(string command)
   {
-    RunCommand(command);
+    var normalizedCommand = command.Trim();
+    if (!normalizedCommand.EndsWith(";"))
+    {
+      normalizedCommand += ";";
+    }
+
+    RunCommand(normalizedCommand);
   }
 
   private async Task StartLanguageServerAsync()
