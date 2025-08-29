@@ -233,7 +233,7 @@ If Utah functions fail due to missing dependencies:
 ```bash
 # Install missing tools
 sudo apt install -y jq  # For JSON functions
-sudo snap install yq    # For YAML functions
+sudo apt install -y yq  # For YAML functions
 
 # Or use Utah's built-in installers
 utah run -c "json.installDependencies()"
