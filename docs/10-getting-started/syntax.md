@@ -67,27 +67,12 @@ version="1.0"
 greeting="Welcome to ${name} v${version}!"
 ```
 
-### Multiline Strings
-
-```typescript
-let description: string = `
-This is a multiline
-string that spans
-multiple lines.
-`;
-```
-
 ## Comments
 
 Utah supports both single-line and multi-line comments:
 
 ```typescript
 // This is a single-line comment
-
-/*
-This is a multi-line comment
-that can span multiple lines
-*/
 
 let value: string = "Hello"; // Inline comment
 ```
@@ -454,10 +439,6 @@ function slowTask(name: string): void {
 parallel slowTask("Task A");
 parallel slowTask("Task B");
 parallel slowTask("Task C");
-
-// Wait for all to complete
-let _ = `$(wait)`;
-console.log("All tasks completed");
 ```
 
 ## Best Practices
@@ -536,30 +517,6 @@ Now that you understand Utah's basic syntax:
 4. **Discover built-ins**: [Built-in Functions](../20-language-features/index.md)
 
 ## Common Syntax Errors
-
-### Missing Type Annotations
-
-```typescript
-// Error: Missing type annotation
-let userName = "Alice";
-
-// Correct
-let userName: string = "Alice";
-```
-
-### Incorrect Function Syntax
-
-```typescript
-// Error: Missing return type
-function add(a: number, b: number) {
-  return a + b;
-}
-
-// Correct
-function add(a: number, b: number): number {
-  return a + b;
-}
-```
 
 ### Improper Array Declaration
 
