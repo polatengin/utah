@@ -135,7 +135,7 @@ public partial class Parser
     if (line.StartsWith("for(") || line.StartsWith("for ("))
     {
       // Disambiguate between for and for-in loops
-      var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+in\s+(.+)\)\s*\{");
+      var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+(in|of)\s+(.+)\)\s*\{");
       if (forInMatch.Success)
       {
         return ParseForInLoop(line, ref i);
@@ -493,7 +493,9 @@ public partial class Parser
     foreach (var p in paramList)
     {
       var parts = p.Trim().Split(':');
-      parameters.Add((parts[0].Trim(), parts[1].Trim()));
+      var paramName = parts[0].Trim();
+      var paramType = parts.Length > 1 ? parts[1].Trim() : "any"; // Default to "any" if no type specified
+      parameters.Add((paramName, paramType));
     }
 
     // Push return type onto stack for validation
@@ -675,11 +677,11 @@ public partial class Parser
 
   private ForInLoop ParseForInLoop(string line, ref int i)
   {
-    var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+in\s+(.+)\)\s*\{");
+    var forInMatch = Regex.Match(line, @"for\s*\((let|const)\s+(\w+)(?::\s*(\w+))?\s+(in|of)\s+(.+)\)\s*\{");
     if (forInMatch.Success)
     {
       var variable = forInMatch.Groups[2].Value;
-      var iterable = ParseExpression(forInMatch.Groups[4].Value);
+      var iterable = ParseExpression(forInMatch.Groups[5].Value); // Changed from Groups[4] to Groups[5] due to added (in|of) group
       var body = new List<Statement>();
       i++;
       while (i < _lines.Length && !_lines[i].Trim().StartsWith("}"))

@@ -1,5 +1,6 @@
 using OmniSharp.Extensions.LanguageServer.Server;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 var app = new UtahApp();
 await app.RunAsync(args);
@@ -205,7 +206,123 @@ class UtahApp
       normalizedCommand += ";";
     }
 
-    RunCommand(normalizedCommand);
+    // For complex constructs, use file-based approach
+    if (ContainsComplexConstructs(normalizedCommand))
+    {
+      ExecuteInlineCommandAsFile(normalizedCommand);
+    }
+    else
+    {
+      // Simple commands can be processed directly
+      RunCommand(normalizedCommand);
+    }
+  }
+
+  private bool ContainsComplexConstructs(string command)
+  {
+    return command.Contains("function ") ||
+           command.Contains("try {") ||
+           command.Contains("defer ") ||
+           command.Contains("catch ");
+  }
+
+  private void ExecuteInlineCommandAsFile(string command)
+  {
+    // Create a temporary .shx file and process it normally
+    var tempFile = Path.GetTempFileName() + ".shx";
+    try
+    {
+      // Format the command properly for file processing
+      var formattedCommand = FormatInlineCommandForFile(command);
+      File.WriteAllText(tempFile, formattedCommand);
+
+      // Process as a regular file synchronously
+      RunFileSynchronously(tempFile);
+    }
+    finally
+    {
+      if (File.Exists(tempFile))
+      {
+        File.Delete(tempFile);
+      }
+    }
+  }
+
+  private void RunFileSynchronously(string filePath)
+  {
+    // Run the file synchronously by reusing the compilation logic
+    try
+    {
+      var shxContent = File.ReadAllText(filePath);
+      var parser = new Parser(shxContent);
+      var ast = parser.Parse();
+      var compiler = new Compiler();
+      var output = compiler.Compile(ast);
+
+      var tempFile = Path.GetTempFileName();
+      File.WriteAllText(tempFile, output);
+
+      var process = new Process
+      {
+        StartInfo = new ProcessStartInfo
+        {
+          FileName = "/bin/bash",
+          Arguments = tempFile,
+          RedirectStandardOutput = true,
+          RedirectStandardError = true,
+          UseShellExecute = false,
+          CreateNoWindow = true,
+        }
+      };
+
+      process.OutputDataReceived += (sender, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+      process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+
+      process.Start();
+      process.BeginOutputReadLine();
+      process.BeginErrorReadLine();
+      process.WaitForExit();
+
+      File.Delete(tempFile);
+    }
+    catch (InvalidOperationException ex)
+    {
+      Console.WriteLine($"❌ Compilation failed: {ex.Message}");
+      Environment.Exit(1);
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
+      Environment.Exit(1);
+    }
+  }
+
+  private string FormatInlineCommandForFile(string command)
+  {
+    // Handle function definitions
+    command = Regex.Replace(command, @"function\s+(\w+)\s*\(([^)]*)\)\s*\{\s*([^}]+)\s*\}",
+                           "function $1($2) {\n  $3\n}");
+
+    // Handle try-catch blocks
+    command = Regex.Replace(command, @"try\s*\{\s*([^}]+)\s*\}\s*catch\s*\{\s*([^}]+)\s*\}",
+                           "try {\n  $1\n}\ncatch {\n  $2\n}");
+
+    // Handle defer statements - wrap in a function if not already in one
+    if (command.Contains("defer ") && !command.Contains("function "))
+    {
+      command = $"function main() {{\n  {command}\n}}\nmain();";
+    }
+
+    // Add line breaks after closing braces when followed by other statements
+    command = Regex.Replace(command, @"\}\s*([a-zA-Z_]\w*)", "}\n$1");
+
+    // Add line breaks after statements
+    command = Regex.Replace(command, @";\s*(?=\w)", ";\n");
+
+    // Clean up extra whitespace
+    command = Regex.Replace(command, @"\n\s*\n", "\n");
+
+    return command;
   }
 
   private async Task StartLanguageServerAsync()

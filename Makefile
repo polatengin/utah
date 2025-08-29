@@ -191,6 +191,53 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		run_test_group "$(FIXTURES_DIR)" "positive" "positive tests"; \
 		run_test_group "$(NEGATIVE_TESTS_DIR)" "negative" "negative tests (should fail compilation)"; \
 		run_test_group "$(MALFORMED_DIR)" "format" "format tests"; \
+		echo "$(BLUE)Testing command-based executions...$(NC)"; \
+		test_command() { \
+			local cmd="$$1" expected_exit="$$2" desc="$$3"; \
+			total=$$((total + 1)); \
+			echo -n "🔍 Testing $$desc... "; \
+			if dotnet run --project $(CLI_DIR) --verbosity quiet -- --command "$$cmd" > /dev/null 2>&1; then \
+				if [ "$$expected_exit" = "0" ]; then \
+					printf "$(GREEN)✅ PASS$(NC)\n"; \
+					passed=$$((passed + 1)); \
+				else \
+					printf "$(RED)❌ FAIL (should have failed)$(NC)\n"; \
+					failed=$$((failed + 1)); \
+				fi; \
+			else \
+				if [ "$$expected_exit" = "1" ]; then \
+					printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
+					passed=$$((passed + 1)); \
+				else \
+					printf "$(RED)❌ FAIL (unexpected failure)$(NC)\n"; \
+					failed=$$((failed + 1)); \
+				fi; \
+			fi; \
+		}; \
+		test_command '' 0 "empty command"; \
+		test_command 'console.log("Hello World")' 0 "simple console.log"; \
+		test_command 'let x = 5; console.log(x)' 0 "variable assignment and output"; \
+		test_command 'fs.exists("/etc/passwd")' 0 "file system check"; \
+		test_command 'git.status()' 0 "git status command"; \
+		test_command 'os.isInstalled("bash")' 0 "OS utility check"; \
+		test_command 'utility.random(1, 10)' 0 "utility function"; \
+		test_command 'console.log("Multi"); console.log("Command")' 0 "multiple commands"; \
+		test_command 'for (let i = 1; i <= 3; i++) { console.log(i) }' 0 "for loop"; \
+		test_command 'if (true) { console.log("condition met") }' 0 "if statement"; \
+		test_command 'function greet(name) { console.log("Hello " + name) } greet("World")' 0 "function definition and call"; \
+		test_command 'let arr = [1, 2, 3]; console.log(arr.length)' 0 "array operations"; \
+		test_command 'try { console.log("success") } catch { console.log("error") }' 0 "try-catch block"; \
+		test_command 'defer console.log("cleanup"); console.log("main")' 0 "defer statement"; \
+		test_command 'let x = args.get("test", "default"); console.log(x)' 0 "args functionality"; \
+		test_command 'template.substitute("Hello {{name}}")' 0 "template functionality"; \
+		test_command 'function processFiles() { let files = fs.find("/tmp", "*.txt"); for (let file of files) { console.log("Processing: " + file) } } processFiles()' 0 "complex file processing function"; \
+		test_command 'let config = { name: "test", version: "1.0" }; if (config.name === "test") { console.log("Config valid") } else { console.log("Config invalid") }' 0 "object and conditional logic"; \
+		test_command 'try { let result = git.status(); console.log("Git status: " + result) } catch { console.log("Git error: " + e) }' 0 "git operations with error handling"; \
+		test_command 'let numbers = [1, 2, 3, 4, 5]; let sum = 0; for (let num of numbers) { sum += num } console.log("Sum: " + sum)' 0 "array iteration and calculation"; \
+		test_command 'function validateInput(input) { if (!input || input.length === 0) { throw new Error("Invalid input") } return true } try { validateInput("test"); console.log("Valid") } catch { console.log("Invalid") }' 0 "function with validation and error handling"; \
+		test_command 'invalid_syntax_here' 1 "invalid syntax (should fail)"; \
+		test_command 'console.nonexistentFunction()' 1 "nonexistent function (should fail)"; \
+		echo; \
 	fi; \
 	echo; \
 	echo "📊 Test Results"; \
