@@ -51,9 +51,9 @@ if (os.getOS() == "Linux") {
   let linuxVersion: string = os.getLinuxVersion();
   console.log("Linux distribution: ${linuxVersion}");
 
-  if (linuxVersion.contains("Ubuntu")) {
+  if (string.contains(linuxVersion, "Ubuntu")) {
     console.log("Running on Ubuntu");
-  } else if (linuxVersion.contains("CentOS")) {
+  } else if (string.contains(linuxVersion, "CentOS")) {
     console.log("Running on CentOS");
   }
 }
@@ -181,13 +181,13 @@ function installPackage(packageName: string): boolean {
   if (osType == "Linux") {
     let linuxVersion: string = os.getLinuxVersion();
 
-    if (linuxVersion.contains("Ubuntu") || linuxVersion.contains("Debian")) {
+    if (string.contains(linuxVersion, "Ubuntu") || string.contains(linuxVersion, "Debian")) {
       // Ubuntu/Debian using apt
       console.log("Installing ${packageName} using apt...");
       let result: number = "$(sudo apt-get update && sudo apt-get install -y ${packageName})";
       installed = (result == 0);
 
-    } else if (linuxVersion.contains("CentOS") || linuxVersion.contains("Red Hat")) {
+    } else if (string.contains(linuxVersion, "CentOS") || string.contains(linuxVersion, "Red Hat")) {
       // CentOS/RHEL using yum or dnf
       if (os.isInstalled("dnf")) {
         console.log("Installing ${packageName} using dnf...");
@@ -199,7 +199,7 @@ function installPackage(packageName: string): boolean {
         installed = (result == 0);
       }
 
-    } else if (linuxVersion.contains("Arch")) {
+    } else if (string.contains(linuxVersion, "Arch")) {
       // Arch Linux using pacman
       console.log("Installing ${packageName} using pacman...");
       let result: number = "$(sudo pacman -S --noconfirm ${packageName})";
@@ -351,7 +351,7 @@ function performHealthCheck(): void {
   if (missingTools.length == 0) {
     console.log("✓ All essential tools are available");
   } else {
-    console.log("⚠ Missing tools: ${missingTools.join(", ")}");
+    console.log("⚠ Missing tools: ${array.join(missingTools, ", ")}");
   }
 }
 
@@ -381,7 +381,7 @@ function setupDevelopmentEnvironment(): void {
   }
 
   if (missingTools.length > 0) {
-    console.log("Missing development tools: ${missingTools.join(", ")}");
+    console.log("Missing development tools: ${array.join(missingTools, ", ")}");
 
     let shouldInstall: boolean = console.promptYesNo("Install missing tools?");
     if (shouldInstall) {
@@ -552,11 +552,11 @@ function getPackageManager(): string {
   } else if (os == "Linux") {
     let distro: string = os.getLinuxVersion();
 
-    if (distro.contains("Ubuntu") || distro.contains("Debian")) {
+    if (string.contains(distro, "Ubuntu") || string.contains(distro, "Debian")) {
       return "apt";
-    } else if (distro.contains("CentOS") || distro.contains("Red Hat")) {
+    } else if (string.contains(distro, "CentOS") || string.contains(distro, "Red Hat")) {
       return os.isInstalled("dnf") ? "dnf" : "yum";
-    } else if (distro.contains("Arch")) {
+    } else if (string.contains(distro, "Arch")) {
       return "pacman";
     }
   }

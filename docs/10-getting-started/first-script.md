@@ -179,11 +179,11 @@ let numbers: number[] = [1, 2, 3, 4, 5];
 let names: string[] = ["Alice", "Bob", "Charlie"];
 
 console.log("First number: ${numbers[0]}");
-console.log("Array length: ${numbers.length}");
-console.log("Is empty: ${numbers.isEmpty()}");
+console.log("Array length: ${array.length(numbers)}");
+console.log("Is empty: ${array.isEmpty(numbers)}");
 
 // Check if array contains an item
-if (names.contains("Alice")) {
+if (array.contains(names, "Alice")) {
   console.log("Alice is in the list");
 }
 ```

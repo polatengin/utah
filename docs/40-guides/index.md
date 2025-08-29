@@ -83,9 +83,9 @@ if (fs.exists(logFile)) {
   let stats: object = json.parse('{"requests": 0, "errors": 0}');
 
   for (let line: string in lines) {
-    if (line.contains(" 200 ")) {
+    if (string.contains(line, " 200 ")) {
       stats = json.set(stats, ".requests", json.getNumber(stats, ".requests") + 1);
-    } else if (line.contains(" 404 ") || line.contains(" 500 ")) {
+    } else if (string.contains(line, " 404 ") || string.contains(line, " 500 ")) {
       stats = json.set(stats, ".errors", json.getNumber(stats, ".errors") + 1);
     }
   }
@@ -110,9 +110,9 @@ let version: string = args.getString("--version");
 
 // Validate environment
 let validEnvs: string[] = ["staging", "production"];
-if (!validEnvs.contains(environment)) {
+if (!array.contains(validEnvs, environment)) {
   console.log("Invalid environment: ${environment}");
-  console.log("Valid environments: ${validEnvs.join(", ")}");
+  console.log("Valid environments: ${array.join(validEnvs, ", ")}");
   exit(1);
 }
 

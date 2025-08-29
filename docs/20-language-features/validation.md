@@ -367,7 +367,7 @@ if (!validate.isEmail(email)) {
 ```typescript
 // Handle empty or null inputs gracefully
 function safeEmailValidation(input: string): boolean {
-  if (input.length() === 0) {
+  if (string.length(input) === 0) {
     console.log("Email address is required");
     return false;
   }
@@ -429,7 +429,7 @@ for (let email: string in emails) {
   }
 }
 
-console.log(`Validated ${validEmails.length()} out of ${emails.length()} emails`);
+console.log(`Validated ${array.length(validEmails)} out of ${array.length(emails)} emails`);
 ```
 
 ## Error Handling

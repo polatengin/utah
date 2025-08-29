@@ -258,8 +258,8 @@ let second: string = items[1];    // "banana"
 let last: string = items[2];      // "cherry"
 
 // Array properties
-let length: number = items.length;        // 3
-let isEmpty: boolean = items.isEmpty();   // false
+let length: number = array.length(items);        // 3
+let isEmpty: boolean = array.isEmpty(items);   // false
 ```
 
 ### Array Methods
@@ -268,14 +268,14 @@ let isEmpty: boolean = items.isEmpty();   // false
 let numbers: number[] = [3, 1, 4, 1, 5];
 
 // Check if array contains item
-let hasThree: boolean = numbers.contains(3);  // true
-let hasTen: boolean = numbers.contains(10);   // false
+let hasThree: boolean = array.contains(numbers, 3);  // true
+let hasTen: boolean = array.contains(numbers, 10);   // false
 
 // Reverse array
-let reversed: number[] = numbers.reverse();   // [5, 1, 4, 1, 3]
+let reversed: number[] = array.reverse(numbers);   // [5, 1, 4, 1, 3]
 
 // Join array elements
-let joined: string = ["a", "b", "c"].join("-");  // "a-b-c"
+let joined: string = array.join(["a", "b", "c"], "-");  // "a-b-c"
 ```
 
 ### Array Iteration

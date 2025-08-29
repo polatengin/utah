@@ -299,13 +299,13 @@ let userType: string = "admin";
 let permissions: string[] = ["read", "write", "delete"];
 
 if (userType == "admin") {
-  if (permissions.contains("delete")) {
+  if (array.contains(permissions, "delete")) {
     console.log("Admin with delete permission");
   } else {
     console.log("Admin without delete permission");
   }
 } else if (userType == "user") {
-  if (permissions.contains("write")) {
+  if (array.contains(permissions, "write")) {
     console.log("User with write permission");
   } else {
     console.log("Read-only user");
@@ -365,7 +365,7 @@ if (port < 1 || port > 65535) {
 
 // Validate environment
 let validEnvs: string[] = ["development", "staging", "production"];
-if (!validEnvs.contains(env)) {
+if (!array.contains(validEnvs, env)) {
   console.log("Error: Invalid environment. Must be one of: development, staging, production");
   exit(1);
 }

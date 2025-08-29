@@ -1223,7 +1223,7 @@ function safeReadFile(filename: string): string {
 function isImageFile(filename: string): boolean {
   let ext: string = fs.extension(filename).toLowerCase();
   let imageExts: string[] = ["jpg", "jpeg", "png", "gif", "bmp"];
-  return imageExts.contains(ext);
+  return array.contains(imageExts, ext);
 }
 ```
 

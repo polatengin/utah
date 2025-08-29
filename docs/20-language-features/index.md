@@ -338,7 +338,7 @@ console.log("Deploying version ${version} to ${environment}");
 
 // Validate environment
 let validEnvs: string[] = ["dev", "staging", "prod"];
-if (!validEnvs.contains(environment)) {
+if (!array.contains(validEnvs, environment)) {
   console.log("Invalid environment");
   exit(1);
 }

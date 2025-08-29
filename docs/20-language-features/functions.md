@@ -212,7 +212,7 @@ Break complex logic into smaller functions:
 
 ```typescript
 function isValidEmail(email: string): boolean {
-  return email.contains("@") && email.contains(".");
+  return string.contains(email, "@") && string.contains(email, ".");
 }
 
 function isValidAge(age: number): boolean {
@@ -564,7 +564,7 @@ function deployApplication(version: string, environment: string): boolean {
 
   // Validate environment
   let validEnvs: string[] = ["dev", "staging", "prod"];
-  if (!validEnvs.contains(environment)) {
+  if (!array.contains(validEnvs, environment)) {
     console.log("Invalid environment: ${environment}");
     return false;
   }

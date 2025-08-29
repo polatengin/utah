@@ -476,7 +476,7 @@ if (outputFormat == "json") {
     let firstRecord: object = records[0];
     let headers: string[] = json.keys(firstRecord);
 
-    outputContent = headers.join(",") + "\n";
+    outputContent = array.join(headers, ",") + "\n";
 
     for (let record: object in records) {
       let values: string[] = [];
@@ -484,7 +484,7 @@ if (outputFormat == "json") {
         let value: string = json.getString(record, ".${header}") || "";
         values.push(value);
       }
-      outputContent += values.join(",") + "\n";
+      outputContent += array.join(values, ",") + "\n";
     }
   }
 } else {

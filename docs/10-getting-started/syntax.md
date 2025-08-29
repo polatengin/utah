@@ -280,12 +280,12 @@ let second: string = fruits[1]; // "banana"
 ```typescript
 let items: string[] = ["a", "b", "c"];
 
-let length: number = items.length;
-let isEmpty: boolean = items.isEmpty();
-let contains: boolean = items.contains("b");
+let length: number = array.length(items);
+let isEmpty: boolean = array.isEmpty(items);
+let contains: boolean = array.contains(items, "b");
 
 // Reverse array
-let reversed: string[] = items.reverse();
+let reversed: string[] = array.reverse(items);
 ```
 
 ## Error Handling
