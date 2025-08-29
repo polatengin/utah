@@ -351,10 +351,12 @@ public partial class Parser
       }
       return new ExpressionStatement(expression);
     }
+    catch (InvalidOperationException)
+    {
+      throw;
+    }
     catch
     {
-      // If it's not a valid expression, it might be a raw statement or an error
-      // For now, we'll treat it as a raw statement if it doesn't look like an incomplete expression
       if (!line.EndsWith(";") && !line.EndsWith("{"))
       {
         return new RawStatement(line);
@@ -369,7 +371,6 @@ public partial class Parser
   {
     var isConst = line.StartsWith("const ");
 
-    // Check if this is a multi-line array literal
     if (line.Contains("= [") && !line.TrimEnd().EndsWith("];"))
     {
       // This is a multi-line array literal, collect all lines until we find the closing ]

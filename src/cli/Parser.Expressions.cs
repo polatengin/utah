@@ -1002,6 +1002,21 @@ public partial class Parser
         return new ConsolePromptDirectoryExpression(prompt, defaultPath);
       }
 
+      // Validate console function calls - catch calls to nonexistent console functions
+      if (functionName.StartsWith("console."))
+      {
+        // Allow console.log and console.clear as they are handled as statements
+        if (functionName == "console.log" || functionName == "console.clear")
+        {
+          // These should be handled by the statement parser, but if they end up here
+          // treat them as generic function calls for now
+        }
+        else
+        {
+          throw new InvalidOperationException($"Unknown console function: {functionName}()");
+        }
+      }
+
       // Special handling for args.has()
       if (functionName == "args.has" && !string.IsNullOrEmpty(argsContent))
       {

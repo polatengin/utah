@@ -206,14 +206,12 @@ class UtahApp
       normalizedCommand += ";";
     }
 
-    // For complex constructs, use file-based approach
     if (ContainsComplexConstructs(normalizedCommand))
     {
       ExecuteInlineCommandAsFile(normalizedCommand);
     }
     else
     {
-      // Simple commands can be processed directly
       RunCommand(normalizedCommand);
     }
   }
@@ -228,15 +226,12 @@ class UtahApp
 
   private void ExecuteInlineCommandAsFile(string command)
   {
-    // Create a temporary .shx file and process it normally
     var tempFile = Path.GetTempFileName() + ".shx";
     try
     {
-      // Format the command properly for file processing
       var formattedCommand = FormatInlineCommandForFile(command);
       File.WriteAllText(tempFile, formattedCommand);
 
-      // Process as a regular file synchronously
       RunFileSynchronously(tempFile);
     }
     finally
@@ -250,7 +245,6 @@ class UtahApp
 
   private void RunFileSynchronously(string filePath)
   {
-    // Run the file synchronously by reusing the compilation logic
     try
     {
       var shxContent = File.ReadAllText(filePath);
@@ -299,26 +293,20 @@ class UtahApp
 
   private string FormatInlineCommandForFile(string command)
   {
-    // Handle function definitions with proper brace matching
     command = FormatFunctionDefinitions(command);
 
-    // Handle try-catch blocks
     command = Regex.Replace(command, @"try\s*\{\s*([^}]+)\s*\}\s*catch\s*\{\s*([^}]+)\s*\}",
                            "try {\n  $1\n}\ncatch {\n  $2\n}");
 
-    // Handle defer statements - wrap in a function if not already in one
     if (command.Contains("defer ") && !command.Contains("function "))
     {
       command = $"function main() {{\n  {command}\n}}\nmain();";
     }
 
-    // Add line breaks after closing braces when followed by other statements
     command = Regex.Replace(command, @"\}\s*([a-zA-Z_]\w*)", "}\n$1");
 
-    // Add line breaks after statements
     command = Regex.Replace(command, @";\s*(?=\w)", ";\n");
 
-    // Clean up extra whitespace
     command = Regex.Replace(command, @"\n\s*\n", "\n");
 
     return command;
@@ -336,7 +324,6 @@ class UtahApp
     var startIndex = match.Index;
     var openBraceIndex = match.Index + match.Length - 1;
 
-    // Find the matching closing brace
     var braceCount = 1;
     var endIndex = openBraceIndex + 1;
 
@@ -353,7 +340,6 @@ class UtahApp
     {
       var functionBody = command.Substring(openBraceIndex + 1, endIndex - openBraceIndex - 2);
 
-      // Split function body into statements and format each one properly
       var statements = SplitStatements(functionBody.Trim());
       var formattedStatements = string.Join("\n  ", statements.Where(s => !string.IsNullOrWhiteSpace(s)));
 
@@ -414,7 +400,6 @@ class UtahApp
         braceCount--;
         current += c;
 
-        // If we're back to balanced braces and this looks like a statement end
         if (braceCount == 0 && (i == body.Length - 1 || IsStatementBoundary(body, i + 1)))
         {
           statements.Add(current.Trim());
@@ -448,7 +433,6 @@ class UtahApp
 
     if (index >= text.Length) return true;
 
-    // Check if next non-whitespace character starts a new statement
     var remaining = text.Substring(index);
     return remaining.StartsWith("if ") || remaining.StartsWith("return ") ||
            remaining.StartsWith("let ") || remaining.StartsWith("const ") ||
@@ -505,10 +489,7 @@ class UtahApp
       var compiler = new Compiler();
       var output = compiler.Compile(ast);
 
-      var finalOutputPath = outputPath ??
-        (isUrl
-          ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
-          : Path.ChangeExtension(inputPath, ".sh"));
+      var finalOutputPath = outputPath ?? (isUrl ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh") : Path.ChangeExtension(inputPath, ".sh"));
 
       File.WriteAllText(finalOutputPath, output);
       Console.WriteLine($"✅ Compiled: {finalOutputPath}");

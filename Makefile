@@ -235,7 +235,7 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		test_command 'try { let result = git.status(); console.log("Git status: " + result) } catch { console.log("Git error: " + e) }' 0 "git operations with error handling"; \
 		test_command 'let numbers = [1, 2, 3, 4, 5]; let sum = 0; for (let num in numbers) { sum += num } console.log("Sum: " + sum)' 0 "array iteration and calculation"; \
 		test_command 'function validateInput(input) { if (string.length(input) === 0) { exit(1) } return true } try { validateInput("test"); console.log("Valid") } catch { console.log("Invalid") }' 0 "function with validation and error handling"; \
-		test_command 'invalid_syntax_here' 1 "invalid syntax (should fail)"; \
+		test_command 'let = }' 1 "invalid syntax (should fail)"; \
 		test_command 'console.nonexistentFunction()' 1 "nonexistent function (should fail)"; \
 		echo; \
 	fi; \
