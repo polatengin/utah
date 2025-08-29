@@ -123,6 +123,8 @@ public partial class Compiler
         return CompileProcessCommandExpression(processCommand);
       case ProcessStatusExpression processStatus:
         return CompileProcessStatusExpression(processStatus);
+      case ProcessStartExpression processStart:
+        return CompileProcessStartExpression(processStart);
       case TimerStopExpression:
         return CompileTimerStopExpression();
       case OsGetLinuxVersionExpression osLinuxVersion:
@@ -763,6 +765,65 @@ public partial class Compiler
   private string CompileProcessStatusExpression(ProcessStatusExpression processStatus)
   {
     return "$(ps -o stat= -p $$)";
+  }
+
+  private string CompileProcessStartExpression(ProcessStartExpression processStart)
+  {
+    var commandCode = CompileExpression(processStart.Command);
+    
+    // Remove surrounding quotes if the command is a string literal
+    if (commandCode.StartsWith("\"") && commandCode.EndsWith("\""))
+    {
+      commandCode = commandCode[1..^1]; // Remove quotes
+    }
+    
+    // Start building the bash command
+    var bashCommand = new StringBuilder();
+    
+    // If cwd is specified, change directory
+    if (processStart.Cwd != null)
+    {
+      var cwdCode = CompileExpression(processStart.Cwd);
+      bashCommand.Append($"(cd {cwdCode} && ");
+    }
+    
+    // Handle input redirection
+    string inputRedirection = "";
+    if (processStart.Input != null)
+    {
+      var inputCode = CompileExpression(processStart.Input);
+      inputRedirection = $" < {inputCode}";
+    }
+    
+    // Handle output redirection
+    string outputRedirection = "";
+    if (processStart.Output != null)
+    {
+      var outputCode = CompileExpression(processStart.Output);
+      outputRedirection = $" > {outputCode}";
+    }
+    
+    // Handle error redirection
+    string errorRedirection = "";
+    if (processStart.Error != null)
+    {
+      var errorCode = CompileExpression(processStart.Error);
+      errorRedirection = $" 2> {errorCode}";
+    }
+    
+    // Build the complete command
+    bashCommand.Append($"{commandCode}{inputRedirection}{outputRedirection}{errorRedirection} &");
+    
+    // Close the subshell if cwd was specified
+    if (processStart.Cwd != null)
+    {
+      bashCommand.Append(")");
+    }
+    
+    // Return the PID of the background process
+    bashCommand.Append("; echo $!");
+    
+    return $"$({bashCommand})";
   }
 
   private string CompileOsGetLinuxVersionExpression(OsGetLinuxVersionExpression osLinuxVersion)

@@ -1,0 +1,38 @@
+// Test process.start() function with various options
+
+// Basic command execution - start a simple command and get its PID
+let pid1: number = process.start("echo 'Hello from background process'");
+console.log("Started basic process with PID: " + pid1);
+
+// Command with working directory change
+let pid2: number = process.start("pwd", { cwd: "/tmp" });
+console.log("Started process in /tmp with PID: " + pid2);
+
+// Command with input redirection from file
+let pid3: number = process.start("cat", { input: "/etc/hostname" });
+console.log("Started cat with input redirection, PID: " + pid3);
+
+// Command with output redirection to file
+let pid4: number = process.start("date", { output: "/tmp/date_output.txt" });
+console.log("Started date with output redirection, PID: " + pid4);
+
+// Command with error redirection to file
+let pid5: number = process.start("ls /nonexistent", { error: "/tmp/error_output.txt" });
+console.log("Started command with error redirection, PID: " + pid5);
+
+// Command with working directory and output redirection
+let pid6: number = process.start("ls -la", { cwd: "/var/log", output: "/tmp/log_listing.txt" });
+console.log("Started ls in /var/log with output redirection, PID: " + pid6);
+
+// Command with all options specified
+let pid7: number = process.start("sort", { cwd: "/tmp", input: "/etc/passwd", output: "/tmp/sorted_passwd.txt", error: "/tmp/sort_errors.txt" });
+console.log("Started sort with all options, PID: " + pid7);
+
+// Complex command with variables
+let workDir: string = "/home";
+let outputFile: string = "/tmp/home_files.txt";
+let pid8: number = process.start("find . -name '*.txt'", { cwd: workDir, output: outputFile });
+console.log("Started find command in " + workDir + ", PID: " + pid8);
+
+// Wait a moment for processes to complete
+console.log("All processes started, PIDs should be valid numbers");

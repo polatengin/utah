@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-159-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-160-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -2129,6 +2129,10 @@ Utah provides process information functions for monitoring and inspecting the cu
 - `process.command()` - Get the command line that started the process
 - `process.status()` - Get the current process status/state
 
+#### Process Management
+
+- `process.start()` - Start a new process with command and optional arguments, working directory, and I/O redirection
+
 ### Process Functions Usage
 
 ```typescript
@@ -2179,6 +2183,47 @@ if (memory > 75.0) {
 }
 ```
 
+### Process Management Example
+
+```typescript
+// Start background processes and track their PIDs
+let logPid: number = process.start("tail -f /var/log/syslog", { output: "/tmp/syslog_copy.log" });
+console.log(`Started log monitor with PID: ${logPid}`);
+
+// Start process with working directory
+let buildPid: number = process.start("make build", { cwd: "/project/src" });
+console.log(`Started build process with PID: ${buildPid}`);
+
+// Start process with input and output redirection
+let sortPid: number = process.start("sort", {
+  input: "/tmp/unsorted.txt",
+  output: "/tmp/sorted.txt",
+  error: "/tmp/sort_errors.log"
+});
+console.log(`Started sort process with PID: ${sortPid}`);
+
+// Start multiple processes for parallel execution
+let pid1: number = process.start("echo 'Task 1'", { output: "/tmp/task1.log" });
+let pid2: number = process.start("echo 'Task 2'", { output: "/tmp/task2.log" });
+let pid3: number = process.start("echo 'Task 3'", { output: "/tmp/task3.log" });
+
+console.log(`Started parallel tasks with PIDs: ${pid1}, ${pid2}, ${pid3}`);
+
+// Complex workflow with variable paths
+let workdir: string = "/data/processing";
+let inputFile: string = "/input/data.csv";
+let outputFile: string = "/output/processed.csv";
+
+let processPid: number = process.start("python process_data.py", {
+  cwd: workdir,
+  input: inputFile,
+  output: outputFile,
+  error: "/logs/processing_errors.log"
+});
+
+console.log(`Data processing started with PID: ${processPid}`);
+```
+
 ### Generated Bash Code for Process Functions
 
 The process functions transpile to efficient `ps` commands:
@@ -2201,6 +2246,22 @@ command=$(ps -o cmd= -p $$)
 
 # process.status() becomes:
 status=$(ps -o stat= -p $$)
+
+# process.start() examples:
+# Basic command execution
+logPid=$(tail -f /var/log/syslog > "/tmp/syslog_copy.log" &; echo $!)
+
+# With working directory
+buildPid=$((cd "/project/src" && make build &); echo $!)
+
+# With input and output redirection
+sortPid=$(sort < "/tmp/unsorted.txt" > "/tmp/sorted.txt" 2> "/tmp/sort_errors.log" &; echo $!)
+
+# With all options and variables
+workdir="/data/processing"
+inputFile="/input/data.csv"
+outputFile="/output/processed.csv"
+processPid=$((cd ${workdir} && python process_data.py < ${inputFile} > ${outputFile} 2> "/logs/processing_errors.log" &); echo $!)
 
 # Complete example:
 processId=$(ps -o pid -p $$ --no-headers | tr -d ' ')
@@ -2225,6 +2286,11 @@ echo "CPU: ${cpu}%, Memory: ${memory}%"
 - **Logging**: Include process details in log files
 - **Alerting**: Set up thresholds for resource usage warnings
 - **Process Management**: Gather information for process control decisions
+- **Background Processing**: Start long-running tasks in the background with `process.start()`
+- **Parallel Execution**: Launch multiple processes simultaneously for concurrent processing
+- **Data Pipeline**: Create processing workflows with input/output redirection
+- **Service Management**: Start services and daemons with proper working directories
+- **Batch Processing**: Execute commands with specific environment setups
 
 ### Process Status Values
 
@@ -6059,6 +6125,7 @@ Current tests cover:
 - **os_isinstalled.shx** - Command/application installation checking
 - **parallel_function_call.shx** - Parallel function calls
 - **process_info.shx** - Process information functions (ID, CPU, memory, etc.)
+- **process_start.shx** - Process start function with background execution, working directory, and I/O redirection options
 - **scheduler_cron.shx** - Cron job scheduling and management
 - **script_continueonerror.shx** - Script control function for continuing on errors
 - **script_description.shx** - Script description metadata function
@@ -6287,7 +6354,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `fs.chown()` - Change file ownership
 
-- [ ] `process.start()` - Start a new process with command and arguments
+- [x] `process.start()` - Start a new process with command and arguments
 
 - [ ] `process.kill()` - Kill a running process by ID or name
 

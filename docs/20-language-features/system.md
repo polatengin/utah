@@ -47,6 +47,29 @@ let pid: number = system.pid();
 // Execute command
 let result: string = system.execute("ls -la");
 
+// Start a process in the background and get its PID
+let backgroundPid: number = process.start("echo 'Hello World'");
+
+// Start process with working directory
+let pid1: number = process.start("pwd", { cwd: "/tmp" });
+
+// Start process with input redirection
+let pid2: number = process.start("cat", { input: "/etc/hostname" });
+
+// Start process with output redirection
+let pid3: number = process.start("date", { output: "/tmp/timestamp.txt" });
+
+// Start process with error redirection
+let pid4: number = process.start("ls /nonexistent", { error: "/tmp/errors.log" });
+
+// Start process with all options
+let pid5: number = process.start("sort", {
+  cwd: "/tmp",
+  input: "/etc/passwd",
+  output: "/tmp/sorted.txt",
+  error: "/tmp/sort_errors.log"
+});
+
 // Execute with error handling
 try {
   let output: string = system.execute("some-command");
@@ -104,6 +127,24 @@ export MY_VAR="value"
 # Process management
 pid=$$
 result=$(ls -la)
+
+# Background process execution with process.start()
+backgroundPid=$(echo 'Hello World' &; echo $!)
+
+# Process with working directory
+pid1=$((cd "/tmp" && pwd &); echo $!)
+
+# Process with input redirection
+pid2=$(cat < "/etc/hostname" &; echo $!)
+
+# Process with output redirection
+pid3=$(date > "/tmp/timestamp.txt" &; echo $!)
+
+# Process with error redirection
+pid4=$(ls /nonexistent 2> "/tmp/errors.log" &; echo $!)
+
+# Process with all options
+pid5=$((cd "/tmp" && sort < "/etc/passwd" > "/tmp/sorted.txt" 2> "/tmp/sort_errors.log" &); echo $!)
 
 # File system operations
 cwd=$(pwd)

@@ -1089,6 +1089,62 @@ public partial class Parser
         return new ProcessStatusExpression();
       }
 
+      // Special handling for process.start()
+      if (functionName == "process.start")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          // process.start("command") - basic command execution
+          var commandExpr = ParseExpression(args[0]);
+          return new ProcessStartExpression(commandExpr, null, null, null, null);
+        }
+        if (args.Count == 2)
+        {
+          // process.start("command", {options}) - command execution with options
+          var commandExpr = ParseExpression(args[0]);
+          var optionsText = args[1].Trim();
+
+          // Parse options object to extract individual parameters
+          Expression? cwdExpr = null, inputExpr = null, outputExpr = null, errorExpr = null;
+
+          if (optionsText.StartsWith("{") && optionsText.EndsWith("}"))
+          {
+            var optionsContent = optionsText[1..^1]; // Remove { }
+            var optionPairs = SplitByComma(optionsContent);
+
+            foreach (var optionPair in optionPairs)
+            {
+              var colonIndex = optionPair.IndexOf(':');
+              if (colonIndex > 0)
+              {
+                var key = optionPair[..colonIndex].Trim();
+                var value = optionPair[(colonIndex + 1)..].Trim();
+
+                switch (key)
+                {
+                  case "cwd":
+                    cwdExpr = ParseExpression(value);
+                    break;
+                  case "input":
+                    inputExpr = ParseExpression(value);
+                    break;
+                  case "output":
+                    outputExpr = ParseExpression(value);
+                    break;
+                  case "error":
+                    errorExpr = ParseExpression(value);
+                    break;
+                }
+              }
+            }
+          }
+
+          return new ProcessStartExpression(commandExpr, cwdExpr, inputExpr, outputExpr, errorExpr);
+        }
+        throw new InvalidOperationException("process.start() requires 1-2 arguments (command, options?)");
+      }
+
       // Special handling for os.getLinuxVersion()
       if (functionName == "os.getLinuxVersion" && string.IsNullOrEmpty(argsContent))
       {
