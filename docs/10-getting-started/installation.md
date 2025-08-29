@@ -250,6 +250,6 @@ Once Utah is installed, you're ready to:
 
 ## Getting Help
 
-- **Documentation**: [Utah Language Docs](https://polatengin.github.io/utah)
+- **Documentation**: [Utah Language Docs](../20-language-features/index.md)
 - **GitHub Issues**: [Report problems](https://github.com/polatengin/utah/issues)
 - **Discussions**: [Community support](https://github.com/polatengin/utah/discussions)
