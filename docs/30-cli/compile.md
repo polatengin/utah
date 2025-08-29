@@ -302,33 +302,17 @@ done
 
 ### Common Issues
 
-**Issue:** Compilation hangs
-**Cause:** Circular imports or very large files
-**Solution:** Check import structure, break cycles
+- **Issue:** Compilation hangs
+  **Cause:** Circular imports or very large files
+  **Solution:** Check import structure, break cycles
 
-**Issue:** Generated bash has syntax errors
-**Cause:** Utah compiler bug or unsupported syntax
-**Solution:** Report issue with minimal reproduction case
+- **Issue:** Generated bash has syntax errors
+  **Cause:** Utah compiler bug or unsupported syntax
+  **Solution:** Report issue with minimal reproduction case
 
-**Issue:** Import not found
-**Cause:** Incorrect path or missing file
-**Solution:** Verify paths are relative to importing file
-
-### Debug Output
-
-Enable verbose compilation output:
-
-```bash
-export UTAH_DEBUG=1
-utah compile script.shx
-```
-
-This shows:
-
-- File resolution steps
-- Import processing
-- AST generation details
-- Compilation phases
+- **Issue:** Import not found
+  **Cause:** Incorrect path or missing file
+  **Solution:** Verify paths are relative to importing file
 
 ### Validation
 
