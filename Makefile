@@ -230,10 +230,10 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		test_command 'defer console.log("cleanup"); console.log("main")' 0 "defer statement"; \
 		test_command 'let x = args.get("test", "default"); console.log(x)' 0 "args functionality"; \
 		test_command 'template.substitute("Hello {{name}}")' 0 "template functionality"; \
-		test_command 'function processFiles() { let files = fs.find("/tmp", "*.txt"); for (let file of files) { console.log("Processing: " + file) } } processFiles()' 0 "complex file processing function"; \
+		test_command 'function processFiles() { let files = fs.find("/tmp", "*.txt"); for (let file in files) { console.log("Processing: " + file) } } processFiles()' 0 "complex file processing function"; \
 		test_command 'let config = { name: "test", version: "1.0" }; if (config.name === "test") { console.log("Config valid") } else { console.log("Config invalid") }' 0 "object and conditional logic"; \
 		test_command 'try { let result = git.status(); console.log("Git status: " + result) } catch { console.log("Git error: " + e) }' 0 "git operations with error handling"; \
-		test_command 'let numbers = [1, 2, 3, 4, 5]; let sum = 0; for (let num of numbers) { sum += num } console.log("Sum: " + sum)' 0 "array iteration and calculation"; \
+		test_command 'let numbers = [1, 2, 3, 4, 5]; let sum = 0; for (let num in numbers) { sum += num } console.log("Sum: " + sum)' 0 "array iteration and calculation"; \
 		test_command 'function validateInput(input) { if (!input || input.length === 0) { throw new Error("Invalid input") } return true } try { validateInput("test"); console.log("Valid") } catch { console.log("Invalid") }' 0 "function with validation and error handling"; \
 		test_command 'invalid_syntax_here' 1 "invalid syntax (should fail)"; \
 		test_command 'console.nonexistentFunction()' 1 "nonexistent function (should fail)"; \
