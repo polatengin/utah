@@ -31,13 +31,13 @@ project/
 ### Module Organization
 
 ```typescript
-// src/utils/string-utils.shx
+// Write module exports for splitting .shx files
 export function trim(str: string): string {
-  return str.trim();
+  return string.trim(str);
 }
 
 export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return string.capitalize(str);
 }
 
 // src/main.shx
@@ -86,11 +86,13 @@ function retryOperation(operation: Function, maxRetries: number = 3): any {
       attempts++;
 
       if (attempts >= maxRetries) {
-        throw error;
+        console.log("Max retries reached, operation failed");
+        exit(1);
       }
 
       console.log("Attempt ${attempts} failed, retrying...");
-      utility.sleep(1000); // Wait 1 second before retry
+      // Wait 1 second before retry - using built-in bash sleep
+      let _: string = `$(sleep 1)`;
     }
   }
 }
@@ -98,7 +100,7 @@ function retryOperation(operation: Function, maxRetries: number = 3): any {
 // Use fallback values
 function getConfigValue(key: string, defaultValue: string = ""): string {
   try {
-    return system.env(key);
+    return env.get(key, defaultValue);
   } catch {
     console.log("Warning: Could not get ${key}, using default");
     return defaultValue;
@@ -136,41 +138,41 @@ function batchFileOperations(files: string[]): void {
   let commands: string[] = [];
 
   for (let file of files) {
-    commands.push("cp ${file} /destination/");
+    commands[commands.length] = "cp ${file} /destination/";
   }
 
-  // Execute all commands in one call
-  system.execute(commands.join(" && "));
+  // Execute all commands in one call using bash
+  let _: string = `$(${array.join(commands, " && ")})`;
 }
 ```
 
 ### Memory Management
 
 ```typescript
-// Avoid loading large data structures
+// Process data efficiently in chunks
 function processDataInChunks(data: string[], chunkSize: number = 100): void {
   for (let i: number = 0; i < data.length; i += chunkSize) {
-    let chunk: string[] = data.slice(i, i + chunkSize);
+    let chunk: string[] = [];
+    
+    // Build chunk manually
+    for (let j: number = i; j < i + chunkSize && j < data.length; j++) {
+      // Use array assignment since we're not sure about array.push
+      chunk[chunk.length] = data[j];
+    }
 
     // Process chunk
     processChunk(chunk);
 
-    // Clear chunk from memory
-    chunk = null;
+    // Note: Utah has automatic memory management
   }
 }
 
-// Use lazy evaluation
-function* generateNumbers(max: number): Generator<number> {
+// Use for iterative processing
+function processNumbers(max: number): void {
   for (let i: number = 0; i < max; i++) {
-    yield i;
-  }
-}
-
-// Process numbers without loading all into memory
-for (let num of generateNumbers(1000000)) {
-  if (num % 1000 === 0) {
-    console.log(num);
+    if (i % 1000 === 0) {
+      console.log(i);
+    }
   }
 }
 ```
@@ -200,9 +202,9 @@ function getCachedData(key: string, ttl: number = 3600): string {
   let cacheFile: string = "/tmp/cache_${key}";
 
   if (fs.exists(cacheFile)) {
-    let fileModTime: string = "$(stat -c %Y ${cacheFile})";
-    let currentTime: string = "$(date +%s)";
-    let fileAge: number = parseInt(currentTime) - parseInt(fileModTime);
+    let fileModTime: string = `$(stat -c %Y ${cacheFile})`;
+    let currentTime: string = `$(date +%s)`;
+    let fileAge: number = Number(currentTime) - Number(fileModTime);
 
     if (fileAge < ttl) {
       return fs.readFile(cacheFile);
@@ -260,10 +262,11 @@ function validatePath(path: string): boolean {
 ```typescript
 // Use environment variables for secrets
 function getSecret(key: string): string {
-  let secret: string = system.env(key);
+  let secret: string = env.get(key);
 
   if (!secret) {
-    throw new Error("Required secret ${key} not found");
+    console.log("Required secret ${key} not found");
+    exit(1);
   }
 
   return secret;
@@ -273,13 +276,13 @@ function getSecret(key: string): string {
 function createSecureFile(filename: string, content: string): void {
   fs.writeFile(filename, content);
 
-  // Set restrictive permissions
-  system.execute("chmod 600 ${filename}");
+  // Set restrictive permissions using bash
+  let _: string = `$(chmod 600 ${filename})`;
 }
 
 // Hash sensitive data
 function hashPassword(password: string): string {
-  let salt: string = utility.randomString(16);
+  let salt: string = utility.uuid(); // Use UUID as salt
   let hash: string = utility.hash(password + salt);
 
   return "${salt}:${hash}";
@@ -292,15 +295,15 @@ function hashPassword(password: string): string {
 // Audit security-sensitive operations
 function auditLog(operation: string, user: string, resource: string): void {
   let entry: object = {
-    timestamp: utility.dateString(),
+    timestamp: `$(date -Iseconds)`,
     operation: operation,
     user: user,
     resource: resource,
-    sourceIP: system.env("SSH_CLIENT") || "unknown"
+    sourceIP: env.get("SSH_CLIENT", "unknown")
   };
 
   let logEntry: string = json.stringify(entry);
-  fs.appendFile("/var/log/audit.log", logEntry + "\n");
+  fs.writeFile("/var/log/audit.log", fs.readFile("/var/log/audit.log") + logEntry + "\n");
 }
 
 // Usage
@@ -318,7 +321,8 @@ function calculateTax(amount: number, rate: number): number {
 }
 
 function formatCurrency(amount: number): string {
-  return "$${amount.toFixed(2)}";
+  // Simple currency formatting
+  return "$" + amount;
 }
 
 function calculateTotal(subtotal: number, taxRate: number): string {
@@ -330,11 +334,13 @@ function calculateTotal(subtotal: number, taxRate: number): string {
 
 // Use descriptive names
 function getUserByEmailAddress(email: string): object {
-  // Implementation
+  // Implementation would go here
+  return json.parse('{"id": 1, "email": "' + email + '"}');
 }
 
 function sendWelcomeEmailToNewUser(user: object): void {
-  // Implementation
+  // Implementation would go here
+  console.log("Sending welcome email to " + json.get(user, ".email"));
 }
 ```
 
@@ -354,18 +360,32 @@ function processCSVFile(
   delimiter: string = ",",
   hasHeaders: boolean = true
 ): object[] {
-  // Implementation
+  // Implementation would go here
+  let content: string = fs.readFile(filename);
+  let lines: string[] = string.split(content, "\n");
+  let result: object[] = [];
+  
+  // Basic CSV parsing for demonstration
+  for (let line: string in lines) {
+    if (line.trim() != "") {
+      let fields: string[] = string.split(line, delimiter);
+      result.push(json.parse('{"data": "' + array.join(fields, "|") + '"}'));
+    }
+  }
+  
+  return result;
 }
 
 /**
  * Configuration object for API client
  */
-interface APIConfig {
-  baseURL: string;
-  timeout: number;
-  retries: number;
-  apiKey: string;
-}
+// Note: Utah uses objects for configuration structures
+let APIConfig: object = {
+  baseURL: "https://api.example.com",
+  timeout: 30000,
+  retries: 3,
+  apiKey: "your-api-key-here"
+};
 ```
 
 ### Testing
@@ -378,16 +398,26 @@ function addNumbers(a: number, b: number): number {
 
 // Test pure functions
 function testAddNumbers(): void {
-  assert(addNumbers(2, 3) === 5, "Should add numbers correctly");
-  assert(addNumbers(-1, 1) === 0, "Should handle negative numbers");
-  assert(addNumbers(0, 0) === 0, "Should handle zero");
+  // Basic assertion pattern
+  if (addNumbers(2, 3) !== 5) {
+    console.log("Test failed: addNumbers(2, 3) should equal 5");
+    exit(1);
+  }
+  if (addNumbers(-1, 1) !== 0) {
+    console.log("Test failed: addNumbers(-1, 1) should equal 0");
+    exit(1);
+  }
+  if (addNumbers(0, 0) !== 0) {
+    console.log("Test failed: addNumbers(0, 0) should equal 0");
+    exit(1);
+  }
+  console.log("All addNumbers tests passed");
 }
 
-// Mock external dependencies
+// Mock external dependencies for testing
 function mockFileSystem(): void {
-  fs.readFile = (path: string): string => {
-    return "mocked content";
-  };
+  // In Utah, you would use test fixtures or temporary files
+  fs.writeFile("/tmp/test_file.txt", "mocked content");
 }
 ```
 
@@ -397,7 +427,7 @@ function mockFileSystem(): void {
 
 ```typescript
 // Use environment-specific settings
-let environment: string = system.env("ENVIRONMENT") || "development";
+let environment: string = env.get("ENVIRONMENT", "development");
 let config: object = loadConfig(environment);
 
 function loadConfig(env: string): object {
@@ -427,9 +457,15 @@ function printVersion(): void {
 function checkCompatibility(): void {
   let requiredVersion: string = "1.0.0";
 
-  if (compareVersions(VERSION, requiredVersion) < 0) {
-    throw new Error("Version ${requiredVersion} or higher required");
+  if (!isVersionGreaterOrEqual(VERSION, requiredVersion)) {
+    console.log("Version ${requiredVersion} or higher required");
+    exit(1);
   }
+}
+
+function isVersionGreaterOrEqual(current: string, required: string): boolean {
+  // Simple version comparison for demonstration
+  return current >= required;
 }
 ```
 
@@ -456,8 +492,8 @@ function healthCheck(): boolean {
 }
 
 function checkDiskSpace(): boolean {
-  let usage: string = system.execute("df -h / | tail -1 | awk '{print $5}'");
-  let usagePercent: number = parseInt(usage.replace("%", ""));
+  let usage: string = `$(df -h / | tail -1 | awk '{print $5}')`;
+  let usagePercent: number = Number(string.replace(usage, "%", ""));
 
   return usagePercent < 90;
 }
@@ -471,7 +507,7 @@ function checkDiskSpace(): boolean {
 // Use structured logging
 function logMessage(level: string, message: string, context: object = {}): void {
   let logEntry: object = {
-    timestamp: utility.dateString(),
+    timestamp: `$(date -Iseconds)`,
     level: level,
     message: message,
     context: context,
@@ -493,7 +529,7 @@ logMessage("ERROR", "Database connection failed", { error: "timeout" });
 // Track metrics
 function recordMetric(name: string, value: number, tags: object = {}): void {
   let metric: object = {
-    timestamp: utility.timestamp(),
+    timestamp: `$(date +%s)`,
     name: name,
     value: value,
     tags: tags
