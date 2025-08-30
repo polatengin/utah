@@ -1,0 +1,90 @@
+// Test process.waitForExit() function with various scenarios
+
+// Basic usage - wait indefinitely for a process
+console.log("Testing basic process.waitForExit() usage");
+let quickPid: number = process.start("echo 'Quick task completed'");
+let exitCode1: number = process.waitForExit(quickPid);
+console.log("Quick process exit code: " + exitCode1);
+
+// Wait with timeout - successful completion
+console.log("Testing process.waitForExit() with timeout - success case");
+let normalPid: number = process.start("sleep 1");
+let exitCode2: number = process.waitForExit(normalPid, 3000); // 3 second timeout
+if (exitCode2 == 0) {
+  console.log("Normal process completed successfully");
+} else if (exitCode2 == -1) {
+  console.log("Normal process timed out");
+} else {
+  console.log("Normal process failed with exit code: " + exitCode2);
+}
+
+// Wait with timeout - timeout case
+console.log("Testing process.waitForExit() with timeout - timeout case");
+let longPid: number = process.start("sleep 5");
+let exitCode3: number = process.waitForExit(longPid, 1000); // 1 second timeout
+if (exitCode3 == -1) {
+  console.log("Long process timed out as expected");
+} else {
+  console.log("Long process unexpectedly completed with exit code: " + exitCode3);
+}
+
+// Wait for process that fails
+console.log("Testing process.waitForExit() with failing process");
+let failPid: number = process.start("false"); // Command that always fails
+let exitCode4: number = process.waitForExit(failPid);
+console.log("Failing process exit code: " + exitCode4);
+
+// Multiple processes workflow
+console.log("Testing multiple processes workflow");
+let pid1: number = process.start("echo 'Task 1'");
+let pid2: number = process.start("echo 'Task 2'");
+let pid3: number = process.start("echo 'Task 3'");
+
+let result1: number = process.waitForExit(pid1, 2000);
+let result2: number = process.waitForExit(pid2, 2000);
+let result3: number = process.waitForExit(pid3, 2000);
+
+if (result1 == 0 && result2 == 0 && result3 == 0) {
+  console.log("All tasks completed successfully");
+} else {
+  console.log("Some tasks failed or timed out");
+}
+
+// Wait for process with variable PID
+console.log("Testing process.waitForExit() with variable PID");
+let variablePid: number = process.start("echo 'Variable PID test'");
+let savedPid: number = variablePid;
+let exitCode5: number = process.waitForExit(savedPid);
+console.log("Variable PID process exit code: " + exitCode5);
+
+// Wait for process created in different context
+console.log("Testing process.waitForExit() in function context");
+
+function testProcessInFunction(): number {
+  let funcPid: number = process.start("echo 'Function process'");
+  return process.waitForExit(funcPid, 5000);
+}
+
+let funcResult: number = testProcessInFunction();
+console.log("Function process exit code: " + funcResult);
+
+// Sequential workflow simulation
+console.log("Testing sequential workflow simulation");
+let step1Pid: number = process.start("echo 'Step 1 complete'");
+let step1Result: number = process.waitForExit(step1Pid, 3000);
+
+if (step1Result == 0) {
+  console.log("Step 1 succeeded, starting step 2");
+  let step2Pid: number = process.start("echo 'Step 2 complete'");
+  let step2Result: number = process.waitForExit(step2Pid, 3000);
+  
+  if (step2Result == 0) {
+    console.log("Step 2 succeeded, workflow complete");
+  } else {
+    console.log("Step 2 failed");
+  }
+} else {
+  console.log("Step 1 failed, aborting workflow");
+}
+
+console.log("process.waitForExit() tests completed");

@@ -127,6 +127,8 @@ public partial class Compiler
         return CompileProcessStartExpression(processStart);
       case ProcessIsRunningExpression processIsRunning:
         return CompileProcessIsRunningExpression(processIsRunning);
+      case ProcessWaitForExitExpression processWaitForExit:
+        return CompileProcessWaitForExitExpression(processWaitForExit);
       case TimerStopExpression:
         return CompileTimerStopExpression();
       case OsGetLinuxVersionExpression osLinuxVersion:
@@ -848,6 +850,71 @@ public partial class Compiler
     // Use ps command to check if process exists and is running
     // This approach works across different Unix-like systems
     return $"$(ps -p {pidReference} -o pid= > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileProcessWaitForExitExpression(ProcessWaitForExitExpression waitForExit)
+  {
+    string pidReference;
+
+    if (waitForExit.Pid is VariableExpression varExpr)
+    {
+      pidReference = $"${{{varExpr.Name}}}";
+    }
+    else if (waitForExit.Pid is LiteralExpression literal && literal.Type == "number")
+    {
+      pidReference = literal.Value;
+    }
+    else
+    {
+      pidReference = CompileExpression(waitForExit.Pid);
+    }
+
+    // Default to no timeout (0 means infinite)
+    string timeout = "0";
+    
+    if (waitForExit.Timeout != null)
+    {
+      timeout = CompileExpression(waitForExit.Timeout);
+    }
+
+    // Generate bash function that handles the waiting logic with fixed 100ms polling interval
+    return $@"$(
+_utah_wait_for_exit() {{
+  local pid=$1
+  local timeout_ms=$2
+  
+  # Fixed 100ms polling interval
+  local poll_interval=""0.1""
+  
+  # Convert milliseconds to seconds for timeout calculation
+  local timeout_seconds=$((timeout_ms / 1000))
+  local start_time=$(date +%s)
+  local elapsed=0
+  
+  while true; do
+    # Check if process is still running
+    if ! ps -p $pid > /dev/null 2>&1; then
+      # Process finished, get exit code from wait if possible
+      # Note: wait only works for child processes, so we'll return 0 for external processes
+      wait $pid 2>/dev/null || echo 0
+      return 0
+    fi
+    
+    # Check timeout (only if timeout > 0)
+    if [ $timeout_ms -gt 0 ]; then
+      elapsed=$(($(date +%s) - start_time))
+      if [ $elapsed -ge $timeout_seconds ]; then
+        echo -1  # Timeout indicator
+        return 0
+      fi
+    fi
+    
+    # Sleep for fixed 100ms interval
+    sleep $poll_interval
+  done
+}}
+_utah_wait_for_exit {pidReference} {timeout}
+)";
   }
 
   private string CompileOsGetLinuxVersionExpression(OsGetLinuxVersionExpression osLinuxVersion)

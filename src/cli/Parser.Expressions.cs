@@ -1106,6 +1106,26 @@ public partial class Parser
         throw new InvalidOperationException("process.isRunning() requires exactly 1 argument (pid)");
       }
 
+      // Special handling for process.waitForExit()
+      if (functionName == "process.waitForExit")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          // process.waitForExit(pid) - wait indefinitely
+          var pidExpr = ParseExpression(args[0]);
+          return new ProcessWaitForExitExpression(pidExpr, null);
+        }
+        else if (args.Count == 2)
+        {
+          // process.waitForExit(pid, timeout) - wait with timeout
+          var pidExpr = ParseExpression(args[0]);
+          var timeoutExpr = ParseExpression(args[1]);
+          return new ProcessWaitForExitExpression(pidExpr, timeoutExpr);
+        }
+        throw new InvalidOperationException("process.waitForExit() requires 1-2 arguments (pid, timeout?)");
+      }
+
       // Special handling for os.getLinuxVersion()
       if (functionName == "os.getLinuxVersion" && string.IsNullOrEmpty(argsContent))
       {
