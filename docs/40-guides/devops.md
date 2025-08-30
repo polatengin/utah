@@ -334,7 +334,7 @@ function checkServices(): void {
     let serviceName: string = json.get(service, ".name");
     let serviceUrl: string = json.get(service, ".url") || "";
     let serviceConnection: string = json.get(service, ".connection") || "";
-    
+
     let healthy: boolean = false;
     if (serviceUrl != "") {
       healthy = checkWebservice(serviceUrl);

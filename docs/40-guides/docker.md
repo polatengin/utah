@@ -107,7 +107,7 @@ script.description("Deploy application using Docker");
 // Deploy application using Docker
 function deploy(): void {
   console.log("Building Docker image...");
-  
+
   let buildResult: string = `$(docker build -t myapp:latest . 2>&1; echo "EXIT_CODE:$?")`;
   let resultParts: string[] = string.split(buildResult, "EXIT_CODE:");
   let exitCode: string = "1";
