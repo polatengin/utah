@@ -160,7 +160,7 @@ function destroyInfrastructure(): void {
 }
 
 // Main execution
-let action: string = args.getString("--action");
+let action: string = args.get("--action");
 
 switch (action) {
   case "deploy":

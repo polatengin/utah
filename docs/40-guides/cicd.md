@@ -25,9 +25,9 @@ args.define("--environment", "-e", "Target environment", "string", false, "devel
 args.define("--build-number", "-b", "Build number", "string", true);
 args.define("--skip-tests", "-s", "Skip test execution", "boolean", false, false);
 
-let environment: string = args.getString("--environment");
-let buildNumber: string = args.getString("--build-number");
-let skipTests: boolean = args.getBoolean("--skip-tests");
+let environment: string = args.get("--environment");
+let buildNumber: string = args.get("--build-number");
+let skipTests: boolean = args.has("--skip-tests");
 
 // Set up build environment
 script.exitOnError(true);
@@ -189,10 +189,10 @@ args.define("--version", "-v", "Version to deploy", "string", true);
 args.define("--rollback", "-r", "Rollback to previous version", "boolean", false, false);
 args.define("--dry-run", "-d", "Dry run mode", "boolean", false, false);
 
-let environment: string = args.getString("--environment");
-let version: string = args.getString("--version");
-let isRollback: boolean = args.getBoolean("--rollback");
-let isDryRun: boolean = args.getBoolean("--dry-run");
+let environment: string = args.get("--environment");
+let version: string = args.get("--version");
+let isRollback: boolean = args.has("--rollback");
+let isDryRun: boolean = args.has("--dry-run");
 
 script.exitOnError(true);
 
@@ -998,10 +998,10 @@ args.define("--repository", "-p", "Repository name", "string", true);
 args.define("--tag", "-t", "Image tag", "string", true);
 args.define("--action", "-a", "Action (build|push|pull|scan)", "string", true);
 
-let registry: string = args.getString("--registry");
-let repository: string = args.getString("--repository");
-let tag: string = args.getString("--tag");
-let action: string = args.getString("--action");
+let registry: string = args.get("--registry");
+let repository: string = args.get("--repository");
+let tag: string = args.get("--tag");
+let action: string = args.get("--action");
 
 let fullImageName: string = "${registry}/${repository}:${tag}";
 

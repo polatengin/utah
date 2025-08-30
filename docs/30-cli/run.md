@@ -71,8 +71,8 @@ script.description("Example script with arguments");
 args.define("--name", "-n", "Your name", "string", true);
 args.define("--count", "-c", "Number of greetings", "number", false, 1);
 
-let name: string = args.getString("--name");
-let count: number = args.getNumber("--count");
+let name: string = args.get("--name");
+let count: number = args.get("--count");
 
 for (let i: number = 0; i < count; i++) {
   console.log("Hello, ${name}!");
@@ -580,7 +580,7 @@ if (!args.has("--required-param")) {
 }
 
 // Good: Provide defaults
-let timeout: number = args.has("--timeout") ? args.getNumber("--timeout") : 30;
+let timeout: number = args.has("--timeout") ? args.get("--timeout") : 30;
 ```
 
 ### 3. Provide Clear Output

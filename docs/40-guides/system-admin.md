@@ -126,8 +126,8 @@ script.description("Monitor and manage disk space");
 args.define("--threshold", "-t", "Disk usage threshold (%)", "number", false, 80);
 args.define("--cleanup", "-c", "Perform automatic cleanup", "boolean", false, false);
 
-let threshold: number = args.getNumber("--threshold");
-let autoCleanup: boolean = args.getBoolean("--cleanup");
+let threshold: number = args.get("--threshold");
+let autoCleanup: boolean = args.has("--cleanup");
 
 // Check disk usage for all mounted filesystems
 function checkDiskUsage(): string[] {
@@ -223,8 +223,8 @@ script.description("Manage system services");
 args.define("--service", "-s", "Service name", "string", true);
 args.define("--action", "-a", "Action (start|stop|restart|status)", "string", true);
 
-let serviceName: string = args.getString("--service");
-let action: string = args.getString("--action");
+let serviceName: string = args.get("--service");
+let action: string = args.get("--action");
 
 function manageService(service: string, action: string): void {
   if (!os.isInstalled("systemctl")) {
@@ -555,8 +555,8 @@ script.description("Analyze and manage system logs");
 args.define("--log-dir", "-d", "Log directory", "string", false, "/var/log");
 args.define("--days", "-n", "Number of days to analyze", "number", false, 7);
 
-let logDir: string = args.getString("--log-dir");
-let analysisDays: number = args.getNumber("--days");
+let logDir: string = args.get("--log-dir");
+let analysisDays: number = args.get("--days");
 
 // Analyze system logs for errors
 function analyzeSystemLogs(): void {
@@ -640,9 +640,9 @@ args.define("--backup-dir", "-d", "Backup destination", "string", true);
 args.define("--include", "-i", "Directories to include (comma-separated)", "string", false, "/etc,/home,/var/www");
 args.define("--exclude", "-e", "Patterns to exclude", "string", false, "*.tmp,*.log,cache/*");
 
-let backupDir: string = args.getString("--backup-dir");
-let includeStr: string = args.getString("--include");
-let excludeStr: string = args.getString("--exclude");
+let backupDir: string = args.get("--backup-dir");
+let includeStr: string = args.get("--include");
+let excludeStr: string = args.get("--exclude");
 
 let includeDirs: string[] = includeStr.split(",");
 let excludePatterns: string[] = excludeStr.split(",");

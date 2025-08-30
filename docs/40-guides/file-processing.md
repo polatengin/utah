@@ -330,8 +330,8 @@ script.description("Analyze web server access logs");
 args.define("--log-file", "-f", "Path to log file", "string", true);
 args.define("--output-dir", "-o", "Output directory", "string", false, "reports");
 
-let logFile: string = args.getString("--log-file");
-let outputDir: string = args.getString("--output-dir");
+let logFile: string = args.get("--log-file");
+let outputDir: string = args.get("--output-dir");
 
 // Create output directory
 fs.createDirectory(outputDir);
@@ -406,9 +406,9 @@ args.define("--input", "-i", "Input file", "string", true);
 args.define("--output", "-o", "Output file", "string", true);
 args.define("--format", "-f", "Output format (json|yaml|csv)", "string", true);
 
-let inputFile: string = args.getString("--input");
-let outputFile: string = args.getString("--output");
-let outputFormat: string = args.getString("--format");
+let inputFile: string = args.get("--input");
+let outputFile: string = args.get("--output");
+let outputFormat: string = args.get("--format");
 
 if (!fs.exists(inputFile)) {
   console.log("❌ Input file not found: ${inputFile}");
@@ -643,8 +643,8 @@ script.description("Update configuration files across environments");
 args.define("--env", "-e", "Environment (dev|staging|prod)", "string", true);
 args.define("--config-dir", "-c", "Configuration directory", "string", false, "./config");
 
-let environment: string = args.getString("--env");
-let configDir: string = args.getString("--config-dir");
+let environment: string = args.get("--env");
+let configDir: string = args.get("--config-dir");
 
 let configFiles: string[] = ["database.yaml", "api.yaml", "cache.yaml"];
 

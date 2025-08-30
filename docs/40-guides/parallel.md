@@ -90,8 +90,8 @@ script.description("Implement a process pool for controlled parallel execution")
 args.define("--max-workers", "-w", "Maximum number of worker processes", "number", false, 4);
 args.define("--task-file", "-f", "File containing tasks to execute", "string", true);
 
-let maxWorkers: number = args.getNumber("--max-workers");
-let taskFile: string = args.getString("--task-file");
+let maxWorkers: number = args.get("--max-workers");
+let taskFile: string = args.get("--task-file");
 
 if (!fs.exists(taskFile)) {
   console.log("❌ Task file not found: ${taskFile}");
@@ -224,10 +224,10 @@ args.define("--output-dir", "-o", "Output directory", "string", true);
 args.define("--pattern", "-p", "File pattern to process", "string", false, "*.txt");
 args.define("--workers", "-w", "Number of worker processes", "number", false, 4);
 
-let inputDir: string = args.getString("--input-dir");
-let outputDir: string = args.getString("--output-dir");
-let pattern: string = args.getString("--pattern");
-let workers: number = args.getNumber("--workers");
+let inputDir: string = args.get("--input-dir");
+let outputDir: string = args.get("--output-dir");
+let pattern: string = args.get("--pattern");
+let workers: number = args.get("--workers");
 
 if (!fs.exists(inputDir)) {
   console.log("❌ Input directory not found: ${inputDir}");
@@ -382,9 +382,9 @@ args.define("--urls-file", "-f", "File containing URLs to fetch", "string", true
 args.define("--concurrency", "-c", "Number of concurrent requests", "number", false, 5);
 args.define("--timeout", "-t", "Request timeout in seconds", "number", false, 30);
 
-let urlsFile: string = args.getString("--urls-file");
-let concurrency: number = args.getNumber("--concurrency");
-let timeout: number = args.getNumber("--timeout");
+let urlsFile: string = args.get("--urls-file");
+let concurrency: number = args.get("--concurrency");
+let timeout: number = args.get("--timeout");
 
 if (!fs.exists(urlsFile)) {
   console.log("❌ URLs file not found: ${urlsFile}");
@@ -576,9 +576,9 @@ args.define("--process-id", "-p", "Process ID for coordination", "string", true)
 args.define("--total-processes", "-t", "Total number of processes", "number", true);
 args.define("--sync-dir", "-s", "Synchronization directory", "string", false, "./sync");
 
-let processId: string = args.getString("--process-id");
-let totalProcesses: number = args.getNumber("--total-processes");
-let syncDir: string = args.getString("--sync-dir");
+let processId: string = args.get("--process-id");
+let totalProcesses: number = args.get("--total-processes");
+let syncDir: string = args.get("--sync-dir");
 
 fs.createDirectory(syncDir);
 
@@ -862,8 +862,8 @@ script.description("Monitor resource usage of parallel processes");
 args.define("--monitor-interval", "-i", "Monitoring interval in seconds", "number", false, 5);
 args.define("--output-file", "-o", "Output file for monitoring data", "string", false, "resource-usage.json");
 
-let monitorInterval: number = args.getNumber("--monitor-interval");
-let outputFile: string = args.getString("--output-file");
+let monitorInterval: number = args.get("--monitor-interval");
+let outputFile: string = args.get("--output-file");
 
 // Function to collect system metrics
 function collectSystemMetrics(): object {

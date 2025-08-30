@@ -354,8 +354,8 @@ for (let file: string in files) {
 args.define("--port", "-p", "Server port", "number", false, 8080);
 args.define("--environment", "-e", "Environment", "string", false, "development");
 
-let port: number = args.getNumber("--port");
-let env: string = args.getString("--environment");
+let port: number = args.get("--port");
+let env: string = args.get("--environment");
 
 // Validate port
 if (port < 1 || port > 65535) {

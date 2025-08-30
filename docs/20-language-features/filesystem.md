@@ -1171,7 +1171,7 @@ function organizeFiles(sourceDir: string): void {
 
 // Usage
 args.define("--dir", "-d", "Directory to organize", "string", false, ".");
-let targetDir: string = args.getString("--dir");
+let targetDir: string = args.get("--dir");
 
 organizeFiles(targetDir);
 ```

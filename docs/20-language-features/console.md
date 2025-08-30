@@ -529,7 +529,7 @@ script.description("File deletion utility with confirmation");
 
 args.define("--file", "-f", "File to delete", "string", true);
 
-let filename: string = args.getString("--file");
+let filename: string = args.get("--file");
 
 if (!fs.exists(filename)) {
   console.log("Error: File not found: ${filename}");

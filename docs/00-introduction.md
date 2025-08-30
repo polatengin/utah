@@ -76,7 +76,7 @@ Built-in argument parsing with type safety:
 
 - Define arguments with `args.define()` including types, defaults, and descriptions
 - Automatic help generation with `args.showHelp()`
-- Type-safe argument access with `args.get()`, `args.getNumber()`, `args.getString()`
+- Type-safe argument access with `args.get()` and `args.has()`
 - Required and optional argument support
 
 ### 🛠️ **Developer Tools**

@@ -587,8 +587,8 @@ function deployApplication(version: string, environment: string): boolean {
 args.define("--version", "-v", "Version to deploy", "string", true);
 args.define("--env", "-e", "Target environment", "string", true);
 
-let version: string = args.getString("--version");
-let environment: string = args.getString("--env");
+let version: string = args.get("--version");
+let environment: string = args.get("--env");
 
 if (!deployApplication(version, environment)) {
   console.log("Deployment failed");

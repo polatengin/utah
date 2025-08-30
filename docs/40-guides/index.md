@@ -105,8 +105,8 @@ script.description("Deploy application to cloud servers");
 args.define("--environment", "-e", "Target environment", "string", true);
 args.define("--version", "-v", "Version to deploy", "string", true);
 
-let environment: string = args.getString("--environment");
-let version: string = args.getString("--version");
+let environment: string = args.get("--environment");
+let version: string = args.get("--version");
 
 // Validate environment
 let validEnvs: string[] = ["staging", "production"];
