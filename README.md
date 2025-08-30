@@ -2918,6 +2918,34 @@ console.log(`Using config: ${configPath}`);
 console.log("All arguments: " + args.all());
 ```
 
+### Running Scripts with Arguments
+
+To pass arguments to your Utah scripts, use the `--` separator to distinguish between Utah CLI options and script arguments:
+
+```bash
+# Pass arguments to your script
+utah run user-management.shx -- --name "Alice" --age 30 --admin --config config.json
+
+# Direct execution syntax also supports arguments
+utah user-management.shx -- --name "Bob" --config production.json
+
+# Show script help
+utah run user-management.shx -- --help
+
+# Arguments with spaces and special characters are properly escaped
+utah script.shx -- --message "Hello World!" --path "/home/user/documents"
+```
+
+Output:
+
+```text
+Creating user: Alice, age: 30, admin: true
+Using config: config.json
+All arguments: --name Alice --age 30 --admin --config config.json
+```
+
+> **Important:** The `--` separator is required when passing arguments to scripts. Everything before `--` is treated as Utah CLI options, and everything after `--` is passed to your script.
+
 ### Generated Help Output
 
 When users run your script with `--help`, they'll see:
@@ -5915,11 +5943,13 @@ Execute Utah (.shx) files or commands directly:
 ```bash
 # Direct execution (recommended)
 utah script.shx
+utah script.shx -- --name "John" --count 3    # With arguments
 utah -c "console.log('Hello, World!')"
 utah --command "json.installDependencies()"
 
 # Or using explicit 'run' command
 utah run script.shx
+utah run script.shx -- --name "Alice" --verbose    # With arguments
 utah run -c "console.log('Hello, World!')"
 utah run --command "json.installDependencies()"
 

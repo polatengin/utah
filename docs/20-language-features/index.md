@@ -352,6 +352,16 @@ if (!os.isInstalled("docker")) {
 console.log("Deployment started...");
 ```
 
+**Running the deployment script:**
+
+```bash
+# Deploy to staging environment
+utah deploy.shx -- --env "staging" --version "v1.2.3"
+
+# Deploy to production
+utah deploy.shx -- --env "prod" --version "v2.0.0"
+```
+
 ### Data Processing Script
 
 ```typescript

@@ -15,12 +15,16 @@ The `utah run` command compiles and immediately executes Utah (.shx) scripts or 
 # Run a .shx file
 utah run <file.shx>
 
+# Run a .shx file with arguments
+utah run <file.shx> -- [script-args...]
+
 # Run a single command directly
 utah run -c <command>
 utah run --command <command>
 
 # Direct execution (new, shorter syntax)
 utah <file.shx>
+utah <file.shx> -- [script-args...]
 utah -c <command>
 utah --command <command>
 ```
@@ -35,6 +39,10 @@ utah run hello.shx
 
 # New direct execution syntax
 utah hello.shx
+
+# With arguments
+utah run script.shx -- --name "John" --verbose
+utah script.shx -- --config production.yml
 ```
 
 ### Direct Command Execution
@@ -61,7 +69,7 @@ utah -c "let name: string = \"Utah\"; console.log(\"Hello from \${name}!\");"
 
 ### With Arguments
 
-Utah scripts can access command-line arguments through the `args` namespace:
+Utah scripts can access command-line arguments through the `args` namespace. To pass arguments to your script, use the `--` separator to distinguish between Utah CLI options and script arguments:
 
 **script.shx:**
 
@@ -79,8 +87,17 @@ for (let i: number = 0; i < count; i++) {
 }
 ```
 
+**Running with arguments:**
+
 ```bash
-utah run script.shx --name "Alice" --count 3
+# Pass arguments to the script using -- separator
+utah run script.shx -- --name "Alice" --count 3
+
+# Direct execution syntax also supports arguments
+utah script.shx -- --name "Bob" --count 2
+
+# Show script help
+utah run script.shx -- --help
 ```
 
 Output:
@@ -90,6 +107,8 @@ Hello, Alice!
 Hello, Alice!
 Hello, Alice!
 ```
+
+> **Important:** The `--` separator is required when passing arguments to scripts. Everything before `--` is treated as Utah CLI options, and everything after `--` is passed to your script.
 
 ### Direct Command Benefits
 
