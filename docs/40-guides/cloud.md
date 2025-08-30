@@ -9,7 +9,7 @@ Deploy Utah applications to cloud platforms.
 
 ## Overview
 
-Utah applications can be deployed to various cloud platforms including AWS, Google Cloud, Azure, and others.
+Utah applications can be deployed to various cloud platforms including Azure, AWS, Google Cloud, and others.
 
 ## AWS Deployment
 
@@ -17,21 +17,23 @@ Utah applications can be deployed to various cloud platforms including AWS, Goog
 
 Deploy Utah scripts as AWS Lambda functions:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
+script.description("AWS Lambda handler for Utah applications");
+
 // AWS Lambda handler
-const lambdaHandler = (event, context) => {
-    const result = processEvent(event)
-    return {
-        statusCode: 200,
-        body: JSON.stringify(result)
-    }
+function lambdaHandler(event: object, context: object): object {
+  let result: object = processEvent(event);
+  return {
+    "statusCode": 200,
+    "body": json.stringify(result)
+  };
 }
 
-const processEvent = (event) => {
-    // Process the Lambda event
-    return { message: "Hello from Utah!" }
+function processEvent(event: object): object {
+  // Process the Lambda event
+  return { "message": "Hello from Utah!" };
 }
 ```
 
@@ -71,17 +73,20 @@ services:
 
 Deploy as Google Cloud Functions:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
+script.description("Google Cloud Function handler");
+
 // Cloud Function entry point
-const cloudFunction = (req, res) => {
-    const result = processRequest(req)
-    res.json(result)
+function cloudFunction(req: object, res: object): void {
+  let result: object = processRequest(req);
+  // In actual implementation, this would use GCP response mechanisms
+  console.log("Response: " + json.stringify(result));
 }
 
-const processRequest = (req) => {
-    return { message: "Hello from Utah on GCP!" }
+function processRequest(req: object): object {
+  return { "message": "Hello from Utah on GCP!" };
 }
 ```
 
@@ -89,29 +94,27 @@ const processRequest = (req) => {
 
 Deploy on Compute Engine instances:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
+script.description("GCE deployment script");
+
 // GCE deployment script
-const deployToGCE = () => {
-    console.log("Deploying to Google Compute Engine...")
+function deployToGCE(): void {
+  console.log("Deploying to Google Compute Engine...");
 
-    const instanceName = "utah-app-instance"
-    const zone = "us-central1-a"
+  let instanceName: string = "utah-app-instance";
+  let zone: string = "us-central1-a";
 
-    // Create instance
-    const createCmd = `gcloud compute instances create ${instanceName}
-        --zone=${zone}
-        --machine-type=e2-micro
-        --image-family=ubuntu-2004-lts
-        --image-project=ubuntu-os-cloud`
+  // Create instance
+  let createCmd: string = "gcloud compute instances create ${instanceName} --zone=${zone} --machine-type=e2-micro --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud";
 
-    os.exec(createCmd)
+  `$(${createCmd})`;
 
-    console.log("Instance created successfully!")
+  console.log("Instance created successfully!");
 }
 
-deployToGCE()
+deployToGCE();
 ```
 
 ## Azure Deployment
@@ -120,20 +123,20 @@ deployToGCE()
 
 Deploy as Azure Functions:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
+script.description("Azure Function handler");
+
 // Azure Function handler
-const azureFunction = (context, req) => {
-    const result = processAzureRequest(req)
-    context.res = {
-        status: 200,
-        body: result
-    }
+function azureFunction(context: object, req: object): void {
+  let result: object = processAzureRequest(req);
+  // In actual implementation, this would use Azure response mechanisms
+  console.log("Response: " + json.stringify(result));
 }
 
-const processAzureRequest = (req) => {
-    return { message: "Hello from Utah on Azure!" }
+function processAzureRequest(req: object): object {
+  return { "message": "Hello from Utah on Azure!" };
 }
 ```
 
@@ -141,30 +144,27 @@ const processAzureRequest = (req) => {
 
 Deploy using ACI:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
+script.description("Deploy to Azure Container Instances");
+
 // Deploy to Azure Container Instances
-const deployToACI = () => {
-    console.log("Deploying to Azure Container Instances...")
+function deployToACI(): void {
+  console.log("Deploying to Azure Container Instances...");
 
-    const resourceGroup = "utah-app-rg"
-    const containerName = "utah-app"
-    const image = "myapp:latest"
+  let resourceGroup: string = "utah-app-rg";
+  let containerName: string = "utah-app";
+  let image: string = "myapp:latest";
 
-    const deployCmd = `az container create
-        --resource-group ${resourceGroup}
-        --name ${containerName}
-        --image ${image}
-        --dns-name-label utah-app-unique
-        --ports 8080`
+  let deployCmd: string = "az container create --resource-group ${resourceGroup} --name ${containerName} --image ${image} --dns-name-label utah-app-unique --ports 8080";
 
-    os.exec(deployCmd)
+  `$(${deployCmd})`;
 
-    console.log("Container deployed successfully!")
+  console.log("Container deployed successfully!");
 }
 
-deployToACI()
+deployToACI();
 ```
 
 ## Best Practices
@@ -173,57 +173,70 @@ deployToACI()
 
 Use environment variables for configuration:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
-const config = {
-    port: env.get("PORT", "8080"),
-    dbUrl: env.get("DATABASE_URL", "localhost:5432"),
-    apiKey: env.get("API_KEY", "")
+script.description("Environment configuration for cloud deployment");
+
+let port: string = env.get("PORT") || "8080";
+let dbUrl: string = env.get("DATABASE_URL") || "localhost:5432";
+let apiKey: string = env.get("API_KEY") || "";
+
+if (apiKey == "") {
+  console.log("API_KEY environment variable is required");
+  exit(1);
 }
 
-if (!config.apiKey) {
-    console.log("API_KEY environment variable is required")
-    exit(1)
-}
+console.log("Configuration loaded:");
+console.log("Port: ${port}");
+console.log("Database URL: ${dbUrl}");
+console.log("API Key: [REDACTED]");
 ```
 
 ### Health Checks
 
 Implement health check endpoints:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
-const healthCheck = () => {
-    const checks = [
-        checkDatabase(),
-        checkExternalService(),
-        checkFileSystem()
-    ]
+script.description("Health check implementation");
 
-    const allHealthy = checks.every(check => check.healthy)
+function healthCheck(): object {
+  let checks: object[] = [
+    checkDatabase(),
+    checkExternalService(),
+    checkFileSystem()
+  ];
 
-    if (allHealthy) {
-        return { status: "healthy", checks }
-    } else {
-        return { status: "unhealthy", checks }
+  let allHealthy: boolean = true;
+  for (let check: object in checks) {
+    let healthStatus: string = json.get(check, ".healthy");
+    if (healthStatus != "true") {
+      allHealthy = false;
     }
+  }
+
+  if (allHealthy) {
+    return { "status": "healthy", "checks": checks };
+  } else {
+    return { "status": "unhealthy", "checks": checks };
+  }
 }
 
-const checkDatabase = () => {
-    // Database connectivity check
-    return { name: "database", healthy: true }
+function checkDatabase(): object {
+  // Database connectivity check
+  return { "name": "database", "healthy": true };
 }
 
-const checkExternalService = () => {
-    // External service check
-    return { name: "external-api", healthy: true }
+function checkExternalService(): object {
+  // External service check
+  return { "name": "external-api", "healthy": true };
 }
 
-const checkFileSystem = () => {
-    // File system check
-    return { name: "filesystem", healthy: true }
+function checkFileSystem(): object {
+  // File system check
+  return { "name": "filesystem", "healthy": true };
 }
 ```
 
@@ -231,26 +244,29 @@ const checkFileSystem = () => {
 
 Set up monitoring:
 
-```shx
+```typescript
 #!/usr/bin/env utah
 
-const setupMonitoring = () => {
-    // Configure logging
-    const logLevel = env.get("LOG_LEVEL", "info")
-    console.log("Setting log level to: ${logLevel}")
+script.description("Setup monitoring and logging");
 
-    // Set up metrics collection
-    const metricsEndpoint = env.get("METRICS_ENDPOINT", "")
-    if (metricsEndpoint) {
-        console.log("Metrics will be sent to: ${metricsEndpoint}")
-    }
+function setupMonitoring(): void {
+  // Configure logging
+  let logLevel: string = env.get("LOG_LEVEL") || "info";
+  console.log("Setting log level to: ${logLevel}");
 
-    // Configure alerts
-    const alertsEnabled = env.get("ALERTS_ENABLED", "true") === "true"
-    console.log("Alerts enabled: ${alertsEnabled}")
+  // Set up metrics collection
+  let metricsEndpoint: string = env.get("METRICS_ENDPOINT") || "";
+  if (metricsEndpoint != "") {
+    console.log("Metrics will be sent to: ${metricsEndpoint}");
+  }
+
+  // Configure alerts
+  let alertsEnabledStr: string = env.get("ALERTS_ENABLED") || "true";
+  let alertsEnabled: boolean = alertsEnabledStr == "true";
+  console.log("Alerts enabled: ${alertsEnabled}");
 }
 
-setupMonitoring()
+setupMonitoring();
 ```
 
 ## CI/CD Integration
