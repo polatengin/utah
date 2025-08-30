@@ -216,6 +216,75 @@ if (result1 == 0 && result2 == 0 && result3 == 0) {
 - **0-255**: Normal process exit codes (0 typically means success)
 - **-1**: Timeout occurred (process was still running when timeout expired)
 
+### Terminating Processes
+
+The `process.kill()` function allows you to terminate running processes using different signals:
+
+```typescript
+// Basic usage - terminate with default SIGTERM signal
+let pid: number = process.start("sleep 60");
+let killed: boolean = process.kill(pid);
+
+if (killed) {
+  console.log("Process terminated successfully");
+} else {
+  console.log("Failed to terminate process");
+}
+
+// Force kill with SIGKILL signal
+let longRunningPid: number = process.start("infinite-loop.sh");
+let forceKilled: boolean = process.kill(longRunningPid, "SIGKILL");
+
+// Using numeric signal values
+let anotherPid: number = process.start("background-task.sh");
+let terminated: boolean = process.kill(anotherPid, 9); // SIGKILL
+
+// Graceful shutdown with fallback
+let servicePid: number = process.start("my-service.sh");
+
+// Try graceful shutdown first
+let gracefulShutdown: boolean = process.kill(servicePid, "SIGTERM");
+if (!gracefulShutdown || process.isRunning(servicePid)) {
+  console.log("Graceful shutdown failed, forcing termination");
+  process.kill(servicePid, "SIGKILL");
+}
+
+// Process management workflow
+function manageWorkflow(): void {
+  let workers: number[] = [];
+  
+  // Start multiple worker processes
+  for (let i: number = 0; i < 3; i++) {
+    let workerPid: number = process.start("worker.sh " + i);
+    workers.push(workerPid);
+  }
+  
+  // Terminate all workers on completion
+  for (let pid of workers) {
+    if (process.isRunning(pid)) {
+      process.kill(pid, "SIGTERM");
+    }
+  }
+}
+```
+
+#### Supported Signals
+
+- **SIGTERM** (default): Graceful termination request
+- **SIGKILL**: Force immediate termination (cannot be ignored)
+- **SIGINT**: Interrupt signal (Ctrl+C equivalent)
+- **SIGHUP**: Hangup signal (often used for config reload)
+- **SIGUSR1**, **SIGUSR2**: User-defined signals
+- **Numeric values**: Direct signal numbers (e.g., 9 for SIGKILL, 15 for SIGTERM)
+
+#### Process Kill Features
+
+- **Signal Support**: Send different termination signals to processes
+- **Boolean Return**: Returns true if kill signal was sent successfully, false otherwise
+- **Cross-platform**: Works on all Unix-like systems with standard signal support
+- **Safe Operation**: Handles invalid PIDs gracefully without crashing
+- **Variable Support**: Use variables for both PID and signal parameters
+
 ## File System Operations
 
 ### Path Operations

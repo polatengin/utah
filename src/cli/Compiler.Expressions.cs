@@ -129,6 +129,8 @@ public partial class Compiler
         return CompileProcessIsRunningExpression(processIsRunning);
       case ProcessWaitForExitExpression processWaitForExit:
         return CompileProcessWaitForExitExpression(processWaitForExit);
+      case ProcessKillExpression processKill:
+        return CompileProcessKillExpression(processKill);
       case TimerStopExpression:
         return CompileTimerStopExpression();
       case OsGetLinuxVersionExpression osLinuxVersion:
@@ -915,6 +917,40 @@ _utah_wait_for_exit() {{
 }}
 _utah_wait_for_exit {pidReference} {timeout}
 )";
+  }
+
+  private string CompileProcessKillExpression(ProcessKillExpression processKill)
+  {
+    string pidReference;
+
+    if (processKill.Pid is VariableExpression varExpr)
+    {
+      pidReference = $"${{{varExpr.Name}}}";
+    }
+    else if (processKill.Pid is LiteralExpression literal && literal.Type == "number")
+    {
+      pidReference = literal.Value;
+    }
+    else
+    {
+      pidReference = CompileExpression(processKill.Pid);
+    }
+
+    // Default signal is SIGTERM (15)
+    string signal = "SIGTERM";
+    
+    if (processKill.Signal != null)
+    {
+      signal = CompileExpression(processKill.Signal);
+      // Remove quotes if it's a string literal
+      if (signal.StartsWith("\"") && signal.EndsWith("\""))
+      {
+        signal = signal[1..^1];
+      }
+    }
+
+    // Generate bash that returns true/false based on kill success
+    return $"$(kill -{signal} {pidReference} 2>/dev/null && echo \"true\" || echo \"false\")";
   }
 
   private string CompileOsGetLinuxVersionExpression(OsGetLinuxVersionExpression osLinuxVersion)

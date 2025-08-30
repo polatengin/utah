@@ -1,0 +1,139 @@
+// Test process.kill() function with various scenarios
+
+// Basic kill with default SIGTERM
+console.log("Testing basic process.kill() with default SIGTERM");
+let shortPid: number = process.start("sleep 30");
+console.log("Started sleep process with PID:");
+console.log(shortPid);
+
+let killed1: boolean = process.kill(shortPid);
+console.log("Process killed with default SIGTERM:");
+console.log(killed1);
+
+// Verify process is no longer running
+let stillRunning1: boolean = process.isRunning(shortPid);
+console.log("Process still running after kill:");
+console.log(stillRunning1);
+
+// Kill with specific signal name
+console.log("Testing process.kill() with specific signal name");
+let longPid: number = process.start("sleep 60");
+console.log("Started long sleep process with PID:");
+console.log(longPid);
+
+let killed2: boolean = process.kill(longPid, "SIGKILL");
+console.log("Process killed with SIGKILL:");
+console.log(killed2);
+
+// Verify process is no longer running
+let stillRunning2: boolean = process.isRunning(longPid);
+console.log("Process still running after SIGKILL:");
+console.log(stillRunning2);
+
+// Kill with numeric signal
+console.log("Testing process.kill() with numeric signal");
+let numPid: number = process.start("sleep 45");
+console.log("Started process for numeric signal test with PID:");
+console.log(numPid);
+
+let killed3: boolean = process.kill(numPid, 9);
+console.log("Process killed with signal 9:");
+console.log(killed3);
+
+// Test killing non-existent process
+console.log("Testing process.kill() with invalid PID");
+let invalidKill: boolean = process.kill(99999);
+console.log("Kill result for invalid PID:");
+console.log(invalidKill);
+
+// Test with variable PID
+console.log("Testing process.kill() with variable PID");
+let varPid: number = process.start("sleep 20");
+let savedPid: number = varPid;
+let killed4: boolean = process.kill(savedPid);
+console.log("Process killed using variable PID:");
+console.log(killed4);
+
+// Test with variable signal
+console.log("Testing process.kill() with variable signal");
+let signalPid: number = process.start("sleep 25");
+let signal: string = "SIGTERM";
+let killed5: boolean = process.kill(signalPid, signal);
+console.log("Process killed using variable signal:");
+console.log(killed5);
+
+// Test in conditional statements
+console.log("Testing process.kill() in conditional statements");
+let condPid: number = process.start("sleep 15");
+
+if (process.isRunning(condPid)) {
+  console.log("Process is running, attempting to kill");
+  let killResult: boolean = process.kill(condPid);
+  if (killResult) {
+    console.log("Process successfully terminated");
+  } else {
+    console.log("Failed to terminate process");
+  }
+}
+
+// Test graceful kill with fallback to force kill
+console.log("Testing graceful kill with fallback pattern");
+let gracefulPid: number = process.start("sleep 40");
+
+let gracefulKill: boolean = process.kill(gracefulPid, "SIGTERM");
+console.log("Graceful kill result:");
+console.log(gracefulKill);
+
+// Wait briefly and check if still running
+if (process.isRunning(gracefulPid)) {
+  console.log("Process still running, using force kill");
+  let forceKill: boolean = process.kill(gracefulPid, "SIGKILL");
+  console.log("Force kill result:");
+  console.log(forceKill);
+}
+
+// Test process workflow: start -> monitor -> kill
+console.log("Testing complete process workflow");
+
+function manageProcess(): void {
+  let workPid: number = process.start("sleep 35");
+  console.log("Workflow process started with PID:");
+  console.log(workPid);
+  
+  if (process.isRunning(workPid)) {
+    console.log("Process confirmed running");
+    let terminated: boolean = process.kill(workPid);
+    if (terminated) {
+      console.log("Workflow process terminated successfully");
+    }
+  }
+}
+
+manageProcess();
+
+// Test multiple process management
+console.log("Testing multiple process management");
+let proc1: number = process.start("sleep 50");
+let proc2: number = process.start("sleep 55");
+let proc3: number = process.start("sleep 60");
+
+console.log("Started three processes for batch termination");
+
+let kill1: boolean = process.kill(proc1, "SIGTERM");
+let kill2: boolean = process.kill(proc2, "SIGKILL");
+let kill3: boolean = process.kill(proc3, 15);
+
+console.log("Batch kill results:");
+console.log(kill1);
+console.log(kill2);
+console.log(kill3);
+
+// Test edge case: killing already dead process
+console.log("Testing kill on already terminated process");
+let quickPid: number = process.start("echo 'Quick task'");
+// Process likely already finished
+let deadKill: boolean = process.kill(quickPid);
+console.log("Kill result on already terminated process:");
+console.log(deadKill);
+
+console.log("All process.kill() tests completed");

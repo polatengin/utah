@@ -59,6 +59,7 @@ public record ProcessStatusExpression() : Expression;
 public record ProcessStartExpression(Expression Command, Expression? Cwd, Expression? Input, Expression? Output, Expression? Error) : Expression;
 public record ProcessIsRunningExpression(Expression Pid) : Expression;
 public record ProcessWaitForExitExpression(Expression Pid, Expression? Timeout) : Expression;
+public record ProcessKillExpression(Expression Pid, Expression? Signal) : Expression;
 public record OsGetLinuxVersionExpression() : Expression;
 public record OsGetOSExpression() : Expression;
 public record WebGetExpression(Expression Url) : Expression;
