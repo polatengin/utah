@@ -99,7 +99,7 @@ function manageProcess(): void {
   let workPid: number = process.start("sleep 35");
   console.log("Workflow process started with PID:");
   console.log(workPid);
-  
+
   if (process.isRunning(workPid)) {
     console.log("Process confirmed running");
     let terminated: boolean = process.kill(workPid);

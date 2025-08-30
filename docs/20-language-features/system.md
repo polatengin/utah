@@ -148,7 +148,7 @@ function deployApplication(): void {
   console.log("Building application...");
   let buildPid: number = process.start("npm run build");
   let buildResult: number = process.waitForExit(buildPid, 300000); // 5 minute timeout
-  
+
   if (buildResult == -1) {
     console.log("Build timed out");
     exit(1);
@@ -156,12 +156,12 @@ function deployApplication(): void {
     console.log("Build failed");
     exit(1);
   }
-  
+
   // Step 2: Test
   console.log("Running tests...");
   let testPid: number = process.start("npm test");
   let testResult: number = process.waitForExit(testPid, 600000); // 10 minute timeout
-  
+
   if (testResult == -1) {
     console.log("Tests timed out");
     exit(1);
@@ -169,12 +169,12 @@ function deployApplication(): void {
     console.log("Tests failed");
     exit(1);
   }
-  
+
   // Step 3: Deploy
   console.log("Deploying application...");
   let deployPid: number = process.start("kubectl apply -f deployment.yaml");
   let deployResult: number = process.waitForExit(deployPid, 180000); // 3 minute timeout
-  
+
   if (deployResult == 0) {
     console.log("Deployment completed successfully");
   } else {
@@ -252,13 +252,13 @@ if (!gracefulShutdown || process.isRunning(servicePid)) {
 // Process management workflow
 function manageWorkflow(): void {
   let workers: number[] = [];
-  
+
   // Start multiple worker processes
   for (let i: number = 0; i < 3; i++) {
     let workerPid: number = process.start("worker.sh " + i);
     workers.push(workerPid);
   }
-  
+
   // Terminate all workers on completion
   for (let pid of workers) {
     if (process.isRunning(pid)) {

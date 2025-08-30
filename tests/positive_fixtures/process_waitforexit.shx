@@ -77,7 +77,7 @@ if (step1Result == 0) {
   console.log("Step 1 succeeded, starting step 2");
   let step2Pid: number = process.start("echo 'Step 2 complete'");
   let step2Result: number = process.waitForExit(step2Pid, 3000);
-  
+
   if (step2Result == 0) {
     console.log("Step 2 succeeded, workflow complete");
   } else {
