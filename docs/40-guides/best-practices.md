@@ -153,7 +153,7 @@ function batchFileOperations(files: string[]): void {
 function processDataInChunks(data: string[], chunkSize: number = 100): void {
   for (let i: number = 0; i < data.length; i += chunkSize) {
     let chunk: string[] = [];
-    
+
     // Build chunk manually
     for (let j: number = i; j < i + chunkSize && j < data.length; j++) {
       // Use array assignment since we're not sure about array.push
@@ -364,7 +364,7 @@ function processCSVFile(
   let content: string = fs.readFile(filename);
   let lines: string[] = string.split(content, "\n");
   let result: object[] = [];
-  
+
   // Basic CSV parsing for demonstration
   for (let line: string in lines) {
     if (line.trim() != "") {
@@ -372,7 +372,7 @@ function processCSVFile(
       result.push(json.parse('{"data": "' + array.join(fields, "|") + '"}'));
     }
   }
-  
+
   return result;
 }
 
