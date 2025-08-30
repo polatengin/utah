@@ -36,7 +36,7 @@ help:
 
 clean: ## Clean build artifacts and test files
 	@echo "$(BLUE)🧹 Cleaning build artifacts...$(NC)"
-	@cd $(CLI_DIR) && dotnet clean
+	@cd $(CLI_DIR) && dotnet restore && dotnet clean
 	@rm -rf $(TESTS_DIR)/temp
 	@rm -f $(TESTS_DIR)/positive_fixtures/*.sh
 	@rm -f $(TESTS_DIR)/negative_fixtures/*.sh
@@ -333,10 +333,12 @@ install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
 	@if [ -n "$(DESTDIR)" ]; then \
 		echo "$(BLUE)Building release version for packaging...$(NC)"; \
-		cd $(CLI_DIR) && dotnet publish -c Release; \
+		cd $(CLI_DIR) && sudo dotnet publish -c Release; \
 		echo "$(GREEN)✅ Utah CLI built for packaging$(NC)"; \
 	else \
-		cd $(CLI_DIR) && dotnet publish -c Release -o /usr/local/bin/utah; \
+		sudo rm -rf /usr/local/bin/utah /usr/local/bin/utah-cli; \
+		cd $(CLI_DIR) && sudo dotnet publish -c Release -o /usr/local/bin/utah-cli; \
+		sudo ln -sf /usr/local/bin/utah-cli/utah /usr/local/bin/utah; \
 		echo "$(GREEN)✅ Utah CLI installed to /usr/local/bin/utah$(NC)"; \
 	fi
 
