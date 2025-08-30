@@ -79,19 +79,22 @@ services:
 ```typescript
 #!/usr/bin/env utah
 
+script.description("Health check for containerized service");
+
 // Check if service is healthy
-const healthCheck = () => {
-    const response = web.get("http://localhost:8080/health")
-    if (response.status === 200) {
-        console.log("Service is healthy")
-        exit(0)
-    } else {
-        console.log("Service is unhealthy")
-        exit(1)
-    }
+function healthCheck(): void {
+  try {
+    let response: string = web.get("http://localhost:8080/health");
+    console.log("Service is healthy");
+    exit(0);
+  }
+  catch {
+    console.log("Service is unhealthy");
+    exit(1);
+  }
 }
 
-healthCheck()
+healthCheck();
 ```
 
 ### Deployment Script
@@ -99,23 +102,31 @@ healthCheck()
 ```typescript
 #!/usr/bin/env utah
 
+script.description("Deploy application using Docker");
+
 // Deploy application using Docker
-const deploy = () => {
-    console.log("Building Docker image...")
-    const buildResult = os.exec("docker build -t myapp:latest .")
+function deploy(): void {
+  console.log("Building Docker image...");
+  
+  let buildResult: string = `$(docker build -t myapp:latest . 2>&1; echo "EXIT_CODE:$?")`;
+  let resultParts: string[] = string.split(buildResult, "EXIT_CODE:");
+  let exitCode: string = "1";
+  if (array.length(resultParts) > 1) {
+    exitCode = string.trim(resultParts[1]);
+  }
 
-    if (buildResult.exitCode !== 0) {
-        console.log("Build failed!")
-        exit(1)
-    }
+  if (exitCode != "0") {
+    console.log("Build failed!");
+    exit(1);
+  }
 
-    console.log("Deploying container...")
-    os.exec("docker run -d --name myapp -p 8080:8080 myapp:latest")
+  console.log("Deploying container...");
+  `$(docker run -d --name myapp -p 8080:8080 myapp:latest)`;
 
-    console.log("Deployment complete!")
+  console.log("Deployment complete!");
 }
 
-deploy()
+deploy();
 ```
 
 ## See Also
