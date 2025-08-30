@@ -120,7 +120,7 @@ class UtahApp
       case "run":
         if (args.Length < 2)
         {
-          Console.WriteLine("Usage: utah run <file.shx>");
+          Console.WriteLine("Usage: utah run <file.shx> [-- script-args...]");
           Console.WriteLine("       utah run -c <command>");
           Console.WriteLine("       utah run --command <command>");
           return;
@@ -137,13 +137,14 @@ class UtahApp
           var command = string.Join(" ", args.Skip(2));
           ExecuteInlineCommand(command);
         }
-        else if (args.Length == 2 && (args[1].EndsWith(".shx") || IsValidUrl(args[1])))
+        else if (args[1].EndsWith(".shx") || IsValidUrl(args[1]))
         {
-          await ExecuteShxFileAsync(args[1]);
+          var (scriptPath, scriptArgs) = ParseRunArguments(args);
+          await ExecuteShxFileAsync(scriptPath, scriptArgs);
         }
         else
         {
-          Console.WriteLine("Usage: utah run <file.shx>");
+          Console.WriteLine("Usage: utah run <file.shx> [-- script-args...]");
           Console.WriteLine("       utah run -c <command>");
           Console.WriteLine("       utah run --command <command>");
           return;
@@ -193,9 +194,43 @@ class UtahApp
     ExecuteInlineCommand(command);
   }
 
+  private (string scriptPath, string[] scriptArgs) ParseRunArguments(string[] args)
+  {
+    var scriptPath = args[1];
+    var scriptArgs = new string[0];
+
+    var separatorIndex = Array.IndexOf(args, "--");
+    if (separatorIndex != -1 && separatorIndex < args.Length - 1)
+    {
+      scriptArgs = args.Skip(separatorIndex + 1).ToArray();
+    }
+
+    return (scriptPath, scriptArgs);
+  }
+
+  private string EscapeShellArgument(string arg)
+  {
+    if (string.IsNullOrEmpty(arg))
+    {
+      return "\"\"";
+    }
+
+    if (arg.Contains(' ') || arg.Contains('"') || arg.Contains('\'') || arg.Contains('$') || arg.Contains('`') || arg.Contains('\\'))
+    {
+      return "\"" + arg.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+    }
+
+    return arg;
+  }
+
   private async Task ExecuteShxFileAsync(string filePath)
   {
-    await RunFileAsync(filePath);
+    await RunFileAsync(filePath, Array.Empty<string>());
+  }
+
+  private async Task ExecuteShxFileAsync(string filePath, string[] scriptArgs)
+  {
+    await RunFileAsync(filePath, scriptArgs);
   }
 
   private void ExecuteInlineCommand(string command)
@@ -506,7 +541,7 @@ class UtahApp
     }
   }
 
-  private async Task RunFileAsync(string inputPath)
+  private async Task RunFileAsync(string inputPath, string[] scriptArgs)
   {
     string content;
     string actualPath = inputPath;
@@ -537,12 +572,19 @@ class UtahApp
       var tempFile = Path.GetTempFileName();
       File.WriteAllText(tempFile, output);
 
+      var bashArgs = tempFile;
+      if (scriptArgs.Length > 0)
+      {
+        var escapedArgs = scriptArgs.Select(EscapeShellArgument);
+        bashArgs += " " + string.Join(" ", escapedArgs);
+      }
+
       var process = new Process
       {
         StartInfo = new ProcessStartInfo
         {
           FileName = "/bin/bash",
-          Arguments = tempFile,
+          Arguments = bashArgs,
           RedirectStandardOutput = true,
           RedirectStandardError = true,
           UseShellExecute = false,
