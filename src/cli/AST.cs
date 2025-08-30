@@ -81,6 +81,7 @@ public record FsDeleteExpression(Expression Path) : Expression;
 public record FsChmodExpression(Expression Path, Expression Permissions) : Expression;
 public record FsChownExpression(Expression Path, Expression Owner, Expression? Group = null) : Expression;
 public record FsFindExpression(Expression SearchPath, Expression? NamePattern) : Expression;
+public record FsWatchExpression(Expression Path, Expression Callback, Expression? Options = null) : Expression;
 public record StringNamespaceCallExpression(string FunctionName, List<Expression> Arguments) : Expression;
 public record FsCreateTempFolderExpression(Expression? Prefix, Expression? BaseDir) : Expression;
 public record ArrayNamespaceCallExpression(string FunctionName, List<Expression> Arguments) : Expression;

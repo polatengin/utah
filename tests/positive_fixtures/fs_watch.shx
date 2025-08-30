@@ -1,0 +1,103 @@
+// Test fs.watch() functionality for file system monitoring
+
+console.log("Testing fs.watch() functionality");
+
+// Basic file watching with string callback
+let simpleWatchPid: string = fs.watch("/tmp/test.log", "echo 'File changed: $1, Event: $2'");
+console.log("Simple watch started with PID:");
+console.log(simpleWatchPid);
+
+// Directory watching with function callback
+function handleFileChange(filePath: string, eventType: string): void {
+  console.log("Change detected!");
+  console.log("File: ${filePath}");
+  console.log("Event: ${eventType}");
+
+  if (eventType == "modify") {
+    console.log("File was modified");
+  } else if (eventType == "create") {
+    console.log("File was created");
+  } else if (eventType == "delete") {
+    console.log("File was deleted");
+  }
+}
+
+let directoryWatchPid: string = fs.watch("/tmp", "handleFileChange");
+console.log("Directory watch started with PID:");
+console.log(directoryWatchPid);
+
+// Watch with complex callback
+function analyzeFileEvent(filePath: string, eventType: string): void {
+  if (fs.extension(filePath) == ".log") {
+    console.log("Log file event detected: ${eventType}");
+
+    if (eventType == "modify" && fs.exists(filePath)) {
+      let fileSize: string = `$(stat -f%z "${filePath}" 2>/dev/null || stat -c%s "${filePath}" 2>/dev/null)`;
+      console.log("File size: ${fileSize} bytes");
+    }
+  }
+}
+
+let complexWatchPid: string = fs.watch("/var/log/application.log", "analyzeFileEvent");
+console.log("Complex watch started with PID:");
+console.log(complexWatchPid);
+
+// Test with variables
+let watchPath: string = "/tmp/monitor";
+let callbackCommand: string = "echo 'Variable watch triggered: $1 $2'";
+
+let variableWatchPid: string = fs.watch(watchPath, callbackCommand);
+console.log("Variable watch started with PID:");
+console.log(variableWatchPid);
+
+// Watch configuration files
+let configPath: string = "/etc/myapp/config.yaml";
+
+function reloadConfiguration(filePath: string, eventType: string): void {
+  console.log("Configuration changed, reloading...");
+  console.log("Config file: ${filePath}");
+
+  if (fs.exists(filePath)) {
+    console.log("Configuration file exists, processing reload");
+  } else {
+    console.log("Configuration file was deleted!");
+  }
+}
+
+let configWatchPid: string = fs.watch(configPath, "reloadConfiguration");
+console.log("Config watch started with PID:");
+console.log(configWatchPid);
+
+// Watch for specific file types in a directory
+function processDocumentChange(filePath: string, eventType: string): void {
+  let extension: string = fs.extension(filePath);
+
+  if (extension == ".pdf" || extension == ".doc" || extension == ".docx") {
+    console.log("Document file changed: ${fs.filename(filePath)}");
+    console.log("Event type: ${eventType}");
+    console.log("Directory: ${fs.dirname(filePath)}");
+  }
+}
+
+let documentWatchPid: string = fs.watch("/home/user/Documents", "processDocumentChange");
+console.log("Document watch started with PID:");
+console.log(documentWatchPid);
+
+// Example of storing and managing watch PIDs
+let activePids: string[] = [];
+array.push(activePids, simpleWatchPid);
+array.push(activePids, directoryWatchPid);
+array.push(activePids, complexWatchPid);
+
+console.log("Active watch processes:");
+for (let pid: string in activePids) {
+  console.log("PID: ${pid}");
+
+  if (process.isRunning(pid)) {
+    console.log("  Status: Running");
+  } else {
+    console.log("  Status: Not running");
+  }
+}
+
+console.log("fs.watch() testing completed");

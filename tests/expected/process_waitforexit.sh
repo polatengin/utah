@@ -6,15 +6,15 @@ exitCode1=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -23,7 +23,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -32,7 +32,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -46,15 +46,15 @@ exitCode2=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -63,7 +63,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -72,7 +72,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -92,15 +92,15 @@ exitCode3=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -109,7 +109,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -118,7 +118,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -136,15 +136,15 @@ exitCode4=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -153,7 +153,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -162,7 +162,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -178,15 +178,15 @@ result1=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -195,7 +195,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -204,7 +204,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -215,15 +215,15 @@ result2=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -232,7 +232,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -241,7 +241,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -252,15 +252,15 @@ result3=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -269,7 +269,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -278,7 +278,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -297,15 +297,15 @@ exitCode5=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -314,7 +314,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -323,7 +323,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -338,15 +338,15 @@ testProcessInFunction() {
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -355,7 +355,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -364,7 +364,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -380,15 +380,15 @@ step1Result=$(
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -397,7 +397,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -406,7 +406,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done
@@ -420,15 +420,15 @@ if [ ${step1Result} -eq 0 ]; then
 _utah_wait_for_exit() {
   local pid=$1
   local timeout_ms=$2
-  
+
   # Fixed 100ms polling interval
   local poll_interval="0.1"
-  
+
   # Convert milliseconds to seconds for timeout calculation
   local timeout_seconds=$((timeout_ms / 1000))
   local start_time=$(date +%s)
   local elapsed=0
-  
+
   while true; do
     # Check if process is still running
     if ! ps -p $pid > /dev/null 2>&1; then
@@ -437,7 +437,7 @@ _utah_wait_for_exit() {
       wait $pid 2>/dev/null || echo 0
       return 0
     fi
-    
+
     # Check timeout (only if timeout > 0)
     if [ $timeout_ms -gt 0 ]; then
       elapsed=$(($(date +%s) - start_time))
@@ -446,7 +446,7 @@ _utah_wait_for_exit() {
         return 0
       fi
     fi
-    
+
     # Sleep for fixed 100ms interval
     sleep $poll_interval
   done

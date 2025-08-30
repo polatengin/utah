@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-163-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-164-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -1644,6 +1644,7 @@ Utah provides a comprehensive set of file system functions for reading, writing,
 - `fs.chown(path, owner, group?)` - Change file ownership with optional group, supports usernames and numeric IDs, returns boolean
 - `fs.exists(filepath)` - Check if a file or directory exists, returns boolean
 - `fs.find(path, name?)` - Search for files and directories, with optional wildcard pattern, returns string[]
+- `fs.watch(path, callback, options?)` - Monitor file or directory for changes, returns process ID string for management
 - `fs.createTempFolder(prefix?, baseDir?)` - Create a secure temporary directory and return its absolute path
 
 #### Path Manipulation Functions
@@ -1799,6 +1800,63 @@ let filename: string = fs.fileName(filePath);
 console.log("Filename:", filename); // "readme.txt"
 ```
 
+### File System Monitoring Usage
+
+```typescript
+// Basic file monitoring with command callback
+let watchPid: string = fs.watch("/var/log/app.log", "echo 'Log file changed: $1'");
+console.log("Watching file with PID:", watchPid);
+
+// Directory monitoring with function callback
+function handleFileChange(filePath: string, eventType: string): void {
+  console.log("File changed: ${filePath}");
+  console.log("Event type: ${eventType}");
+
+  if (eventType == "modify") {
+    console.log("File was modified");
+  } else if (eventType == "create") {
+    console.log("File was created");
+  } else if (eventType == "delete") {
+    console.log("File was deleted");
+  }
+}
+
+let dirWatchPid: string = fs.watch("/tmp", "handleFileChange");
+
+// Configuration file monitoring
+let configPath: string = "/etc/myapp/config.yaml";
+
+function reloadConfig(filePath: string, eventType: string): void {
+  if (eventType == "modify" && fs.exists(filePath)) {
+    console.log("Configuration updated, reloading...");
+    // Reload application configuration
+  }
+}
+
+let configWatchPid: string = fs.watch(configPath, "reloadConfig");
+
+// Monitor document changes
+function processDocumentChange(filePath: string, eventType: string): void {
+  let extension: string = fs.extension(filePath);
+
+  if (extension == "pdf" || extension == "doc") {
+    console.log("Document file event: ${fs.filename(filePath)} (${eventType})");
+  }
+}
+
+let docWatchPid: string = fs.watch("/home/user/Documents", "processDocumentChange");
+
+// Process management
+if (process.isRunning(watchPid)) {
+  console.log("Watch process is active");
+} else {
+  console.log("Watch process has stopped");
+}
+
+// Stop monitoring
+process.kill(watchPid);
+```
+
 ### Generated Bash Code for File System Functions
 
 The file system functions transpile to efficient bash commands:
@@ -1902,6 +1960,42 @@ $(chown "500" "backup.tar" && echo "true" || echo "false")
 # System ownership:
 $(chown "www-data:www-data" "web.sock" && echo "true" || echo "false")
 $(chown "root:nginx" "nginx.conf" && echo "true" || echo "false")
+
+# File system monitoring:
+watchPid=$(_utah_watch_pid_1=$(inotifywait -m -e modify,create,delete,move "/var/log/app.log" --format '%w%f %e' | while read file event; do
+  echo 'Log file changed: $1' "${file}" "${event}"
+done & echo $!)
+echo "${_utah_watch_pid_1}")
+echo "Watching file with PID: $watchPid"
+
+# Function-based monitoring:
+handleFileChange() {
+  local filePath="$1"
+  local eventType="$2"
+  echo "File changed: ${filePath}"
+  echo "Event type: ${eventType}"
+
+  if [ "${eventType}" = "modify" ]; then
+    echo "File was modified"
+  elif [ "${eventType}" = "create" ]; then
+    echo "File was created"
+  elif [ "${eventType}" = "delete" ]; then
+    echo "File was deleted"
+  fi
+}
+
+dirWatchPid=$(_utah_watch_pid_2=$(inotifywait -m -e modify,create,delete,move "/tmp" --format '%w%f %e' | while read file event; do
+  handleFileChange "${file}" "${event}"
+done & echo $!)
+echo "${_utah_watch_pid_2}")
+
+# Process management:
+isRunning=$(ps -p ${watchPid} -o pid= > /dev/null 2>&1 && echo "true" || echo "false")
+if [ "${isRunning}" = "true" ]; then
+  echo "Watch process is active"
+else
+  echo "Watch process has stopped"
+fi
 ```
 
 ## 📝 Template Functions
@@ -6374,7 +6468,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `fs.delete()` - Delete files or directories with recursive option
 
-- [ ] `fs.watch()` - File system watching for changes
+- [x] `fs.watch()` - File system watching for changes
 
 - [x] `fs.createTempFolder()` - Create temporary folders with unique names
 

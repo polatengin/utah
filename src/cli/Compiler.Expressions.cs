@@ -6,6 +6,7 @@ public partial class Compiler
   private static int _randomCounter = 0;
   private static int _joinCounter = 0;
   private static int _sortCounter = 0;
+  private static int _watchCounter = 0;
 
   private string CompileExpression(Expression expr)
   {
@@ -197,6 +198,8 @@ public partial class Compiler
         return CompileFsChownExpression(fsChown);
       case FsFindExpression fsFind:
         return CompileFsFindExpression(fsFind);
+      case FsWatchExpression fsWatch:
+        return CompileFsWatchExpression(fsWatch);
       case TimerCurrentExpression timerCurrent:
         return CompileTimerCurrentExpression(timerCurrent);
       case GitUndoLastCommitExpression:
@@ -2224,6 +2227,50 @@ _utah_wait_for_exit {pidReference} {timeout}
       "echo \"${dir}\"; })";
 
     return script;
+  }
+
+  private string CompileFsWatchExpression(FsWatchExpression fsWatch)
+  {
+    var path = CompileExpression(fsWatch.Path);
+    var callback = CompileExpression(fsWatch.Callback);
+
+    // Remove surrounding quotes if the path is a string literal
+    if (path.StartsWith("\"") && path.EndsWith("\""))
+    {
+      path = path[1..^1]; // Remove quotes
+    }
+
+    // Remove surrounding quotes if the callback is a string literal
+    if (callback.StartsWith("\"") && callback.EndsWith("\""))
+    {
+      callback = callback[1..^1]; // Remove quotes
+    }
+
+    // Default events
+    var events = "modify,create,delete,move";
+
+    // Parse options if provided
+    if (fsWatch.Options != null)
+    {
+      // For now, we'll generate a simple options parser that can handle JSON-like object literals
+      // This is a simplified implementation - in a full implementation you'd want proper JSON parsing
+      var optionsCode = CompileExpression(fsWatch.Options);
+
+      // For the initial implementation, we'll pass the options through but use defaults
+      // A more sophisticated implementation could parse JSON options at runtime
+    }
+
+    // Generate unique variable name for the watch PID
+    _watchCounter++;
+    var pidVar = $"_utah_watch_pid_{_watchCounter}";
+
+    // Build the inotifywait command with background process
+    var watchCommand = $@"$({pidVar}=$(inotifywait -m -e {events} ""{path}"" --format '%w%f %e' | while read file event; do
+  {callback} ""${{file}}"" ""${{event}}""
+done & echo $!)
+echo ""${{{pidVar}}}"")";
+
+    return watchCommand;
   }
 
   private string CompileStringInterpolationExpression(StringInterpolationExpression stringInterpolation)

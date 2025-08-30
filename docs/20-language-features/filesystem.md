@@ -676,6 +676,139 @@ done
 - File: `tests/positive_fixtures/fs_find.shx`
 - Tests basic finding, pattern matching, variable usage, and empty results
 
+### fs.watch()
+
+Monitor files or directories for changes and execute a callback when events occur. Returns a process ID string for managing the background watcher:
+
+```typescript
+// Basic file monitoring
+let watchPid: string = fs.watch("/var/log/app.log", "echo 'Log file changed: $1, Event: $2'");
+console.log("Watching file with PID: ${watchPid}");
+
+// Directory monitoring with function callback
+function handleFileChange(filePath: string, eventType: string): void {
+  console.log("File changed: ${filePath}");
+  console.log("Event type: ${eventType}");
+
+  if (eventType == "modify") {
+    console.log("File was modified");
+  } else if (eventType == "create") {
+    console.log("File was created");
+  } else if (eventType == "delete") {
+    console.log("File was deleted");
+  } else if (eventType == "move") {
+    console.log("File was moved or renamed");
+  }
+}
+
+let dirWatchPid: string = fs.watch("/tmp", "handleFileChange");
+
+// Configuration file monitoring
+function reloadConfig(filePath: string, eventType: string): void {
+  if (eventType == "modify" && fs.exists(filePath)) {
+    console.log("Configuration updated, reloading...");
+    // Reload application configuration here
+  }
+}
+
+let configWatchPid: string = fs.watch("/etc/myapp/config.yaml", "reloadConfig");
+
+// Variable-based watching
+let watchPath: string = "/home/user/documents";
+let callbackCommand: string = "echo 'Document changed: $1 ($2)'";
+
+let docWatchPid: string = fs.watch(watchPath, callbackCommand);
+
+// Watch management
+if (process.isRunning(watchPid)) {
+  console.log("Watcher is active");
+} else {
+  console.log("Watcher has stopped");
+}
+
+// Stop watching
+process.kill(watchPid);
+```
+
+**Generated Bash:**
+
+```bash
+# Basic file monitoring
+watchPid=$(_utah_watch_pid_1=$(inotifywait -m -e modify,create,delete,move "/var/log/app.log" --format '%w%f %e' | while read file event; do
+  echo 'Log file changed: $1, Event: $2' "${file}" "${event}"
+done & echo $!)
+echo "${_utah_watch_pid_1}")
+echo "Watching file with PID: ${watchPid}"
+
+# Function-based callback
+handleFileChange() {
+  local filePath="$1"
+  local eventType="$2"
+  echo "File changed: ${filePath}"
+  echo "Event type: ${eventType}"
+
+  if [ "${eventType}" = "modify" ]; then
+    echo "File was modified"
+  elif [ "${eventType}" = "create" ]; then
+    echo "File was created"
+  elif [ "${eventType}" = "delete" ]; then
+    echo "File was deleted"
+  elif [ "${eventType}" = "move" ]; then
+    echo "File was moved or renamed"
+  fi
+}
+
+dirWatchPid=$(_utah_watch_pid_2=$(inotifywait -m -e modify,create,delete,move "/tmp" --format '%w%f %e' | while read file event; do
+  handleFileChange "${file}" "${event}"
+done & echo $!)
+echo "${_utah_watch_pid_2}")
+
+# Process management
+isRunning=$(ps -p ${watchPid} -o pid= > /dev/null 2>&1 && echo "true" || echo "false")
+if [ "${isRunning}" = "true" ]; then
+  echo "Watcher is active"
+else
+  echo "Watcher has stopped"
+fi
+
+# Stop watching
+kill ${watchPid} 2>/dev/null || true
+```
+
+**Key Features:**
+
+- **Real-time Monitoring**: Uses `inotifywait` for efficient filesystem event monitoring
+- **Event Types**: Supports modify, create, delete, and move events
+- **Callback Flexibility**: Accepts both simple commands and function names as callbacks
+- **Background Process**: Runs in background and returns process ID for management
+- **Cross-platform**: Works on Linux systems with inotify-tools installed
+- **Integration**: Works seamlessly with Utah's process management functions
+
+**Event Types:**
+
+- `modify` - File or directory content was changed
+- `create` - File or directory was created
+- `delete` - File or directory was deleted
+- `move` - File or directory was moved or renamed
+
+**Dependencies:**
+
+- Requires `inotify-tools` package (`sudo apt install inotify-tools` on Ubuntu/Debian)
+- Uses `inotifywait` command for efficient filesystem monitoring
+
+**Use Cases:**
+
+- Configuration file monitoring for auto-reload functionality
+- Log file monitoring for real-time analysis
+- Development tools that need to detect source code changes
+- Backup systems that trigger on file modifications
+- Security monitoring for sensitive directories
+
+**Test Coverage:**
+
+- File: `tests/positive_fixtures/fs_watch.shx`
+- Tests basic monitoring, function callbacks, variable usage, and process management
+
 ### fs.appendFile()
 
 Append content to a file:

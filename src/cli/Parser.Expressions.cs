@@ -799,6 +799,26 @@ public partial class Parser
         throw new InvalidOperationException("fs.createTempFolder() requires 0 to 2 arguments (prefix?, baseDir?)");
       }
 
+      // Special handling for fs.watch()
+      if (functionName == "fs.watch")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          var callbackExpr = ParseExpression(args[1]);
+          return new FsWatchExpression(pathExpr, callbackExpr, null);
+        }
+        if (args.Count == 3)
+        {
+          var pathExpr = ParseExpression(args[0]);
+          var callbackExpr = ParseExpression(args[1]);
+          var optionsExpr = ParseExpression(args[2]);
+          return new FsWatchExpression(pathExpr, callbackExpr, optionsExpr);
+        }
+        throw new InvalidOperationException("fs.watch() requires 2 or 3 arguments (path, callback, options?)");
+      }
+
       // Special handling for console.isSudo()
       if (functionName == "console.isSudo" && string.IsNullOrEmpty(argsContent))
       {
