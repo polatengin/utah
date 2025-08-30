@@ -186,18 +186,18 @@ function runPlaybook(playbook: string, inventory: string): void {
 
   let result: string = ansible.playbook(playbook, inventory);
 
-  if (result.includes("failed=0")) {
+  if (string.contains(result, "failed=0")) {
     console.log("✅ Playbook executed successfully!");
   } else {
     console.log("❌ Playbook execution failed!");
-    script.exit(1);
+    exit(1);
   }
 }
 
 function manageServices(): void {
   let services: string[] = ["nginx", "postgresql", "redis"];
 
-  for (let service of services) {
+  for (let service: string in services) {
     console.log("Managing service: ${service}");
     ansible.service(service, "restarted");
   }
@@ -218,17 +218,17 @@ function buildAndPush(image: string, tag: string): void {
   console.log("Building ${image}:${tag}...");
 
   // Build image
-  let buildResult: string = system.execute("docker build -t ${image}:${tag} .");
+  let buildResult: string = `$(docker build -t ${image}:${tag} .)`;
 
-  if (buildResult.includes("Successfully built")) {
+  if (string.contains(buildResult, "Successfully built")) {
     console.log("✅ Image built successfully!");
 
     // Push to registry
-    system.execute("docker push ${image}:${tag}");
+    `$(docker push ${image}:${tag})`;
     console.log("✅ Image pushed to registry!");
   } else {
     console.log("❌ Image build failed!");
-    script.exit(1);
+    exit(1);
   }
 }
 
@@ -236,12 +236,12 @@ function deployContainer(image: string, port: number): void {
   console.log("Deploying container: ${image}");
 
   // Stop existing container
-  system.execute("docker stop ${image} || true");
-  system.execute("docker rm ${image} || true");
+  `$(docker stop ${image} || true)`;
+  `$(docker rm ${image} || true)`;
 
   // Run new container
   let runCmd: string = "docker run -d --name ${image} -p ${port}:80 ${image}:latest";
-  system.execute(runCmd);
+  `$(${runCmd})`;
 
   console.log("✅ Container deployed on port ${port}");
 }
@@ -259,36 +259,36 @@ function deployToKubernetes(namespace: string, manifest: string): void {
   console.log("Deploying to namespace: ${namespace}");
 
   // Create namespace if it doesn't exist
-  system.execute("kubectl create namespace ${namespace} || true");
+  `$(kubectl create namespace ${namespace} || true)`;
 
   // Apply manifest
-  let result: string = system.execute("kubectl apply -f ${manifest} -n ${namespace}");
+  let result: string = `$(kubectl apply -f ${manifest} -n ${namespace})`;
 
-  if (result.includes("created") || result.includes("configured")) {
+  if (string.contains(result, "created") || string.contains(result, "configured")) {
     console.log("✅ Deployment successful!");
   } else {
     console.log("❌ Deployment failed!");
-    script.exit(1);
+    exit(1);
   }
 }
 
 function waitForDeployment(namespace: string, deployment: string): void {
   console.log("Waiting for deployment: ${deployment}");
 
-  system.execute("kubectl rollout status deployment/${deployment} -n ${namespace}");
+  `$(kubectl rollout status deployment/${deployment} -n ${namespace})`;
   console.log("✅ Deployment ready!");
 }
 
 function checkHealth(namespace: string, service: string): void {
   console.log("Checking health of service: ${service}");
 
-  let pods: string = system.execute("kubectl get pods -n ${namespace} -l app=${service}");
+  let pods: string = `$(kubectl get pods -n ${namespace} -l app=${service})`;
 
-  if (pods.includes("Running")) {
+  if (string.contains(pods, "Running")) {
     console.log("✅ Service is healthy!");
   } else {
     console.log("❌ Service is not healthy!");
-    script.exit(1);
+    exit(1);
   }
 }
 
@@ -307,37 +307,46 @@ checkHealth("production", "my-app");
 function checkWebservice(url: string): boolean {
   try {
     let response: string = web.get(url);
-    return response.includes("healthy");
-  } catch (error) {
+    return string.contains(response, "healthy");
+  }
+  catch {
     return false;
   }
 }
 
 function checkDatabase(connectionString: string): boolean {
   try {
-    let result: string = system.execute("psql "${connectionString}" -c "SELECT 1;"");
-    return result.includes("1 row");
-  } catch (error) {
+    let result: string = `$(psql "${connectionString}" -c "SELECT 1;")`;
+    return string.contains(result, "1 row");
+  }
+  catch {
     return false;
   }
 }
 
 function checkServices(): void {
   let services: object[] = [
-    { name: "Web API", url: "https://api.example.com/health" },
-    { name: "Database", connection: "postgresql://user:pass@localhost:5432/db" }
+    json.parse("{\"name\": \"Web API\", \"url\": \"https://api.example.com/health\"}"),
+    json.parse("{\"name\": \"Database\", \"connection\": \"postgresql://user:pass@localhost:5432/db\"}")
   ];
 
-  for (let service of services) {
-    let healthy: boolean = service.url
-      ? checkWebservice(service.url)
-      : checkDatabase(service.connection);
+  for (let service: object in services) {
+    let serviceName: string = json.get(service, ".name");
+    let serviceUrl: string = json.get(service, ".url") || "";
+    let serviceConnection: string = json.get(service, ".connection") || "";
+    
+    let healthy: boolean = false;
+    if (serviceUrl != "") {
+      healthy = checkWebservice(serviceUrl);
+    } else if (serviceConnection != "") {
+      healthy = checkDatabase(serviceConnection);
+    }
 
     if (healthy) {
-      console.log("✅ ${service.name} is healthy");
+      console.log("✅ ${serviceName} is healthy");
     } else {
-      console.log("❌ ${service.name} is unhealthy");
-      sendAlert(service.name);
+      console.log("❌ ${serviceName} is unhealthy");
+      sendAlert(serviceName);
     }
   }
 }
@@ -346,12 +355,10 @@ function sendAlert(serviceName: string): void {
   let message: string = "Alert: ${serviceName} is unhealthy";
 
   // Send to Slack
-  web.post("https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK", {
-    text: message
-  });
+  web.post("https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK", json.parse("{\"text\": \"${message}\"}"));
 
   // Send email
-  system.execute("echo "${message}" | mail -s "Service Alert" admin@example.com");
+  `$(echo "${message}" | mail -s "Service Alert" admin@example.com)`;
 }
 
 checkServices();
@@ -365,15 +372,15 @@ function analyzeAccessLogs(logFile: string): void {
   console.log("Analyzing access logs: ${logFile}");
 
   let logs: string = fs.readFile(logFile);
-  let lines: string[] = logs.split("\n");
+  let lines: string[] = string.split(logs, "\n");
 
   let errorCount: number = 0;
   let warningCount: number = 0;
 
-  for (let line of lines) {
-    if (line.includes("ERROR")) {
+  for (let line: string in lines) {
+    if (string.contains(line, "ERROR")) {
       errorCount++;
-    } else if (line.includes("WARN")) {
+    } else if (string.contains(line, "WARN")) {
       warningCount++;
     }
   }
@@ -388,16 +395,16 @@ function analyzeAccessLogs(logFile: string): void {
 function rotateLogFiles(logDir: string): void {
   console.log("Rotating logs in: ${logDir}");
 
-  let filesList: string = "$(ls ${logDir}/*.log 2>/dev/null || true)";
+  let filesList: string = `$(ls ${logDir}/*.log 2>/dev/null || true)`;
   let files: string[] = string.split(filesList, "\n");
 
-  for (let file of files) {
+  for (let file: string in files) {
     if (string.length(file) > 0) {
-      let timestamp: string = utility.dateString();
+      let timestamp: string = `$(date +%Y%m%d_%H%M%S)`;
       let archivedName: string = "${file}.${timestamp}";
 
       fs.move(file, archivedName);
-      system.execute("gzip ${archivedName}");
+      `$(gzip ${archivedName})`;
     }
   }
 }
@@ -417,19 +424,19 @@ function scanForVulnerabilities(): void {
   console.log("Running security scan...");
 
   // Run dependency check
-  let depCheck: string = system.execute("dependency-check --project myapp --scan .");
+  let depCheck: string = `$(dependency-check --project myapp --scan .)`;
 
-  if (depCheck.includes("High") || depCheck.includes("Critical")) {
+  if (string.contains(depCheck, "High") || string.contains(depCheck, "Critical")) {
     console.log("❌ Critical vulnerabilities found!");
-    script.exit(1);
+    exit(1);
   }
 
   // Run container scan
-  let containerScan: string = system.execute("trivy image myapp:latest");
+  let containerScan: string = `$(trivy image myapp:latest)`;
 
-  if (containerScan.includes("HIGH") || containerScan.includes("CRITICAL")) {
+  if (string.contains(containerScan, "HIGH") || string.contains(containerScan, "CRITICAL")) {
     console.log("❌ Container vulnerabilities found!");
-    script.exit(1);
+    exit(1);
   }
 
   console.log("✅ Security scan passed!");
@@ -439,19 +446,19 @@ function auditCompliance(): void {
   console.log("Running compliance audit...");
 
   // Check file permissions
-  let permissions: string = system.execute("find /app -type f -perm 777");
+  let permissions: string = `$(find /app -type f -perm 777)`;
 
-  if (permissions.trim() != "") {
+  if (string.trim(permissions) != "") {
     console.log("❌ Files with 777 permissions found!");
-    script.exit(1);
+    exit(1);
   }
 
   // Check for secrets in code
-  let secrets: string = system.execute("grep -r 'password\\|secret\\|key' src/ || true");
+  let secrets: string = `$(grep -r 'password\\|secret\\|key' src/ || true)`;
 
-  if (secrets.includes("password") || secrets.includes("secret")) {
+  if (string.contains(secrets, "password") || string.contains(secrets, "secret")) {
     console.log("❌ Potential secrets found in code!");
-    script.exit(1);
+    exit(1);
   }
 
   console.log("✅ Compliance audit passed!");
@@ -470,17 +477,18 @@ auditCompliance();
 function deployWithErrorHandling(): void {
   try {
     // Deployment logic
-    system.execute("kubectl apply -f deployment.yaml");
-  } catch (error) {
-    console.log("❌ Deployment failed: ${error}");
+    `$(kubectl apply -f deployment.yaml)`;
+  }
+  catch {
+    console.log("❌ Deployment failed");
 
     // Rollback on failure
-    system.execute("kubectl rollout undo deployment/myapp");
+    `$(kubectl rollout undo deployment/myapp)`;
 
     // Send notification
     sendAlert("Deployment failed, rolled back");
 
-    script.exit(1);
+    exit(1);
   }
 }
 ```
@@ -489,12 +497,12 @@ function deployWithErrorHandling(): void {
 
 ```typescript
 // Use environment variables for configuration
-let environment: string = system.env("DEPLOY_ENV") || "development";
-let apiKey: string = system.env("API_KEY") || "";
+let environment: string = env.get("DEPLOY_ENV") || "development";
+let apiKey: string = env.get("API_KEY") || "";
 
 if (apiKey == "") {
   console.log("❌ API_KEY environment variable is required");
-  script.exit(1);
+  exit(1);
 }
 ```
 
@@ -503,14 +511,14 @@ if (apiKey == "") {
 ```typescript
 // Log all operations with timestamps
 function logOperation(operation: string): void {
-  let timestamp: string = utility.dateString();
+  let timestamp: string = `$(date)`;
   console.log("[${timestamp}] ${operation}");
 }
 
 // Monitor resource usage
 function checkResourceUsage(): void {
-  let cpuUsage: string = system.execute("top -bn1 | grep 'Cpu(s)' | awk '{print $2}'");
-  let memUsage: string = system.execute("free -m | grep Mem | awk '{print ($3/$2)*100}'");
+  let cpuUsage: string = `$(top -bn1 | grep 'Cpu(s)' | awk '{print $2}')`;
+  let memUsage: string = `$(free -m | grep Mem | awk '{print ($3/$2)*100}')`;
 
   console.log("CPU Usage: ${cpuUsage}, Memory Usage: ${memUsage}%");
 }
@@ -530,6 +538,7 @@ function loadConfig(environment: string): object {
     return json.parse(configData);
   }
 
-  throw new Error("Configuration file not found: ${configFile}");
+  console.log("❌ Configuration file not found: ${configFile}");
+  exit(1);
 }
 ```
