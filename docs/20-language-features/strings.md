@@ -22,6 +22,87 @@ let empty: string = "";
 let path: string = "/usr/local/bin";
 ```
 
+### Multiline Strings
+
+Utah supports multiline strings using triple-double quotes (`"""`). This feature is perfect for embedding SQL queries, HTML templates, configuration files, or any content that spans multiple lines.
+
+#### Basic Multiline Strings
+
+```typescript
+let sqlQuery: string = """
+SELECT id, name, email
+FROM users
+WHERE active = 1
+ORDER BY name ASC
+""";
+
+let htmlTemplate: string = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <h1>Hello World</h1>
+</body>
+</html>
+""";
+```
+
+#### Multiline Strings with Interpolation
+
+Multiline strings support variable interpolation using `${variable}` syntax:
+
+```typescript
+let tableName: string = "customers";
+let condition: string = "status = 'active'";
+
+let query: string = """
+SELECT id, name, email
+FROM ${tableName}
+WHERE ${condition}
+ORDER BY created_date DESC
+""";
+
+let appName: string = "MyApp";
+let version: string = "1.0.0";
+
+let config: string = """
+{
+  "name": "${appName}",
+  "version": "${version}",
+  "server": {
+    "port": 8080,
+    "host": "localhost"
+  }
+}
+""";
+```
+
+#### Indentation Handling
+
+Utah automatically normalizes common leading whitespace in multiline strings:
+
+```typescript
+// This multiline string has consistent indentation
+let script: string = """
+    #!/bin/bash
+    set -e
+    echo "Starting deployment..."
+    echo "Deployment complete!"
+""";
+// The common leading whitespace is removed
+```
+
+#### Use Cases for Multiline Strings
+
+- **SQL Queries**: Write readable database queries
+- **Configuration Files**: Embed JSON, YAML, or other config formats
+- **HTML Templates**: Create HTML content with embedded variables
+- **Shell Scripts**: Embed bash script content
+- **Error Messages**: Create formatted error messages with multiple lines
+- **Documentation**: Embed help text or documentation strings
+
 ### String Methods
 
 #### `string.length()`

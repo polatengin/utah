@@ -32,6 +32,12 @@ public partial class Parser
 
   private Expression ParseAssignmentExpression(string input)
   {
+    // If this is a multiline string literal, don't treat = as assignment
+    if (input.Trim().StartsWith("\"\"\"") && input.Trim().EndsWith("\"\"\""))
+    {
+      return ParseTernaryExpression(input);
+    }
+
     var parts = input.Split(new[] { '=' }, 2);
     if (parts.Length == 2 && !IsPartOfOperator(input, input.IndexOf('=')))
     {
@@ -214,6 +220,12 @@ public partial class Parser
     if (input.StartsWith("(") && input.EndsWith(")"))
     {
       return new ParenthesizedExpression(ParseExpression(input.Substring(1, input.Length - 2)));
+    }
+
+    // Multiline string literal with triple quotes
+    if (input.StartsWith("\"\"\"") && input.EndsWith("\"\"\"") && input.Length >= 6)
+    {
+      return ParseMultilineString(input);
     }
 
     // String literal
@@ -2209,5 +2221,42 @@ public partial class Parser
     }
 
     return args;
+  }
+
+  private MultilineStringExpression ParseMultilineString(string input)
+  {
+    var content = input.Substring(3, input.Length - 6); // Remove opening and closing """
+
+    // Determine if we should preserve indentation based on content structure
+    var preservesIndentation = ShouldPreserveIndentation(content);
+
+    return new MultilineStringExpression(content, preservesIndentation);
+  }
+
+  private bool ShouldPreserveIndentation(string content)
+  {
+    // Smart indentation detection: if the first line after opening """ is not empty
+    // and has leading whitespace, we assume indentation should be preserved
+    var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+    if (lines.Length == 0) return false;
+
+    // Check if multiple lines have common leading whitespace
+    var nonEmptyLines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+    if (nonEmptyLines.Length <= 1) return false;
+
+    // Find common leading whitespace
+    var minLeadingWhitespace = nonEmptyLines.Min(line =>
+    {
+      var leadingWhitespace = 0;
+      foreach (var ch in line)
+      {
+        if (ch == ' ' || ch == '\t') leadingWhitespace++;
+        else break;
+      }
+      return leadingWhitespace;
+    });
+
+    // If there's common indentation, we should normalize it (not preserve exact)
+    return minLeadingWhitespace == 0;
   }
 }

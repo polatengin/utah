@@ -54,6 +54,8 @@ public partial class Compiler
         return CompileParenthesizedExpression(paren);
       case StringInterpolationExpression stringInterpolation:
         return CompileStringInterpolationExpression(stringInterpolation);
+      case MultilineStringExpression multilineStr:
+        return CompileMultilineStringExpression(multilineStr);
       case ArrayLiteral arr:
         return CompileArrayLiteral(arr);
       case ArrayAccess acc:
@@ -3399,5 +3401,132 @@ _utah_validate_in_range {value} {min} {max}
 
     // Use associative array to track seen elements, preserving order
     return $"($(declare -A _utah_seen; for item in \"${{{varName}[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
+  }
+
+  private string CompileMultilineStringExpression(MultilineStringExpression multilineStr)
+  {
+    var content = multilineStr.Content;
+
+    // Process indentation
+    if (!multilineStr.PreservesIndentation)
+    {
+      content = NormalizeIndentation(content);
+    }
+
+    // Handle interpolation if present
+    if (content.Contains("${"))
+    {
+      return CompileMultilineWithInterpolation(content);
+    }
+
+    // Escape content for bash
+    content = EscapeForBash(content);
+
+    // Use $'...' quoting for multiline strings to handle newlines properly
+    return $"$'{content}'";
+  }
+
+  private string NormalizeIndentation(string content)
+  {
+    var lines = content.Split(new[] { '\n' }, StringSplitOptions.None);
+    if (lines.Length <= 1) return content;
+
+    // Find minimum leading whitespace (excluding empty lines)
+    var nonEmptyLines = lines.Where(line => !string.IsNullOrWhiteSpace(line)).ToArray();
+    if (nonEmptyLines.Length == 0) return content;
+
+    var minIndent = nonEmptyLines.Min(line =>
+    {
+      var leadingWhitespace = 0;
+      foreach (var ch in line)
+      {
+        if (ch == ' ' || ch == '\t') leadingWhitespace++;
+        else break;
+      }
+      return leadingWhitespace;
+    });
+
+    // Remove common leading whitespace
+    if (minIndent > 0)
+    {
+      for (int i = 0; i < lines.Length; i++)
+      {
+        if (!string.IsNullOrWhiteSpace(lines[i]) && lines[i].Length >= minIndent)
+        {
+          lines[i] = lines[i].Substring(minIndent);
+        }
+      }
+    }
+
+    return string.Join("\n", lines);
+  }
+
+  private string CompileMultilineWithInterpolation(string content)
+  {
+    // Parse interpolation within multiline content
+    var parts = new List<string>();
+    var i = 0;
+    var currentString = "";
+
+    while (i < content.Length)
+    {
+      if (i < content.Length - 1 && content[i] == '$' && content[i + 1] == '{')
+      {
+        // Add any accumulated string before the expression
+        if (currentString.Length > 0)
+        {
+          parts.Add($"$'{EscapeForBash(currentString)}'");
+          currentString = "";
+        }
+
+        // Find the matching closing brace
+        i += 2; // Skip '${'
+        var braceDepth = 1;
+        var exprStart = i;
+
+        while (i < content.Length && braceDepth > 0)
+        {
+          if (content[i] == '{') braceDepth++;
+          else if (content[i] == '}') braceDepth--;
+          i++;
+        }
+
+        if (braceDepth == 0)
+        {
+          var exprContent = content.Substring(exprStart, i - exprStart - 1);
+          parts.Add($"${{{exprContent}}}");
+        }
+        else
+        {
+          // Unmatched braces - treat as literal text
+          currentString += "${" + content.Substring(exprStart);
+          break;
+        }
+      }
+      else
+      {
+        currentString += content[i];
+        i++;
+      }
+    }
+
+    // Add any remaining string
+    if (currentString.Length > 0)
+    {
+      parts.Add($"$'{EscapeForBash(currentString)}'");
+    }
+
+    return string.Join("", parts);
+  }
+
+  private string EscapeForBash(string content)
+  {
+    // Escape special characters for $'...' quoting
+    return content
+      .Replace("\\", "\\\\")  // Escape backslashes first
+      .Replace("'", "\\'")    // Escape single quotes
+      .Replace("\n", "\\n")   // Convert newlines to \n
+      .Replace("\r", "\\r")   // Convert carriage returns to \r
+      .Replace("\t", "\\t");  // Convert tabs to \t
   }
 }

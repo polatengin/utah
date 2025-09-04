@@ -1,0 +1,128 @@
+// Test comprehensive multiline string support with triple-double quotes
+
+// Basic multiline string
+let basicMultiline: string = """
+This is a basic
+multiline string
+that spans multiple lines
+""";
+
+console.log("Basic multiline:");
+console.log(basicMultiline);
+
+// SQL query example
+let sqlQuery: string = """
+SELECT id, name, email
+FROM users
+WHERE active = 1
+ORDER BY name ASC
+""";
+
+console.log("SQL Query:");
+console.log(sqlQuery);
+
+// Multiline string with interpolation
+let tableName: string = "customers";
+let condition: string = "status = 'active'";
+let columns: string = "id, name, email";
+
+let interpolatedQuery: string = """
+SELECT ${columns}
+FROM ${tableName}
+WHERE ${condition}
+ORDER BY last_login DESC
+""";
+
+console.log("Interpolated Query:");
+console.log(interpolatedQuery);
+
+// Configuration template
+let appName: string = "MyApp";
+let version: string = "1.0.0";
+let port: number = 8080;
+
+let configTemplate: string = """
+{
+  "name": "${appName}",
+  "version": "${version}",
+  "server": {
+    "port": ${port},
+    "host": "localhost"
+  }
+}
+""";
+
+console.log("Config Template:");
+console.log(configTemplate);
+
+// Script content
+let scriptContent: string = """
+#!/bin/bash
+set -e
+echo "Starting deployment..."
+echo "Deployment complete!"
+""";
+
+console.log("Script Content:");
+console.log(scriptContent);
+
+// Error message with proper formatting
+let env: string = "staging";
+let errorMessage: string = """
+Error: Configuration validation failed
+
+The following issues were found:
+- Missing required field database.host
+- Invalid port number: must be between 1 and 65535
+- Unsupported environment: ${env}
+
+Please check your configuration and try again.
+""";
+
+console.log("Error Message:");
+console.log(errorMessage);
+
+// HTML template
+let title: string = "Welcome";
+let content: string = "Hello World";
+
+let htmlTemplate: string = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${title}</title>
+</head>
+<body>
+    <h1>${title}</h1>
+    <p>${content}</p>
+</body>
+</html>
+""";
+
+console.log("HTML Template:");
+console.log(htmlTemplate);
+
+// Empty multiline string
+let emptyMultiline: string = """
+""";
+
+console.log("Empty multiline length:");
+console.log(string.length(emptyMultiline));
+
+// Single line in multiline quotes
+let singleInMultiline: string = """Just one line""";
+
+console.log("Single line in multiline:");
+console.log(singleInMultiline);
+
+// Multiline with special characters
+let specialChars: string = """
+Special characters test:
+- Quotes work fine
+- Backslashes work too
+- Tabs and spaces
+- Mixed content is supported
+""";
+
+console.log("Special characters:");
+console.log(specialChars);

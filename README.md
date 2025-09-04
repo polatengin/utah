@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-164-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy to GitHub Pages](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-165-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -6243,6 +6243,7 @@ Current tests cover:
 - **math.shx** - Basic mathematical operations and functions
 - **mixed_loops.shx** - Mixed loop types in one file
 - **mixed_syntax.shx** - Mixed Utah and bash syntax compatibility
+- **multiline_strings.shx** - Multiline string support with triple-double quotes and interpolation
 - **nested_for_loop.shx** - Nested for loops
 - **nested_import.shx** - Nested import functionality with import chains
 - **os_getlinuxversion.shx** - Operating system Linux version detection
@@ -6388,7 +6389,7 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] `array.forEach()` function to iterate over elements
 
-- [ ] Multiline string support with triple-double quotes (`"""`)
+- [x] Multiline string support with triple-double quotes (`"""`)
 
 - [x] Add shebang (`#!/bin/bash`) to generated scripts
 

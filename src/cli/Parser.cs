@@ -357,6 +357,12 @@ public partial class Parser
     }
     catch
     {
+      // Never convert Utah variable declarations to raw statements
+      if (line.StartsWith("let ") || line.StartsWith("const "))
+      {
+        throw; // Re-throw the original exception
+      }
+
       if (!line.EndsWith(";") && !line.EndsWith("{"))
       {
         return new RawStatement(line);
@@ -418,6 +424,64 @@ public partial class Parser
         return new VariableDeclaration(name, type, value, isConst);
       }
       throw new Exception($"Invalid multi-line variable declaration: {fullDeclaration}");
+    }
+
+    // Check if this is a multiline string literal starting with """
+    if (line.Contains("= \"\"\"") && !line.TrimEnd().EndsWith("\"\"\";"))
+    {
+      // This is a multi-line string literal, collect all lines until we find the closing """
+      var fullDeclaration = line;
+      var originalI = i;
+
+      i++;
+      while (i < _lines.Length)
+      {
+        var nextLine = _lines[i];
+        fullDeclaration += "\n" + nextLine;
+
+        if (nextLine.TrimEnd().EndsWith("\"\"\";"))
+        {
+          break;
+        }
+        i++;
+      }
+
+      // Ensure we found the closing """ - if not, this might not be a multiline string
+      if (i >= _lines.Length)
+      {
+        // Reset index and fall through to regular parsing
+        i = originalI;
+      }
+      else
+      {
+        // Now parse the complete declaration
+        var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;", RegexOptions.Singleline);
+        if (match.Success)
+        {
+          var name = match.Groups[2].Value;
+          var type = match.Groups[3].Value;
+          var valueStr = match.Groups[4].Value;
+
+          if (isConst)
+          {
+            _constVariables.Add(name);
+          }
+
+          // Ensure the value string represents a multiline string
+          if (valueStr.StartsWith("\"\"\"") && valueStr.EndsWith("\"\"\""))
+          {
+            var value = ParseExpression(valueStr);
+
+            // Validate variable type assignment
+            ValidateVariableTypeAssignment(value, type, name);
+
+            return new VariableDeclaration(name, type, value, isConst);
+          }
+        }
+
+        // If we get here, the multiline parsing failed, reset and fall through
+        i = originalI;
+      }
     }
 
     // Single-line variable declaration
