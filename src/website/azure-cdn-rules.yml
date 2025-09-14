@@ -1,0 +1,131 @@
+# Rule 1: Redirect curl and CLI tools to text versions
+- name: "CLI-Tools-Redirect"
+  conditions:
+    - operator: "Contains"
+      matchValues:
+        - "curl"
+        - "wget"
+        - "httpie"
+        - "python-requests"
+        - "go-http-client"
+      matchVariable: "RequestHeader"
+      selector: "User-Agent"
+      transforms:
+        - "Lowercase"
+  actions:
+    - name: "UrlRewrite"
+      parameters:
+        sourcePattern: "^/(.*?)/?$"
+        destination: "/text/$1.txt"
+        preserveUnmatchedPath: false
+
+# Rule 2: Handle directory requests for CLI tools
+- name: "CLI-Directory-Index"
+  conditions:
+    - operator: "Contains"
+      matchValues:
+        - "curl"
+        - "wget"
+        - "httpie"
+      matchVariable: "RequestHeader"
+      selector: "User-Agent"
+      transforms:
+        - "Lowercase"
+    - operator: "EndsWith"
+      matchValues:
+        - "/"
+      matchVariable: "RequestUri"
+  actions:
+    - name: "UrlRewrite"
+      parameters:
+        sourcePattern: "^/(.*?)/?$"
+        destination: "/text/$1/index.txt"
+        preserveUnmatchedPath: false
+
+# Rule 3: Handle root requests for CLI tools
+- name: "CLI-Root-Redirect"
+  conditions:
+    - operator: "Contains"
+      matchValues:
+        - "curl"
+        - "wget"
+        - "httpie"
+      matchVariable: "RequestHeader"
+      selector: "User-Agent"
+      transforms:
+        - "Lowercase"
+    - operator: "Equal"
+      matchValues:
+        - "/"
+      matchVariable: "RequestUri"
+  actions:
+    - name: "UrlRewrite"
+      parameters:
+        sourcePattern: "^/$"
+        destination: "/text/index.txt"
+        preserveUnmatchedPath: false
+
+# Rule 4: Cache control for text files
+- name: "Text-Files-Cache"
+  conditions:
+    - operator: "EndsWith"
+      matchValues:
+        - ".txt"
+      matchVariable: "RequestUri"
+  actions:
+    - name: "ModifyResponseHeader"
+      parameters:
+        headerAction: "Overwrite"
+        headerName: "Cache-Control"
+        value: "public, max-age=3600"
+    - name: "ModifyResponseHeader"
+      parameters:
+        headerAction: "Overwrite"
+        headerName: "Content-Type"
+        value: "text/plain; charset=utf-8"
+
+# Rule 5: Cache control for static assets
+- name: "Static-Assets-Cache"
+  conditions:
+    - operator: "EndsWith"
+      matchValues:
+        - ".js"
+        - ".css"
+        - ".png"
+        - ".jpg"
+        - ".svg"
+        - ".ico"
+      matchVariable: "RequestUri"
+  actions:
+    - name: "ModifyResponseHeader"
+      parameters:
+        headerAction: "Overwrite"
+        headerName: "Cache-Control"
+        value: "public, max-age=31536000, immutable"
+
+# Rule 6: Default browser handling (SPA routing)
+- name: "Browser-SPA-Routing"
+  conditions:
+    - operator: "Not"
+      conditions:
+        - operator: "Contains"
+          matchValues:
+            - "curl"
+            - "wget"
+            - "httpie"
+          matchVariable: "RequestHeader"
+          selector: "User-Agent"
+          transforms:
+            - "Lowercase"
+    - operator: "Not"
+      conditions:
+        - operator: "Contains"
+          matchValues:
+            - "."
+          matchVariable: "RequestUri"
+  actions:
+    - name: "UrlRewrite"
+      parameters:
+        sourcePattern: ".*"
+        destination: "/index.html"
+        preserveUnmatchedPath: false
