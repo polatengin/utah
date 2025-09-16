@@ -78,9 +78,6 @@ sudo chmod +x /usr/local/bin/utah
 # Using the install script
 curl -sL https://utahshx.com/install.sh | sudo bash
 
-# Or using Homebrew (if available)
-# brew install utah  # Coming soon
-
 # Or manual installation
 curl -LO https://github.com/polatengin/utah/releases/latest/download/utah-osx-x64.tar.gz
 tar -xzf utah-osx-x64.tar.gz
@@ -95,6 +92,12 @@ Utah works best in Windows Subsystem for Linux (WSL):
 ```bash
 # In WSL terminal
 curl -sL https://utahshx.com/install.sh | sudo bash
+
+# Or manual installation
+wget https://github.com/polatengin/utah/releases/latest/download/utah-linux-x64.tar.gz
+tar -xzf utah-linux-x64.tar.gz
+sudo mv utah /usr/local/bin/
+sudo chmod +x /usr/local/bin/utah
 ```
 
 ## Installing Dependencies
