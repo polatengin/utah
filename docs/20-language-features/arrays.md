@@ -17,9 +17,6 @@ let users: string[] = [];
 
 // Array with initial values
 let numbers: number[] = [1, 2, 3, 4, 5];
-
-// Mixed types (object array)
-let items: object[] = [];
 ```
 
 ### Array Methods
