@@ -11,7 +11,7 @@
     "dev": "npx concurrently \"npm run start\" \"npm run inspector\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.24.0"
+    "@modelcontextprotocol/sdk": "1.26.0"
   },
   "devDependencies": {
     "concurrently": "9.2.0",
