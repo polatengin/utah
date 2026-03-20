@@ -1,0 +1,2 @@
+let ts: number = date.now();
+console.log("Timestamp: ${ts}");

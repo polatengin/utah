@@ -50,6 +50,7 @@ public class CompletionHandler : ICompletionHandler
         "scheduler" => GetSchedulerCompletions(),
         "array" => GetArrayCompletions(),
         "math" => GetMathCompletions(),
+        "date" => GetDateCompletions(),
         _ => null
       };
 
@@ -473,6 +474,22 @@ public class CompletionHandler : ICompletionHandler
       N("template", "Template variable substitution namespace"),
       N("scheduler", "Task scheduling namespace"),
       N("array", "Array operations namespace"),
+      N("date", "Date and time operations namespace"),
+    };
+  }
+
+  public static List<CompletionItem> GetDateCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("now", "now(): number", "Get the current Unix timestamp in seconds"),
+      M("nowMillis", "nowMillis(): number", "Get the current Unix timestamp in milliseconds"),
+      M("format", "format(timestamp?: number, format?: string): string", "Format a timestamp into a human-readable date string"),
+      M("parse", "parse(dateString: string, format?: string): number", "Parse a date string into a Unix timestamp"),
+      M("diff", "diff(ts1: number, ts2: number, unit?: string): number", "Calculate the difference between two timestamps"),
+      M("add", "add(timestamp: number, amount: number, unit: string): number", "Add time to a timestamp"),
+      M("subtract", "subtract(timestamp: number, amount: number, unit: string): number", "Subtract time from a timestamp"),
+      M("dayOfWeek", "dayOfWeek(timestamp?: number): string", "Get the day of the week name for a timestamp"),
     };
   }
 

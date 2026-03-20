@@ -1453,6 +1453,120 @@ public partial class Parser
         return new SystemMemoryUsageExpression();
       }
 
+      // Special handling for date.now()
+      if (functionName == "date.now" && string.IsNullOrEmpty(argsContent))
+      {
+        return new DateNowExpression();
+      }
+
+      // Special handling for date.nowMillis()
+      if (functionName == "date.nowMillis" && string.IsNullOrEmpty(argsContent))
+      {
+        return new DateNowMillisExpression();
+      }
+
+      // Special handling for date.format()
+      if (functionName == "date.format")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          return new DateFormatExpression(null, null);
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          return new DateFormatExpression(ParseExpression(args[0]), null);
+        }
+        if (args.Count == 2)
+        {
+          return new DateFormatExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+        }
+        throw new InvalidOperationException("date.format() accepts 0 to 2 arguments (timestamp?, format?)");
+      }
+
+      // Special handling for date.parse()
+      if (functionName == "date.parse")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("date.parse() requires at least 1 argument (dateString)");
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          return new DateParseExpression(ParseExpression(args[0]), null);
+        }
+        if (args.Count == 2)
+        {
+          return new DateParseExpression(ParseExpression(args[0]), ParseExpression(args[1]));
+        }
+        throw new InvalidOperationException("date.parse() accepts 1 or 2 arguments (dateString, format?)");
+      }
+
+      // Special handling for date.diff()
+      if (functionName == "date.diff")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("date.diff() requires at least 2 arguments (timestamp1, timestamp2)");
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          return new DateDiffExpression(ParseExpression(args[0]), ParseExpression(args[1]), null);
+        }
+        if (args.Count == 3)
+        {
+          return new DateDiffExpression(ParseExpression(args[0]), ParseExpression(args[1]), ParseExpression(args[2]));
+        }
+        throw new InvalidOperationException("date.diff() accepts 2 or 3 arguments (timestamp1, timestamp2, unit?)");
+      }
+
+      // Special handling for date.add()
+      if (functionName == "date.add")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("date.add() requires exactly 3 arguments (timestamp, amount, unit)");
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 3)
+        {
+          return new DateAddExpression(ParseExpression(args[0]), ParseExpression(args[1]), ParseExpression(args[2]));
+        }
+        throw new InvalidOperationException("date.add() requires exactly 3 arguments (timestamp, amount, unit)");
+      }
+
+      // Special handling for date.subtract()
+      if (functionName == "date.subtract")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("date.subtract() requires exactly 3 arguments (timestamp, amount, unit)");
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 3)
+        {
+          return new DateSubtractExpression(ParseExpression(args[0]), ParseExpression(args[1]), ParseExpression(args[2]));
+        }
+        throw new InvalidOperationException("date.subtract() requires exactly 3 arguments (timestamp, amount, unit)");
+      }
+
+      // Special handling for date.dayOfWeek()
+      if (functionName == "date.dayOfWeek")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          return new DateDayOfWeekExpression(null);
+        }
+        var args = SplitByComma(argsContent);
+        if (args.Count == 1)
+        {
+          return new DateDayOfWeekExpression(ParseExpression(args[0]));
+        }
+        throw new InvalidOperationException("date.dayOfWeek() accepts 0 or 1 arguments (timestamp?)");
+      }
+
       // Special handling for ssh.connect()
       if (functionName == "ssh.connect")
       {

@@ -1,0 +1,2 @@
+let ts: number = date.parse("2024-01-15");
+console.log("Parsed: ${ts}");

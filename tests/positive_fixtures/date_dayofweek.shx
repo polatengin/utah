@@ -1,0 +1,6 @@
+let today: string = date.dayOfWeek();
+console.log("Today is: ${today}");
+
+let ts: number = date.now();
+let day: string = date.dayOfWeek(ts);
+console.log("Day: ${day}");

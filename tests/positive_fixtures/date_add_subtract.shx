@@ -1,0 +1,6 @@
+let ts: number = date.now();
+let future: number = date.add(ts, 7, "days");
+console.log("Future: ${future}");
+
+let past: number = date.subtract(ts, 2, "hours");
+console.log("Past: ${past}");

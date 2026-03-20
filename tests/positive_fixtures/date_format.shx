@@ -1,0 +1,9 @@
+let formatted: string = date.format();
+console.log("Current: ${formatted}");
+
+let ts: number = date.now();
+let formatted2: string = date.format(ts);
+console.log("Formatted: ${formatted2}");
+
+let custom: string = date.format(ts, "%Y-%m-%d");
+console.log("Custom: ${custom}");

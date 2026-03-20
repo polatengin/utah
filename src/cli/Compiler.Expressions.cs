@@ -303,6 +303,22 @@ public partial class Compiler
         return CompileSystemMemoryTotalExpression();
       case SystemMemoryUsageExpression:
         return CompileSystemMemoryUsageExpression();
+      case DateNowExpression:
+        return CompileDateNowExpression();
+      case DateNowMillisExpression:
+        return CompileDateNowMillisExpression();
+      case DateFormatExpression dateFormat:
+        return CompileDateFormatExpression(dateFormat);
+      case DateParseExpression dateParse:
+        return CompileDateParseExpression(dateParse);
+      case DateDiffExpression dateDiff:
+        return CompileDateDiffExpression(dateDiff);
+      case DateAddExpression dateAdd:
+        return CompileDateAddExpression(dateAdd);
+      case DateSubtractExpression dateSubtract:
+        return CompileDateSubtractExpression(dateSubtract);
+      case DateDayOfWeekExpression dateDayOfWeek:
+        return CompileDateDayOfWeekExpression(dateDayOfWeek);
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -333,6 +349,140 @@ public partial class Compiler
   private string CompileSystemMemoryUsageExpression()
   {
     return "$(free 2>/dev/null | awk 'NR==2 {printf(\"%d\", ($3/$2)*100)}' || echo \"0\")";
+  }
+
+  private string CompileDateNowExpression()
+  {
+    return "$(date +%s)";
+  }
+
+  private string CompileDateNowMillisExpression()
+  {
+    return "$(date +%s%3N)";
+  }
+
+  private string CompileDateFormatExpression(DateFormatExpression expr)
+  {
+    if (expr.Timestamp == null && expr.Format == null)
+    {
+      return "$(date +\"%Y-%m-%d %H:%M:%S\")";
+    }
+    if (expr.Timestamp != null && expr.Format == null)
+    {
+      var ts = CompileExpression(expr.Timestamp);
+      return $"$(date -d @{ts} +\"%Y-%m-%d %H:%M:%S\")";
+    }
+    if (expr.Timestamp == null && expr.Format != null)
+    {
+      var fmt = CompileExpression(expr.Format);
+      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == "string")
+      {
+        return $"$(date +\"{fmtLiteral.Value}\")";
+      }
+      return $"$(date +\"{fmt}\")";
+    }
+    // Both timestamp and format provided
+    var timestamp = CompileExpression(expr.Timestamp!);
+    if (expr.Format is LiteralExpression formatLiteral && formatLiteral.Type == "string")
+    {
+      return $"$(date -d @{timestamp} +\"{formatLiteral.Value}\")";
+    }
+    var format = CompileExpression(expr.Format!);
+    return $"$(date -d @{timestamp} +\"{format}\")";
+  }
+
+  private string CompileDateParseExpression(DateParseExpression expr)
+  {
+    var dateStr = CompileExpression(expr.DateString);
+    if (expr.DateString is LiteralExpression dateLiteral && dateLiteral.Type == "string")
+    {
+      dateStr = $"\"{dateLiteral.Value}\"";
+    }
+    if (expr.Format != null)
+    {
+      var fmt = CompileExpression(expr.Format);
+      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == "string")
+      {
+        return $"$(date -d {dateStr} +\"{fmtLiteral.Value}\")";
+      }
+      return $"$(date -d {dateStr} +\"{fmt}\")";
+    }
+    return $"$(date -d {dateStr} +%s)";
+  }
+
+  private string CompileDateDiffExpression(DateDiffExpression expr)
+  {
+    var ts1 = CompileExpression(expr.Timestamp1);
+    var ts2 = CompileExpression(expr.Timestamp2);
+
+    if (expr.Unit == null)
+    {
+      return $"$(({ts1} - {ts2}))";
+    }
+
+    var unit = CompileExpression(expr.Unit);
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    {
+      return unit switch
+      {
+        _ when unitLiteral.Value == "seconds" => $"$(({ts1} - {ts2}))",
+        _ when unitLiteral.Value == "minutes" => $"$((({ts1} - {ts2}) / 60))",
+        _ when unitLiteral.Value == "hours" => $"$((({ts1} - {ts2}) / 3600))",
+        _ when unitLiteral.Value == "days" => $"$((({ts1} - {ts2}) / 86400))",
+        _ => $"$(({ts1} - {ts2}))"
+      };
+    }
+    return $"$(({ts1} - {ts2}))";
+  }
+
+  private string CompileDateAddExpression(DateAddExpression expr)
+  {
+    var ts = CompileExpression(expr.Timestamp);
+    var amount = CompileExpression(expr.Amount);
+
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    {
+      return unitLiteral.Value switch
+      {
+        "seconds" => $"$(({ts} + {amount}))",
+        "minutes" => $"$(({ts} + {amount} * 60))",
+        "hours" => $"$(({ts} + {amount} * 3600))",
+        "days" => $"$(({ts} + {amount} * 86400))",
+        _ => $"$(({ts} + {amount}))"
+      };
+    }
+    var unit = CompileExpression(expr.Unit);
+    return $"$(({ts} + {amount}))";
+  }
+
+  private string CompileDateSubtractExpression(DateSubtractExpression expr)
+  {
+    var ts = CompileExpression(expr.Timestamp);
+    var amount = CompileExpression(expr.Amount);
+
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    {
+      return unitLiteral.Value switch
+      {
+        "seconds" => $"$(({ts} - {amount}))",
+        "minutes" => $"$(({ts} - {amount} * 60))",
+        "hours" => $"$(({ts} - {amount} * 3600))",
+        "days" => $"$(({ts} - {amount} * 86400))",
+        _ => $"$(({ts} - {amount}))"
+      };
+    }
+    var unit = CompileExpression(expr.Unit);
+    return $"$(({ts} - {amount}))";
+  }
+
+  private string CompileDateDayOfWeekExpression(DateDayOfWeekExpression expr)
+  {
+    if (expr.Timestamp == null)
+    {
+      return "$(date +%A)";
+    }
+    var ts = CompileExpression(expr.Timestamp);
+    return $"$(date -d @{ts} +%A)";
   }
 
   private string CompileGitUndoLastCommitExpression()

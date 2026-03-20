@@ -152,6 +152,14 @@ public record SystemCpuCountExpression() : Expression;
 public record SystemMemoryTotalExpression() : Expression;
 public record SystemMemoryUsageExpression() : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
+public record DateNowExpression() : Expression;
+public record DateNowMillisExpression() : Expression;
+public record DateFormatExpression(Expression? Timestamp, Expression? Format) : Expression;
+public record DateParseExpression(Expression DateString, Expression? Format) : Expression;
+public record DateDiffExpression(Expression Timestamp1, Expression Timestamp2, Expression? Unit) : Expression;
+public record DateAddExpression(Expression Timestamp, Expression Amount, Expression Unit) : Expression;
+public record DateSubtractExpression(Expression Timestamp, Expression Amount, Expression Unit) : Expression;
+public record DateDayOfWeekExpression(Expression? Timestamp) : Expression;
 
 // Statements
 public abstract record Statement : Node;

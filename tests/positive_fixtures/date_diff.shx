@@ -1,0 +1,7 @@
+let ts1: number = date.parse("2024-01-15");
+let ts2: number = date.parse("2024-01-10");
+let diffSec: number = date.diff(ts1, ts2);
+console.log("Diff seconds: ${diffSec}");
+
+let diffDays: number = date.diff(ts1, ts2, "days");
+console.log("Diff days: ${diffDays}");
