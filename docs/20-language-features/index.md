@@ -94,6 +94,7 @@ Utah provides comprehensive built-in functions organized by functionality:
 - **[Git](git.md)** - Version control operations
 - **[SSH](ssh.md)** - Secure shell operations
 - **[Utilities](utilities.md)** - Common utility functions
+- **[Argument Parsing](arguments.md)** - CLI argument handling
 
 ### Network and Web
 
