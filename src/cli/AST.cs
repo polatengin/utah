@@ -148,6 +148,9 @@ public record ValidateIsInRangeExpression(Expression Value, Expression Min, Expr
 public record ValidateIsNumericExpression(Expression Value) : Expression;
 public record ValidateIsAlphaNumericExpression(Expression Value) : Expression;
 public record LambdaExpression(List<string> Parameters, List<Statement> Body) : Expression;
+public record SystemCpuCountExpression() : Expression;
+public record SystemMemoryTotalExpression() : Expression;
+public record SystemMemoryUsageExpression() : Expression;
 public record SchedulerCronExpression(Expression CronPattern, LambdaExpression Job) : Expression;
 
 // Statements

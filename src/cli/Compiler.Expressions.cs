@@ -297,6 +297,12 @@ public partial class Compiler
         return CompileValidateIsNumericExpression(validateIsNumeric);
       case ValidateIsAlphaNumericExpression validateIsAlphaNumeric:
         return CompileValidateIsAlphaNumericExpression(validateIsAlphaNumeric);
+      case SystemCpuCountExpression:
+        return CompileSystemCpuCountExpression();
+      case SystemMemoryTotalExpression:
+        return CompileSystemMemoryTotalExpression();
+      case SystemMemoryUsageExpression:
+        return CompileSystemMemoryUsageExpression();
       case SchedulerCronExpression schedulerCron:
         return CompileSchedulerCronExpression(schedulerCron);
       case LambdaExpression lambda:
@@ -312,6 +318,21 @@ public partial class Compiler
       default:
         throw new NotSupportedException($"Expression type {expr.GetType().Name} is not supported");
     }
+  }
+
+  private string CompileSystemCpuCountExpression()
+  {
+    return "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo \"1\")";
+  }
+
+  private string CompileSystemMemoryTotalExpression()
+  {
+    return "$(free -m 2>/dev/null | awk 'NR==2 {print $2}' || sysctl -n hw.memsize 2>/dev/null | awk '{printf(\"%d\", $1/1024/1024)}' || echo \"0\")";
+  }
+
+  private string CompileSystemMemoryUsageExpression()
+  {
+    return "$(free 2>/dev/null | awk 'NR==2 {printf(\"%d\", ($3/$2)*100)}' || echo \"0\")";
   }
 
   private string CompileGitUndoLastCommitExpression()

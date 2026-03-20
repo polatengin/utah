@@ -366,3 +366,42 @@ home="$HOME"
 - Process monitoring and management
 - File system operations
 - Cross-platform compatibility
+
+## System Resource Monitoring
+
+### CPU Count
+
+```typescript
+// Get the number of CPU cores
+let cores: number = system.cpuCount();
+console.log("CPU cores: ${cores}");
+```
+
+### Total Memory
+
+```typescript
+// Get total system memory in MB
+let totalMem: number = system.memoryTotal();
+console.log("Total memory: ${totalMem} MB");
+```
+
+### Memory Usage
+
+```typescript
+// Get current memory usage as a percentage (0-100)
+let memUsage: number = system.memoryUsage();
+console.log("Memory usage: ${memUsage}%");
+```
+
+### Generated Bash
+
+```bash
+# CPU count (cross-platform: Linux + macOS)
+cores=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo "1")
+
+# Total memory in MB
+totalMem=$(free -m 2>/dev/null | awk 'NR==2 {print $2}' || sysctl -n hw.memsize 2>/dev/null | awk '{printf("%d", $1/1024/1024)}' || echo "0")
+
+# Memory usage percentage
+memUsage=$(free 2>/dev/null | awk 'NR==2 {printf("%d", ($3/$2)*100)}' || echo "0")
+```

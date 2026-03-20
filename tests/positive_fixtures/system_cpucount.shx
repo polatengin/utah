@@ -1,0 +1,2 @@
+let cores: number = system.cpuCount();
+console.log("CPU cores: ${cores}");

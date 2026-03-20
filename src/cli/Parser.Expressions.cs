@@ -1435,6 +1435,24 @@ public partial class Parser
         return new GitResetToCommitExpression(commitHashExpr);
       }
 
+      // Special handling for system.cpuCount()
+      if (functionName == "system.cpuCount" && string.IsNullOrEmpty(argsContent))
+      {
+        return new SystemCpuCountExpression();
+      }
+
+      // Special handling for system.memoryTotal()
+      if (functionName == "system.memoryTotal" && string.IsNullOrEmpty(argsContent))
+      {
+        return new SystemMemoryTotalExpression();
+      }
+
+      // Special handling for system.memoryUsage()
+      if (functionName == "system.memoryUsage" && string.IsNullOrEmpty(argsContent))
+      {
+        return new SystemMemoryUsageExpression();
+      }
+
       // Special handling for ssh.connect()
       if (functionName == "ssh.connect")
       {
