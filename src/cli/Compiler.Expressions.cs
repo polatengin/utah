@@ -3982,6 +3982,7 @@ _utah_validate_in_range {value} {min} {max}
       ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
       ObjectLiteralExpression => "object",
       VariableExpression variable => GetVariableType(variable.Name) ?? "unknown",
+      SshConnectExpression => "sshConnection",
       JsonParseExpression => "object",
       YamlParseExpression => "object",
       ArrayMapExpression => "any[]",

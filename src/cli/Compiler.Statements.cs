@@ -945,6 +945,12 @@ public partial class Compiler
     lines.Add($"for {itemVar} in \"${{{loopArrayVar}[@]}}\"; do");
 
     // Compile the callback body statements
+    PushVariableTypeScope();
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? "unknown");
+    if (indexVar != null)
+    {
+      RegisterVariableType(indexVar, "number");
+    }
     foreach (var statement in arrayForEach.Callback.Body)
     {
       var compiledStatements = CompileStatement(statement);
@@ -956,6 +962,7 @@ public partial class Compiler
         }
       }
     }
+    PopVariableTypeScope();
 
     // Increment index if used
     if (indexVar != null)

@@ -1311,6 +1311,7 @@ public partial class Parser
       ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
       ObjectLiteralExpression => "object",
       VariableExpression variable => LookupVariableType(variable.Name) ?? "unknown",
+      SshConnectExpression => "sshConnection",
       JsonParseExpression => "object",
       YamlParseExpression => "object",
       JsonGetExpression => "unknown",
@@ -1479,6 +1480,16 @@ public partial class Parser
 
     if (expectedType == "object" &&
         (actualType == "object" || _structuredTypes.ContainsKey(actualType) || IsMapType(actualType) || IsDictionaryType(actualType)))
+    {
+      return true;
+    }
+
+    if (_structuredTypes.ContainsKey(expectedType) && actualType == "object")
+    {
+      return true;
+    }
+
+    if ((IsMapType(expectedType) || IsDictionaryType(expectedType)) && actualType == "object")
     {
       return true;
     }
