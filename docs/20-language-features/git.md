@@ -169,8 +169,9 @@ git reset --hard "abc123"
 git reset --hard ${commitHash}
 ```
 
-{: .warning }
-> `git.resetToCommit()` uses `git reset --hard`, which **permanently discards** all uncommitted changes and all commits after the target. Use `git.undoLastCommit()` for a safer alternative when you only need to undo the most recent commit.
+:::warning
+`git.resetToCommit()` uses `git reset --hard`, which **permanently discards** all uncommitted changes and all commits after the target. Use `git.undoLastCommit()` for a safer alternative when you only need to undo the most recent commit.
+:::
 
 **Test Coverage:**
 
