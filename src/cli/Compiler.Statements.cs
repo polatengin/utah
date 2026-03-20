@@ -344,6 +344,21 @@ public partial class Compiler
       case ReturnStatement ret:
         if (ret.Value != null)
         {
+          if (ret.Value is BinaryExpression returnBinary &&
+              (IsBooleanComparison(returnBinary) || returnBinary.Operator == "&&" || returnBinary.Operator == "||"))
+          {
+            var booleanReturn = CompileExpression(ret.Value);
+            lines.Add($"{booleanReturn} && echo \"true\" || echo \"false\"");
+            break;
+          }
+
+          if (ret.Value is UnaryExpression returnUnary && returnUnary.Operator == "!")
+          {
+            var booleanReturn = CompileExpression(ret.Value);
+            lines.Add($"{booleanReturn} && echo \"true\" || echo \"false\"");
+            break;
+          }
+
           var returnValue = CompileExpression(ret.Value);
           // Remove quotes if the value is already quoted (like string literals)
           // or if it's an arithmetic expression
@@ -984,7 +999,7 @@ public partial class Compiler
     var resultArrayVar = declaration.Name;
 
     AddArrayMaterializationLines(lines, sourceArrayVar, declaration.Value);
-    lines.Add($"{resultArrayVar}=($(printf '%s\n' \"${{{sourceArrayVar}[@]}}\" | awk '!seen[$0]++'))");
+    lines.Add($"{resultArrayVar}=($(printf '%s\\n' \"${{{sourceArrayVar}[@]}}\" | awk '!seen[$0]++'))");
 
     if (declaration.IsConst)
     {

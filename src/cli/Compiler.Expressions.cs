@@ -1402,8 +1402,25 @@ _utah_wait_for_exit {pidReference} {timeout}
   private string CompileArrayLiteral(ArrayLiteral arr)
   {
     // Bash arrays are declared and initialized like: arr=("item1" "item2" "item3")
-    var elements = arr.Elements.Select(CompileExpression).ToList();
+    var elements = arr.Elements.Select(CompileArrayElement).ToList();
     return $"({string.Join(" ", elements)})";
+  }
+
+  private string CompileArrayElement(Expression element)
+  {
+    var compiled = CompileExpression(element);
+
+    if (compiled.StartsWith("\"") || compiled.StartsWith("'"))
+    {
+      return compiled;
+    }
+
+    if (element is LiteralExpression literal && literal.Type != "string")
+    {
+      return compiled;
+    }
+
+    return $"\"{compiled}\"";
   }
 
   private string CompileArrayAccess(ArrayAccess acc)
@@ -1708,7 +1725,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     var existsVar = $"_utah_set_add_exists_{uniqueId}";
     var valueExpression = CompileExpression(func.Arguments[1]);
 
-    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(\"${{{sourceArrayVar}[@]}}\"); {valueVar}={valueExpression}; {existsVar}=false; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{valueVar}}}\" ]; then {existsVar}=true; break; fi; done; if [ \"${{{existsVar}}}\" != \"true\" ]; then {resultArrayVar}+=(\"${{{valueVar}}}\"); fi; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+    return $"($({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(\"${{{sourceArrayVar}[@]}}\"); {valueVar}={valueExpression}; {existsVar}=false; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{valueVar}}}\" ]; then {existsVar}=true; break; fi; done; if [ \"${{{existsVar}}}\" != \"true\" ]; then {resultArrayVar}+=(\"${{{valueVar}}}\"); fi; printf '%s\\n' \"${{{resultArrayVar}[@]}}\"))";
   }
 
   private string CompileSetRemoveFunction(FunctionCall func)
@@ -1723,7 +1740,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     var itemVar = $"_utah_set_remove_item_{uniqueId}";
     var valueExpression = CompileExpression(func.Arguments[1]);
 
-    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(); {valueVar}={valueExpression}; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" != \"${{{valueVar}}}\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+    return $"($({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(); {valueVar}={valueExpression}; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" != \"${{{valueVar}}}\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\"))";
   }
 
   private string CompileSetUnionFunction(FunctionCall func)
@@ -1734,7 +1751,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     var uniqueId = GetUniqueId();
     var leftVar = $"_utah_set_union_left_{uniqueId}";
     var rightVar = $"_utah_set_union_right_{uniqueId}";
-    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}printf '%s\\n' \"${{{leftVar}[@]}}\" \"${{{rightVar}[@]}}\" | awk '!seen[$0]++')";
+    return $"($( {BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}printf '%s\\n' \"${{{leftVar}[@]}}\" \"${{{rightVar}[@]}}\" | awk '!seen[$0]++' ))";
   }
 
   private string CompileSetIntersectionFunction(FunctionCall func)
@@ -1750,7 +1767,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     var resultVar = $"_utah_set_intersection_result_{uniqueId}";
     var foundVar = $"_utah_set_intersection_found_{uniqueId}";
 
-    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" = \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++')";
+    return $"($( {BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" = \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++' ))";
   }
 
   private string CompileSetDifferenceFunction(FunctionCall func)
@@ -1766,7 +1783,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     var resultVar = $"_utah_set_difference_result_{uniqueId}";
     var foundVar = $"_utah_set_difference_found_{uniqueId}";
 
-    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" != \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++')";
+    return $"($( {BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" != \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++' ))";
   }
 
   private string BuildJqArgumentClause(Expression expression, string argumentName)
@@ -1841,7 +1858,8 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     if (_structuredTypes.TryGetValue(typeName, out var declaration))
     {
-      var expectedKeys = string.Join(", ", declaration.Fields.Select(field => $"\"{EscapeJqString(field.Name)}\""));
+      var orderedFields = declaration.Fields.OrderBy(field => field.Name).ToList();
+      var expectedKeys = string.Join(", ", orderedFields.Select(field => $"\"{EscapeJqString(field.Name)}\""));
       var fieldChecks = declaration.Fields
         .Select(field => $"(.{field.Name} | {BuildSchemaValidatorFilter(field.Type)})")
         .ToList();
@@ -3774,9 +3792,9 @@ _utah_validate_in_range {value} {min} {max}
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayMap.Callback, lambdaParameters);
-    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+    var indexAssignment = indexVar != null ? $"{indexVar}=${{{loopIndexVar}}}; " : "";
 
-    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayMap.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{valueVar}=$({lambdaCommand}); {resultArrayVar}+=(\"${{{valueVar}}}\"); done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+    return $"($({BuildArrayMaterializationSnippet(sourceArrayVar, arrayMap.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{valueVar}=$({lambdaCommand}); {resultArrayVar}+=(\"${{{valueVar}}}\"); done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\"))";
   }
 
   private string CompileArrayFilterExpression(ArrayFilterExpression arrayFilter)
@@ -3796,9 +3814,9 @@ _utah_validate_in_range {value} {min} {max}
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayFilter.Callback, lambdaParameters);
-    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+    var indexAssignment = indexVar != null ? $"{indexVar}=${{{loopIndexVar}}}; " : "";
 
-    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayFilter.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+    return $"($({BuildArrayMaterializationSnippet(sourceArrayVar, arrayFilter.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\"))";
   }
 
   private string CompileArrayReduceExpression(ArrayReduceExpression arrayReduce)
@@ -3827,12 +3845,12 @@ _utah_validate_in_range {value} {min} {max}
 
     if (initialValue != null)
     {
-      var indexAssignment = indexParam != null ? $"{indexParam}={loopIndexVar}; " : "";
+      var indexAssignment = indexParam != null ? $"{indexParam}=${{{loopIndexVar}}}; " : "";
       return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayReduce.Array)}{accumulatorVar}={initialValue}; for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {accParam}=\"${{{accumulatorVar}}}\"; {itemParam}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{accumulatorVar}=$({lambdaCommand}); done; echo \"${{{accumulatorVar}}}\")";
     }
 
     var emptyResult = "echo \"\"";
-    var noInitialIndexAssignment = indexParam != null ? $"{indexParam}={loopIndexVar}; " : "";
+    var noInitialIndexAssignment = indexParam != null ? $"{indexParam}=${{{loopIndexVar}}}; " : "";
     return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayReduce.Array)}if [ ${{#{sourceArrayVar}[@]}} -eq 0 ]; then {emptyResult}; else {accumulatorVar}=\"${{{sourceArrayVar}[0]}}\"; for (({loopIndexVar}=1; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {accParam}=\"${{{accumulatorVar}}}\"; {itemParam}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {noInitialIndexAssignment}{accumulatorVar}=$({lambdaCommand}); done; echo \"${{{accumulatorVar}}}\"; fi)";
   }
 
@@ -3852,7 +3870,7 @@ _utah_validate_in_range {value} {min} {max}
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayFind.Callback, lambdaParameters);
-    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+    var indexAssignment = indexVar != null ? $"{indexVar}=${{{loopIndexVar}}}; " : "";
 
     return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayFind.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then echo \"${{{itemVar}}}\"; break; fi; done)";
   }
@@ -3873,7 +3891,7 @@ _utah_validate_in_range {value} {min} {max}
     }
 
     var lambdaCommand = CompileLambdaCommand(arraySome.Callback, lambdaParameters);
-    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+    var indexAssignment = indexVar != null ? $"{indexVar}=${{{loopIndexVar}}}; " : "";
 
     return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arraySome.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then echo \"true\"; exit 0; fi; done; echo \"false\")";
   }
@@ -3894,7 +3912,7 @@ _utah_validate_in_range {value} {min} {max}
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayEvery.Callback, lambdaParameters);
-    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+    var indexAssignment = indexVar != null ? $"{indexVar}=${{{loopIndexVar}}}; " : "";
 
     return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayEvery.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" != \"true\" ]; then echo \"false\"; exit 0; fi; done; echo \"true\")";
   }

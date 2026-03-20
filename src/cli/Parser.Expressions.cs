@@ -22,7 +22,7 @@ public partial class Parser
     if (index < input.Length - 1)
     {
       char nextChar = input[index + 1];
-      if (nextChar == '=')
+      if (nextChar == '=' || nextChar == '>')
       {
         return true;
       }
