@@ -2390,6 +2390,12 @@ _utah_wait_for_exit {pidReference} {timeout}
     result.Append($"for {itemVar} in \"${{{loopArrayVar}[@]}}\"; do ");
 
     // Compile the callback body statements
+    PushVariableTypeScope();
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? "unknown");
+    if (indexVar != null)
+    {
+      RegisterVariableType(indexVar, "number");
+    }
     foreach (var statement in arrayForEach.Callback.Body)
     {
       var compiledStatements = CompileStatement(statement);
@@ -2402,6 +2408,7 @@ _utah_wait_for_exit {pidReference} {timeout}
         }
       }
     }
+    PopVariableTypeScope();
 
     // Increment index if used
     if (indexVar != null)
