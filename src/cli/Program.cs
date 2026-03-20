@@ -1009,12 +1009,12 @@ class UtahApp
     Console.WriteLine("Direct Execution:");
     Console.WriteLine("  <file.shx> [-- script-args...]     Compile and run a .shx file directly.");
     Console.WriteLine($"  <https://url/file.shx> [{AllowRemoteFlag}] [-- script-args...]");
-    Console.WriteLine("                                  Download and run a remote .shx file.");
-    Console.WriteLine("  -c, --command <command>        Run a single shx command directly.");
+    Console.WriteLine("                                     Download and run a remote .shx file.");
+    Console.WriteLine("  -c, --command <command>            Run a single shx command directly.");
     Console.WriteLine();
     Console.WriteLine("Commands:");
     Console.WriteLine($"  run [{AllowRemoteFlag}] <file.shx|url> [-- script-args...]");
-    Console.WriteLine("                              Compile and run a .shx file or URL.");
+    Console.WriteLine("                               Compile and run a .shx file or URL.");
     Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
     Console.WriteLine("  compile <file.shx|url>       Compile a .shx file or URL to a .sh file.");
     Console.WriteLine("    Options:");
@@ -1025,7 +1025,7 @@ class UtahApp
     Console.WriteLine("      -o, --output <file>      Write formatted output to a specific file (single file only).");
     Console.WriteLine("      --in-place               Format the file(s) in place (overwrite original).");
     Console.WriteLine("      --check                  Check if file(s) are formatted (exit 1 if not).");
-    Console.WriteLine($"      {AllowRemoteFlag}         Acknowledge and allow executing a remote URL.");
+    Console.WriteLine($"      {AllowRemoteFlag}           Acknowledge and allow executing a remote URL.");
     Console.WriteLine("  lsp                          Run the language server.");
     Console.WriteLine("  version (--version, -v)      Show version information.");
     Console.WriteLine();
