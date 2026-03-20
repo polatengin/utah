@@ -15,6 +15,9 @@ The `utah run` command compiles and immediately executes Utah (.shx) scripts or 
 # Run a .shx file
 utah run <file.shx>
 
+# Run a remote .shx file (explicit opt-in)
+utah run --allow-remote <url>
+
 # Run a .shx file with arguments
 utah run <file.shx> -- [script-args...]
 
@@ -40,6 +43,9 @@ utah run hello.shx
 # New direct execution syntax
 utah hello.shx
 
+# Remote direct execution
+utah https://example.com/hello.shx --allow-remote
+
 # With arguments
 utah run script.shx -- --name "John" --verbose
 utah script.shx -- --config production.yml
@@ -60,8 +66,8 @@ utah --command "os.isInstalled('git')"
 # File operations
 utah -c "console.log(fs.exists('/etc/passwd'))"
 
-# JSON operations
-utah --command "json.installDependencies()"
+# Utility functions
+utah --command "utility.uuid()"
 
 # Multiple statements (use quotes to wrap the entire command)
 utah -c "let name: string = \"Utah\"; console.log(\"Hello from \${name}!\");"
@@ -109,6 +115,8 @@ Hello, Alice!
 ```
 
 > **Important:** The `--` separator is required when passing arguments to scripts. Everything before `--` is treated as Utah CLI options, and everything after `--` is passed to your script.
+
+> **Remote execution safety:** Utah now requires `--allow-remote` before it will execute a `.shx` file loaded from a URL. Remote compilation is still allowed without that flag.
 
 ### Direct Command Benefits
 

@@ -15,6 +15,9 @@ Utah supports direct execution of `.shx` files and commands without requiring ex
 # Run a .shx file directly (no 'run' command needed!)
 utah script.shx
 
+# Execute a remote .shx file (explicit opt-in)
+utah https://example.com/script.shx --allow-remote
+
 # Execute commands directly
 utah -c "echo('Hello, World!')"
 utah --command "os.isInstalled('git')"
@@ -85,9 +88,12 @@ Compiles and immediately executes Utah scripts or commands:
 # Run a .shx file
 utah run script.shx
 
+# Run a remote .shx file
+utah run --allow-remote https://example.com/script.shx
+
 # Run a single command directly
 utah run -c "console.log('Hello, World!')"
-utah run --command "json.installDependencies()"
+utah run --command "utility.uuid()"
 
 # More command examples
 utah run -c "os.isInstalled('git')"
@@ -97,6 +103,7 @@ utah run --command "fs.exists('/path/to/file')"
 **Features:**
 
 - Execute .shx files directly
+- Explicit opt-in for executing remote `.shx` URLs
 - Run single commands without creating files
 - Temporary compilation (no .sh file created for direct commands)
 - Real-time output streaming
@@ -106,9 +113,11 @@ utah run --command "fs.exists('/path/to/file')"
 **Options:**
 
 - `utah <file.shx>`: Execute a .shx file directly
+- `utah <url> --allow-remote`: Execute a remote `.shx` file directly
 - `utah -c <command>`: Execute a single command directly
 - `utah --command <command>`: Execute a single command directly (long form)
 - `utah run <file.shx>`: Execute a .shx file
+- `utah run --allow-remote <url>`: Execute a remote `.shx` file
 - `utah run -c <command>`: Execute a single command directly
 - `utah run --command <command>`: Execute a single command directly
 
