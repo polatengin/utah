@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension build-debian build-debian-changelog test compile clean install info dev markdownlint format
+.PHONY: help build build-extension test compile clean install info dev markdownlint format
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -335,42 +335,6 @@ build-extension: build ## Build both CLI and VS Code extension
 	@cp $(CLI_DIR)/bin/Debug/net9.0/*.dll $(VSCODE_DIR)/dist/server/ 2>/dev/null || true
 	@chmod +x $(VSCODE_DIR)/dist/server/utah
 	@echo "$(GREEN)✅ Extension build complete$(NC)"
-
-build-debian: ## Build Debian package
-	@echo "$(BLUE)📦 Building Debian package...$(NC)"
-	@debuild -us -uc -b --lintian-opts --suppress-tags debian-changelog-line-too-long,extended-description-line-too-long,no-manual-page
-	@echo "$(GREEN)✅ Debian package build complete$(NC)"
-
-build-debian-changelog: ## Generate debian/changelog from git tags
-	@echo "$(BLUE)📝 Generating Debian changelog...$(NC)"
-	@bash -c ' \
-	PACKAGE_NAME="utah"; \
-	CHANGELOG_FILE="debian/changelog"; \
-	DEBFULLNAME="Engin Polat"; \
-	DEBEMAIL="polatengin@hotmail.com"; \
-	mapfile -t tags < <(git tag --sort=-version:refname | grep "^v"); \
-	> "$$CHANGELOG_FILE"; \
-	for ((i=0; i<$${#tags[@]}; i++)); do \
-		current_tag="$${tags[$$i]}"; \
-		if [ $$i -eq $$((${#tags[@]}-1)) ]; then \
-			prev_tag="$$(git rev-list --max-parents=0 HEAD | head -1)"; \
-		else \
-			prev_tag="$${tags[$$((i+1))]}"; \
-		fi; \
-		version="$${current_tag#v}"; \
-		commits=$$(git log "$$prev_tag..$$current_tag" --pretty=format:"  * %s" --no-merges); \
-		[[ -z "$$commits" ]] && commits="  * Initial release"; \
-		date_rfc=$$(git log -1 --format=%cD "$$current_tag"); \
-		{ \
-			echo "$$PACKAGE_NAME ($$version) unstable; urgency=medium"; \
-			echo; \
-			echo "$$commits"; \
-			echo; \
-			echo " -- $$DEBFULLNAME <$$DEBEMAIL>  $$date_rfc"; \
-			echo; \
-		} >> "$$CHANGELOG_FILE"; \
-	done'
-	@echo "$(GREEN)✅ Changelog generated at debian/changelog$(NC)"
 
 install: build ## Install Utah CLI globally (requires sudo)
 	@echo "$(BLUE)📦 Installing Utah CLI globally...$(NC)"
