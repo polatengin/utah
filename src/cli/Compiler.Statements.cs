@@ -254,7 +254,7 @@ public partial class Compiler
         }
         else
         {
-          lines.Add(CompileExpression(exprStmt.Expression));
+          lines.Add(CompileExpressionStatement(exprStmt.Expression));
         }
         break;
 
@@ -660,8 +660,33 @@ public partial class Compiler
     return lines;
   }
 
-  private static int _tryCatchCounter = 0;
-  private static bool _inTryBlock = false;
+  private string CompileExpressionStatement(Expression expression)
+  {
+    var compiled = CompileExpression(expression);
+
+    if (ShouldEvaluateWithoutExecutingResult(compiled))
+    {
+      if ((compiled.StartsWith("\"") && compiled.EndsWith("\"")) ||
+          (compiled.StartsWith("'") && compiled.EndsWith("'")))
+      {
+        return $": {compiled}";
+      }
+
+      return $": \"{compiled}\"";
+    }
+
+    return compiled;
+  }
+
+  private static bool ShouldEvaluateWithoutExecutingResult(string compiledExpression)
+  {
+    return compiledExpression.StartsWith("$(") ||
+           compiledExpression.StartsWith("${") ||
+           compiledExpression.StartsWith("$((") ||
+           compiledExpression.StartsWith("\"") ||
+           compiledExpression.StartsWith("'") ||
+           compiledExpression.StartsWith("(");
+  }
 
   private void CompileTryCatchStatement(TryCatchStatement tryStmt, List<string> lines)
   {

@@ -12,9 +12,18 @@ public partial class Compiler
 
   private Stack<FunctionContext> _functionStack = new();
   private int _globalDeferCounter = 0;
+  private int _randomCounter = 0;
+  private int _joinCounter = 0;
+  private int _sortCounter = 0;
+  private int _watchCounter = 0;
+  private int _uniqueIdCounter = 0;
+  private int _tryCatchCounter = 0;
+  private bool _inTryBlock = false;
 
   public string Compile(ProgramNode program)
   {
+    ResetState();
+
     var lines = new List<string>
     {
       "#!/bin/bash",
@@ -46,20 +55,21 @@ public partial class Compiler
 
   private bool ProgramUsesArgs(ProgramNode program)
   {
-    // Check if any statement is an args statement
-    return program.Statements.Any(stmt =>
-      stmt is ArgsDefineStatement ||
-      stmt is ArgsShowHelpStatement ||
-      ContainsArgsExpression(stmt));
+    return AstInspector.ContainsArgsUsage(program);
   }
 
-  private bool ContainsArgsExpression(Statement stmt)
+  private void ResetState()
   {
-    // This is a simplified check - in a real implementation,
-    // you'd want to recursively check all expressions in the statement
-    return stmt.ToString().Contains("ArgsHas") ||
-           stmt.ToString().Contains("ArgsGet") ||
-           stmt.ToString().Contains("ArgsAll");
+    _hasArgsUsage = false;
+    _functionStack.Clear();
+    _globalDeferCounter = 0;
+    _randomCounter = 0;
+    _joinCounter = 0;
+    _sortCounter = 0;
+    _watchCounter = 0;
+    _uniqueIdCounter = 0;
+    _tryCatchCounter = 0;
+    _inTryBlock = false;
   }
 
   private List<string> GenerateArgumentParsingInfrastructure()
