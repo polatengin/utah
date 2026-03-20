@@ -98,6 +98,7 @@ public record ArgsHasExpression(string Flag) : Expression;
 public record ArgsGetExpression(string Flag) : Expression;
 public record ArgsAllExpression() : Expression;
 public record GitUndoLastCommitExpression() : Expression;
+public record GitStatusExpression() : Expression;
 public record SshConnectExpression(Expression Host, Expression? Port, Expression? Username, Expression? Password, Expression? KeyPath, Expression? ConfigName, Expression? Async) : Expression;
 public record ObjectPropertyAccessExpression(Expression Object, string PropertyName) : Expression;
 public record SshExecuteExpression(Expression Connection, Expression Command) : Expression;
