@@ -24,9 +24,8 @@ main() {
 
   # Check if utah already exists
   if [ -f "/usr/local/bin/utah" ]; then
-    echo "⚠️  Utah binary already exists: /usr/local/bin/utah"
-    echo "❌ Installation cancelled. Please remove the existing binary first! (sudo rm /usr/local/bin/utah)"
-    return 1
+    echo "⚠️  Earlier version of Utah found at /usr/local/bin/utah. Removing it..."
+    sudo rm -f "/usr/local/bin/utah"
   fi
 
   echo "🎯 Target version: $target_version"
