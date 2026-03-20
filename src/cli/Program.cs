@@ -1050,16 +1050,16 @@ class UtahApp
     var version = assembly.GetName().Version;
     var versionString = version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "1.0.0";
 
-    Console.WriteLine("Copyright (c) 2025 Utah Project");
-    Console.WriteLine("Licensed under MIT License");
+    Console.WriteLine($"{Bold("Utah CLI")} {Green(versionString)}");
+    Console.WriteLine($"{Dim("Copyright (c) 2025 Utah Project - MIT License")}");
     Console.WriteLine();
-    Console.WriteLine("Project Information:");
-    Console.WriteLine($"  Version: {versionString}");
+    Console.WriteLine(Yellow("Project Information:"));
+    Console.WriteLine($"  {"Version:",-16} {Cyan(versionString)}");
     Console.WriteLine();
-    Console.WriteLine("Runtime Information:");
-    Console.WriteLine($"  DotNet Version: {Environment.Version}");
-    Console.WriteLine($"  OS: {Environment.OSVersion}");
-    Console.WriteLine($"  Architecture: {System.Runtime.InteropServices.RuntimeInformation.OSArchitecture}");
+    Console.WriteLine(Yellow("Runtime Information:"));
+    Console.WriteLine($"  {".NET Version:",-16} {Cyan(Environment.Version.ToString())}");
+    Console.WriteLine($"  {"OS:",-16} {Cyan(Environment.OSVersion.ToString())}");
+    Console.WriteLine($"  {"Architecture:",-16} {Cyan(System.Runtime.InteropServices.RuntimeInformation.OSArchitecture.ToString())}");
   }
 }
 
