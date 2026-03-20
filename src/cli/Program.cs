@@ -7,31 +7,64 @@ await app.RunAsync(args);
 
 class UtahApp
 {
+  private const string AllowRemoteFlag = "--allow-remote";
+  private static readonly HttpClient s_httpClient = CreateHttpClient();
+  private static readonly HashSet<string> s_formatExcludedDirectories = new(StringComparer.OrdinalIgnoreCase)
+  {
+    ".git",
+    "bin",
+    "dist",
+    "node_modules",
+    "obj"
+  };
+
+  private sealed record ScriptExecutionRequest(string ScriptPath, string[] ScriptArgs, bool AllowRemoteExecution);
+
   public async Task RunAsync(string[] args)
   {
-    if (args.Length > 0)
+    try
     {
-      var argumentType = DetectArgumentType(args[0]);
-
-      switch (argumentType)
-      {
-        case ArgumentType.KnownCommand:
-          await HandleKnownCommandAsync(args);
-          break;
-        case ArgumentType.InlineCommand:
-          HandleInlineCommand(args);
-          break;
-        case ArgumentType.File:
-          await ExecuteShxFileAsync(args[0]);
-          break;
-        case ArgumentType.Unknown:
-          PrintUsage();
-          break;
-      }
+      Environment.ExitCode = await RunCoreAsync(args);
     }
-    else
+    catch (InvalidOperationException ex)
+    {
+      Console.WriteLine($"❌ {ex.Message}");
+      Environment.ExitCode = 1;
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
+      Environment.ExitCode = 1;
+    }
+  }
+
+  private async Task<int> RunCoreAsync(string[] args)
+  {
+    if (args.Length == 0)
     {
       PrintUsage();
+      return 0;
+    }
+
+    if (args.Length > 1 && args[0] == AllowRemoteFlag)
+    {
+      return await ExecuteShxFileAsync(ParseScriptExecutionRequest(args, 0));
+    }
+
+    var argumentType = DetectArgumentType(args[0]);
+
+    switch (argumentType)
+    {
+      case ArgumentType.KnownCommand:
+        return await HandleKnownCommandAsync(args);
+      case ArgumentType.InlineCommand:
+        return await HandleInlineCommandAsync(args);
+      case ArgumentType.File:
+        return await ExecuteShxFileAsync(ParseScriptExecutionRequest(args, 0));
+      case ArgumentType.Unknown:
+      default:
+        PrintUsage();
+        return 0;
     }
   }
 
@@ -60,19 +93,14 @@ class UtahApp
   private bool IsValidUrl(string input)
   {
     return Uri.TryCreate(input, UriKind.Absolute, out var uri) &&
-           (uri.Scheme == "http" || uri.Scheme == "https");
+           (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
   }
 
   private async Task<string> DownloadFileContentAsync(string url)
   {
     try
     {
-      using var httpClient = new HttpClient();
-      httpClient.Timeout = TimeSpan.FromSeconds(30);
-
-      httpClient.DefaultRequestHeaders.Add("User-Agent", "Utah-CLI/1.0");
-
-      var response = await httpClient.GetAsync(url);
+      var response = await s_httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
       response.EnsureSuccessStatusCode();
 
       var content = await response.Content.ReadAsStringAsync();
@@ -82,221 +110,285 @@ class UtahApp
     }
     catch (HttpRequestException ex)
     {
-      Console.WriteLine($"❌ HTTP error downloading {url}: {ex.Message}");
-      Environment.Exit(1);
-      return string.Empty;
+      throw new InvalidOperationException($"HTTP error downloading {url}: {ex.Message}", ex);
     }
     catch (TaskCanceledException ex)
     {
-      Console.WriteLine($"❌ Timeout downloading {url}: {ex.Message}");
-      Environment.Exit(1);
-      return string.Empty;
+      throw new InvalidOperationException($"Timeout downloading {url}: {ex.Message}", ex);
     }
     catch (Exception ex)
     {
-      Console.WriteLine($"❌ Error downloading {url}: {ex.Message}");
-      Environment.Exit(1);
-      return string.Empty;
+      throw new InvalidOperationException($"Error downloading {url}: {ex.Message}", ex);
     }
   }
 
-  private async Task HandleKnownCommandAsync(string[] args)
+  private async Task<int> HandleKnownCommandAsync(string[] args)
   {
     switch (args[0])
     {
       case "lsp":
         await StartLanguageServerAsync();
-        break;
+        return 0;
       case "compile":
         if (args.Length < 2 || (!args[1].EndsWith(".shx") && !IsValidUrl(args[1])))
         {
-          Console.WriteLine("Usage: utah compile <file.shx|url> [-o, --output <output.sh>]");
-          return;
+          PrintCompileUsage();
+          return 1;
         }
-        var inputPath = args[1];
-        var outputPath = GetOutputPath(args);
-        await CompileFileAsync(inputPath, outputPath);
-        break;
+
+        return await CompileFileAsync(args[1], GetOutputPath(args));
       case "run":
         if (args.Length < 2)
         {
-          Console.WriteLine("Usage: utah run <file.shx> [-- script-args...]");
-          Console.WriteLine("       utah run -c <command>");
-          Console.WriteLine("       utah run --command <command>");
-          return;
+          PrintRunUsage();
+          return 1;
         }
 
         if (args[1] == "-c" || args[1] == "--command")
         {
           if (args.Length < 3)
           {
-            Console.WriteLine("Usage: utah run -c <command>");
-            Console.WriteLine("       utah run --command <command>");
-            return;
+            PrintInlineRunUsage();
+            return 1;
           }
+
           var command = string.Join(" ", args.Skip(2));
-          ExecuteInlineCommand(command);
+          return await ExecuteInlineCommandAsync(command);
         }
-        else if (args[1].EndsWith(".shx") || IsValidUrl(args[1]))
+
+        var request = ParseScriptExecutionRequest(args, 1);
+        if (!request.ScriptPath.EndsWith(".shx") && !IsValidUrl(request.ScriptPath))
         {
-          var (scriptPath, scriptArgs) = ParseRunArguments(args);
-          await ExecuteShxFileAsync(scriptPath, scriptArgs);
+          PrintRunUsage();
+          return 1;
         }
-        else
-        {
-          Console.WriteLine("Usage: utah run <file.shx> [-- script-args...]");
-          Console.WriteLine("       utah run -c <command>");
-          Console.WriteLine("       utah run --command <command>");
-          return;
-        }
-        break;
+
+        return await ExecuteShxFileAsync(request);
       case "format":
-        if (args.Length < 2)
+        if (args.Length < 2 || args[1].StartsWith("-"))
         {
-          FormatAllFiles(args);
+          return FormatAllFiles(args);
         }
-        else if (args[1].StartsWith("-"))
+
+        if (!args[1].EndsWith(".shx"))
         {
-          FormatAllFiles(args);
+          PrintFormatUsage();
+          return 1;
         }
-        else if (!args[1].EndsWith(".shx"))
-        {
-          Console.WriteLine("Usage: utah format [file.shx] [-o, --output <output.shx>] [--in-place] [--check]");
-          Console.WriteLine("       utah format                   # Format all .shx files recursively");
-          return;
-        }
-        else
-        {
-          FormatFile(args);
-        }
-        break;
+
+        return FormatFile(args);
       case "--version":
       case "-v":
       case "version":
         PrintVersion();
-        break;
+        return 0;
       default:
         PrintUsage();
-        break;
+        return 0;
     }
   }
 
-  private void HandleInlineCommand(string[] args)
+  private async Task<int> HandleInlineCommandAsync(string[] args)
   {
     if (args.Length < 2)
     {
-      Console.WriteLine("Usage: utah -c <command>");
-      Console.WriteLine("       utah --command <command>");
-      return;
+      PrintDirectCommandUsage();
+      return 1;
     }
 
     var command = string.Join(" ", args.Skip(1));
-    ExecuteInlineCommand(command);
+    return await ExecuteInlineCommandAsync(command);
   }
 
-  private (string scriptPath, string[] scriptArgs) ParseRunArguments(string[] args)
+  private ScriptExecutionRequest ParseScriptExecutionRequest(string[] args, int startIndex)
   {
-    var scriptPath = args[1];
-    var scriptArgs = new string[0];
+    var separatorIndex = Array.IndexOf(args, "--", startIndex);
+    var optionEndIndex = separatorIndex == -1 ? args.Length : separatorIndex;
+    string? scriptPath = null;
+    bool allowRemoteExecution = false;
 
-    var separatorIndex = Array.IndexOf(args, "--");
-    if (separatorIndex != -1 && separatorIndex < args.Length - 1)
+    for (int i = startIndex; i < optionEndIndex; i++)
     {
-      scriptArgs = args.Skip(separatorIndex + 1).ToArray();
+      var arg = args[i];
+      if (arg == AllowRemoteFlag)
+      {
+        allowRemoteExecution = true;
+        continue;
+      }
+
+      if (scriptPath == null)
+      {
+        scriptPath = arg;
+        continue;
+      }
+
+      throw new InvalidOperationException($"Unexpected argument '{arg}'. Use '--' before script arguments.");
     }
 
-    return (scriptPath, scriptArgs);
-  }
-
-  private string EscapeShellArgument(string arg)
-  {
-    if (string.IsNullOrEmpty(arg))
+    if (string.IsNullOrWhiteSpace(scriptPath))
     {
-      return "\"\"";
+      throw new InvalidOperationException("Missing script path. Use 'utah run <file.shx|url>' or 'utah <file.shx>'.");
     }
 
-    if (arg.Contains(' ') || arg.Contains('"') || arg.Contains('\'') || arg.Contains('$') || arg.Contains('`') || arg.Contains('\\'))
-    {
-      return "\"" + arg.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
-    }
+    var scriptArgs = separatorIndex == -1
+      ? Array.Empty<string>()
+      : args[(separatorIndex + 1)..];
 
-    return arg;
+    return new ScriptExecutionRequest(scriptPath, scriptArgs, allowRemoteExecution);
   }
 
-  private async Task ExecuteShxFileAsync(string filePath)
+  private async Task<int> ExecuteShxFileAsync(ScriptExecutionRequest request)
   {
-    await RunFileAsync(filePath, Array.Empty<string>());
+    EnsureRemoteExecutionAllowed(request.ScriptPath, request.AllowRemoteExecution);
+    return await RunFileAsync(request.ScriptPath, request.ScriptArgs);
   }
 
-  private async Task ExecuteShxFileAsync(string filePath, string[] scriptArgs)
+  private async Task<int> ExecuteInlineCommandAsync(string command)
   {
-    await RunFileAsync(filePath, scriptArgs);
+    var preparedCommand = PrepareInlineCommand(command);
+    var ast = PromoteInlineExpressionResult(ParseShxContent(preparedCommand));
+    return await ExecuteCompiledScriptAsync(CompileShxAst(ast), Array.Empty<string>());
   }
 
-  private void ExecuteInlineCommand(string command)
+  private string PrepareInlineCommand(string command)
   {
     var normalizedCommand = command.Trim();
-    if (!normalizedCommand.EndsWith(";"))
+    if (string.IsNullOrWhiteSpace(normalizedCommand))
+    {
+      return string.Empty;
+    }
+
+    if (!normalizedCommand.EndsWith(";") && !normalizedCommand.EndsWith("}"))
     {
       normalizedCommand += ";";
     }
 
-    if (ContainsComplexConstructs(normalizedCommand))
-    {
-      ExecuteInlineCommandAsFile(normalizedCommand);
-    }
-    else
-    {
-      RunCommand(normalizedCommand);
-    }
+    return FormatInlineCommandForFile(normalizedCommand);
   }
 
-  private bool ContainsComplexConstructs(string command)
+  private static ProgramNode PromoteInlineExpressionResult(ProgramNode program)
   {
-    return command.Contains("function ") ||
-           command.Contains("try {") ||
-           command.Contains("defer ") ||
-           command.Contains("catch ");
+    if (program.Statements.Count != 1 || program.Statements[0] is not ExpressionStatement exprStmt)
+    {
+      return program;
+    }
+
+    if (!ShouldEchoInlineExpression(exprStmt.Expression))
+    {
+      return program;
+    }
+
+    return new ProgramNode(new List<Statement> { new ConsoleLog(exprStmt.Expression) });
   }
 
-  private void ExecuteInlineCommandAsFile(string command)
+  private static bool ShouldEchoInlineExpression(Expression expression)
   {
-    var tempFile = Path.GetTempFileName() + ".shx";
+    return expression switch
+    {
+      FunctionCall or ParallelFunctionCall => false,
+      ArrayForEachExpression or
+      ConsoleShowMessageExpression or
+      ConsoleShowInfoExpression or
+      ConsoleShowWarningExpression or
+      ConsoleShowErrorExpression or
+      ConsoleShowSuccessExpression or
+      ConsoleShowProgressExpression or
+      FsWriteFileExpressionPlaceholder or
+      FsCopyExpression or
+      FsMoveExpression or
+      FsRenameExpression or
+      FsDeleteExpression or
+      FsChmodExpression or
+      FsChownExpression or
+      FsWatchExpression or
+      GitUndoLastCommitExpression or
+      JsonInstallDependenciesExpression or
+      ProcessStartExpression or
+      ProcessKillExpression or
+      ProcessWaitForExitExpression or
+      SchedulerCronExpression or
+      SshConnectExpression or
+      SshExecuteExpression or
+      SshUploadExpression or
+      SshDownloadExpression or
+      TemplateUpdateExpression or
+      YamlInstallDependenciesExpression => false,
+      _ => true
+    };
+  }
+
+  private async Task<int> RunFileAsync(string inputPath, string[] scriptArgs)
+  {
+    var content = await LoadShxContentAsync(inputPath);
+    return await CompileAndRunShxContentAsync(content, scriptArgs);
+  }
+
+  private async Task<string> LoadShxContentAsync(string inputPath)
+  {
+    if (IsValidUrl(inputPath))
+    {
+      Console.WriteLine($"📥 Downloading: {inputPath}");
+      return await DownloadFileContentAsync(inputPath);
+    }
+
+    if (!File.Exists(inputPath))
+    {
+      throw new InvalidOperationException($"File not found: {inputPath}");
+    }
+
+    return ImportResolver.ResolveImports(inputPath);
+  }
+
+  private static ProgramNode ParseShxContent(string shxContent)
+  {
     try
     {
-      var formattedCommand = FormatInlineCommandForFile(command);
-      File.WriteAllText(tempFile, formattedCommand);
-
-      RunFileSynchronously(tempFile);
-    }
-    finally
-    {
-      if (File.Exists(tempFile))
-      {
-        File.Delete(tempFile);
-      }
-    }
-  }
-
-  private void RunFileSynchronously(string filePath)
-  {
-    try
-    {
-      var shxContent = File.ReadAllText(filePath);
       var parser = new Parser(shxContent);
-      var ast = parser.Parse();
+      return parser.Parse();
+    }
+    catch (Exception ex)
+    {
+      throw new InvalidOperationException($"Compilation failed: {ex.Message}", ex);
+    }
+  }
+
+  private static string CompileShxAst(ProgramNode ast)
+  {
+    try
+    {
       var compiler = new Compiler();
-      var output = compiler.Compile(ast);
+      return compiler.Compile(ast);
+    }
+    catch (Exception ex)
+    {
+      throw new InvalidOperationException($"Compilation failed: {ex.Message}", ex);
+    }
+  }
 
-      var tempFile = Path.GetTempFileName();
-      File.WriteAllText(tempFile, output);
+  private static string CompileShxContent(string shxContent)
+  {
+    return CompileShxAst(ParseShxContent(shxContent));
+  }
 
-      var process = new Process
+  private async Task<int> CompileAndRunShxContentAsync(string shxContent, string[] scriptArgs)
+  {
+    var output = CompileShxContent(shxContent);
+    return await ExecuteCompiledScriptAsync(output, scriptArgs);
+  }
+
+  private async Task<int> ExecuteCompiledScriptAsync(string output, string[] scriptArgs)
+  {
+    var tempFile = Path.GetTempFileName();
+
+    try
+    {
+      await File.WriteAllTextAsync(tempFile, output);
+
+      using var process = new Process
       {
         StartInfo = new ProcessStartInfo
         {
           FileName = "/bin/bash",
-          Arguments = tempFile,
           RedirectStandardOutput = true,
           RedirectStandardError = true,
           UseShellExecute = false,
@@ -304,47 +396,161 @@ class UtahApp
         }
       };
 
-      process.OutputDataReceived += (sender, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-      process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
+      process.StartInfo.ArgumentList.Add(tempFile);
+      foreach (var scriptArg in scriptArgs)
+      {
+        process.StartInfo.ArgumentList.Add(scriptArg);
+      }
+
+      process.OutputDataReceived += (_, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
+      process.ErrorDataReceived += (_, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
 
       process.Start();
       process.BeginOutputReadLine();
       process.BeginErrorReadLine();
+      await process.WaitForExitAsync();
       process.WaitForExit();
 
-      File.Delete(tempFile);
-    }
-    catch (InvalidOperationException ex)
-    {
-      Console.WriteLine($"❌ Compilation failed: {ex.Message}");
-      Environment.Exit(1);
+      return process.ExitCode;
     }
     catch (Exception ex)
     {
-      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
-      Environment.Exit(1);
+      throw new InvalidOperationException($"Failed to execute compiled script: {ex.Message}", ex);
     }
+    finally
+    {
+      DeleteTempFile(tempFile);
+    }
+  }
+
+  private void EnsureRemoteExecutionAllowed(string inputPath, bool allowRemoteExecution)
+  {
+    if (IsValidUrl(inputPath) && !allowRemoteExecution)
+    {
+      throw new InvalidOperationException($"Refusing to execute remote script '{inputPath}' without {AllowRemoteFlag}. Re-run with {AllowRemoteFlag} to acknowledge the risk.");
+    }
+  }
+
+  private static void DeleteTempFile(string tempFile)
+  {
+    if (!File.Exists(tempFile))
+    {
+      return;
+    }
+
+    try
+    {
+      File.Delete(tempFile);
+    }
+    catch (IOException ex)
+    {
+      Console.Error.WriteLine($"⚠️ Unable to delete temporary file '{tempFile}': {ex.Message}");
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+      Console.Error.WriteLine($"⚠️ Unable to delete temporary file '{tempFile}': {ex.Message}");
+    }
+  }
+
+  private static HttpClient CreateHttpClient()
+  {
+    var client = new HttpClient
+    {
+      Timeout = TimeSpan.FromSeconds(30)
+    };
+
+    client.DefaultRequestHeaders.Add("User-Agent", "Utah-CLI/1.0");
+    return client;
   }
 
   private string FormatInlineCommandForFile(string command)
   {
     command = FormatFunctionDefinitions(command);
-
-    command = Regex.Replace(command, @"try\s*\{\s*([^}]+)\s*\}\s*catch\s*\{\s*([^}]+)\s*\}",
-                           "try {\n  $1\n}\ncatch {\n  $2\n}");
+    command = ExpandInlineControlBlocks(command);
 
     if (command.Contains("defer ") && !command.Contains("function "))
     {
       command = $"function main() {{\n  {command}\n}}\nmain();";
+      command = FormatFunctionDefinitions(command);
+      command = ExpandInlineControlBlocks(command);
     }
 
-    command = Regex.Replace(command, @"\}\s*([a-zA-Z_]\w*)", "}\n$1");
-
-    command = Regex.Replace(command, @";\s*(?=\w)", ";\n");
+    command = string.Join("\n", SplitStatements(command).Where(statement => !string.IsNullOrWhiteSpace(statement)));
+    command = EnsureStatementTerminators(command);
 
     command = Regex.Replace(command, @"\n\s*\n", "\n");
 
     return command;
+  }
+
+  private string ExpandInlineControlBlocks(string command)
+  {
+    string previous;
+    do
+    {
+      previous = command;
+      command = Regex.Replace(command,
+        @"if\s*\(([^{}]+?)\)\s*\{\s*([^{}]+?)\s*\}\s*else\s*\{\s*([^{}]+?)\s*\}",
+        "if ($1) {\n  $2\n}\nelse {\n  $3\n}",
+        RegexOptions.Singleline);
+      command = Regex.Replace(command,
+        @"if\s*\(([^{}]+?)\)\s*\{\s*([^{}]+?)\s*\}",
+        "if ($1) {\n  $2\n}",
+        RegexOptions.Singleline);
+      command = Regex.Replace(command,
+        @"for\s*\(([^{}]+?)\)\s*\{\s*([^{}]+?)\s*\}",
+        "for ($1) {\n  $2\n}",
+        RegexOptions.Singleline);
+      command = Regex.Replace(command,
+        @"while\s*\(([^{}]+?)\)\s*\{\s*([^{}]+?)\s*\}",
+        "while ($1) {\n  $2\n}",
+        RegexOptions.Singleline);
+      command = Regex.Replace(command,
+        @"try\s*\{\s*([^{}]+?)\s*\}\s*catch\s*\{\s*([^{}]+?)\s*\}",
+        "try {\n  $1\n}\ncatch {\n  $2\n}",
+        RegexOptions.Singleline);
+    } while (command != previous);
+
+    return command;
+  }
+
+  private string EnsureStatementTerminators(string command)
+  {
+    var lines = command.Split('\n');
+    for (int i = 0; i < lines.Length; i++)
+    {
+      var trimmedLine = lines[i].Trim();
+      if (!NeedsInlineStatementTerminator(trimmedLine))
+      {
+        continue;
+      }
+
+      lines[i] = $"{lines[i].TrimEnd()};";
+    }
+
+    return string.Join("\n", lines);
+  }
+
+  private static bool NeedsInlineStatementTerminator(string trimmedLine)
+  {
+    if (string.IsNullOrWhiteSpace(trimmedLine))
+    {
+      return false;
+    }
+
+    if (trimmedLine.EndsWith(";") ||
+        trimmedLine.EndsWith("{") ||
+        trimmedLine == "}" ||
+        trimmedLine.StartsWith("}") ||
+        trimmedLine == "else {" ||
+        trimmedLine == "catch {" ||
+        trimmedLine.StartsWith("case ") ||
+        trimmedLine == "default:")
+    {
+      return false;
+    }
+
+    return true;
   }
 
   private string FormatFunctionDefinitions(string command)
@@ -391,6 +597,8 @@ class UtahApp
     var statements = new List<string>();
     var current = "";
     var braceCount = 0;
+    var bracketCount = 0;
+    var parenCount = 0;
     var inString = false;
     var escapeNext = false;
 
@@ -430,6 +638,16 @@ class UtahApp
         braceCount++;
         current += c;
       }
+      else if (c == '[')
+      {
+        bracketCount++;
+        current += c;
+      }
+      else if (c == '(')
+      {
+        parenCount++;
+        current += c;
+      }
       else if (c == '}')
       {
         braceCount--;
@@ -441,7 +659,17 @@ class UtahApp
           current = "";
         }
       }
-      else if (c == ';' && braceCount == 0)
+      else if (c == ']')
+      {
+        bracketCount--;
+        current += c;
+      }
+      else if (c == ')')
+      {
+        parenCount--;
+        current += c;
+      }
+      else if (c == ';' && braceCount == 0 && bracketCount == 0 && parenCount == 0)
       {
         current += c;
         statements.Add(current.Trim());
@@ -470,9 +698,12 @@ class UtahApp
 
     var remaining = text.Substring(index);
     return remaining.StartsWith("if ") || remaining.StartsWith("return ") ||
+           remaining.StartsWith("else") || remaining.StartsWith("catch") ||
+           remaining.StartsWith("for ") || remaining.StartsWith("while ") ||
            remaining.StartsWith("let ") || remaining.StartsWith("const ") ||
            remaining.StartsWith("throw ") || remaining.StartsWith("try ") ||
-           remaining.StartsWith("console.");
+           remaining.StartsWith("console.") ||
+           Regex.IsMatch(remaining, @"^[A-Za-z_]\w*\s*\(");
   }
 
   private async Task StartLanguageServerAsync()
@@ -494,176 +725,26 @@ class UtahApp
         return args[i + 1];
       }
     }
+
     return null;
   }
 
-  private async Task CompileFileAsync(string inputPath, string? outputPath = null)
+  private async Task<int> CompileFileAsync(string inputPath, string? outputPath = null)
   {
-    string content;
-    bool isUrl = IsValidUrl(inputPath);
+    var content = await LoadShxContentAsync(inputPath);
+    var output = CompileShxContent(content);
 
-    if (isUrl)
-    {
-      Console.WriteLine($"📥 Downloading: {inputPath}");
-      content = await DownloadFileContentAsync(inputPath);
-    }
-    else
-    {
-      if (!File.Exists(inputPath))
-      {
-        Console.WriteLine($"File not found: {inputPath}");
-        return;
-      }
-      content = ResolveImports(inputPath);
-    }
+    var finalOutputPath = outputPath ?? (IsValidUrl(inputPath)
+      ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
+      : Path.ChangeExtension(inputPath, ".sh"));
 
-    try
-    {
-      var parser = new Parser(content);
-      var ast = parser.Parse();
-      var compiler = new Compiler();
-      var output = compiler.Compile(ast);
-
-      var finalOutputPath = outputPath ?? (isUrl ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh") : Path.ChangeExtension(inputPath, ".sh"));
-
-      File.WriteAllText(finalOutputPath, output);
-      Console.WriteLine($"✅ Compiled: {finalOutputPath}");
-    }
-    catch (InvalidOperationException ex)
-    {
-      Console.WriteLine($"❌ Compilation failed: {ex.Message}");
-      Environment.Exit(1);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
-      Environment.Exit(1);
-    }
+    EnsureOutputDirectoryExists(finalOutputPath);
+    await File.WriteAllTextAsync(finalOutputPath, output);
+    Console.WriteLine($"✅ Compiled: {finalOutputPath}");
+    return 0;
   }
 
-  private async Task RunFileAsync(string inputPath, string[] scriptArgs)
-  {
-    string content;
-    string actualPath = inputPath;
-
-    if (IsValidUrl(inputPath))
-    {
-      Console.WriteLine($"📥 Downloading: {inputPath}");
-      content = await DownloadFileContentAsync(inputPath);
-      actualPath = $"<remote:{inputPath}>";
-    }
-    else
-    {
-      if (!File.Exists(inputPath))
-      {
-        Console.WriteLine($"File not found: {inputPath}");
-        return;
-      }
-      content = ResolveImports(inputPath);
-    }
-
-    try
-    {
-      var parser = new Parser(content);
-      var ast = parser.Parse();
-      var compiler = new Compiler();
-      var output = compiler.Compile(ast);
-
-      var tempFile = Path.GetTempFileName();
-      File.WriteAllText(tempFile, output);
-
-      var bashArgs = tempFile;
-      if (scriptArgs.Length > 0)
-      {
-        var escapedArgs = scriptArgs.Select(EscapeShellArgument);
-        bashArgs += " " + string.Join(" ", escapedArgs);
-      }
-
-      var process = new Process
-      {
-        StartInfo = new ProcessStartInfo
-        {
-          FileName = "/bin/bash",
-          Arguments = bashArgs,
-          RedirectStandardOutput = true,
-          RedirectStandardError = true,
-          UseShellExecute = false,
-          CreateNoWindow = true,
-        }
-      };
-
-      process.OutputDataReceived += (sender, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-      process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
-
-      process.Start();
-      process.BeginOutputReadLine();
-      process.BeginErrorReadLine();
-      process.WaitForExit();
-
-      File.Delete(tempFile);
-    }
-    catch (InvalidOperationException ex)
-    {
-      Console.WriteLine($"❌ Compilation failed: {ex.Message}");
-      Environment.Exit(1);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
-      Environment.Exit(1);
-    }
-  }
-
-  private void RunCommand(string command)
-  {
-    try
-    {
-      var shxContent = command;
-
-      var parser = new Parser(shxContent);
-      var ast = parser.Parse();
-      var compiler = new Compiler();
-      var output = compiler.Compile(ast);
-
-      var tempFile = Path.GetTempFileName();
-      File.WriteAllText(tempFile, output);
-
-      var process = new Process
-      {
-        StartInfo = new ProcessStartInfo
-        {
-          FileName = "/bin/bash",
-          Arguments = tempFile,
-          RedirectStandardOutput = true,
-          RedirectStandardError = true,
-          UseShellExecute = false,
-          CreateNoWindow = true,
-        }
-      };
-
-      process.OutputDataReceived += (sender, e) => { if (e.Data != null) Console.WriteLine(e.Data); };
-      process.ErrorDataReceived += (sender, e) => { if (e.Data != null) Console.Error.WriteLine(e.Data); };
-
-      process.Start();
-      process.BeginOutputReadLine();
-      process.BeginErrorReadLine();
-      process.WaitForExit();
-
-      File.Delete(tempFile);
-    }
-    catch (InvalidOperationException ex)
-    {
-      Console.WriteLine($"❌ Compilation failed: {ex.Message}");
-      Environment.Exit(1);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine($"❌ Unexpected error: {ex.Message}");
-      Environment.Exit(1);
-    }
-  }
-
-  private void FormatFile(string[] args)
+  private int FormatFile(string[] args)
   {
     var inputPath = args[1];
     string? outputPath = null;
@@ -693,54 +774,43 @@ class UtahApp
 
     if (!File.Exists(inputPath))
     {
-      Console.WriteLine($"File not found: {inputPath}");
-      Environment.Exit(1);
-      return;
+      throw new InvalidOperationException($"File not found: {inputPath}");
     }
 
-    try
+    var options = FormattingOptions.FromEditorConfig(inputPath);
+    var formatter = new Formatter(options);
+    var formattedContent = formatter.Format(inputPath);
+
+    if (checkOnly)
     {
-      var options = FormattingOptions.FromEditorConfig(inputPath);
-      var formatter = new Formatter(options);
-
-      var formattedContent = formatter.Format(inputPath);
-
-      if (checkOnly)
+      var originalContent = File.ReadAllText(inputPath);
+      if (originalContent != formattedContent)
       {
-        var originalContent = File.ReadAllText(inputPath);
-        if (originalContent != formattedContent)
-        {
-          Console.WriteLine($"❌ File is not formatted: {inputPath}");
-          Environment.Exit(1);
-        }
-        else
-        {
-          Console.WriteLine($"✅ File is properly formatted: {inputPath}");
-        }
-        return;
+        Console.WriteLine($"❌ File is not formatted: {inputPath}");
+        return 1;
       }
 
-      var finalOutputPath = outputPath ?? (inPlace ? inputPath : Path.ChangeExtension(inputPath, ".formatted.shx"));
-
-      File.WriteAllText(finalOutputPath, formattedContent);
-
-      if (inPlace)
-      {
-        Console.WriteLine($"✅ Formatted in place: {inputPath}");
-      }
-      else
-      {
-        Console.WriteLine($"✅ Formatted: {finalOutputPath}");
-      }
+      Console.WriteLine($"✅ File is properly formatted: {inputPath}");
+      return 0;
     }
-    catch (Exception ex)
+
+    var finalOutputPath = outputPath ?? (inPlace ? inputPath : Path.ChangeExtension(inputPath, ".formatted.shx"));
+    EnsureOutputDirectoryExists(finalOutputPath);
+    File.WriteAllText(finalOutputPath, formattedContent);
+
+    if (inPlace)
     {
-      Console.WriteLine($"❌ Formatting failed: {ex.Message}");
-      Environment.Exit(1);
+      Console.WriteLine($"✅ Formatted in place: {inputPath}");
     }
+    else
+    {
+      Console.WriteLine($"✅ Formatted: {finalOutputPath}");
+    }
+
+    return 0;
   }
 
-  private void FormatAllFiles(string[] args)
+  private int FormatAllFiles(string[] args)
   {
     bool inPlace = false;
     bool checkOnly = false;
@@ -757,162 +827,179 @@ class UtahApp
           break;
         case "-o":
         case "--output":
-          Console.WriteLine("❌ -o/--output option is not supported when formatting all files. Use --in-place instead.");
-          Environment.Exit(1);
-          return;
+          throw new InvalidOperationException("-o/--output option is not supported when formatting all files. Use --in-place instead.");
       }
+    }
+
+    var currentDirectory = Directory.GetCurrentDirectory();
+    var shxFiles = EnumerateShxFiles(currentDirectory).ToList();
+
+    if (shxFiles.Count == 0)
+    {
+      Console.WriteLine("No .shx files found in current directory and supported subdirectories.");
+      return 0;
+    }
+
+    Console.WriteLine($"Found {shxFiles.Count} .shx file(s) to format:");
+
+    int formattedCount = 0;
+    int alreadyFormattedCount = 0;
+    int errorCount = 0;
+
+    foreach (var filePath in shxFiles)
+    {
+      try
+      {
+        var relativePath = Path.GetRelativePath(currentDirectory, filePath);
+        Console.Write($"  {relativePath}... ");
+
+        var options = FormattingOptions.FromEditorConfig(filePath);
+        var formatter = new Formatter(options);
+        var formattedContent = formatter.Format(filePath);
+        var originalContent = File.ReadAllText(filePath);
+
+        if (checkOnly)
+        {
+          if (originalContent != formattedContent)
+          {
+            Console.WriteLine("❌ not formatted");
+            formattedCount++;
+          }
+          else
+          {
+            Console.WriteLine("✅ already formatted");
+            alreadyFormattedCount++;
+          }
+
+          continue;
+        }
+
+        if (originalContent != formattedContent)
+        {
+          if (inPlace)
+          {
+            File.WriteAllText(filePath, formattedContent);
+            Console.WriteLine("✅ formatted");
+          }
+          else
+          {
+            var outputPath = Path.ChangeExtension(filePath, ".formatted.shx");
+            EnsureOutputDirectoryExists(outputPath);
+            File.WriteAllText(outputPath, formattedContent);
+            Console.WriteLine($"✅ formatted -> {Path.GetRelativePath(currentDirectory, outputPath)}");
+          }
+
+          formattedCount++;
+        }
+        else
+        {
+          Console.WriteLine("✅ already formatted");
+          alreadyFormattedCount++;
+        }
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"❌ error: {ex.Message}");
+        errorCount++;
+      }
+    }
+
+    Console.WriteLine();
+    if (checkOnly)
+    {
+      Console.WriteLine($"Summary: {alreadyFormattedCount} properly formatted, {formattedCount} need formatting, {errorCount} errors");
+      if (formattedCount > 0)
+      {
+        Console.WriteLine("Run 'utah format --in-place' to format all files.");
+      }
+
+      return formattedCount > 0 || errorCount > 0 ? 1 : 0;
+    }
+
+    Console.WriteLine($"Summary: {formattedCount} formatted, {alreadyFormattedCount} already formatted, {errorCount} errors");
+    return errorCount > 0 ? 1 : 0;
+  }
+
+  private static IEnumerable<string> EnumerateShxFiles(string rootDirectory)
+  {
+    foreach (var file in Directory.EnumerateFiles(rootDirectory, "*.shx"))
+    {
+      yield return file;
+    }
+
+    foreach (var directory in Directory.EnumerateDirectories(rootDirectory))
+    {
+      if (ShouldSkipDirectory(directory))
+      {
+        continue;
+      }
+
+      foreach (var file in EnumerateShxFiles(directory))
+      {
+        yield return file;
+      }
+    }
+  }
+
+  private static bool ShouldSkipDirectory(string directoryPath)
+  {
+    var directoryName = Path.GetFileName(directoryPath);
+    if (s_formatExcludedDirectories.Contains(directoryName))
+    {
+      return true;
     }
 
     try
     {
-      var currentDirectory = Directory.GetCurrentDirectory();
-      var shxFiles = Directory.GetFiles(currentDirectory, "*.shx", SearchOption.AllDirectories);
-
-      if (shxFiles.Length == 0)
-      {
-        Console.WriteLine("No .shx files found in current directory and subdirectories.");
-        return;
-      }
-
-      Console.WriteLine($"Found {shxFiles.Length} .shx file(s) to format:");
-
-      int formattedCount = 0;
-      int alreadyFormattedCount = 0;
-      int errorCount = 0;
-
-      foreach (var filePath in shxFiles)
-      {
-        try
-        {
-          var relativePath = Path.GetRelativePath(currentDirectory, filePath);
-          Console.Write($"  {relativePath}... ");
-
-          var options = FormattingOptions.FromEditorConfig(filePath);
-          var formatter = new Formatter(options);
-
-          var formattedContent = formatter.Format(filePath);
-
-          if (checkOnly)
-          {
-            var originalContent = File.ReadAllText(filePath);
-            if (originalContent != formattedContent)
-            {
-              Console.WriteLine("❌ not formatted");
-              formattedCount++;
-            }
-            else
-            {
-              Console.WriteLine("✅ already formatted");
-              alreadyFormattedCount++;
-            }
-          }
-          else
-          {
-            var originalContent = File.ReadAllText(filePath);
-            if (originalContent != formattedContent)
-            {
-              if (inPlace)
-              {
-                File.WriteAllText(filePath, formattedContent);
-                Console.WriteLine("✅ formatted");
-                formattedCount++;
-              }
-              else
-              {
-                var outputPath = Path.ChangeExtension(filePath, ".formatted.shx");
-                File.WriteAllText(outputPath, formattedContent);
-                Console.WriteLine($"✅ formatted -> {Path.GetRelativePath(currentDirectory, outputPath)}");
-                formattedCount++;
-              }
-            }
-            else
-            {
-              Console.WriteLine("✅ already formatted");
-              alreadyFormattedCount++;
-            }
-          }
-        }
-        catch (Exception ex)
-        {
-          Console.WriteLine($"❌ error: {ex.Message}");
-          errorCount++;
-        }
-      }
-
-      Console.WriteLine();
-      if (checkOnly)
-      {
-        Console.WriteLine($"Summary: {alreadyFormattedCount} properly formatted, {formattedCount} need formatting, {errorCount} errors");
-        if (formattedCount > 0)
-        {
-          Console.WriteLine("Run 'utah format --in-place' to format all files.");
-          Environment.Exit(1);
-        }
-      }
-      else
-      {
-        Console.WriteLine($"Summary: {formattedCount} formatted, {alreadyFormattedCount} already formatted, {errorCount} errors");
-      }
+      return File.GetAttributes(directoryPath).HasFlag(FileAttributes.ReparsePoint);
     }
-    catch (Exception ex)
+    catch (IOException)
     {
-      Console.WriteLine($"❌ Error finding .shx files: {ex.Message}");
-      Environment.Exit(1);
+      return true;
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return true;
     }
   }
 
-  private string ResolveImports(string filePath)
+  private static void EnsureOutputDirectoryExists(string outputPath)
   {
-    var resolvedFiles = new HashSet<string>();
-    var result = new List<string>();
-
-    ResolveImportsRecursive(filePath, resolvedFiles, result);
-
-    return string.Join(Environment.NewLine, result);
+    var directory = Path.GetDirectoryName(Path.GetFullPath(outputPath));
+    if (!string.IsNullOrEmpty(directory))
+    {
+      Directory.CreateDirectory(directory);
+    }
   }
 
-  private void ResolveImportsRecursive(string filePath, HashSet<string> resolvedFiles, List<string> result)
+  private void PrintCompileUsage()
   {
-    var absolutePath = Path.GetFullPath(filePath);
+    Console.WriteLine("Usage: utah compile <file.shx|url> [-o, --output <output.sh>]");
+  }
 
-    if (resolvedFiles.Contains(absolutePath))
-    {
-      return;
-    }
+  private void PrintRunUsage()
+  {
+    Console.WriteLine($"Usage: utah run [{AllowRemoteFlag}] <file.shx|url> [-- script-args...]");
+    Console.WriteLine("       utah run -c <command>");
+    Console.WriteLine("       utah run --command <command>");
+  }
 
-    resolvedFiles.Add(absolutePath);
+  private void PrintInlineRunUsage()
+  {
+    Console.WriteLine("Usage: utah run -c <command>");
+    Console.WriteLine("       utah run --command <command>");
+  }
 
-    if (!File.Exists(absolutePath))
-    {
-      throw new InvalidOperationException($"Import file not found: {filePath}");
-    }
+  private void PrintDirectCommandUsage()
+  {
+    Console.WriteLine("Usage: utah -c <command>");
+    Console.WriteLine("       utah --command <command>");
+  }
 
-    var content = File.ReadAllText(absolutePath);
-    var lines = content.Split('\n');
-    var baseDirectory = Path.GetDirectoryName(absolutePath) ?? "";
-
-    foreach (var line in lines)
-    {
-      var trimmedLine = line.Trim();
-
-      if (trimmedLine.StartsWith("import "))
-      {
-        var match = System.Text.RegularExpressions.Regex.Match(trimmedLine, @"import\s+([""']?)([^""';]+)\1;?");
-        if (match.Success)
-        {
-          var importPath = match.Groups[2].Value;
-          var fullImportPath = Path.IsPathRooted(importPath)
-            ? importPath
-            : Path.Combine(baseDirectory, importPath);
-
-          ResolveImportsRecursive(fullImportPath, resolvedFiles, result);
-        }
-      }
-      else
-      {
-        result.Add(line);
-      }
-    }
+  private void PrintFormatUsage()
+  {
+    Console.WriteLine("Usage: utah format [file.shx] [-o, --output <output.shx>] [--in-place] [--check]");
+    Console.WriteLine("       utah format                   # Format all .shx files recursively");
   }
 
   private void PrintUsage()
@@ -920,12 +1007,14 @@ class UtahApp
     Console.WriteLine("Usage: utah <command|file.shx|url>");
     Console.WriteLine();
     Console.WriteLine("Direct Execution:");
-    Console.WriteLine("  <file.shx>                   Compile and run a .shx file directly.");
-    Console.WriteLine("  <https://url/file.shx>       Download and run a .shx file from URL.");
-    Console.WriteLine("  -c, --command <command>      Run a single shx command directly.");
+    Console.WriteLine("  <file.shx> [-- script-args...]     Compile and run a .shx file directly.");
+    Console.WriteLine($"  <https://url/file.shx> [{AllowRemoteFlag}] [-- script-args...]");
+    Console.WriteLine("                                  Download and run a remote .shx file.");
+    Console.WriteLine("  -c, --command <command>        Run a single shx command directly.");
     Console.WriteLine();
     Console.WriteLine("Commands:");
-    Console.WriteLine("  run <file.shx|url>           Compile and run a .shx file or URL.");
+    Console.WriteLine($"  run [{AllowRemoteFlag}] <file.shx|url> [-- script-args...]");
+    Console.WriteLine("                              Compile and run a .shx file or URL.");
     Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
     Console.WriteLine("  compile <file.shx|url>       Compile a .shx file or URL to a .sh file.");
     Console.WriteLine("    Options:");
@@ -936,12 +1025,13 @@ class UtahApp
     Console.WriteLine("      -o, --output <file>      Write formatted output to a specific file (single file only).");
     Console.WriteLine("      --in-place               Format the file(s) in place (overwrite original).");
     Console.WriteLine("      --check                  Check if file(s) are formatted (exit 1 if not).");
+    Console.WriteLine($"      {AllowRemoteFlag}         Acknowledge and allow executing a remote URL.");
     Console.WriteLine("  lsp                          Run the language server.");
     Console.WriteLine("  version (--version, -v)      Show version information.");
     Console.WriteLine();
     Console.WriteLine("Examples:");
     Console.WriteLine("  utah script.shx");
-    Console.WriteLine("  utah run https://utahshx.com/examples/script.shx");
+    Console.WriteLine($"  utah run {AllowRemoteFlag} https://utahshx.com/examples/script.shx");
     Console.WriteLine("  utah compile https://gist.githubusercontent.com/user/hash/raw/script.shx");
   }
 
