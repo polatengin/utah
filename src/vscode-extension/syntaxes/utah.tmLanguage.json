@@ -2,25 +2,34 @@
     "scopeName": "source.utah",
     "patterns": [
         {
-            "include": "#keywords"
+            "include": "#comments"
+        },
+        {
+            "include": "#multiline-strings"
         },
         {
             "include": "#strings"
         },
         {
-            "include": "#comments"
+            "include": "#template-strings"
+        },
+        {
+            "include": "#namespace-calls"
+        },
+        {
+            "include": "#keywords"
         },
         {
             "include": "#types"
+        },
+        {
+            "include": "#constants"
         },
         {
             "include": "#functions"
         },
         {
             "include": "#variables"
-        },
-        {
-            "include": "#template-strings"
         }
     ],
     "repository": {
@@ -28,11 +37,53 @@
             "patterns": [
                 {
                     "name": "keyword.control.utah",
-                    "match": "\\b(if|else|const|let|exit|function|for|in|switch|case|default|break|os|fs|process|timer|env)\\b"
+                    "match": "\\b(if|else|for|in|while|switch|case|default|break|continue|return|try|catch|defer|import|parallel)\\b"
                 },
                 {
-                    "name": "support.function.utah",
-                    "match": "\\b(console.log|length|slice|replace|toUpperCase|toLowerCase|trim|startsWith|endsWith|includes|split)\\b"
+                    "name": "keyword.declaration.utah",
+                    "match": "\\b(const|let|function|record|interface)\\b"
+                },
+                {
+                    "name": "keyword.other.utah",
+                    "match": "\\b(exit)\\b"
+                }
+            ]
+        },
+        "constants": {
+            "patterns": [
+                {
+                    "name": "constant.language.boolean.utah",
+                    "match": "\\b(true|false)\\b"
+                },
+                {
+                    "name": "constant.numeric.utah",
+                    "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+                }
+            ]
+        },
+        "namespace-calls": {
+            "patterns": [
+                {
+                    "name": "meta.namespace-call.utah",
+                    "match": "\\b(console|fs|os|process|git|utility|timer|string|math|script|web|json|yaml|validate|ssh|system|template|scheduler|args|array|env)\\s*\\.\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+                    "captures": {
+                        "1": {
+                            "name": "support.class.utah"
+                        },
+                        "2": {
+                            "name": "support.function.utah"
+                        }
+                    }
+                }
+            ]
+        },
+        "multiline-strings": {
+            "name": "string.quoted.triple.utah",
+            "begin": "\"\"\"",
+            "end": "\"\"\"",
+            "patterns": [
+                {
+                    "include": "#interpolation"
                 }
             ]
         },
@@ -51,9 +102,18 @@
             ]
         },
         "comments": {
-            "name": "comment.line.double-slash.utah",
-            "begin": "//",
-            "end": "$\n"
+            "patterns": [
+                {
+                    "name": "comment.block.utah",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                },
+                {
+                    "name": "comment.line.double-slash.utah",
+                    "begin": "//",
+                    "end": "$"
+                }
+            ]
         },
         "types": {
             "patterns": [
@@ -67,7 +127,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.utah",
-                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\()"
+                    "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*\\()"
                 }
             ]
         },
