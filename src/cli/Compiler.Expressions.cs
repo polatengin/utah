@@ -426,6 +426,7 @@ public partial class Compiler
   private string CompileObjectPropertyAccessExpression(ObjectPropertyAccessExpression objectProperty)
   {
     if (TryGetPropertyPath(objectProperty, out var rootName, out var path) &&
+        !_sshConnectionVariables.Contains(rootName) &&
         IsJsonBackedObjectType(GetVariableType(rootName)))
     {
       var jqPath = string.Join("", path.Select(segment => $".{segment}"));
@@ -4006,7 +4007,7 @@ _utah_validate_in_range {value} {min} {max}
       MultilineStringExpression => "string",
       ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
       ObjectLiteralExpression => "object",
-      VariableExpression variable => GetVariableType(variable.Name) ?? "unknown",
+      VariableExpression variable => _sshConnectionVariables.Contains(variable.Name) ? "sshConnection" : GetVariableType(variable.Name) ?? "unknown",
       SshConnectExpression => "sshConnection",
       JsonParseExpression => "object",
       YamlParseExpression => "object",

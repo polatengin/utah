@@ -123,7 +123,17 @@ public partial class Compiler
             lines.Add($"{v.Name}={expressionValue}");
           }
         }
-        var resolvedType = InferExpressionType(v.Value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value));
+        if (v.Value is SshConnectExpression ||
+            (v.Value is VariableExpression variableValue && _sshConnectionVariables.Contains(variableValue.Name)))
+        {
+          _sshConnectionVariables.Add(v.Name);
+        }
+        else
+        {
+          _sshConnectionVariables.Remove(v.Name);
+        }
+
+        var resolvedType = !string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value);
         RegisterVariableType(v.Name, resolvedType);
         break;
 

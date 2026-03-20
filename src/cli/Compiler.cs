@@ -23,6 +23,7 @@ public partial class Compiler
   private bool _inTryBlock = false;
   private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
   private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
+  private readonly HashSet<string> _sshConnectionVariables = new(StringComparer.Ordinal);
 
   public string Compile(ProgramNode program)
   {
@@ -78,6 +79,7 @@ public partial class Compiler
     _structuredTypes.Clear();
     _variableTypeScopes.Clear();
     _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+    _sshConnectionVariables.Clear();
   }
 
   private void CollectStructuredTypes(ProgramNode program)

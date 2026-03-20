@@ -424,7 +424,7 @@ public partial class Parser
         var value = ParseExpression(valueStr);
 
         ValidateVariableTypeAssignment(value, type, name);
-        var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+        var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
         RegisterVariableType(name, resolvedType);
 
         return new VariableDeclaration(name, type, value, isConst);
@@ -479,7 +479,7 @@ public partial class Parser
             var value = ParseExpression(valueStr);
 
             ValidateVariableTypeAssignment(value, type, name);
-            var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+            var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
             RegisterVariableType(name, resolvedType);
 
             return new VariableDeclaration(name, type, value, isConst);
@@ -507,7 +507,7 @@ public partial class Parser
       var value = ParseExpression(valueStr);
 
       ValidateVariableTypeAssignment(value, type, name);
-      var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
       RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
@@ -533,7 +533,7 @@ public partial class Parser
       var value = ParseExpression(valueStr);
 
       ValidateVariableTypeAssignment(value, type, name);
-      var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
       RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
