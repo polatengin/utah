@@ -285,6 +285,12 @@ jobs:
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-x64 -o ./publish/osx-x64
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-arm64 -o ./publish/osx-arm64
 
+      - name: Ensure artifacts exist
+        run: |
+          test -f ./publish/linux-x64/utah
+          test -f ./publish/osx-x64/utah
+          test -f ./publish/osx-arm64/utah
+
       - name: Create Release
         id: create_release
         env:
