@@ -287,6 +287,8 @@ jobs:
 
       - name: Ensure artifacts exist
         run: |
+          ls -R ./publish
+
           test -f ./publish/linux-x64/utah
           test -f ./publish/osx-x64/utah
           test -f ./publish/osx-arm64/utah
