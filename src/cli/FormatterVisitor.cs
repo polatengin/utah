@@ -615,6 +615,8 @@ public class FormatterVisitor
         return "args.all()";
       case GitUndoLastCommitExpression:
         return "git.undoLastCommit()";
+      case GitStatusExpression:
+        return "git.status()";
       case SchedulerCronExpression schedulerCron:
         return $"scheduler.cron({VisitExpression(schedulerCron.CronPattern)}, {VisitExpression(schedulerCron.Job)})";
       case LambdaExpression lambda:
