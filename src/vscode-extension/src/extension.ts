@@ -6,6 +6,7 @@ import {
   ServerOptions,
   TransportKind
 } from 'vscode-languageclient/node';
+import { createCompletionProvider } from './completionProvider';
 
 let client: LanguageClient;
 
@@ -36,15 +37,8 @@ export async function activate() {
       revealOutputChannelOn: 1, // RevealOutputChannelOn.Error = 1 (show on errors)
       initializationOptions: {},
       middleware: {
-        provideCompletionItem: (document, position, context, token, next) => {
-          console.log('Completion middleware called:', {
-            document: document.uri.toString(),
-            position: position,
-            context: context,
-            triggerCharacter: context.triggerCharacter,
-            triggerKind: context.triggerKind
-          });
-          return next(document, position, context, token);
+        provideCompletionItem: () => {
+          return [];
         }
       }
     };
@@ -84,24 +78,9 @@ export async function activate() {
 
     const completionProvider = vscode.languages.registerCompletionItemProvider(
       { scheme: 'file', language: 'utah' },
-      {
-        provideCompletionItems(document, position, _token, context) {
-          console.log('Direct completion provider called:', {
-            document: document.uri.toString(),
-            position: position,
-            context: context,
-            triggerCharacter: context.triggerCharacter,
-            triggerKind: context.triggerKind
-          });
-
-          // Let the LSP handle it, but log that we were called
-          return null;
-        }
-      },
+      createCompletionProvider(),
       '.' // Trigger character
     );
-
-    console.log('Registered direct completion provider for debugging');
 
     // Test document language detection
     const activeEditor = vscode.window.activeTextEditor;
