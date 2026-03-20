@@ -1,17 +1,21 @@
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Linq;
 
 public partial class Parser
 {
   private string[] _lines;
   private readonly HashSet<string> _constVariables = new HashSet<string>();
   private readonly Stack<string> _functionReturnTypeStack = new Stack<string>();
+  private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
+  private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
 
   public Parser(string input)
   {
     // Pre-process to remove comments, but preserve strings
     var processed = RemoveComments(input);
     _lines = processed.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
   }
 
   private string RemoveComments(string input)
@@ -119,6 +123,14 @@ public partial class Parser
     if (line.StartsWith("import "))
     {
       return ParseImportStatement(line);
+    }
+    if (line.StartsWith("interface "))
+    {
+      return ParseStructuredTypeDeclaration(line, ref i, isRecord: false);
+    }
+    if (line.StartsWith("record "))
+    {
+      return ParseStructuredTypeDeclaration(line, ref i, isRecord: true);
     }
     if (line.StartsWith("let ") || line.StartsWith("const "))
     {
@@ -397,11 +409,11 @@ public partial class Parser
       }
 
       // Now parse the complete declaration
-      var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
+      var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([^=]+?))?\s*=\s*(.+)\s*;");
       if (match.Success)
       {
         var name = match.Groups[2].Value;
-        var type = match.Groups[3].Value;
+        var type = NormalizeTypeAnnotation(match.Groups[3].Value);
         var valueStr = match.Groups[4].Value;
 
         if (isConst)
@@ -411,15 +423,8 @@ public partial class Parser
 
         var value = ParseExpression(valueStr);
 
-        // Validate array element types if this is an array type
-        if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
-        {
-          var elementType = type.Substring(0, type.Length - 2); // Remove []
-          ValidateArrayElementTypes(arrayLiteral, elementType, name);
-        }
-
-        // Validate variable type assignment for non-array types
         ValidateVariableTypeAssignment(value, type, name);
+        RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
 
         return new VariableDeclaration(name, type, value, isConst);
       }
@@ -455,11 +460,11 @@ public partial class Parser
       else
       {
         // Now parse the complete declaration
-        var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;", RegexOptions.Singleline);
+        var match = Regex.Match(fullDeclaration, @"(let|const)\s+(\w+)(?:\s*:\s*([^=]+?))?\s*=\s*(.+)\s*;", RegexOptions.Singleline);
         if (match.Success)
         {
           var name = match.Groups[2].Value;
-          var type = match.Groups[3].Value;
+          var type = NormalizeTypeAnnotation(match.Groups[3].Value);
           var valueStr = match.Groups[4].Value;
 
           if (isConst)
@@ -472,8 +477,8 @@ public partial class Parser
           {
             var value = ParseExpression(valueStr);
 
-            // Validate variable type assignment
             ValidateVariableTypeAssignment(value, type, name);
+            RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
 
             return new VariableDeclaration(name, type, value, isConst);
           }
@@ -485,11 +490,11 @@ public partial class Parser
     }
 
     // Single-line variable declaration
-    var singleLineMatch = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
+    var singleLineMatch = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([^=]+?))?\s*=\s*(.+)\s*;");
     if (singleLineMatch.Success)
     {
       var name = singleLineMatch.Groups[2].Value;
-      var type = singleLineMatch.Groups[3].Value;
+      var type = NormalizeTypeAnnotation(singleLineMatch.Groups[3].Value);
       var valueStr = singleLineMatch.Groups[4].Value;
 
       if (isConst)
@@ -499,15 +504,8 @@ public partial class Parser
 
       var value = ParseExpression(valueStr);
 
-      // Validate array element types if this is an array type
-      if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
-      {
-        var elementType = type.Substring(0, type.Length - 2); // Remove []
-        ValidateArrayElementTypes(arrayLiteral, elementType, name);
-      }
-
-      // Validate variable type assignment for non-array types
       ValidateVariableTypeAssignment(value, type, name);
+      RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
 
       return new VariableDeclaration(name, type, value, isConst);
     }
@@ -517,11 +515,11 @@ public partial class Parser
   private VariableDeclaration ParseSingleLineVariableDeclaration(string line)
   {
     var isConst = line.StartsWith("const ");
-    var match = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([\w\[\]]+))?\s*=\s*(.+)\s*;");
+    var match = Regex.Match(line, @"(let|const)\s+(\w+)(?:\s*:\s*([^=]+?))?\s*=\s*(.+)\s*;");
     if (match.Success)
     {
       var name = match.Groups[2].Value;
-      var type = match.Groups[3].Value;
+      var type = NormalizeTypeAnnotation(match.Groups[3].Value);
       var valueStr = match.Groups[4].Value;
 
       if (isConst)
@@ -531,15 +529,8 @@ public partial class Parser
 
       var value = ParseExpression(valueStr);
 
-      // Validate array element types if this is an array type
-      if (type.EndsWith("[]") && value is ArrayLiteral arrayLiteral)
-      {
-        var elementType = type.Substring(0, type.Length - 2); // Remove []
-        ValidateArrayElementTypes(arrayLiteral, elementType, name);
-      }
-
-      // Validate variable type assignment for non-array types
       ValidateVariableTypeAssignment(value, type, name);
+      RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
 
       return new VariableDeclaration(name, type, value, isConst);
     }
@@ -548,23 +539,30 @@ public partial class Parser
 
   private FunctionDeclaration ParseFunctionDeclaration(string line, ref int i)
   {
-    var headerMatch = Regex.Match(line, @"function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*(\w+))?\s*\{");
+    var headerMatch = Regex.Match(line, @"function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*([^{]+))?\s*\{");
     if (!headerMatch.Success) throw new Exception("Invalid function declaration");
 
     var name = headerMatch.Groups[1].Value;
-    var returnType = headerMatch.Groups[3].Value;
+    var returnType = NormalizeTypeAnnotation(headerMatch.Groups[3].Value);
     var parameters = new List<(string Name, string Type)>();
-    var paramList = headerMatch.Groups[2].Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    var paramList = SplitByComma(headerMatch.Groups[2].Value)
+      .Where(p => !string.IsNullOrWhiteSpace(p))
+      .ToList();
     foreach (var p in paramList)
     {
-      var parts = p.Trim().Split(':');
-      var paramName = parts[0].Trim();
-      var paramType = parts.Length > 1 ? parts[1].Trim() : "any"; // Default to "any" if no type specified
+      var colonIndex = p.IndexOf(':');
+      var paramName = colonIndex >= 0 ? p[..colonIndex].Trim() : p.Trim();
+      var paramType = colonIndex >= 0 ? NormalizeTypeAnnotation(p[(colonIndex + 1)..].Trim()) : "any";
       parameters.Add((paramName, paramType));
     }
 
     // Push return type onto stack for validation
     _functionReturnTypeStack.Push(returnType ?? "void");
+    PushVariableTypeScope();
+    foreach (var (paramName, paramType) in parameters)
+    {
+      RegisterVariableType(paramName, paramType);
+    }
 
     var body = new List<Statement>();
     i++;
@@ -584,8 +582,91 @@ public partial class Parser
 
     // Pop return type from stack
     _functionReturnTypeStack.Pop();
+    PopVariableTypeScope();
 
     return new FunctionDeclaration(name, parameters, body, returnType);
+  }
+
+  private StructuredTypeDeclaration ParseStructuredTypeDeclaration(string line, ref int i, bool isRecord)
+  {
+    var headerMatch = Regex.Match(line, @"(interface|record)\s+(\w+)\s*\{(.*)");
+    if (!headerMatch.Success)
+      throw new InvalidOperationException($"Invalid {(isRecord ? "record" : "interface")} declaration: {line}");
+
+    var name = headerMatch.Groups[2].Value;
+    var inlineBody = headerMatch.Groups[3].Value;
+    var bodyBuilder = new StringBuilder();
+
+    if (inlineBody.Contains("}"))
+    {
+      bodyBuilder.Append(inlineBody[..inlineBody.LastIndexOf('}')]);
+    }
+    else
+    {
+      i++;
+      while (i < _lines.Length)
+      {
+        var currentLine = _lines[i].Trim();
+
+        if (currentLine.StartsWith("}"))
+        {
+          break;
+        }
+
+        if (currentLine.Contains("}"))
+        {
+          bodyBuilder.AppendLine(currentLine[..currentLine.IndexOf('}')]);
+          break;
+        }
+
+        bodyBuilder.AppendLine(currentLine);
+        i++;
+      }
+
+      if (i >= _lines.Length)
+      {
+        throw new InvalidOperationException($"Unterminated {(isRecord ? "record" : "interface")} declaration for '{name}'.");
+      }
+    }
+
+    var fields = ParseStructuredTypeFields(bodyBuilder.ToString());
+    var declaration = new StructuredTypeDeclaration(name, fields, isRecord);
+    _structuredTypes[name] = declaration;
+    return declaration;
+  }
+
+  private List<StructuredTypeField> ParseStructuredTypeFields(string body)
+  {
+    var fields = new List<StructuredTypeField>();
+    var entries = body
+      .Split(new[] { ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+      .Where(entry => !string.IsNullOrWhiteSpace(entry));
+
+    foreach (var entry in entries)
+    {
+      var colonIndex = entry.IndexOf(':');
+      if (colonIndex <= 0)
+      {
+        throw new InvalidOperationException($"Invalid structured type field declaration: {entry}");
+      }
+
+      var fieldName = entry[..colonIndex].Trim();
+      var fieldType = NormalizeTypeAnnotation(entry[(colonIndex + 1)..].Trim());
+
+      if (string.IsNullOrEmpty(fieldName) || string.IsNullOrEmpty(fieldType))
+      {
+        throw new InvalidOperationException($"Invalid structured type field declaration: {entry}");
+      }
+
+      if (fields.Any(field => field.Name == fieldName))
+      {
+        throw new InvalidOperationException($"Duplicate field '{fieldName}' in structured type declaration.");
+      }
+
+      fields.Add(new StructuredTypeField(fieldName, fieldType));
+    }
+
+    return fields;
   }
 
   private IfStatement ParseIfStatement(string line, ref int i)
@@ -1137,75 +1218,381 @@ public partial class Parser
     return str;
   }
 
+  private string NormalizeTypeAnnotation(string type)
+  {
+    return string.IsNullOrWhiteSpace(type) ? "" : Regex.Replace(type.Trim(), @"\s+", "");
+  }
+
+  private void PushVariableTypeScope()
+  {
+    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+  }
+
+  private void PopVariableTypeScope()
+  {
+    if (_variableTypeScopes.Count > 1)
+    {
+      _variableTypeScopes.Pop();
+    }
+  }
+
+  private void RegisterVariableType(string variableName, string? type)
+  {
+    if (string.IsNullOrWhiteSpace(variableName) || string.IsNullOrWhiteSpace(type) || _variableTypeScopes.Count == 0)
+    {
+      return;
+    }
+
+    _variableTypeScopes.Peek()[variableName] = NormalizeTypeAnnotation(type);
+  }
+
+  private string? LookupVariableType(string variableName)
+  {
+    foreach (var scope in _variableTypeScopes)
+    {
+      if (scope.TryGetValue(variableName, out var type))
+      {
+        return type;
+      }
+    }
+
+    return null;
+  }
+
   private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string arrayName)
   {
     for (int i = 0; i < arrayLiteral.Elements.Count; i++)
     {
-      var element = arrayLiteral.Elements[i];
-      if (element is LiteralExpression literal)
+      if (!IsTypeCompatible(arrayLiteral.Elements[i], expectedElementType))
       {
-        var actualType = literal.Type;
-        if (actualType != expectedElementType)
-        {
-          throw new InvalidOperationException($"Type mismatch in array '{arrayName}' at index {i}. Expected '{expectedElementType}' but found '{actualType}' for element '{literal.Value}'.");
-        }
+        var actualType = InferExpressionType(arrayLiteral.Elements[i]);
+        throw new InvalidOperationException($"Type mismatch in array '{arrayName}' at index {i}. Expected '{expectedElementType}' but found '{actualType}'.");
       }
-      // Add more checks for other expression types if needed
     }
   }
 
   private void ValidateVariableTypeAssignment(Expression value, string expectedType, string variableName)
   {
-    // Skip validation if no type annotation is provided
+    expectedType = NormalizeTypeAnnotation(expectedType);
     if (string.IsNullOrEmpty(expectedType))
       return;
 
-    // Skip validation for array types (handled separately)
-    if (expectedType.EndsWith("[]"))
-      return;
-
-    if (value is LiteralExpression literal)
+    if (!IsTypeCompatible(value, expectedType))
     {
-      var actualType = literal.Type;
-
-      // Allow "unknown" types to pass (complex expressions, JSON strings, etc.)
-      if (actualType == "unknown")
-        return;
-
-      if (actualType != expectedType)
-      {
-        throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType}' for value '{literal.Value}'.");
-      }
+      var actualType = InferExpressionType(value);
+      throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType}'.");
     }
-    // Add more checks for other expression types as needed
   }
 
   private void ValidateReturnType(Expression? value, string expectedReturnType)
   {
-    // Skip validation if no expected return type or it's void
+    expectedReturnType = NormalizeTypeAnnotation(expectedReturnType);
     if (string.IsNullOrEmpty(expectedReturnType) || expectedReturnType == "void")
       return;
 
-    // If expecting a return value but got null
     if (value == null)
     {
       throw new InvalidOperationException($"Function expects return type '{expectedReturnType}' but found void return.");
     }
 
-    if (value is LiteralExpression literal)
+    if (!IsTypeCompatible(value, expectedReturnType))
     {
-      var actualType = literal.Type;
+      var actualType = InferExpressionType(value);
+      throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType}'.");
+    }
+  }
 
-      // Allow "unknown" types to pass (complex expressions, etc.)
-      if (actualType == "unknown")
-        return;
+  private string InferExpressionType(Expression expression)
+  {
+    return expression switch
+    {
+      LiteralExpression literal => literal.Type,
+      MultilineStringExpression => "string",
+      ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
+      ObjectLiteralExpression => "object",
+      VariableExpression variable => LookupVariableType(variable.Name) ?? "unknown",
+      JsonParseExpression => "object",
+      YamlParseExpression => "object",
+      JsonGetExpression => "unknown",
+      YamlGetExpression => "unknown",
+      ArrayMapExpression => "any[]",
+      ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? "unknown",
+      ArrayReduceExpression => "unknown",
+      ArraySomeExpression => "boolean",
+      ArrayEveryExpression => "boolean",
+      FunctionCall functionCall => InferFunctionCallType(functionCall),
+      ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
+      _ => "unknown"
+    };
+  }
 
-      if (actualType != expectedReturnType)
+  private string InferFunctionCallType(FunctionCall functionCall)
+  {
+    return functionCall.Name switch
+    {
+      "schema.validate" => functionCall.Arguments.Count >= 2 ? ResolveSchemaName(functionCall.Arguments[1]) ?? "object" : "object",
+      "schema.isValid" => "boolean",
+      "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? "unknown"
+        : "unknown",
+      "map.has" or "dictionary.has" => "boolean",
+      "set.has" => "boolean",
+      "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
+        ? InferExpressionType(functionCall.Arguments[0])
+        : "unknown",
+      _ => "unknown"
+    };
+  }
+
+  private string InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  {
+    if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
+    {
+      return "unknown";
+    }
+
+    var currentType = LookupVariableType(rootName) ?? "unknown";
+    foreach (var segment in path)
+    {
+      var fieldType = GetStructuredFieldType(currentType, segment);
+      if (fieldType == null)
       {
-        throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType}' for value '{literal.Value}'.");
+        return "unknown";
+      }
+
+      currentType = fieldType;
+    }
+
+    return currentType;
+  }
+
+  private bool TryGetPropertyPath(Expression expression, out string rootName, out List<string> path)
+  {
+    rootName = "";
+    path = new List<string>();
+
+    if (expression is VariableExpression variableExpression)
+    {
+      rootName = variableExpression.Name;
+      return true;
+    }
+
+    if (expression is ObjectPropertyAccessExpression propertyAccess &&
+        TryGetPropertyPath(propertyAccess.Object, out rootName, out path))
+    {
+      path.Add(propertyAccess.PropertyName);
+      return true;
+    }
+
+    return false;
+  }
+
+  private string? GetStructuredFieldType(string typeName, string fieldName)
+  {
+    typeName = NormalizeTypeAnnotation(typeName);
+    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    {
+      return declaration.Fields.FirstOrDefault(field => field.Name == fieldName)?.Type;
+    }
+
+    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    {
+      return GetMapValueType(typeName);
+    }
+
+    return null;
+  }
+
+  private bool IsTypeCompatible(Expression value, string expectedType)
+  {
+    expectedType = NormalizeTypeAnnotation(expectedType);
+
+    if (string.IsNullOrEmpty(expectedType) || expectedType == "any")
+    {
+      return true;
+    }
+
+    if (value is ArrayLiteral arrayLiteral)
+    {
+      if (IsArrayType(expectedType))
+      {
+        ValidateArrayElementTypes(arrayLiteral, GetCollectionElementType(expectedType)!, "array literal");
+        return true;
+      }
+
+      if (IsSetType(expectedType))
+      {
+        foreach (var element in arrayLiteral.Elements)
+        {
+          if (!IsTypeCompatible(element, GetCollectionElementType(expectedType)!))
+          {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      return false;
+    }
+
+    if (value is ObjectLiteralExpression objectLiteral)
+    {
+      if (expectedType == "object")
+      {
+        return true;
+      }
+
+      if (_structuredTypes.ContainsKey(expectedType))
+      {
+        return ValidateStructuredObjectLiteral(objectLiteral, expectedType);
+      }
+
+      if (IsMapType(expectedType) || IsDictionaryType(expectedType))
+      {
+        var valueType = GetMapValueType(expectedType) ?? "any";
+        return objectLiteral.Properties.All(property => IsTypeCompatible(property.Value, valueType));
+      }
+
+      return false;
+    }
+
+    if (value is JsonParseExpression or YamlParseExpression)
+    {
+      return expectedType == "object" ||
+             _structuredTypes.ContainsKey(expectedType) ||
+             IsMapType(expectedType) ||
+             IsDictionaryType(expectedType);
+    }
+
+    var actualType = NormalizeTypeAnnotation(InferExpressionType(value));
+    if (string.IsNullOrEmpty(actualType) || actualType == "unknown" || actualType == "any")
+    {
+      return true;
+    }
+
+    if (actualType == expectedType)
+    {
+      return true;
+    }
+
+    if (expectedType == "object" &&
+        (actualType == "object" || _structuredTypes.ContainsKey(actualType) || IsMapType(actualType) || IsDictionaryType(actualType)))
+    {
+      return true;
+    }
+
+    if (IsArrayType(expectedType) && IsArrayType(actualType))
+    {
+      var expectedElementType = GetCollectionElementType(expectedType)!;
+      var actualElementType = GetCollectionElementType(actualType)!;
+      return expectedElementType == "any" || actualElementType == "unknown" || expectedElementType == actualElementType;
+    }
+
+    if (IsSetType(expectedType) && IsSetType(actualType))
+    {
+      var expectedElementType = GetCollectionElementType(expectedType)!;
+      var actualElementType = GetCollectionElementType(actualType)!;
+      return expectedElementType == "any" || actualElementType == "unknown" || expectedElementType == actualElementType;
+    }
+
+    if ((IsMapType(expectedType) || IsDictionaryType(expectedType)) &&
+        (IsMapType(actualType) || IsDictionaryType(actualType)))
+    {
+      return GetMapValueType(expectedType) == GetMapValueType(actualType);
+    }
+
+    return false;
+  }
+
+  private bool ValidateStructuredObjectLiteral(ObjectLiteralExpression objectLiteral, string structuredTypeName)
+  {
+    var declaration = _structuredTypes[structuredTypeName];
+
+    foreach (var field in declaration.Fields)
+    {
+      var property = objectLiteral.Properties.FirstOrDefault(candidate => candidate.Name == field.Name);
+      if (property == null)
+      {
+        throw new InvalidOperationException($"Missing required field '{field.Name}' for type '{structuredTypeName}'.");
+      }
+
+      if (!IsTypeCompatible(property.Value, field.Type))
+      {
+        var actualType = InferExpressionType(property.Value);
+        throw new InvalidOperationException($"Field '{field.Name}' in type '{structuredTypeName}' expects '{field.Type}' but found '{actualType}'.");
       }
     }
-    // Add more checks for other expression types as needed
+
+    foreach (var property in objectLiteral.Properties)
+    {
+      if (!declaration.Fields.Any(field => field.Name == property.Name))
+      {
+        throw new InvalidOperationException($"Unknown field '{property.Name}' for type '{structuredTypeName}'.");
+      }
+    }
+
+    return true;
+  }
+
+  private bool IsArrayType(string type) => NormalizeTypeAnnotation(type).EndsWith("[]");
+
+  private bool IsSetType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("set<") && type.EndsWith(">");
+  }
+
+  private bool IsMapType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("map<") && type.EndsWith(">");
+  }
+
+  private bool IsDictionaryType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("dictionary<") && type.EndsWith(">");
+  }
+
+  private string? GetCollectionElementType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    if (IsArrayType(type))
+    {
+      return type[..^2];
+    }
+
+    if (IsSetType(type))
+    {
+      return type[4..^1];
+    }
+
+    return null;
+  }
+
+  private string? GetMapValueType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    if (!IsMapType(type) && !IsDictionaryType(type))
+    {
+      return null;
+    }
+
+    var genericContent = type[(type.IndexOf('<') + 1)..^1];
+    var genericParts = SplitByComma(genericContent);
+    return genericParts.Count == 2 ? NormalizeTypeAnnotation(genericParts[1]) : null;
+  }
+
+  private string? ResolveSchemaName(Expression expression)
+  {
+    return expression switch
+    {
+      VariableExpression variable => variable.Name,
+      LiteralExpression literal when literal.Type == "string" => literal.Value,
+      _ => null
+    };
   }
 
   private bool IsRawBashStatement(string line)

@@ -1,3 +1,5 @@
+using System.Linq;
+
 public partial class Compiler
 {
   private bool _hasArgsUsage = false;
@@ -19,10 +21,13 @@ public partial class Compiler
   private int _uniqueIdCounter = 0;
   private int _tryCatchCounter = 0;
   private bool _inTryBlock = false;
+  private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
+  private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
 
   public string Compile(ProgramNode program)
   {
     ResetState();
+    CollectStructuredTypes(program);
 
     var lines = new List<string>
     {
@@ -70,6 +75,17 @@ public partial class Compiler
     _uniqueIdCounter = 0;
     _tryCatchCounter = 0;
     _inTryBlock = false;
+    _structuredTypes.Clear();
+    _variableTypeScopes.Clear();
+    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+  }
+
+  private void CollectStructuredTypes(ProgramNode program)
+  {
+    foreach (var declaration in program.Statements.OfType<StructuredTypeDeclaration>())
+    {
+      _structuredTypes[declaration.Name] = declaration;
+    }
   }
 
   private List<string> GenerateArgumentParsingInfrastructure()

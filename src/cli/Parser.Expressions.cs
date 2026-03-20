@@ -254,6 +254,33 @@ public partial class Parser
       return new LiteralExpression(input, "boolean");
     }
 
+    // Object literal: { name: "Utah", retries: 3 }
+    if (input.StartsWith("{") && input.EndsWith("}"))
+    {
+      var content = input.Substring(1, input.Length - 2).Trim();
+      var properties = new List<ObjectLiteralProperty>();
+
+      if (!string.IsNullOrEmpty(content))
+      {
+        foreach (var propertyEntry in SplitByComma(content))
+        {
+          var separatorIndex = FindTopLevelSeparator(propertyEntry, ':');
+          if (separatorIndex <= 0)
+          {
+            throw new InvalidOperationException($"Invalid object literal property: {propertyEntry}");
+          }
+
+          var rawName = propertyEntry[..separatorIndex].Trim();
+          var propertyName = StripQuotes(rawName);
+          var propertyValue = ParseExpression(propertyEntry[(separatorIndex + 1)..].Trim());
+
+          properties.Add(new ObjectLiteralProperty(propertyName, propertyValue));
+        }
+      }
+
+      return new ObjectLiteralExpression(properties);
+    }
+
     // Array literal: [1, 2, 3] or ["a", "b", "c"]
     if (input.StartsWith("[") && input.EndsWith("]"))
     {
@@ -580,6 +607,61 @@ public partial class Parser
         var lambdaExpr = ParseLambdaExpression(args[1].Trim());
 
         return new ArrayForEachExpression(arrayExpr, lambdaExpr);
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("map(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(4, methodPart.Length - 5).Trim());
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.map() requires exactly 2 arguments: array and callback");
+
+        return new ArrayMapExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()));
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("filter(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(7, methodPart.Length - 8).Trim());
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.filter() requires exactly 2 arguments: array and callback");
+
+        return new ArrayFilterExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()));
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("reduce(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(7, methodPart.Length - 8).Trim());
+        if (args.Count < 2 || args.Count > 3)
+          throw new InvalidOperationException("array.reduce() requires 2 or 3 arguments: array, callback, initialValue?");
+
+        var initialValue = args.Count == 3 ? ParseExpression(args[2].Trim()) : null;
+        return new ArrayReduceExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()), initialValue);
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("find(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(5, methodPart.Length - 6).Trim());
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.find() requires exactly 2 arguments: array and callback");
+
+        return new ArrayFindExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()));
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("some(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(5, methodPart.Length - 6).Trim());
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.some() requires exactly 2 arguments: array and callback");
+
+        return new ArraySomeExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()));
+      }
+
+      if (objectName == "array" && methodPart.StartsWith("every(") && methodPart.EndsWith(")"))
+      {
+        var args = SplitByComma(methodPart.Substring(6, methodPart.Length - 7).Trim());
+        if (args.Count != 2)
+          throw new InvalidOperationException("array.every() requires exactly 2 arguments: array and callback");
+
+        return new ArrayEveryExpression(ParseExpression(args[0].Trim()), ParseLambdaExpression(args[1].Trim()));
       }
 
       // Handle timer methods
@@ -1846,15 +1928,17 @@ public partial class Parser
       }
     }
 
-    // Object property access (obj.property) for simple property access only
-    // Only match simple identifier.property patterns, not complex expressions or string literals
-    if (Regex.IsMatch(input, @"^\w+\.\w+$"))
+    // Object property access (obj.property or obj.nested.property)
+    if (Regex.IsMatch(input, @"^\w+(\.\w+)+$"))
     {
-      var dotIndex = input.IndexOf('.');
-      var objectName = input.Substring(0, dotIndex);
-      var propertyName = input.Substring(dotIndex + 1);
-      var objectExpr = new VariableExpression(objectName);
-      return new ObjectPropertyAccessExpression(objectExpr, propertyName);
+      var parts = input.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+      Expression current = new VariableExpression(parts[0]);
+      for (int index = 1; index < parts.Length; index++)
+      {
+        current = new ObjectPropertyAccessExpression(current, parts[index]);
+      }
+
+      return current;
     }
 
     // Variable reference
@@ -2015,6 +2099,7 @@ public partial class Parser
     var parts = new List<string>();
     var current = "";
     var depth = 0;
+    var angleDepth = 0;
     var inQuotes = false;
 
     for (int i = 0; i < input.Length; i++)
@@ -2032,9 +2117,13 @@ public partial class Parser
           depth++;
         else if (ch == ')' || ch == ']' || ch == '}')
           depth--;
+        else if (ch == '<')
+          angleDepth++;
+        else if (ch == '>' && angleDepth > 0)
+          angleDepth--;
       }
 
-      if (ch == ',' && depth == 0 && !inQuotes)
+      if (ch == ',' && depth == 0 && angleDepth == 0 && !inQuotes)
       {
         parts.Add(current.Trim());
         current = "";
@@ -2051,6 +2140,40 @@ public partial class Parser
     }
 
     return parts;
+  }
+
+  private int FindTopLevelSeparator(string input, char separator)
+  {
+    int depth = 0;
+    int angleDepth = 0;
+    bool inQuotes = false;
+
+    for (int i = 0; i < input.Length; i++)
+    {
+      var ch = input[i];
+      if (ch == '"' && (i == 0 || input[i - 1] != '\\'))
+      {
+        inQuotes = !inQuotes;
+      }
+
+      if (inQuotes)
+      {
+        continue;
+      }
+
+      if (ch == '(' || ch == '[' || ch == '{')
+        depth++;
+      else if (ch == ')' || ch == ']' || ch == '}')
+        depth--;
+      else if (ch == '<')
+        angleDepth++;
+      else if (ch == '>' && angleDepth > 0)
+        angleDepth--;
+      else if (ch == separator && depth == 0 && angleDepth == 0)
+        return i;
+    }
+
+    return -1;
   }
 
   private List<string> SplitByOperator(string input, params string[] operators)

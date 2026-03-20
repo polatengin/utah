@@ -31,6 +31,8 @@ public partial class Compiler
         return lit.Type == "string" ? $"\"{lit.Value}\"" : lit.Value;
       case VariableExpression var:
         return $"${{{var.Name}}}";
+      case ObjectLiteralExpression objectLiteral:
+        return CompileObjectLiteralExpression(objectLiteral);
       case BinaryExpression bin:
         return CompileBinaryExpression(bin);
       case UnaryExpression un:
@@ -167,6 +169,18 @@ public partial class Compiler
         return CompileArrayUniqueExpression(arrayUnique);
       case ArrayForEachExpression arrayForEach:
         return CompileArrayForEachExpression(arrayForEach);
+      case ArrayMapExpression arrayMap:
+        return CompileArrayMapExpression(arrayMap);
+      case ArrayFilterExpression arrayFilter:
+        return CompileArrayFilterExpression(arrayFilter);
+      case ArrayReduceExpression arrayReduce:
+        return CompileArrayReduceExpression(arrayReduce);
+      case ArrayFindExpression arrayFind:
+        return CompileArrayFindExpression(arrayFind);
+      case ArraySomeExpression arraySome:
+        return CompileArraySomeExpression(arraySome);
+      case ArrayEveryExpression arrayEvery:
+        return CompileArrayEveryExpression(arrayEvery);
       case FsDirnameExpression fsDirname:
         return CompileFsDirnameExpression(fsDirname);
       case FsFileNameExpression fsFileName:
@@ -411,8 +425,14 @@ public partial class Compiler
 
   private string CompileObjectPropertyAccessExpression(ObjectPropertyAccessExpression objectProperty)
   {
-    var propertyName = objectProperty.PropertyName;
+    if (TryGetPropertyPath(objectProperty, out var rootName, out var path) &&
+        IsJsonBackedObjectType(GetVariableType(rootName)))
+    {
+      var jqPath = string.Join("", path.Select(segment => $".{segment}"));
+      return $"$(echo \"${{{rootName}}}\" | jq -cr '{jqPath}')";
+    }
 
+    var propertyName = objectProperty.PropertyName;
     if (objectProperty.Object is VariableExpression varExpr)
     {
       // For SSH connection objects, conn contains the array name (e.g., "_utah_ssh_conn_1")
@@ -1489,6 +1509,11 @@ _utah_wait_for_exit {pidReference} {timeout}
       }
     }
 
+    if (TryCompileSchemaOrCollectionFunction(func, out var builtInFunction))
+    {
+      return builtInFunction;
+    }
+
     // In bash, function calls in expressions use command substitution
     var bashArgs = func.Arguments.Select(arg =>
     {
@@ -1509,6 +1534,324 @@ _utah_wait_for_exit {pidReference} {timeout}
     {
       return $"$({func.Name})";
     }
+  }
+
+  private bool TryCompileSchemaOrCollectionFunction(FunctionCall func, out string compiled)
+  {
+    switch (func.Name)
+    {
+      case "schema.isValid":
+        compiled = CompileSchemaIsValidFunction(func);
+        return true;
+      case "schema.validate":
+        compiled = CompileSchemaValidateFunction(func);
+        return true;
+      case "map.get":
+      case "dictionary.get":
+        compiled = CompileMapGetFunction(func);
+        return true;
+      case "map.has":
+      case "dictionary.has":
+        compiled = CompileMapHasFunction(func);
+        return true;
+      case "map.set":
+      case "dictionary.set":
+        compiled = CompileMapSetFunction(func);
+        return true;
+      case "map.delete":
+      case "dictionary.delete":
+        compiled = CompileMapDeleteFunction(func);
+        return true;
+      case "map.keys":
+      case "dictionary.keys":
+        compiled = CompileMapKeysFunction(func);
+        return true;
+      case "map.values":
+      case "dictionary.values":
+        compiled = CompileMapValuesFunction(func);
+        return true;
+      case "set.has":
+        compiled = CompileSetHasFunction(func);
+        return true;
+      case "set.add":
+        compiled = CompileSetAddFunction(func);
+        return true;
+      case "set.remove":
+        compiled = CompileSetRemoveFunction(func);
+        return true;
+      case "set.union":
+        compiled = CompileSetUnionFunction(func);
+        return true;
+      case "set.intersection":
+        compiled = CompileSetIntersectionFunction(func);
+        return true;
+      case "set.difference":
+        compiled = CompileSetDifferenceFunction(func);
+        return true;
+      default:
+        compiled = "";
+        return false;
+    }
+  }
+
+  private string CompileSchemaIsValidFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("schema.isValid() requires exactly 2 arguments");
+
+    var schemaName = ResolveSchemaName(func.Arguments[1]) ??
+                     throw new InvalidOperationException("schema.isValid() requires a schema name or string literal as the second argument");
+    var validator = BuildSchemaValidatorFilter(schemaName);
+    var jsonValue = BuildJsonSourceExpression(func.Arguments[0]);
+
+    return $"$(echo {QuoteForBashWord(jsonValue)} | jq -ce '{validator}' >/dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileSchemaValidateFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("schema.validate() requires exactly 2 arguments");
+
+    var schemaName = ResolveSchemaName(func.Arguments[1]) ??
+                     throw new InvalidOperationException("schema.validate() requires a schema name or string literal as the second argument");
+    var validator = BuildSchemaValidatorFilter(schemaName);
+    var jsonValue = BuildJsonSourceExpression(func.Arguments[0]);
+    var valueVar = $"_utah_schema_value_{GetUniqueId()}";
+
+    return $"$({valueVar}={QuoteForBashWord(jsonValue)}; if echo \"${{{valueVar}}}\" | jq -ce '{validator}' >/dev/null 2>&1; then echo \"${{{valueVar}}}\"; else echo \"Schema validation failed for {schemaName}\" >&2; exit 1; fi)";
+  }
+
+  private string CompileMapGetFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 2 arguments");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    var keyValue = CompileExpression(func.Arguments[1]);
+    return $"$(echo {QuoteForBashWord(mapValue)} | jq -cr --arg key {QuoteForBashWord(keyValue)} '.[$key]')";
+  }
+
+  private string CompileMapHasFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 2 arguments");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    var keyValue = CompileExpression(func.Arguments[1]);
+    return $"$(echo {QuoteForBashWord(mapValue)} | jq -cr --arg key {QuoteForBashWord(keyValue)} 'has($key)')";
+  }
+
+  private string CompileMapSetFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 3)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 3 arguments");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    var keyValue = CompileExpression(func.Arguments[1]);
+    var valueArgName = $"_utah_map_value_{GetUniqueId()}";
+    var valueArgument = BuildJqArgumentClause(func.Arguments[2], valueArgName);
+    return $"$(echo {QuoteForBashWord(mapValue)} | jq -c --arg key {QuoteForBashWord(keyValue)} {valueArgument} '.[$key] = ${valueArgName}')";
+  }
+
+  private string CompileMapDeleteFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 2 arguments");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    var keyValue = CompileExpression(func.Arguments[1]);
+    return $"$(echo {QuoteForBashWord(mapValue)} | jq -c --arg key {QuoteForBashWord(keyValue)} 'del(.[$key])')";
+  }
+
+  private string CompileMapKeysFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 1)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 1 argument");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    return $"($(echo {QuoteForBashWord(mapValue)} | jq -r 'keys[]'))";
+  }
+
+  private string CompileMapValuesFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 1)
+      throw new InvalidOperationException($"{func.Name}() requires exactly 1 argument");
+
+    var mapValue = BuildJsonSourceExpression(func.Arguments[0]);
+    return $"($(echo {QuoteForBashWord(mapValue)} | jq -cr '.[]'))";
+  }
+
+  private string CompileSetHasFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.has() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_set_has_source_{uniqueId}";
+    var needleVar = $"_utah_set_has_needle_{uniqueId}";
+    var itemVar = $"_utah_set_has_item_{uniqueId}";
+    var needleValue = CompileExpression(func.Arguments[1]);
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{needleVar}={needleValue}; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{needleVar}}}\" ]; then echo \"true\"; exit 0; fi; done; echo \"false\")";
+  }
+
+  private string CompileSetAddFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.add() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_set_add_source_{uniqueId}";
+    var resultArrayVar = $"_utah_set_add_result_{uniqueId}";
+    var valueVar = $"_utah_set_add_value_{uniqueId}";
+    var itemVar = $"_utah_set_add_item_{uniqueId}";
+    var existsVar = $"_utah_set_add_exists_{uniqueId}";
+    var valueExpression = CompileExpression(func.Arguments[1]);
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(\"${{{sourceArrayVar}[@]}}\"); {valueVar}={valueExpression}; {existsVar}=false; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{valueVar}}}\" ]; then {existsVar}=true; break; fi; done; if [ \"${{{existsVar}}}\" != \"true\" ]; then {resultArrayVar}+=(\"${{{valueVar}}}\"); fi; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+  }
+
+  private string CompileSetRemoveFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.remove() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_set_remove_source_{uniqueId}";
+    var resultArrayVar = $"_utah_set_remove_result_{uniqueId}";
+    var valueVar = $"_utah_set_remove_value_{uniqueId}";
+    var itemVar = $"_utah_set_remove_item_{uniqueId}";
+    var valueExpression = CompileExpression(func.Arguments[1]);
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, func.Arguments[0])}{resultArrayVar}=(); {valueVar}={valueExpression}; for {itemVar} in \"${{{sourceArrayVar}[@]}}\"; do if [ \"${{{itemVar}}}\" != \"${{{valueVar}}}\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+  }
+
+  private string CompileSetUnionFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.union() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var leftVar = $"_utah_set_union_left_{uniqueId}";
+    var rightVar = $"_utah_set_union_right_{uniqueId}";
+    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}printf '%s\\n' \"${{{leftVar}[@]}}\" \"${{{rightVar}[@]}}\" | awk '!seen[$0]++')";
+  }
+
+  private string CompileSetIntersectionFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.intersection() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var leftVar = $"_utah_set_intersection_left_{uniqueId}";
+    var rightVar = $"_utah_set_intersection_right_{uniqueId}";
+    var itemVar = $"_utah_set_intersection_item_{uniqueId}";
+    var otherVar = $"_utah_set_intersection_other_{uniqueId}";
+    var resultVar = $"_utah_set_intersection_result_{uniqueId}";
+    var foundVar = $"_utah_set_intersection_found_{uniqueId}";
+
+    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" = \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++')";
+  }
+
+  private string CompileSetDifferenceFunction(FunctionCall func)
+  {
+    if (func.Arguments.Count != 2)
+      throw new InvalidOperationException("set.difference() requires exactly 2 arguments");
+
+    var uniqueId = GetUniqueId();
+    var leftVar = $"_utah_set_difference_left_{uniqueId}";
+    var rightVar = $"_utah_set_difference_right_{uniqueId}";
+    var itemVar = $"_utah_set_difference_item_{uniqueId}";
+    var otherVar = $"_utah_set_difference_other_{uniqueId}";
+    var resultVar = $"_utah_set_difference_result_{uniqueId}";
+    var foundVar = $"_utah_set_difference_found_{uniqueId}";
+
+    return $"$({BuildArrayMaterializationSnippet(leftVar, func.Arguments[0])}{BuildArrayMaterializationSnippet(rightVar, func.Arguments[1])}{resultVar}=(); for {itemVar} in \"${{{leftVar}[@]}}\"; do {foundVar}=false; for {otherVar} in \"${{{rightVar}[@]}}\"; do if [ \"${{{itemVar}}}\" = \"${{{otherVar}}}\" ]; then {foundVar}=true; break; fi; done; if [ \"${{{foundVar}}}\" != \"true\" ]; then {resultVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultVar}[@]}}\" | awk '!seen[$0]++')";
+  }
+
+  private string BuildJqArgumentClause(Expression expression, string argumentName)
+  {
+    var type = InferExpressionType(expression);
+    if (expression is LiteralExpression literal && literal.Type == "string")
+    {
+      return $"--arg {argumentName} {QuoteForBashWord(CompileExpression(expression))}";
+    }
+
+    if (type == "number" || type == "boolean" || IsJsonBackedObjectType(type) || IsArrayType(type) || IsSetType(type) ||
+        expression is ObjectLiteralExpression || expression is ArrayLiteral)
+    {
+      return $"--argjson {argumentName} {QuoteForBashWord(BuildJsonSourceExpression(expression))}";
+    }
+
+    return $"--arg {argumentName} {QuoteForBashWord(CompileExpression(expression))}";
+  }
+
+  private string BuildJsonSourceExpression(Expression expression)
+  {
+    if (expression is VariableExpression variableExpression)
+    {
+      var variableType = GetVariableType(variableExpression.Name) ?? "";
+      if (IsArrayType(variableType) || IsSetType(variableType))
+      {
+        return BuildArrayVariableJsonExpression(variableExpression.Name);
+      }
+    }
+
+    if (expression is ArrayLiteral arrayLiteral)
+    {
+      var build = BuildJqValueExpression(arrayLiteral, $"_utah_json_array_{GetUniqueId()}");
+      var argsPrefix = build.Arguments.Count > 0 ? string.Join(" ", build.Arguments) + " " : "";
+      return $"$(jq -cn {argsPrefix}'{build.Expression}')";
+    }
+
+    return CompileExpression(expression);
+  }
+
+  private string BuildSchemaValidatorFilter(string typeName)
+  {
+    typeName = NormalizeTypeAnnotation(typeName);
+
+    if (string.IsNullOrEmpty(typeName) || typeName == "any" || typeName == "unknown")
+    {
+      return "true";
+    }
+
+    if (typeName == "string" || typeName == "number" || typeName == "boolean" || typeName == "object")
+    {
+      return $"type == \"{typeName}\"";
+    }
+
+    if (IsArrayType(typeName))
+    {
+      var elementFilter = BuildSchemaValidatorFilter(GetCollectionElementType(typeName)!);
+      return $"type == \"array\" and all(.[]; {elementFilter})";
+    }
+
+    if (IsSetType(typeName))
+    {
+      var elementFilter = BuildSchemaValidatorFilter(GetCollectionElementType(typeName)!);
+      return $"type == \"array\" and all(.[]; {elementFilter}) and ((unique | length) == length)";
+    }
+
+    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    {
+      var valueFilter = BuildSchemaValidatorFilter(GetMapValueType(typeName) ?? "any");
+      return $"type == \"object\" and all(.[]; {valueFilter})";
+    }
+
+    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    {
+      var expectedKeys = string.Join(", ", declaration.Fields.Select(field => $"\"{EscapeJqString(field.Name)}\""));
+      var fieldChecks = declaration.Fields
+        .Select(field => $"(.{field.Name} | {BuildSchemaValidatorFilter(field.Type)})")
+        .ToList();
+
+      var conditions = new List<string> { "type == \"object\"", $"((keys | sort) == [{expectedKeys}])" };
+      conditions.AddRange(fieldChecks);
+      return string.Join(" and ", conditions);
+    }
+
+    throw new InvalidOperationException($"Unknown schema type '{typeName}'.");
   }
 
   private string ExtractVariableName(string varExpr)
@@ -3402,6 +3745,488 @@ _utah_validate_in_range {value} {min} {max}
 
     // Use associative array to track seen elements, preserving order
     return $"($(declare -A _utah_seen; for item in \"${{{varName}[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
+  }
+
+  private sealed record LambdaParameterBinding(string Name, string? Type);
+  private sealed record JqBuildResult(string Expression, List<string> Arguments);
+
+  private string CompileArrayMapExpression(ArrayMapExpression arrayMap)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_map_source_{uniqueId}";
+    var resultArrayVar = $"_utah_map_result_{uniqueId}";
+    var valueVar = $"_utah_map_value_{uniqueId}";
+    var loopIndexVar = $"_utah_map_index_{uniqueId}";
+    var itemVar = arrayMap.Callback.Parameters.Count > 0 ? arrayMap.Callback.Parameters[0] : "item";
+    var indexVar = arrayMap.Callback.Parameters.Count > 1 ? arrayMap.Callback.Parameters[1] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayMap.Array)) ?? "unknown";
+    var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
+    if (indexVar != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arrayMap.Callback, lambdaParameters);
+    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayMap.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{valueVar}=$({lambdaCommand}); {resultArrayVar}+=(\"${{{valueVar}}}\"); done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+  }
+
+  private string CompileArrayFilterExpression(ArrayFilterExpression arrayFilter)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_filter_source_{uniqueId}";
+    var resultArrayVar = $"_utah_filter_result_{uniqueId}";
+    var predicateVar = $"_utah_filter_match_{uniqueId}";
+    var loopIndexVar = $"_utah_filter_index_{uniqueId}";
+    var itemVar = arrayFilter.Callback.Parameters.Count > 0 ? arrayFilter.Callback.Parameters[0] : "item";
+    var indexVar = arrayFilter.Callback.Parameters.Count > 1 ? arrayFilter.Callback.Parameters[1] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFilter.Array)) ?? "unknown";
+    var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
+    if (indexVar != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arrayFilter.Callback, lambdaParameters);
+    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayFilter.Array)}{resultArrayVar}=(); for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then {resultArrayVar}+=(\"${{{itemVar}}}\"); fi; done; printf '%s\\n' \"${{{resultArrayVar}[@]}}\")";
+  }
+
+  private string CompileArrayReduceExpression(ArrayReduceExpression arrayReduce)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_reduce_source_{uniqueId}";
+    var accumulatorVar = $"_utah_reduce_acc_{uniqueId}";
+    var loopIndexVar = $"_utah_reduce_index_{uniqueId}";
+    var accParam = arrayReduce.Callback.Parameters.Count > 0 ? arrayReduce.Callback.Parameters[0] : "acc";
+    var itemParam = arrayReduce.Callback.Parameters.Count > 1 ? arrayReduce.Callback.Parameters[1] : "item";
+    var indexParam = arrayReduce.Callback.Parameters.Count > 2 ? arrayReduce.Callback.Parameters[2] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayReduce.Array)) ?? "unknown";
+    var accumulatorType = arrayReduce.InitialValue != null ? InferExpressionType(arrayReduce.InitialValue) : elementType;
+    var lambdaParameters = new List<LambdaParameterBinding>
+    {
+      new(accParam, accumulatorType),
+      new(itemParam, elementType)
+    };
+    if (indexParam != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexParam, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arrayReduce.Callback, lambdaParameters);
+    var initialValue = arrayReduce.InitialValue != null ? CompileExpression(arrayReduce.InitialValue) : null;
+
+    if (initialValue != null)
+    {
+      var indexAssignment = indexParam != null ? $"{indexParam}={loopIndexVar}; " : "";
+      return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayReduce.Array)}{accumulatorVar}={initialValue}; for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {accParam}=\"${{{accumulatorVar}}}\"; {itemParam}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{accumulatorVar}=$({lambdaCommand}); done; echo \"${{{accumulatorVar}}}\")";
+    }
+
+    var emptyResult = "echo \"\"";
+    var noInitialIndexAssignment = indexParam != null ? $"{indexParam}={loopIndexVar}; " : "";
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayReduce.Array)}if [ ${{#{sourceArrayVar}[@]}} -eq 0 ]; then {emptyResult}; else {accumulatorVar}=\"${{{sourceArrayVar}[0]}}\"; for (({loopIndexVar}=1; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {accParam}=\"${{{accumulatorVar}}}\"; {itemParam}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {noInitialIndexAssignment}{accumulatorVar}=$({lambdaCommand}); done; echo \"${{{accumulatorVar}}}\"; fi)";
+  }
+
+  private string CompileArrayFindExpression(ArrayFindExpression arrayFind)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_find_source_{uniqueId}";
+    var predicateVar = $"_utah_find_match_{uniqueId}";
+    var loopIndexVar = $"_utah_find_index_{uniqueId}";
+    var itemVar = arrayFind.Callback.Parameters.Count > 0 ? arrayFind.Callback.Parameters[0] : "item";
+    var indexVar = arrayFind.Callback.Parameters.Count > 1 ? arrayFind.Callback.Parameters[1] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFind.Array)) ?? "unknown";
+    var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
+    if (indexVar != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arrayFind.Callback, lambdaParameters);
+    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayFind.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then echo \"${{{itemVar}}}\"; break; fi; done)";
+  }
+
+  private string CompileArraySomeExpression(ArraySomeExpression arraySome)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_some_source_{uniqueId}";
+    var predicateVar = $"_utah_some_match_{uniqueId}";
+    var loopIndexVar = $"_utah_some_index_{uniqueId}";
+    var itemVar = arraySome.Callback.Parameters.Count > 0 ? arraySome.Callback.Parameters[0] : "item";
+    var indexVar = arraySome.Callback.Parameters.Count > 1 ? arraySome.Callback.Parameters[1] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arraySome.Array)) ?? "unknown";
+    var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
+    if (indexVar != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arraySome.Callback, lambdaParameters);
+    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arraySome.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" = \"true\" ]; then echo \"true\"; exit 0; fi; done; echo \"false\")";
+  }
+
+  private string CompileArrayEveryExpression(ArrayEveryExpression arrayEvery)
+  {
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_every_source_{uniqueId}";
+    var predicateVar = $"_utah_every_match_{uniqueId}";
+    var loopIndexVar = $"_utah_every_index_{uniqueId}";
+    var itemVar = arrayEvery.Callback.Parameters.Count > 0 ? arrayEvery.Callback.Parameters[0] : "item";
+    var indexVar = arrayEvery.Callback.Parameters.Count > 1 ? arrayEvery.Callback.Parameters[1] : null;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayEvery.Array)) ?? "unknown";
+    var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
+    if (indexVar != null)
+    {
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+    }
+
+    var lambdaCommand = CompileLambdaCommand(arrayEvery.Callback, lambdaParameters);
+    var indexAssignment = indexVar != null ? $"{indexVar}={loopIndexVar}; " : "";
+
+    return $"$({BuildArrayMaterializationSnippet(sourceArrayVar, arrayEvery.Array)}for (({loopIndexVar}=0; {loopIndexVar}<${{#{sourceArrayVar}[@]}}; {loopIndexVar}++)); do {itemVar}=\"${{{sourceArrayVar}[{loopIndexVar}]}}\"; {indexAssignment}{predicateVar}=$({lambdaCommand}); if [ \"${{{predicateVar}}}\" != \"true\" ]; then echo \"false\"; exit 0; fi; done; echo \"true\")";
+  }
+
+  private string CompileLambdaCommand(LambdaExpression lambda, IEnumerable<LambdaParameterBinding> parameters)
+  {
+    PushVariableTypeScope();
+    foreach (var parameter in parameters)
+    {
+      RegisterVariableType(parameter.Name, parameter.Type);
+    }
+
+    var lines = new List<string>();
+    foreach (var statement in lambda.Body)
+    {
+      lines.AddRange(CompileStatement(statement).Where(line => !string.IsNullOrWhiteSpace(line)));
+    }
+
+    PopVariableTypeScope();
+
+    return lines.Count == 0 ? "echo \"\"" : string.Join("; ", lines);
+  }
+
+  private string BuildArrayMaterializationSnippet(string targetVar, Expression arrayExpression)
+  {
+    if (arrayExpression is VariableExpression variableExpression)
+    {
+      return $"{targetVar}=(\"${{{variableExpression.Name}[@]}}\"); ";
+    }
+
+    var compiled = CompileExpression(arrayExpression);
+    if (compiled.StartsWith("("))
+    {
+      return $"{targetVar}={compiled}; ";
+    }
+
+    return $"{targetVar}=({compiled}); ";
+  }
+
+  private void AddArrayMaterializationLines(List<string> lines, string targetVar, Expression arrayExpression)
+  {
+    lines.Add(BuildArrayMaterializationSnippet(targetVar, arrayExpression).TrimEnd(' ', ';'));
+  }
+
+  private void PushVariableTypeScope()
+  {
+    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+  }
+
+  private void PopVariableTypeScope()
+  {
+    if (_variableTypeScopes.Count > 1)
+    {
+      _variableTypeScopes.Pop();
+    }
+  }
+
+  private void RegisterVariableType(string variableName, string? type)
+  {
+    if (string.IsNullOrWhiteSpace(variableName) || string.IsNullOrWhiteSpace(type) || _variableTypeScopes.Count == 0)
+    {
+      return;
+    }
+
+    _variableTypeScopes.Peek()[variableName] = NormalizeTypeAnnotation(type);
+  }
+
+  private string? GetVariableType(string variableName)
+  {
+    foreach (var scope in _variableTypeScopes)
+    {
+      if (scope.TryGetValue(variableName, out var type))
+      {
+        return type;
+      }
+    }
+
+    return null;
+  }
+
+  private string NormalizeTypeAnnotation(string type)
+  {
+    return string.IsNullOrWhiteSpace(type) ? "" : Regex.Replace(type.Trim(), @"\s+", "");
+  }
+
+  private string InferExpressionType(Expression expression)
+  {
+    return expression switch
+    {
+      LiteralExpression literal => literal.Type,
+      MultilineStringExpression => "string",
+      ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
+      ObjectLiteralExpression => "object",
+      VariableExpression variable => GetVariableType(variable.Name) ?? "unknown",
+      JsonParseExpression => "object",
+      YamlParseExpression => "object",
+      ArrayMapExpression => "any[]",
+      ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? "unknown",
+      ArrayReduceExpression => "unknown",
+      ArraySomeExpression => "boolean",
+      ArrayEveryExpression => "boolean",
+      FunctionCall functionCall => InferFunctionCallType(functionCall),
+      ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
+      _ => "unknown"
+    };
+  }
+
+  private string InferFunctionCallType(FunctionCall functionCall)
+  {
+    return functionCall.Name switch
+    {
+      "schema.validate" => functionCall.Arguments.Count >= 2 ? ResolveSchemaName(functionCall.Arguments[1]) ?? "object" : "object",
+      "schema.isValid" => "boolean",
+      "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? "unknown"
+        : "unknown",
+      "map.has" or "dictionary.has" or "set.has" => "boolean",
+      "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
+        ? InferExpressionType(functionCall.Arguments[0])
+        : "unknown",
+      _ => "unknown"
+    };
+  }
+
+  private string InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  {
+    if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
+    {
+      return "unknown";
+    }
+
+    var currentType = GetVariableType(rootName) ?? "unknown";
+    foreach (var segment in path)
+    {
+      currentType = GetStructuredFieldType(currentType, segment) ?? "unknown";
+      if (currentType == "unknown")
+      {
+        break;
+      }
+    }
+
+    return currentType;
+  }
+
+  private bool TryGetPropertyPath(Expression expression, out string rootName, out List<string> path)
+  {
+    rootName = "";
+    path = new List<string>();
+
+    if (expression is VariableExpression variableExpression)
+    {
+      rootName = variableExpression.Name;
+      return true;
+    }
+
+    if (expression is ObjectPropertyAccessExpression propertyAccess &&
+        TryGetPropertyPath(propertyAccess.Object, out rootName, out path))
+    {
+      path.Add(propertyAccess.PropertyName);
+      return true;
+    }
+
+    return false;
+  }
+
+  private string? GetStructuredFieldType(string typeName, string fieldName)
+  {
+    typeName = NormalizeTypeAnnotation(typeName);
+    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    {
+      return declaration.Fields.FirstOrDefault(field => field.Name == fieldName)?.Type;
+    }
+
+    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    {
+      return GetMapValueType(typeName);
+    }
+
+    return null;
+  }
+
+  private bool IsArrayType(string type) => NormalizeTypeAnnotation(type).EndsWith("[]");
+
+  private bool IsSetType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("set<") && type.EndsWith(">");
+  }
+
+  private bool IsMapType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("map<") && type.EndsWith(">");
+  }
+
+  private bool IsDictionaryType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    return type.StartsWith("dictionary<") && type.EndsWith(">");
+  }
+
+  private string? GetCollectionElementType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    if (IsArrayType(type))
+    {
+      return type[..^2];
+    }
+
+    if (IsSetType(type))
+    {
+      return type[4..^1];
+    }
+
+    return null;
+  }
+
+  private string? GetMapValueType(string type)
+  {
+    type = NormalizeTypeAnnotation(type);
+    if (!IsMapType(type) && !IsDictionaryType(type))
+    {
+      return null;
+    }
+
+    var genericContent = type[(type.IndexOf('<') + 1)..^1];
+    var genericParts = genericContent.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    return genericParts.Length == 2 ? NormalizeTypeAnnotation(genericParts[1]) : null;
+  }
+
+  private bool IsJsonBackedObjectType(string? type)
+  {
+    type = NormalizeTypeAnnotation(type ?? "");
+    return type == "object" || _structuredTypes.ContainsKey(type) || IsMapType(type) || IsDictionaryType(type);
+  }
+
+  private string? ResolveSchemaName(Expression expression)
+  {
+    return expression switch
+    {
+      VariableExpression variable => variable.Name,
+      LiteralExpression literal when literal.Type == "string" => literal.Value,
+      _ => null
+    };
+  }
+
+  private string CompileObjectLiteralExpression(ObjectLiteralExpression objectLiteral)
+  {
+    var build = BuildJqValueExpression(objectLiteral, $"_utah_obj_{GetUniqueId()}");
+    var argsPrefix = build.Arguments.Count > 0 ? string.Join(" ", build.Arguments) + " " : "";
+    return $"$(jq -cn {argsPrefix}'{build.Expression}')";
+  }
+
+  private JqBuildResult BuildJqValueExpression(Expression expression, string baseName)
+  {
+    switch (expression)
+    {
+      case LiteralExpression literal when literal.Type == "string":
+        return new JqBuildResult($"\"{EscapeJqString(literal.Value)}\"", new List<string>());
+      case LiteralExpression literal:
+        return new JqBuildResult(literal.Value, new List<string>());
+      case ObjectLiteralExpression objectLiteral:
+      {
+        var args = new List<string>();
+        var properties = new List<string>();
+        for (int index = 0; index < objectLiteral.Properties.Count; index++)
+        {
+          var property = objectLiteral.Properties[index];
+          var child = BuildJqValueExpression(property.Value, $"{baseName}_{property.Name}_{index}");
+          args.AddRange(child.Arguments);
+          properties.Add($"\"{EscapeJqString(property.Name)}\": {child.Expression}");
+        }
+
+        return new JqBuildResult($"{{{string.Join(", ", properties)}}}", args);
+      }
+      case ArrayLiteral arrayLiteral:
+      {
+        var args = new List<string>();
+        var elements = new List<string>();
+        for (int index = 0; index < arrayLiteral.Elements.Count; index++)
+        {
+          var child = BuildJqValueExpression(arrayLiteral.Elements[index], $"{baseName}_{index}");
+          args.AddRange(child.Arguments);
+          elements.Add(child.Expression);
+        }
+
+        return new JqBuildResult($"[{string.Join(", ", elements)}]", args);
+      }
+      case VariableExpression variableExpression when IsArrayType(GetVariableType(variableExpression.Name) ?? "") || IsSetType(GetVariableType(variableExpression.Name) ?? ""):
+      {
+        var argName = SanitizeIdentifier(baseName);
+        var jsonArray = BuildArrayVariableJsonExpression(variableExpression.Name);
+        return new JqBuildResult($"${argName}", new List<string> { $"--argjson {argName} {QuoteForBashWord(jsonArray)}" });
+      }
+      default:
+      {
+        var argName = SanitizeIdentifier(baseName);
+        var compiled = CompileExpression(expression);
+        var type = InferExpressionType(expression);
+
+        if (type == "number" || type == "boolean" || IsJsonBackedObjectType(type))
+        {
+          return new JqBuildResult($"${argName}", new List<string> { $"--argjson {argName} {QuoteForBashWord(compiled)}" });
+        }
+
+        return new JqBuildResult($"${argName}", new List<string> { $"--arg {argName} {QuoteForBashWord(compiled)}" });
+      }
+    }
+  }
+
+  private string BuildArrayVariableJsonExpression(string variableName)
+  {
+    return $"$(printf '%s\\n' \"${{{variableName}[@]}}\" | jq -R . | jq -s .)";
+  }
+
+  private string QuoteForBashWord(string value)
+  {
+    if ((value.StartsWith("\"") && value.EndsWith("\"")) || (value.StartsWith("'") && value.EndsWith("'")))
+    {
+      return value;
+    }
+
+    return $"\"{value}\"";
+  }
+
+  private string SanitizeIdentifier(string value)
+  {
+    var sanitized = Regex.Replace(value, @"[^A-Za-z0-9_]", "_");
+    return string.IsNullOrEmpty(sanitized) ? $"_utah_{GetUniqueId()}" : sanitized;
+  }
+
+  private string EscapeJqString(string value)
+  {
+    return value
+      .Replace("\\", "\\\\")
+      .Replace("\"", "\\\"")
+      .Replace("\n", "\\n")
+      .Replace("\r", "\\r");
   }
 
   private string CompileMultilineStringExpression(MultilineStringExpression multilineStr)

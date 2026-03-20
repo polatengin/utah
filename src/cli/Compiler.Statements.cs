@@ -24,6 +24,10 @@ public partial class Compiler
         // Import statements are resolved at preprocessing time, so we don't generate any code
         break;
 
+      case StructuredTypeDeclaration:
+        // Structured types are compile-time metadata only.
+        break;
+
       case VariableDeclaration v:
         // Special handling for string.split() in array variable declarations
         if (v.Value is StringNamespaceCallExpression stringCall && stringCall.FunctionName == "split")
@@ -64,6 +68,10 @@ public partial class Compiler
         else if (v.Value is SshConnectExpression sshConnect)
         {
           lines.AddRange(CompileSshConnectionDeclaration(v.Name, sshConnect, v.IsConst));
+        }
+        else if (IsSetType(v.Type))
+        {
+          lines.AddRange(CompileSetVariableDeclaration(v));
         }
         else
         {
@@ -115,6 +123,7 @@ public partial class Compiler
             lines.Add($"{v.Name}={expressionValue}");
           }
         }
+        RegisterVariableType(v.Name, !string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value));
         break;
 
       case ExpressionStatement exprStmt:
@@ -262,6 +271,11 @@ public partial class Compiler
         // Create function context for tracking defer statements
         var functionContext = new FunctionContext { Name = f.Name };
         _functionStack.Push(functionContext);
+        PushVariableTypeScope();
+        foreach (var (paramName, paramType) in f.Parameters)
+        {
+          RegisterVariableType(paramName, paramType);
+        }
 
         lines.Add($"{f.Name}() {{");
 
@@ -311,6 +325,7 @@ public partial class Compiler
 
         // Pop function context
         _functionStack.Pop();
+        PopVariableTypeScope();
         break;
 
       case ConsoleLog log:
@@ -950,6 +965,24 @@ public partial class Compiler
 
     // Close the for loop
     lines.Add("done");
+
+    return lines;
+  }
+
+  private List<string> CompileSetVariableDeclaration(VariableDeclaration declaration)
+  {
+    var lines = new List<string>();
+    var uniqueId = GetUniqueId();
+    var sourceArrayVar = $"_utah_set_source_{uniqueId}";
+    var resultArrayVar = declaration.Name;
+
+    AddArrayMaterializationLines(lines, sourceArrayVar, declaration.Value);
+    lines.Add($"{resultArrayVar}=($(printf '%s\n' \"${{{sourceArrayVar}[@]}}\" | awk '!seen[$0]++'))");
+
+    if (declaration.IsConst)
+    {
+      lines.Add($"readonly -a {resultArrayVar}");
+    }
 
     return lines;
   }
