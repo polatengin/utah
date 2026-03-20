@@ -2,11 +2,23 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "make: build-extension",
+      "type": "shell",
+      "command": "make build-extension",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "watch",
       "dependsOn": [
+        "make: build-extension",
         "npm: watch:tsc",
         "npm: esbuild"
       ],
+      "dependsOrder": "sequence",
       "presentation": {
         "reveal": "never"
       },
