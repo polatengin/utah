@@ -1411,6 +1411,30 @@ public partial class Parser
         return new GitStatusExpression();
       }
 
+      // Special handling for git.currentBranch()
+      if (functionName == "git.currentBranch" && string.IsNullOrEmpty(argsContent))
+      {
+        return new GitCurrentBranchExpression();
+      }
+
+      // Special handling for git.isClean()
+      if (functionName == "git.isClean" && string.IsNullOrEmpty(argsContent))
+      {
+        return new GitIsCleanExpression();
+      }
+
+      // Special handling for git.resetToCommit()
+      if (functionName == "git.resetToCommit")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("git.resetToCommit() requires one argument (commit hash)");
+        }
+
+        var commitHashExpr = ParseExpression(argsContent.Trim());
+        return new GitResetToCommitExpression(commitHashExpr);
+      }
+
       // Special handling for ssh.connect()
       if (functionName == "ssh.connect")
       {

@@ -643,6 +643,12 @@ public class FormatterVisitor
         return "git.undoLastCommit()";
       case GitStatusExpression:
         return "git.status()";
+      case GitCurrentBranchExpression:
+        return "git.currentBranch()";
+      case GitIsCleanExpression:
+        return "git.isClean()";
+      case GitResetToCommitExpression gitResetToCommit:
+        return $"git.resetToCommit({VisitExpression(gitResetToCommit.CommitHash)})";
       case SchedulerCronExpression schedulerCron:
         return $"scheduler.cron({VisitExpression(schedulerCron.CronPattern)}, {VisitExpression(schedulerCron.Job)})";
       case LambdaExpression lambda:

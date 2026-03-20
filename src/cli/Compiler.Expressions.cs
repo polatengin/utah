@@ -219,6 +219,12 @@ public partial class Compiler
         return CompileGitUndoLastCommitExpression();
       case GitStatusExpression:
         return CompileGitStatusExpression();
+      case GitCurrentBranchExpression:
+        return CompileGitCurrentBranchExpression();
+      case GitIsCleanExpression:
+        return CompileGitIsCleanExpression();
+      case GitResetToCommitExpression gitResetToCommit:
+        return CompileGitResetToCommitExpression(gitResetToCommit);
       case SshConnectExpression sshConnect:
         return CompileSshConnectExpression(sshConnect);
       case ObjectPropertyAccessExpression objectProperty:
@@ -316,6 +322,33 @@ public partial class Compiler
   private string CompileGitStatusExpression()
   {
     return "$(git status --short)";
+  }
+
+  private string CompileGitCurrentBranchExpression()
+  {
+    return "$(git rev-parse --abbrev-ref HEAD)";
+  }
+
+  private string CompileGitIsCleanExpression()
+  {
+    return "$([ -z \"$(git status --porcelain)\" ] && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileGitResetToCommitExpression(GitResetToCommitExpression expr)
+  {
+    var commitHash = CompileExpression(expr.CommitHash);
+
+    if (expr.CommitHash is LiteralExpression literal && literal.Type == "string")
+    {
+      return $"$(git reset --hard \"{literal.Value}\")";
+    }
+
+    if (expr.CommitHash is VariableExpression varExpr)
+    {
+      return $"$(git reset --hard ${{{varExpr.Name}}})";
+    }
+
+    return $"$(git reset --hard {commitHash})";
   }
 
   private string CompileSshConnectExpression(SshConnectExpression sshConnect)

@@ -1,0 +1,9 @@
+# Test for git.isClean()
+
+let clean: boolean = git.isClean();
+
+if (clean) {
+  console.log("Working directory is clean");
+} else {
+  console.log("Working directory has uncommitted changes");
+}

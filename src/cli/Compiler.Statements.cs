@@ -194,6 +194,26 @@ public partial class Compiler
           {
             lines.Add("git reset --soft HEAD~1");
           }
+          // Special handling for git.resetToCommit() function calls
+          else if (funcCall.Name == "git.resetToCommit")
+          {
+            if (funcCall.Arguments.Count == 1)
+            {
+              var resetHash = CompileExpression(funcCall.Arguments[0]);
+              if (funcCall.Arguments[0] is LiteralExpression resetLiteral && resetLiteral.Type == "string")
+              {
+                lines.Add($"git reset --hard \"{resetLiteral.Value}\"");
+              }
+              else if (funcCall.Arguments[0] is VariableExpression resetVar)
+              {
+                lines.Add($"git reset --hard ${{{resetVar.Name}}}");
+              }
+              else
+              {
+                lines.Add($"git reset --hard {resetHash}");
+              }
+            }
+          }
           else
           {
             var bashArgs = funcCall.Arguments.Select(CompileExpression).ToList();
@@ -216,6 +236,23 @@ public partial class Compiler
         else if (exprStmt.Expression is GitUndoLastCommitExpression)
         {
           lines.Add("git reset --soft HEAD~1");
+        }
+        // Special handling for git.resetToCommit() expressions in statement context
+        else if (exprStmt.Expression is GitResetToCommitExpression gitResetToCommit)
+        {
+          if (gitResetToCommit.CommitHash is LiteralExpression resetLiteral2 && resetLiteral2.Type == "string")
+          {
+            lines.Add($"git reset --hard \"{resetLiteral2.Value}\"");
+          }
+          else if (gitResetToCommit.CommitHash is VariableExpression resetVar2)
+          {
+            lines.Add($"git reset --hard ${{{resetVar2.Name}}}");
+          }
+          else
+          {
+            var resetHash2 = CompileExpression(gitResetToCommit.CommitHash);
+            lines.Add($"git reset --hard {resetHash2}");
+          }
         }
         // Parallel function call
         else if (exprStmt.Expression is ParallelFunctionCall parallelCall)
@@ -405,14 +442,14 @@ public partial class Compiler
           ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
         }
         // Handle boolean function calls (ArrayIsEmpty, ArrayContains, ConsoleIsSudo, etc.)
-        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression || ifs.Condition is GitIsCleanExpression)
         {
           // For boolean functions, check if the result equals "true"
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
         else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
-                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression))
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression || unary.Operand is GitIsCleanExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
           // For negated boolean functions, check if the result equals "false"

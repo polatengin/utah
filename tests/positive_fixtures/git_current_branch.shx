@@ -1,0 +1,4 @@
+# Test for git.currentBranch()
+
+let branch: string = git.currentBranch();
+console.log("Current branch: ${branch}");

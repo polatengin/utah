@@ -1,0 +1,8 @@
+# Test for git.resetToCommit()
+
+# Reset to a specific commit hash
+git.resetToCommit("abc123");
+
+# Reset using a variable
+let commitHash: string = "def456";
+git.resetToCommit(commitHash);

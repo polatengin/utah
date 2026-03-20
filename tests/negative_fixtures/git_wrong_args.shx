@@ -1,0 +1,10 @@
+// Should fail - git built-in function call errors
+
+// git.currentBranch() takes no arguments
+let branch: string = git.currentBranch("main")
+
+// git.isClean() takes no arguments  
+let clean: boolean = git.isClean("path")
+
+// git.resetToCommit() requires exactly one argument
+git.resetToCommit()

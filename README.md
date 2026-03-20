@@ -4433,6 +4433,9 @@ Utah provides git utilities for common version control operations. These functio
 #### Version Control Operations
 
 - `git.undoLastCommit()` - Undo the last commit while preserving changes in the staging area
+- `git.currentBranch()` - Get the name of the current git branch
+- `git.isClean()` - Check if the working directory has no uncommitted changes (returns boolean)
+- `git.resetToCommit(hash)` - Hard reset to a specific commit hash
 
 ### Git Utilities Usage
 
@@ -4440,6 +4443,25 @@ Utah provides git utilities for common version control operations. These functio
 // Undo the last commit (safe - keeps changes staged)
 git.undoLastCommit();
 console.log("Last commit has been undone, changes preserved in staging area");
+
+// Get the current branch name
+let branch: string = git.currentBranch();
+console.log("Currently on branch: ${branch}");
+
+// Check if the working directory is clean
+let isClean: boolean = git.isClean();
+if (isClean) {
+  console.log("Working directory is clean");
+} else {
+  console.log("There are uncommitted changes");
+}
+
+// Reset to a specific commit
+git.resetToCommit("abc123def");
+
+// Reset using a variable
+let targetCommit: string = "HEAD~3";
+git.resetToCommit(targetCommit);
 
 // Use in conditional logic
 let hasChanges: boolean = true; // This would typically come from checking git status
@@ -4535,6 +4557,15 @@ The git utilities transpile to standard git commands:
 ```bash
 # git.undoLastCommit() becomes:
 git reset --soft HEAD~1
+
+# git.currentBranch() becomes:
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# git.isClean() becomes:
+isClean=$([ -z "$(git status --porcelain)" ] && echo "true" || echo "false")
+
+# git.resetToCommit("abc123") becomes:
+git reset --hard "abc123"
 
 # Complete example with error handling:
 gitInstalled=$(command -v git &> /dev/null && echo "true" || echo "false")
@@ -6432,6 +6463,12 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 - [x] `ssh.download()` function for file transfers
 
 - [x] `git.undoLastCommit()` function for undoing the last commit
+
+- [x] `git.currentBranch()` function for getting the current branch name
+
+- [x] `git.isClean()` function for checking if the working directory is clean
+
+- [x] `git.resetToCommit()` function for hard resetting to a specific commit
 
 - [x] `validate.isEmail()` function for email validation
 
