@@ -95,6 +95,13 @@ Utah provides comprehensive built-in functions organized by functionality:
 - **[SSH](ssh.md)** - Secure shell operations
 - **[Utilities](utilities.md)** - Common utility functions
 - **[Argument Parsing](arguments.md)** - CLI argument handling
+- **[Timer](timer.md)** - Execution time measurement
+- **[Scheduler](scheduler.md)** - Cron job scheduling
+
+### Script Configuration
+
+- **[Script Directives](script-directives.md)** - Script metadata and shell options
+- **[Parallel Execution](parallel.md)** - Concurrent function execution
 
 ### Network and Web
 
