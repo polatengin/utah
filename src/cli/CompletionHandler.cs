@@ -28,374 +28,44 @@ public class CompletionHandler : ICompletionHandler
     {
       var context = await AnalyzeCompletionContextAsync(request, cancellationToken);
 
-      if (context == "string")
+      var namespaceCompletions = context switch
       {
-        completionItems.AddRange(GetStringNamespaceCompletions());
+        "console" => GetConsoleCompletions(),
+        "fs" => GetFsCompletions(),
+        "web" => GetWebCompletions(),
+        "json" => GetJsonCompletions(),
+        "yaml" => GetYamlCompletions(),
+        "validate" => GetValidateCompletions(),
+        "process" => GetProcessCompletions(),
+        "os" => GetOsCompletions(),
+        "git" => GetGitCompletions(),
+        "utility" => GetUtilityCompletions(),
+        "timer" => GetTimerCompletions(),
+        "system" => GetSystemCompletions(),
+        "string" => GetStringNamespaceCompletions(),
+        "ssh" => GetSshNamespaceCompletions(),
+        "args" => GetArgsCompletions(),
+        "script" => GetScriptCompletions(),
+        "template" => GetTemplateCompletions(),
+        "scheduler" => GetSchedulerCompletions(),
+        "array" => GetArrayCompletions(),
+        "math" => GetMathCompletions(),
+        _ => null
+      };
+
+      if (namespaceCompletions != null)
+      {
+        completionItems.AddRange(namespaceCompletions);
       }
       else if (context.StartsWith("conn") || context.StartsWith("connection") || context.EndsWith("Conn") || context.EndsWith("Connection"))
       {
         completionItems.AddRange(GetSshConnectionCompletions());
       }
-      else if (context == "ssh")
-      {
-        completionItems.AddRange(GetSshNamespaceCompletions());
-      }
-      else
-      {
-        completionItems.AddRange(new List<CompletionItem>
-      {
-        // Console methods
-        new CompletionItem
-        {
-          Label = "log",
-          Kind = CompletionItemKind.Method,
-          Detail = "log(message: string)",
-          Documentation = "Print a message to the console"
-        },
-        new CompletionItem
-        {
-          Label = "isSudo",
-          Kind = CompletionItemKind.Method,
-          Detail = "isSudo(): boolean",
-          Documentation = "Check if the script is running with sudo privileges"
-        },
-        new CompletionItem
-        {
-          Label = "promptYesNo",
-          Kind = CompletionItemKind.Method,
-          Detail = "promptYesNo(prompt: string): boolean",
-          Documentation = "Display a yes/no prompt and return the user's choice"
-        },
-
-        // Timer methods
-        new CompletionItem
-        {
-          Label = "sleep",
-          Kind = CompletionItemKind.Method,
-          Detail = "sleep(milliseconds: number)",
-          Documentation = "Pause execution for specified milliseconds"
-        },
-        new CompletionItem
-        {
-          Label = "timeout",
-          Kind = CompletionItemKind.Method,
-          Detail = "timeout(milliseconds: number)",
-          Documentation = "Set a timeout"
-        },
-
-        // String methods
-        new CompletionItem
-        {
-          Label = "length",
-          Kind = CompletionItemKind.Property,
-          Detail = "length: number",
-          Documentation = "Get the length of a string or array"
-        },
-        new CompletionItem
-        {
-          Label = "substring",
-          Kind = CompletionItemKind.Method,
-          Detail = "substring(start: number, end?: number)",
-          Documentation = "Extract a substring from a string"
-        },
-        new CompletionItem
-        {
-          Label = "split",
-          Kind = CompletionItemKind.Method,
-          Detail = "split(separator: string)",
-          Documentation = "Split a string into an array"
-        },
-        new CompletionItem
-        {
-          Label = "toUpperCase",
-          Kind = CompletionItemKind.Method,
-          Detail = "toUpperCase()",
-          Documentation = "Convert string to uppercase"
-        },
-        new CompletionItem
-        {
-          Label = "toLowerCase",
-          Kind = CompletionItemKind.Method,
-          Detail = "toLowerCase()",
-          Documentation = "Convert string to lowercase"
-        },
-        new CompletionItem
-        {
-          Label = "trim",
-          Kind = CompletionItemKind.Method,
-          Detail = "trim()",
-          Documentation = "Remove whitespace from both ends"
-        },
-
-        // Utility methods
-        new CompletionItem
-        {
-          Label = "getEnv",
-          Kind = CompletionItemKind.Method,
-          Detail = "getEnv(name: string)",
-          Documentation = "Get environment variable value"
-        },
-        new CompletionItem
-        {
-          Label = "exit",
-          Kind = CompletionItemKind.Method,
-          Detail = "exit(code?: number)",
-          Documentation = "Exit the program"
-        },
-
-        // Script methods
-        new CompletionItem
-        {
-          Label = "enableDebug",
-          Kind = CompletionItemKind.Method,
-          Detail = "enableDebug()",
-          Documentation = "Enable shell debugging (set -x)"
-        },
-        new CompletionItem
-        {
-          Label = "disableDebug",
-          Kind = CompletionItemKind.Method,
-          Detail = "disableDebug()",
-          Documentation = "Disable shell debugging (set +x)"
-        },
-        new CompletionItem
-        {
-          Label = "disableGlobbing",
-          Kind = CompletionItemKind.Method,
-          Detail = "disableGlobbing()",
-          Documentation = "Disable filename globbing (set -f)"
-        },
-        new CompletionItem
-        {
-          Label = "enableGlobbing",
-          Kind = CompletionItemKind.Method,
-          Detail = "enableGlobbing()",
-          Documentation = "Enable filename globbing (set +f)"
-        },
-        new CompletionItem
-        {
-          Label = "exitOnError",
-          Kind = CompletionItemKind.Method,
-          Detail = "exitOnError()",
-          Documentation = "Exit script on any command failure (set -e)"
-        },
-        new CompletionItem
-        {
-          Label = "continueOnError",
-          Kind = CompletionItemKind.Method,
-          Detail = "continueOnError()",
-          Documentation = "Continue script execution on command failure (set +e)"
-        },
-
-        // Array methods
-        new CompletionItem
-        {
-          Label = "join",
-          Kind = CompletionItemKind.Method,
-          Detail = "join(separator: string)",
-          Documentation = "Join array elements into a string"
-        },
-        new CompletionItem
-        {
-          Label = "push",
-          Kind = CompletionItemKind.Method,
-          Detail = "push(item: any)",
-          Documentation = "Add item to end of array"
-        },
-        new CompletionItem
-        {
-          Label = "pop",
-          Kind = CompletionItemKind.Method,
-          Detail = "pop()",
-          Documentation = "Remove and return last item from array"
-        }
-      });
-      }
     }
     else
     {
-      // Show keywords and namespaces when not triggered by dot
-      completionItems.AddRange(new List<CompletionItem>
-      {
-        // Keywords
-        new CompletionItem
-        {
-          Label = "let",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "let variable: type = value",
-          Documentation = "Declare a mutable variable"
-        },
-        new CompletionItem
-        {
-          Label = "const",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "const variable: type = value",
-          Documentation = "Declare a constant variable"
-        },
-        new CompletionItem
-        {
-          Label = "function",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "function name(params) { ... }",
-          Documentation = "Declare a function"
-        },
-        new CompletionItem
-        {
-          Label = "if",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "if (condition) { ... }",
-          Documentation = "Conditional statement"
-        },
-        new CompletionItem
-        {
-          Label = "else",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "else { ... }",
-          Documentation = "Alternative branch for if statement"
-        },
-        new CompletionItem
-        {
-          Label = "for",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "for (init; condition; increment) { ... }",
-          Documentation = "For loop"
-        },
-        new CompletionItem
-        {
-          Label = "while",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "while (condition) { ... }",
-          Documentation = "While loop"
-        },
-        new CompletionItem
-        {
-          Label = "return",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "return value",
-          Documentation = "Return a value from function"
-        },
-        new CompletionItem
-        {
-          Label = "true",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "true",
-          Documentation = "Boolean true value"
-        },
-        new CompletionItem
-        {
-          Label = "false",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "false",
-          Documentation = "Boolean false value"
-        },
-        new CompletionItem
-        {
-          Label = "try",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "try { ... } catch (e) { ... }",
-          Documentation = "Try-catch error handling"
-        },
-        new CompletionItem
-        {
-          Label = "catch",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "catch (error) { ... }",
-          Documentation = "Catch block for error handling"
-        },
-        new CompletionItem
-        {
-          Label = "switch",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "switch (expression) { ... }",
-          Documentation = "Switch statement"
-        },
-        new CompletionItem
-        {
-          Label = "case",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "case value: ...",
-          Documentation = "Case clause in switch statement"
-        },
-        new CompletionItem
-        {
-          Label = "default",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "default: ...",
-          Documentation = "Default clause in switch statement"
-        },
-        new CompletionItem
-        {
-          Label = "break",
-          Kind = CompletionItemKind.Keyword,
-          Detail = "break",
-          Documentation = "Break out of loop or switch"
-        },
-
-        // Namespaces/Objects
-        new CompletionItem
-        {
-          Label = "console",
-          Kind = CompletionItemKind.Module,
-          Detail = "console",
-          Documentation = "Console operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "utility",
-          Kind = CompletionItemKind.Module,
-          Detail = "utility",
-          Documentation = "Utility functions namespace"
-        },
-        new CompletionItem
-        {
-          Label = "timer",
-          Kind = CompletionItemKind.Module,
-          Detail = "timer",
-          Documentation = "Timer operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "string",
-          Kind = CompletionItemKind.Module,
-          Detail = "string",
-          Documentation = "String operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "math",
-          Kind = CompletionItemKind.Module,
-          Detail = "math",
-          Documentation = "Math operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "script",
-          Kind = CompletionItemKind.Module,
-          Detail = "script",
-          Documentation = "Script control operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "fs",
-          Kind = CompletionItemKind.Module,
-          Detail = "fs",
-          Documentation = "File system operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "os",
-          Kind = CompletionItemKind.Module,
-          Detail = "os",
-          Documentation = "Operating system operations namespace"
-        },
-        new CompletionItem
-        {
-          Label = "process",
-          Kind = CompletionItemKind.Module,
-          Detail = "process",
-          Documentation = "Process operations namespace"
-        }
-      });
+      completionItems.AddRange(GetKeywordCompletions());
+      completionItems.AddRange(GetNamespaceCompletions());
     }
 
     return new CompletionList(completionItems);
@@ -436,225 +106,385 @@ public class CompletionHandler : ICompletionHandler
     }
   }
 
-  private List<CompletionItem> GetStringNamespaceCompletions()
+  public static List<CompletionItem> GetConsoleCompletions()
   {
     return new List<CompletionItem>
     {
-      // Core string functions
-      new CompletionItem
-      {
-        Label = "length",
-        Kind = CompletionItemKind.Method,
-        Detail = "length(value: string): number",
-        Documentation = "Get the length of a string"
-      },
-      new CompletionItem
-      {
-        Label = "trim",
-        Kind = CompletionItemKind.Method,
-        Detail = "trim(value: string): string",
-        Documentation = "Remove whitespace from both ends of a string"
-      },
-      new CompletionItem
-      {
-        Label = "isEmpty",
-        Kind = CompletionItemKind.Method,
-        Detail = "isEmpty(value: string): boolean",
-        Documentation = "Check if string is empty or contains only whitespace"
-      },
-
-      // Case operations
-      new CompletionItem
-      {
-        Label = "toUpperCase",
-        Kind = CompletionItemKind.Method,
-        Detail = "toUpperCase(value: string): string",
-        Documentation = "Convert string to uppercase"
-      },
-      new CompletionItem
-      {
-        Label = "toLowerCase",
-        Kind = CompletionItemKind.Method,
-        Detail = "toLowerCase(value: string): string",
-        Documentation = "Convert string to lowercase"
-      },
-      new CompletionItem
-      {
-        Label = "capitalize",
-        Kind = CompletionItemKind.Method,
-        Detail = "capitalize(value: string): string",
-        Documentation = "Capitalize the first letter of a string"
-      },
-
-      // Search and test operations
-      new CompletionItem
-      {
-        Label = "startsWith",
-        Kind = CompletionItemKind.Method,
-        Detail = "startsWith(value: string, prefix: string): boolean",
-        Documentation = "Check if string starts with the specified prefix"
-      },
-      new CompletionItem
-      {
-        Label = "endsWith",
-        Kind = CompletionItemKind.Method,
-        Detail = "endsWith(value: string, suffix: string): boolean",
-        Documentation = "Check if string ends with the specified suffix"
-      },
-      new CompletionItem
-      {
-        Label = "contains",
-        Kind = CompletionItemKind.Method,
-        Detail = "contains(value: string, searchValue: string): boolean",
-        Documentation = "Check if string contains the specified substring"
-      },
-      new CompletionItem
-      {
-        Label = "indexOf",
-        Kind = CompletionItemKind.Method,
-        Detail = "indexOf(value: string, searchValue: string): number",
-        Documentation = "Find the index of the first occurrence of a substring"
-      },
-
-      // Extraction and manipulation operations
-      new CompletionItem
-      {
-        Label = "substring",
-        Kind = CompletionItemKind.Method,
-        Detail = "substring(value: string, start: number, length?: number): string",
-        Documentation = "Extract a substring starting at the specified index"
-      },
-      new CompletionItem
-      {
-        Label = "slice",
-        Kind = CompletionItemKind.Method,
-        Detail = "slice(value: string, start: number, end?: number): string",
-        Documentation = "Extract a section of the string between start and end indices"
-      },
-      new CompletionItem
-      {
-        Label = "replace",
-        Kind = CompletionItemKind.Method,
-        Detail = "replace(value: string, searchValue: string, replaceValue: string): string",
-        Documentation = "Replace the first occurrence of a substring"
-      },
-      new CompletionItem
-      {
-        Label = "replaceAll",
-        Kind = CompletionItemKind.Method,
-        Detail = "replaceAll(value: string, searchValue: string, replaceValue: string): string",
-        Documentation = "Replace all occurrences of a substring"
-      },
-      new CompletionItem
-      {
-        Label = "split",
-        Kind = CompletionItemKind.Method,
-        Detail = "split(value: string, separator: string): string[]",
-        Documentation = "Split a string into an array using the specified separator"
-      },
-
-      // Advanced operations
-      new CompletionItem
-      {
-        Label = "padStart",
-        Kind = CompletionItemKind.Method,
-        Detail = "padStart(value: string, length: number, pad?: string): string",
-        Documentation = "Pad the string from the start to reach the specified length"
-      },
-      new CompletionItem
-      {
-        Label = "padEnd",
-        Kind = CompletionItemKind.Method,
-        Detail = "padEnd(value: string, length: number, pad?: string): string",
-        Documentation = "Pad the string from the end to reach the specified length"
-      },
-      new CompletionItem
-      {
-        Label = "repeat",
-        Kind = CompletionItemKind.Method,
-        Detail = "repeat(value: string, count: number): string",
-        Documentation = "Repeat the string the specified number of times"
-      }
+      M("log", "log(message: string)", "Print a message to the console"),
+      M("clear", "clear()", "Clear the console screen"),
+      M("isSudo", "isSudo(): boolean", "Check if the script is running with sudo privileges"),
+      M("isInteractive", "isInteractive(): boolean", "Check if the terminal is interactive"),
+      M("getShell", "getShell(): string", "Get the current shell name"),
+      M("promptYesNo", "promptYesNo(prompt: string): boolean", "Display a yes/no prompt and return the user's choice"),
+      M("promptText", "promptText(prompt: string): string", "Prompt user for text input"),
+      M("promptPassword", "promptPassword(prompt: string): string", "Prompt user for password input (hidden)"),
+      M("promptNumber", "promptNumber(prompt: string): number", "Prompt user for numeric input"),
+      M("promptFile", "promptFile(prompt: string): string", "Prompt user to select a file"),
+      M("promptDirectory", "promptDirectory(prompt: string): string", "Prompt user to select a directory"),
+      M("showMessage", "showMessage(message: string)", "Show an informational message dialog"),
+      M("showInfo", "showInfo(message: string)", "Show an info-level message dialog"),
+      M("showWarning", "showWarning(message: string)", "Show a warning message dialog"),
+      M("showError", "showError(message: string)", "Show an error message dialog"),
+      M("showSuccess", "showSuccess(message: string)", "Show a success message dialog"),
+      M("showChoice", "showChoice(prompt: string, options: string[]): string", "Show a single-choice dialog"),
+      M("showMultiChoice", "showMultiChoice(prompt: string, options: string[]): string[]", "Show a multi-choice dialog"),
+      M("showConfirm", "showConfirm(prompt: string): boolean", "Show a confirmation dialog"),
+      M("showProgress", "showProgress(message: string)", "Show a progress indicator"),
     };
   }
 
-  private List<CompletionItem> GetSshNamespaceCompletions()
+  public static List<CompletionItem> GetFsCompletions()
   {
     return new List<CompletionItem>
     {
-      new CompletionItem
-      {
-        Label = "connect",
-        Kind = CompletionItemKind.Method,
-        Detail = "connect(host: string, options?: object): object",
-        Documentation = "Establish SSH connection with optional async support"
-      }
+      M("exists", "exists(path: string): boolean", "Check if a file or directory exists"),
+      M("readFile", "readFile(path: string): string", "Read the contents of a file"),
+      M("writeFile", "writeFile(path: string, content: string)", "Write content to a file"),
+      M("copy", "copy(source: string, destination: string)", "Copy a file or directory"),
+      M("move", "move(source: string, destination: string)", "Move a file or directory"),
+      M("rename", "rename(oldPath: string, newPath: string)", "Rename a file or directory"),
+      M("delete", "delete(path: string)", "Delete a file or directory"),
+      M("chmod", "chmod(path: string, mode: string)", "Change file permissions"),
+      M("chown", "chown(path: string, owner: string)", "Change file ownership"),
+      M("find", "find(path: string, pattern: string): string[]", "Find files matching a pattern"),
+      M("dirname", "dirname(path: string): string", "Get the directory name from a path"),
+      M("fileName", "fileName(path: string): string", "Get the file name from a path"),
+      M("extension", "extension(path: string): string", "Get the file extension from a path"),
+      M("parentDirName", "parentDirName(path: string): string", "Get the parent directory name"),
+      M("createTempFolder", "createTempFolder(): string", "Create a temporary folder and return its path"),
+      M("watch", "watch(path: string, callback: function)", "Watch a file or directory for changes"),
     };
   }
 
-  private List<CompletionItem> GetSshConnectionCompletions()
+  public static List<CompletionItem> GetWebCompletions()
   {
     return new List<CompletionItem>
     {
-      // Connection properties
-      new CompletionItem
-      {
-        Label = "connected",
-        Kind = CompletionItemKind.Property,
-        Detail = "connected: boolean",
-        Documentation = "Connection status - true if connected, false otherwise"
-      },
-      new CompletionItem
-      {
-        Label = "host",
-        Kind = CompletionItemKind.Property,
-        Detail = "host: string",
-        Documentation = "The target hostname or IP address"
-      },
-      new CompletionItem
-      {
-        Label = "port",
-        Kind = CompletionItemKind.Property,
-        Detail = "port: string",
-        Documentation = "The SSH port (default: '22')"
-      },
-      new CompletionItem
-      {
-        Label = "username",
-        Kind = CompletionItemKind.Property,
-        Detail = "username: string",
-        Documentation = "The SSH username for authentication"
-      },
-      new CompletionItem
-      {
-        Label = "authMethod",
-        Kind = CompletionItemKind.Property,
-        Detail = "authMethod: string",
-        Documentation = "Authentication method: 'config', 'key', or 'password'"
-      },
-      new CompletionItem
-      {
-        Label = "async",
-        Kind = CompletionItemKind.Property,
-        Detail = "async: boolean",
-        Documentation = "Whether the connection is persistent (async: true) or one-time"
-      },
-
-      // Connection methods
-      new CompletionItem
-      {
-        Label = "execute",
-        Kind = CompletionItemKind.Method,
-        Detail = "execute(command: string): string",
-        Documentation = "Execute a command on the remote server and return the output"
-      },
-      new CompletionItem
-      {
-        Label = "upload",
-        Kind = CompletionItemKind.Method,
-        Detail = "upload(localPath: string, remotePath: string): boolean",
-        Documentation = "Upload a file to the remote server, returns true on success"
-      }
+      M("get", "get(url: string): string", "Send an HTTP GET request"),
+      M("post", "post(url: string, body: string): string", "Send an HTTP POST request"),
+      M("put", "put(url: string, body: string): string", "Send an HTTP PUT request"),
+      M("delete", "delete(url: string): string", "Send an HTTP DELETE request"),
+      M("download", "download(url: string, path: string)", "Download a file from a URL"),
+      M("speedtest", "speedtest(): string", "Run a network speed test"),
     };
   }
+
+  public static List<CompletionItem> GetJsonCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("parse", "parse(text: string): object", "Parse a JSON string into an object"),
+      M("stringify", "stringify(obj: object): string", "Convert an object to a JSON string"),
+      M("isValid", "isValid(text: string): boolean", "Check if a string is valid JSON"),
+      M("get", "get(obj: object, path: string): any", "Get a value by JSON path"),
+      M("set", "set(obj: object, path: string, value: any): object", "Set a value by JSON path"),
+      M("has", "has(obj: object, path: string): boolean", "Check if a JSON path exists"),
+      M("delete", "delete(obj: object, path: string): object", "Delete a value by JSON path"),
+      M("keys", "keys(obj: object): string[]", "Get all keys from a JSON object"),
+      M("values", "values(obj: object): any[]", "Get all values from a JSON object"),
+      M("merge", "merge(obj1: object, obj2: object): object", "Deep-merge two JSON objects"),
+      M("installDependencies", "installDependencies()", "Install jq if not already present"),
+    };
+  }
+
+  public static List<CompletionItem> GetYamlCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("parse", "parse(text: string): object", "Parse a YAML string into an object"),
+      M("stringify", "stringify(obj: object): string", "Convert an object to a YAML string"),
+      M("isValid", "isValid(text: string): boolean", "Check if a string is valid YAML"),
+      M("get", "get(obj: object, path: string): any", "Get a value by YAML path"),
+      M("set", "set(obj: object, path: string, value: any): object", "Set a value by YAML path"),
+      M("has", "has(obj: object, path: string): boolean", "Check if a YAML path exists"),
+      M("delete", "delete(obj: object, path: string): object", "Delete a value by YAML path"),
+      M("keys", "keys(obj: object): string[]", "Get all keys from a YAML object"),
+      M("values", "values(obj: object): any[]", "Get all values from a YAML object"),
+      M("merge", "merge(obj1: object, obj2: object): object", "Deep-merge two YAML objects"),
+      M("installDependencies", "installDependencies()", "Install yq if not already present"),
+    };
+  }
+
+  public static List<CompletionItem> GetValidateCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("isEmail", "isEmail(value: string): boolean", "Validate if value is a valid email address"),
+      M("isURL", "isURL(value: string): boolean", "Validate if value is a valid URL"),
+      M("isUUID", "isUUID(value: string): boolean", "Validate if value is a valid UUID"),
+      M("isEmpty", "isEmpty(value: string): boolean", "Check if value is empty or whitespace"),
+      M("isGreaterThan", "isGreaterThan(value: number, threshold: number): boolean", "Check if value is greater than threshold"),
+      M("isLessThan", "isLessThan(value: number, threshold: number): boolean", "Check if value is less than threshold"),
+      M("isInRange", "isInRange(value: number, min: number, max: number): boolean", "Check if value is within range"),
+      M("isNumeric", "isNumeric(value: string): boolean", "Check if value contains only numeric characters"),
+      M("isAlphaNumeric", "isAlphaNumeric(value: string): boolean", "Check if value contains only alphanumeric characters"),
+    };
+  }
+
+  public static List<CompletionItem> GetProcessCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("start", "start(command: string): number", "Start a new process and return its PID"),
+      M("id", "id(): number", "Get the current process ID"),
+      M("elapsedTime", "elapsedTime(): number", "Get elapsed time in seconds since process start"),
+      M("cpu", "cpu(): number", "Get CPU usage percentage of the current process"),
+      M("memory", "memory(): number", "Get memory usage of the current process"),
+      M("command", "command(): string", "Get the command that started the current process"),
+      M("status", "status(pid: number): string", "Get the status of a process by PID"),
+      M("isRunning", "isRunning(pid: number): boolean", "Check if a process is running"),
+      M("waitForExit", "waitForExit(pid: number): number", "Wait for a process to exit and return exit code"),
+      M("kill", "kill(pid: number)", "Kill a process by PID"),
+    };
+  }
+
+  public static List<CompletionItem> GetOsCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("isInstalled", "isInstalled(command: string): boolean", "Check if a command/program is installed"),
+      M("getLinuxVersion", "getLinuxVersion(): string", "Get the Linux distribution version"),
+      M("getOS", "getOS(): string", "Get the operating system name"),
+    };
+  }
+
+  public static List<CompletionItem> GetGitCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("undoLastCommit", "undoLastCommit()", "Undo the last git commit (soft reset)"),
+      M("status", "status(): string", "Get the current git status"),
+      M("currentBranch", "currentBranch(): string", "Get the current git branch name"),
+      M("isClean", "isClean(): boolean", "Check if working directory is clean"),
+      M("resetToCommit", "resetToCommit(commit: string)", "Reset to a specific commit"),
+    };
+  }
+
+  public static List<CompletionItem> GetUtilityCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("random", "random(min: number, max: number): number", "Generate a random number within range"),
+      M("uuid", "uuid(): string", "Generate a new UUID"),
+      M("hash", "hash(value: string, algorithm?: string): string", "Hash a string with specified algorithm"),
+      M("base64Encode", "base64Encode(value: string): string", "Encode a string to base64"),
+      M("base64Decode", "base64Decode(value: string): string", "Decode a base64 string"),
+    };
+  }
+
+  public static List<CompletionItem> GetTimerCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("start", "start(name: string)", "Start a named timer"),
+      M("stop", "stop(name: string): number", "Stop a named timer and return elapsed milliseconds"),
+      M("current", "current(): number", "Get current timestamp in milliseconds"),
+    };
+  }
+
+  public static List<CompletionItem> GetSystemCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("cpuCount", "cpuCount(): number", "Get the number of CPU cores"),
+      M("memoryTotal", "memoryTotal(): number", "Get total system memory in bytes"),
+      M("memoryUsage", "memoryUsage(): number", "Get current memory usage in bytes"),
+    };
+  }
+
+  public static List<CompletionItem> GetArgsCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("has", "has(name: string): boolean", "Check if a named argument was provided"),
+      M("get", "get(name: string): string", "Get the value of a named argument"),
+      M("all", "all(): string[]", "Get all arguments as an array"),
+      M("define", "define(name: string, options: object)", "Define an expected argument with type and default"),
+    };
+  }
+
+  public static List<CompletionItem> GetScriptCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("enableDebug", "enableDebug()", "Enable shell debugging (set -x)"),
+      M("disableDebug", "disableDebug()", "Disable shell debugging (set +x)"),
+      M("disableGlobbing", "disableGlobbing()", "Disable filename globbing (set -f)"),
+      M("enableGlobbing", "enableGlobbing()", "Enable filename globbing (set +f)"),
+      M("exitOnError", "exitOnError()", "Exit script on any command failure (set -e)"),
+      M("continueOnError", "continueOnError()", "Continue script execution on command failure (set +e)"),
+      M("description", "description(text: string)", "Set the script description for help output"),
+    };
+  }
+
+  public static List<CompletionItem> GetTemplateCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("update", "update(templatePath: string, outputPath: string, vars: object)", "Apply template variable substitution"),
+    };
+  }
+
+  public static List<CompletionItem> GetSchedulerCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("cron", "cron(expression: string, command: string)", "Schedule a command with a cron expression"),
+    };
+  }
+
+  public static List<CompletionItem> GetArrayCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("join", "join(arr: any[], separator: string): string", "Join array elements into a string"),
+      M("sort", "sort(arr: any[]): any[]", "Sort array elements"),
+      M("reverse", "reverse(arr: any[]): any[]", "Reverse array element order"),
+      M("shuffle", "shuffle(arr: any[]): any[]", "Randomly shuffle array elements"),
+      M("unique", "unique(arr: any[]): any[]", "Remove duplicate elements from array"),
+      M("merge", "merge(arr1: any[], arr2: any[]): any[]", "Merge two arrays together"),
+      M("contains", "contains(arr: any[], value: any): boolean", "Check if array contains value"),
+      M("isEmpty", "isEmpty(arr: any[]): boolean", "Check if array is empty"),
+      M("forEach", "forEach(arr: any[], callback: function)", "Execute callback for each element"),
+      M("map", "map(arr: any[], callback: function): any[]", "Transform each element with callback"),
+      M("filter", "filter(arr: any[], callback: function): any[]", "Filter elements by callback"),
+      M("reduce", "reduce(arr: any[], callback: function, initial: any): any", "Reduce array to single value"),
+      M("find", "find(arr: any[], callback: function): any", "Find first element matching callback"),
+      M("some", "some(arr: any[], callback: function): boolean", "Check if any element matches callback"),
+      M("every", "every(arr: any[], callback: function): boolean", "Check if all elements match callback"),
+    };
+  }
+
+  public static List<CompletionItem> GetMathCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("abs", "abs(value: number): number", "Get the absolute value"),
+      M("ceil", "ceil(value: number): number", "Round up to nearest integer"),
+      M("floor", "floor(value: number): number", "Round down to nearest integer"),
+      M("round", "round(value: number): number", "Round to nearest integer"),
+      M("min", "min(a: number, b: number): number", "Get the smaller of two values"),
+      M("max", "max(a: number, b: number): number", "Get the larger of two values"),
+      M("pow", "pow(base: number, exp: number): number", "Raise base to a power"),
+      M("sqrt", "sqrt(value: number): number", "Get the square root"),
+    };
+  }
+
+  public static List<CompletionItem> GetStringNamespaceCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("length", "length(value: string): number", "Get the length of a string"),
+      M("trim", "trim(value: string): string", "Remove whitespace from both ends of a string"),
+      M("isEmpty", "isEmpty(value: string): boolean", "Check if string is empty or contains only whitespace"),
+      M("toUpperCase", "toUpperCase(value: string): string", "Convert string to uppercase"),
+      M("toLowerCase", "toLowerCase(value: string): string", "Convert string to lowercase"),
+      M("capitalize", "capitalize(value: string): string", "Capitalize the first letter of a string"),
+      M("startsWith", "startsWith(value: string, prefix: string): boolean", "Check if string starts with the specified prefix"),
+      M("endsWith", "endsWith(value: string, suffix: string): boolean", "Check if string ends with the specified suffix"),
+      M("contains", "contains(value: string, searchValue: string): boolean", "Check if string contains the specified substring"),
+      M("indexOf", "indexOf(value: string, searchValue: string): number", "Find the index of the first occurrence of a substring"),
+      M("substring", "substring(value: string, start: number, length?: number): string", "Extract a substring starting at the specified index"),
+      M("slice", "slice(value: string, start: number, end?: number): string", "Extract a section of the string between start and end indices"),
+      M("replace", "replace(value: string, searchValue: string, replaceValue: string): string", "Replace the first occurrence of a substring"),
+      M("replaceAll", "replaceAll(value: string, searchValue: string, replaceValue: string): string", "Replace all occurrences of a substring"),
+      M("split", "split(value: string, separator: string): string[]", "Split a string into an array using the specified separator"),
+      M("padStart", "padStart(value: string, length: number, pad?: string): string", "Pad the string from the start to reach the specified length"),
+      M("padEnd", "padEnd(value: string, length: number, pad?: string): string", "Pad the string from the end to reach the specified length"),
+      M("repeat", "repeat(value: string, count: number): string", "Repeat the string the specified number of times"),
+    };
+  }
+
+  public static List<CompletionItem> GetSshNamespaceCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("connect", "connect(host: string, options?: object): object", "Establish SSH connection with optional async support"),
+    };
+  }
+
+  private static List<CompletionItem> GetSshConnectionCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      P("connected", "connected: boolean", "Connection status - true if connected, false otherwise"),
+      P("host", "host: string", "The target hostname or IP address"),
+      P("port", "port: string", "The SSH port (default: '22')"),
+      P("username", "username: string", "The SSH username for authentication"),
+      P("authMethod", "authMethod: string", "Authentication method: 'config', 'key', or 'password'"),
+      P("async", "async: boolean", "Whether the connection is persistent (async: true) or one-time"),
+      M("execute", "execute(command: string): string", "Execute a command on the remote server and return the output"),
+      M("upload", "upload(localPath: string, remotePath: string): boolean", "Upload a file to the remote server, returns true on success"),
+      M("download", "download(remotePath: string, localPath: string): boolean", "Download a file from the remote server"),
+    };
+  }
+
+  private static List<CompletionItem> GetKeywordCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      K("let", "let variable: type = value", "Declare a mutable variable"),
+      K("const", "const variable: type = value", "Declare a constant variable"),
+      K("function", "function name(params) { ... }", "Declare a function"),
+      K("if", "if (condition) { ... }", "Conditional statement"),
+      K("else", "else { ... }", "Alternative branch for if statement"),
+      K("for", "for (init; condition; increment) { ... }", "For loop"),
+      K("while", "while (condition) { ... }", "While loop"),
+      K("return", "return value", "Return a value from function"),
+      K("break", "break", "Break out of loop or switch"),
+      K("continue", "continue", "Skip to next iteration of loop"),
+      K("try", "try { ... } catch (e) { ... }", "Try-catch error handling"),
+      K("catch", "catch (error) { ... }", "Catch block for error handling"),
+      K("defer", "defer expression", "Execute expression when scope exits"),
+      K("import", "import \"path/to/file.shx\"", "Import another shx file"),
+      K("switch", "switch (expression) { ... }", "Switch statement"),
+      K("case", "case value: ...", "Case clause in switch statement"),
+      K("default", "default: ...", "Default clause in switch statement"),
+      K("parallel", "parallel { ... }", "Execute functions in parallel"),
+      K("record", "record Name { ... }", "Define a record type"),
+      K("interface", "interface Name { ... }", "Define an interface type"),
+      K("true", "true", "Boolean true value"),
+      K("false", "false", "Boolean false value"),
+      K("exit", "exit(code?: number)", "Exit the script with optional code"),
+    };
+  }
+
+  private static List<CompletionItem> GetNamespaceCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      N("console", "Console operations namespace"),
+      N("fs", "File system operations namespace"),
+      N("web", "HTTP request operations namespace"),
+      N("json", "JSON parsing and manipulation namespace"),
+      N("yaml", "YAML parsing and manipulation namespace"),
+      N("validate", "Input validation namespace"),
+      N("process", "Process management namespace"),
+      N("os", "Operating system operations namespace"),
+      N("git", "Git operations namespace"),
+      N("utility", "Utility functions namespace"),
+      N("timer", "Timer operations namespace"),
+      N("system", "System information namespace"),
+      N("string", "String operations namespace"),
+      N("math", "Math operations namespace"),
+      N("ssh", "SSH remote connection namespace"),
+      N("args", "Script argument handling namespace"),
+      N("script", "Script control operations namespace"),
+      N("template", "Template variable substitution namespace"),
+      N("scheduler", "Task scheduling namespace"),
+      N("array", "Array operations namespace"),
+    };
+  }
+
+  private static CompletionItem M(string label, string detail, string documentation) =>
+    new() { Label = label, Kind = CompletionItemKind.Method, Detail = detail, Documentation = documentation };
+
+  private static CompletionItem P(string label, string detail, string documentation) =>
+    new() { Label = label, Kind = CompletionItemKind.Property, Detail = detail, Documentation = documentation };
+
+  private static CompletionItem K(string label, string detail, string documentation) =>
+    new() { Label = label, Kind = CompletionItemKind.Keyword, Detail = detail, Documentation = documentation };
+
+  private static CompletionItem N(string label, string documentation) =>
+    new() { Label = label, Kind = CompletionItemKind.Module, Detail = label, Documentation = documentation };
 }

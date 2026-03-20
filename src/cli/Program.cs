@@ -723,7 +723,8 @@ class UtahApp
         options
           .WithInput(Console.OpenStandardInput())
           .WithOutput(Console.OpenStandardOutput())
-          .AddHandler<CompletionHandler>());
+          .AddHandler<CompletionHandler>()
+          .AddHandler<HoverHandler>());
     await server.WaitForExit;
   }
 
