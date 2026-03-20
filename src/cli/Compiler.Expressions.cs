@@ -206,6 +206,8 @@ public partial class Compiler
         return CompileTimerCurrentExpression(timerCurrent);
       case GitUndoLastCommitExpression:
         return CompileGitUndoLastCommitExpression();
+      case GitStatusExpression:
+        return CompileGitStatusExpression();
       case SshConnectExpression sshConnect:
         return CompileSshConnectExpression(sshConnect);
       case ObjectPropertyAccessExpression objectProperty:
@@ -298,6 +300,11 @@ public partial class Compiler
   private string CompileGitUndoLastCommitExpression()
   {
     return "$(git reset --soft HEAD~1)";
+  }
+
+  private string CompileGitStatusExpression()
+  {
+    return "$(git status --short)";
   }
 
   private string CompileSshConnectExpression(SshConnectExpression sshConnect)

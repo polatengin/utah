@@ -1291,6 +1291,12 @@ public partial class Parser
         return new GitUndoLastCommitExpression();
       }
 
+      // Special handling for git.status()
+      if (functionName == "git.status" && string.IsNullOrEmpty(argsContent))
+      {
+        return new GitStatusExpression();
+      }
+
       // Special handling for ssh.connect()
       if (functionName == "ssh.connect")
       {
