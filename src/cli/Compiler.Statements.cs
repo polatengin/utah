@@ -572,6 +572,10 @@ public partial class Compiler
         lines.Add("break");
         break;
 
+      case ContinueStatement continueStmt:
+        lines.Add("continue");
+        break;
+
       case ConsoleClearStatement:
         lines.Add("clear");
         break;
