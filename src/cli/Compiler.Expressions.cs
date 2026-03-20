@@ -157,6 +157,8 @@ public partial class Compiler
         return CompileWebPutExpression(webPut);
       case WebSpeedtestExpression webSpeedtest:
         return CompileWebSpeedtestExpression(webSpeedtest);
+      case WebDownloadExpression webDownload:
+        return CompileWebDownloadExpression(webDownload);
       case ArrayJoinExpression arrayJoin:
         return CompileArrayJoinExpression(arrayJoin);
       case ArraySortExpression arraySort:
@@ -2217,6 +2219,44 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     // Return a bash command substitution that uses curl to measure speed
     return $"$({curlCommand} 2>/dev/null || echo '{{\"error\":\"failed\"}}')";
+  }
+
+  private string CompileWebDownloadExpression(WebDownloadExpression webDownload)
+  {
+    var url = CompileExpression(webDownload.Url);
+    var outputPath = CompileExpression(webDownload.OutputPath);
+
+    // Handle different types of URL expressions
+    string curlUrl;
+    if (url.StartsWith("${") && url.EndsWith("}"))
+    {
+      curlUrl = url;
+    }
+    else if (url.StartsWith("\"") && url.EndsWith("\""))
+    {
+      curlUrl = url;
+    }
+    else
+    {
+      curlUrl = $"${{{url}}}";
+    }
+
+    // Handle different types of output path expressions
+    string curlOutput;
+    if (outputPath.StartsWith("${") && outputPath.EndsWith("}"))
+    {
+      curlOutput = outputPath;
+    }
+    else if (outputPath.StartsWith("\"") && outputPath.EndsWith("\""))
+    {
+      curlOutput = outputPath;
+    }
+    else
+    {
+      curlOutput = $"${{{outputPath}}}";
+    }
+
+    return $"$(curl -sL -o {curlOutput} -w \"%{{http_code}}\" {curlUrl} 2>/dev/null || echo \"000\")";
   }
 
   private string CompileArrayJoinExpression(ArrayJoinExpression arrayJoin)

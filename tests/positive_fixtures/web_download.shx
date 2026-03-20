@@ -1,0 +1,9 @@
+// Test web.download() function with URL and output path
+let status: string = web.download("https://example.com/file.tar.gz", "/tmp/file.tar.gz");
+console.log("Download status: ${status}");
+
+// Test with variable URL and output path
+let fileUrl: string = "https://example.com/data.json";
+let outputPath: string = "/tmp/data.json";
+let result: string = web.download(fileUrl, outputPath);
+console.log("Download result: ${result}");

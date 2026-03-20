@@ -483,6 +483,30 @@ public partial class Parser
         }
       }
 
+      // Special case for web.download() - handle this as a function call
+      if (objectName == "web" && methodPart.StartsWith("download(") && methodPart.EndsWith(")"))
+      {
+        var argsContent = methodPart.Substring(9, methodPart.Length - 10).Trim();
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("web.download() requires URL and output path arguments");
+        }
+        else
+        {
+          var args = ParseFunctionArguments(argsContent);
+          if (args.Count == 2)
+          {
+            var urlExpr = ParseExpression(args[0]);
+            var outputPathExpr = ParseExpression(args[1]);
+            return new WebDownloadExpression(urlExpr, outputPathExpr);
+          }
+          else
+          {
+            throw new InvalidOperationException($"web.download() requires exactly 2 arguments (URL, outputPath), got {args.Count}");
+          }
+        }
+      }
+
       // Special case for template.update() - handle this as a function call
       if (objectName == "template" && methodPart.StartsWith("update(") && methodPart.EndsWith(")"))
       {

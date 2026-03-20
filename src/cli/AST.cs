@@ -76,6 +76,7 @@ public record WebDeleteExpression(Expression Url, Expression? Options = null) : 
 public record WebPostExpression(Expression Url, Expression Data, Expression? Options = null) : Expression;
 public record WebPutExpression(Expression Url, Expression Data, Expression? Options = null) : Expression;
 public record WebSpeedtestExpression(Expression Url, Expression? Options = null) : Expression;
+public record WebDownloadExpression(Expression Url, Expression OutputPath) : Expression;
 public record FsDirnameExpression(Expression Path) : Expression;
 public record FsFileNameExpression(Expression Path) : Expression;
 public record FsExtensionExpression(Expression Path) : Expression;

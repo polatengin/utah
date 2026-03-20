@@ -18,6 +18,7 @@ Currently implemented web functions:
 - `web.post(url, data, options?)` - HTTP POST requests
 - `web.put(url, data, options?)` - HTTP PUT requests
 - `web.speedtest(url, options?)` - Network speed testing
+- `web.download(url, outputPath)` - File download to local path
 
 #### web.get(url)
 
@@ -151,6 +152,30 @@ The web.speedtest() function returns a JSON object with the following metrics:
 - `size_download`: Number of bytes downloaded
 - `response_code`: HTTP response code
 
+#### web.download(url, outputPath)
+
+Downloads a file from the specified URL and saves it to the given output path. Returns the HTTP status code as a string (e.g., "200" for success).
+
+```typescript
+// Download a file
+let status: string = web.download("https://example.com/file.tar.gz", "/tmp/file.tar.gz");
+console.log("Download status: ${status}");
+
+// Download with variables
+let fileUrl: string = "https://example.com/data.json";
+let outputPath: string = "/tmp/data.json";
+let result: string = web.download(fileUrl, outputPath);
+console.log("Download result: ${result}");
+
+// Check download success
+let code: string = web.download("https://example.com/archive.zip", "/tmp/archive.zip");
+if (code === "200") {
+  console.log("Download successful!");
+} else {
+  console.log("Download failed with status: ${code}");
+}
+```
+
 ## Generated Bash
 
 Web functions compile to appropriate curl commands:
@@ -180,6 +205,12 @@ speedData=$(curl -w '{"download_speed":"%{speed_download}","upload_speed":"0","t
 
 # Speed test with options
 timedTest=$(curl "--max-time 5" -w '{"download_speed":"%{speed_download}","upload_speed":"0","time_total":"%{time_total}","time_connect":"%{time_connect}","time_pretransfer":"%{time_pretransfer}","size_download":"%{size_download}","response_code":"%{response_code}"}' --silent --output /dev/null "https://httpbin.org/get" 2>/dev/null || echo '{"error":"failed"}')
+
+# File download
+status=$(curl -sL -o "/tmp/file.tar.gz" -w "%{http_code}" "https://example.com/file.tar.gz" 2>/dev/null || echo "000")
+
+# File download with variables
+result=$(curl -sL -o ${outputPath} -w "%{http_code}" ${fileUrl} 2>/dev/null || echo "000")
 ```
 
 ## Error Handling
@@ -212,4 +243,3 @@ The following web features are planned for future releases:
 
 - `web.patch()` - HTTP PATCH requests
 - URL manipulation functions
-- File download utilities
