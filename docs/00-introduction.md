@@ -81,9 +81,9 @@ Built-in argument parsing with type safety:
 
 ### 🛠️ **Developer Tools**
 
-- **VS Code Extension**: Full IDE integration with syntax highlighting and IntelliSense
-- **Language Server**: Real-time error checking and code completion
-- **Code Formatting**: Automatic formatting with EditorConfig support
+- **VS Code Extension**: Syntax highlighting, file icons, and LSP-backed code completion
+- **Language Server**: Code completion for Utah namespaces and member access
+- **Code Formatting**: CLI formatting with EditorConfig support via `utah format`
 
 ### 📝 **Script Metadata**
 

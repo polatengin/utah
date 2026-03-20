@@ -145,18 +145,17 @@ utah format script.shx --check            # Exit 1 if not formatted
 
 ### Language Server
 
-Provides IDE integration for VS Code and other editors:
+Provides completion support for editors that integrate with `utah lsp`:
 
 ```bash
 utah lsp
 ```
 
-**Features:**
+**Current feature:**
 
-- Syntax highlighting
-- Error diagnostics
-- Code completion
-- Symbol navigation
+- Code completion for Utah namespaces and member access
+
+> Syntax highlighting comes from editor grammars (such as the VS Code extension), not from the language server itself.
 
 ### Version Information
 
@@ -264,12 +263,14 @@ Utah includes a VS Code extension that uses the language server:
 }
 ```
 
-**Features provided:**
+**Features provided today:**
 
-- Syntax highlighting for .shx files
-- Real-time error checking
-- Code completion for built-in functions
-- Format on save support
+- Syntax highlighting for `.shx` files
+- File icons and Utah language association
+- LSP-backed code completion for built-in namespaces and common member access
+- Use `utah format` from VS Code tasks or the integrated terminal for formatting
+
+Advanced IDE features such as diagnostics, hover, go-to-definition, references, and a formatting provider are still in progress.
 
 ## Advanced Usage
 

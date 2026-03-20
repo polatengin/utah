@@ -5,296 +5,91 @@ parent: CLI Reference
 nav_order: 4
 ---
 
-The Utah VS Code extension provides comprehensive language support for Utah (.shx) files, including syntax highlighting, error checking, code completion, and formatting integration.
+The Utah VS Code extension currently provides syntax highlighting, `.shx` file association, file icons, and LSP-backed code completion for Utah files. It does **not** currently ship diagnostics, hover, go-to-definition, references, formatting, or command palette commands.
 
-## Installation
-
-### From VS Code Marketplace
-
-1. Open VS Code
-2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "Utah Language Support"
-4. Click Install
-
-### Manual Installation
-
-```bash
-# Install from VSIX file
-code --install-extension utah-language-support.vsix
-```
-
-## Features
+## Current Features
 
 ### Syntax Highlighting
 
-The extension provides full syntax highlighting for Utah files:
+The extension ships a TextMate grammar for Utah and highlights:
 
-- **Keywords:** `let`, `const`, `function`, `if`, `for`, `while`, etc.
-- **Types:** `string`, `number`, `boolean`, `array`, `object`
-- **Built-in functions:** `console.log`, `fs.readFile`, `json.parse`, etc.
-- **Comments:** Single-line (`//`) and multi-line (`/* */`)
-- **Strings:** Template literals with interpolation support
-
-### Error Detection
-
-Real-time error checking and diagnostics:
-
-```typescript
-// Error: Type mismatch
-let name: string = 42;  // Underlined in red
-
-// Error: Undefined variable
-console.log(unknownVar);  // Underlined in red
-
-// Error: Missing semicolon
-let count: number = 10  // Warning underline
-```
+- Keywords such as `let`, `const`, `function`, `if`, `for`, and `while`
+- Primitive types such as `string`, `number`, `boolean`, `array`, and `object`
+- Built-in namespaces such as `console`, `fs`, `json`, `yaml`, `web`, and `ssh`
+- Comments, strings, and string interpolation
 
 ### Code Completion
 
-Intelligent code completion for:
+The extension starts Utah's language server (`utah lsp`) and currently exposes completion support for:
 
-- **Built-in functions:** Auto-complete for `console.*`, `fs.*`, `json.*`, etc.
-- **Variables:** Context-aware variable suggestions
-- **Function parameters:** Parameter hints with type information
-- **Import statements:** File path completion for imports
+- Built-in namespaces and common namespace members
+- String helper methods
+- SSH connection members
+- Completion requests triggered after `.`
 
-### Language Server Integration
+### File Icons and Language Association
 
-The extension uses Utah's language server (`utah lsp`) for advanced features:
+The packaged extension contributes:
 
-- **Go to definition:** Navigate to function/variable definitions
-- **Find references:** Find all usages of symbols
-- **Symbol outline:** Document outline in Explorer
-- **Hover information:** Type and documentation on hover
+- The `utah` language id for `.shx` files
+- A Utah file icon theme for Utah source files
+- A bundled language server startup path used by the extension at runtime
 
-### Formatting Support
+## Current Limitations
 
-Automatic code formatting using `utah format`:
+The current extension does not yet provide:
 
-- **Format on save:** Automatically format when saving files
-- **Format on paste:** Format pasted code
-- **Format selection:** Format only selected code
-- **Format document:** Format entire document
+- Diagnostics / red squiggles
+- Hover information
+- Go to definition, find references, or document symbols
+- Document formatting or format-on-save integration
+- Contributed VS Code commands such as `Utah: Compile File` or `Utah: Restart Language Server`
 
-## Configuration
+The package manifest currently exposes `utah.server.path` and `utah.server.args`, but the runtime still launches the bundled Utah binary in `lsp` mode. Treat those settings as reserved until they are wired through.
 
-### VS Code Settings
+## Installation and Development
 
-Configure the extension in your VS Code settings:
-
-```json
-{
-  // Utah-specific settings
-  "utah.languageServer.enabled": true,
-  "utah.languageServer.trace": "off",
-  "utah.formatting.enabled": true,
-  "utah.formatting.onSave": true,
-
-  // Editor settings for .shx files
-  "[shx]": {
-    "editor.defaultFormatter": "utah-lang.utah-language-support",
-    "editor.formatOnSave": true,
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
-    "editor.detectIndentation": false
-  },
-
-  // File associations
-  "files.associations": {
-    "*.shx": "shx"
-  }
-}
-```
-
-### Workspace Settings
-
-Project-specific settings in `.vscode/settings.json`:
-
-```json
-{
-  "utah.projectRoot": "${workspaceFolder}",
-  "utah.formatting.indentSize": 2,
-  "utah.linting.enabled": true,
-  "utah.completion.enabled": true
-}
-```
-
-### EditorConfig Integration
-
-The extension respects `.editorconfig` files:
-
-```ini
-[*.shx]
-indent_style = space
-indent_size = 2
-end_of_line = lf
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-max_line_length = 100
-```
-
-## Commands
-
-The extension provides several commands accessible via Command Palette (Ctrl+Shift+P):
-
-| Command | Description | Keybinding |
-|---------|-------------|------------|
-| `Utah: Compile File` | Compile current .shx file | Ctrl+F7 |
-| `Utah: Run File` | Run current .shx file | F5 |
-| `Utah: Format Document` | Format current document | Shift+Alt+F |
-| `Utah: Restart Language Server` | Restart language server | - |
-| `Utah: Show Output` | Show Utah output panel | - |
-
-### Custom Keybindings
-
-Add custom keybindings in `keybindings.json`:
-
-```json
-[
-  {
-    "key": "ctrl+shift+b",
-    "command": "utah.compile",
-    "when": "resourceExtname == .shx"
-  },
-  {
-    "key": "ctrl+f5",
-    "command": "utah.run",
-    "when": "resourceExtname == .shx"
-  }
-]
-```
-
-## Development Setup
-
-### Extension Development
-
-To work on the Utah VS Code extension:
+To build the extension locally:
 
 ```bash
-# Clone the repository
-git clone https://github.com/polatengin/utah.git
-cd utah/src/vscode-extension
-
-# Install dependencies
+cd src/vscode-extension
 npm install
+npm run compile
+```
 
-# Build the extension
-npm run build
+During development:
 
-# Watch for changes during development
+```bash
 npm run watch
 ```
 
-### Testing Extension
+Run the extension test suite:
 
 ```bash
-# Run extension in development mode
-npm run dev
-
-# Run tests
 npm test
-
-# Package extension
-npm run package
 ```
 
-### Language Server Development
-
-The language server runs separately from the extension:
+If you already have a packaged VSIX artifact, install it with:
 
 ```bash
-# Start language server manually
-utah lsp
-
-# Debug language server
-UTAH_DEBUG=1 utah lsp
+code --install-extension path/to/utah-language-support.vsix
 ```
 
-## Troubleshooting
+## Using Utah from VS Code
 
-### Common Issues
-
-**Issue:** Syntax highlighting not working
-**Solution:** Check file is saved with `.shx` extension
-
-**Issue:** Language server not starting
-**Solution:** Ensure Utah CLI is installed and in PATH
-
-```bash
-# Check Utah installation
-which utah
-utah --version
-
-# Restart language server
-Ctrl+Shift+P > "Utah: Restart Language Server"
-```
-
-**Issue:** Formatting not working
-**Solution:** Check formatting is enabled in settings
+A minimal workspace setup looks like this:
 
 ```json
 {
-  "utah.formatting.enabled": true,
-  "[shx]": {
-    "editor.defaultFormatter": "utah-lang.utah-language-support"
+  "files.associations": {
+    "*.shx": "utah"
   }
 }
 ```
 
-**Issue:** Code completion not working
-**Solution:** Verify language server is running
+### Recommended Tasks
 
-```bash
-# Check language server process
-ps aux | grep "utah lsp"
-
-# Check VS Code output panel
-View > Output > Select "Utah Language Server"
-```
-
-### Debug Mode
-
-Enable debug output for troubleshooting:
-
-```json
-{
-  "utah.languageServer.trace": "verbose"
-}
-```
-
-Check output in: View > Output > Utah Language Server
-
-### Reset Extension
-
-If issues persist, reset the extension:
-
-1. Disable Utah Language Support extension
-2. Reload VS Code
-3. Re-enable extension
-4. Restart language server
-
-## Integration Examples
-
-### Project Setup
-
-Create `.vscode/settings.json` for Utah projects:
-
-```json
-{
-  "utah.projectRoot": "${workspaceFolder}",
-  "utah.formatting.onSave": true,
-  "files.associations": {
-    "*.shx": "shx"
-  },
-  "editor.defaultFormatter": "utah-lang.utah-language-support"
-}
-```
-
-### Build Tasks
-
-Add Utah build tasks in `.vscode/tasks.json`:
+Add Utah CLI tasks in `.vscode/tasks.json`:
 
 ```json
 {
@@ -305,164 +100,61 @@ Add Utah build tasks in `.vscode/tasks.json`:
       "type": "shell",
       "command": "utah",
       "args": ["compile", "${file}"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      }
+      "group": "build"
     },
     {
       "label": "Utah: Run",
       "type": "shell",
       "command": "utah",
       "args": ["run", "${file}"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      }
-    }
-  ]
-}
-```
-
-### Launch Configuration
-
-Add debug configuration in `.vscode/launch.json`:
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
+      "group": "test"
+    },
     {
-      "name": "Run Utah Script",
-      "type": "node",
-      "request": "launch",
-      "program": "utah",
-      "args": ["run", "${file}"],
-      "console": "integratedTerminal",
-      "cwd": "${workspaceFolder}"
+      "label": "Utah: Format",
+      "type": "shell",
+      "command": "utah",
+      "args": ["format", "${file}", "--in-place"],
+      "group": "build"
     }
   ]
 }
 ```
 
-### Recommended Extensions
+## Language Server Development
 
-Extensions that work well with Utah:
+The language server can be started manually for local debugging:
 
-```json
-{
-  "recommendations": [
-    "utah-lang.utah-language-support",
-    "ms-vscode.vscode-json",
-    "editorconfig.editorconfig",
-    "ms-vscode.vscode-typescript-next"
-  ]
-}
+```bash
+utah lsp
+UTAH_DEBUG=1 utah lsp
 ```
 
-## Extension API
+## Troubleshooting
 
-### Language Server Protocol
+**Issue:** Syntax highlighting not working
 
-The Utah language server implements LSP features:
+**Solution:** Ensure the file uses the `.shx` extension and that VS Code has associated it with the `utah` language.
 
-- **textDocument/completion:** Code completion
-- **textDocument/hover:** Hover information
-- **textDocument/definition:** Go to definition
-- **textDocument/references:** Find references
-- **textDocument/formatting:** Document formatting
-- **textDocument/diagnostics:** Error checking
+**Issue:** Code completion not working
 
-### Extension Commands
+**Solution:** Open the VS Code output panel and inspect `Utah Language Server` and `Utah Language Server Trace`. Completion is currently strongest after typing `.` on supported namespaces and values.
 
-Available commands for extension integration:
+**Issue:** You need formatting inside VS Code
 
-- `utah.compile` - Compile current file
-- `utah.run` - Run current file
-- `utah.format` - Format current document
-- `utah.restartLanguageServer` - Restart language server
+**Solution:** Use `utah format` from the integrated terminal or a VS Code task. The extension does not currently register a document formatter.
 
-### Configuration Schema
+## Language Server Surface Today
 
-The extension contributes configuration options:
+The current Utah language server implementation exposes:
 
-```json
-{
-  "contributes": {
-    "configuration": {
-      "title": "Utah",
-      "properties": {
-        "utah.languageServer.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable Utah language server"
-        },
-        "utah.formatting.onSave": {
-          "type": "boolean",
-          "default": true,
-          "description": "Format file on save"
-        }
-      }
-    }
-  }
-}
-```
+- `textDocument/completion`
 
-## Best Practices
+## Planned Expansion
 
-### 1. Configure for Team Development
+Advanced editor features are still planned work:
 
-```json
-// .vscode/settings.json - Team settings
-{
-  "utah.formatting.onSave": true,
-  "utah.formatting.indentSize": 2,
-  "[shx]": {
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2
-  },
-  "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true
-}
-```
-
-### 2. Use Consistent File Organization
-
-```text
-project/
-├── .vscode/
-│   ├── settings.json
-│   ├── tasks.json
-│   └── launch.json
-├── src/
-│   ├── main.shx
-│   └── utils/
-│       └── helpers.shx
-└── README.md
-```
-
-### 3. Enable Auto-formatting
-
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-  "utah.formatting.enabled": true
-}
-```
-
-### 4. Monitor Language Server
-
-Check language server health regularly:
-
-- View > Output > Utah Language Server
-- Monitor for error messages
-- Restart if issues occur
-
-The VS Code extension provides a complete development environment for Utah, making it easy to write, debug, and maintain Utah scripts with full IDE support.
+- Diagnostics
+- Hover information
+- Definition and reference lookup
+- Document formatting
+- Command palette actions for compile/run/restart

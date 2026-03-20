@@ -6505,4 +6505,4 @@ The malformed test fixtures ensure that the formatter correctly handles and form
 
 - [x] Code formatting with EditorConfig support
 
-- [ ] VS Code extension for intellisense and autocompletion
+- [x] VS Code extension for intellisense and autocompletion

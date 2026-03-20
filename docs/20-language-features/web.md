@@ -208,9 +208,8 @@ All web functions include automatic error handling:
 
 ## Future Functions
 
-The following web functions are planned for future releases:
+The following web features are planned for future releases:
 
-- `web.put()` - HTTP PUT requests
 - `web.patch()` - HTTP PATCH requests
 - URL manipulation functions
 - File download utilities
