@@ -6,8 +6,6 @@ public class CompletionHandler : ICompletionHandler
 {
   public CompletionRegistrationOptions GetRegistrationOptions(CompletionCapability capability, ClientCapabilities clientCapabilities)
   {
-    Console.Error.WriteLine("[LSP] Registering completion handler");
-
     return new CompletionRegistrationOptions
     {
       DocumentSelector = new TextDocumentSelector(new TextDocumentFilter
@@ -22,39 +20,28 @@ public class CompletionHandler : ICompletionHandler
 
   public async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
   {
-    await Console.Error.WriteLineAsync($"[LSP] Completion request received for {request.TextDocument.Uri}");
-
     var completionItems = new List<CompletionItem>();
 
-    // Check if this was triggered by a dot
     bool isDotTriggered = request.Context?.TriggerCharacter == ".";
-
-    await Console.Error.WriteLineAsync($"[LSP] Completion triggered by dot: {isDotTriggered}");
 
     if (isDotTriggered)
     {
-      // Get context by reading the document and analyzing what comes before the dot
       var context = await AnalyzeCompletionContextAsync(request, cancellationToken);
-      await Console.Error.WriteLineAsync($"[LSP] Detected context: {context}");
 
       if (context == "string")
       {
-        // Show only string.* function completions
         completionItems.AddRange(GetStringNamespaceCompletions());
       }
       else if (context.StartsWith("conn") || context.StartsWith("connection") || context.EndsWith("Conn") || context.EndsWith("Connection"))
       {
-        // Show SSH connection object completions
         completionItems.AddRange(GetSshConnectionCompletions());
       }
       else if (context == "ssh")
       {
-        // Show SSH namespace completions
         completionItems.AddRange(GetSshNamespaceCompletions());
       }
       else
       {
-        // Show all method completions for backward compatibility
         completionItems.AddRange(new List<CompletionItem>
       {
         // Console methods
@@ -411,7 +398,6 @@ public class CompletionHandler : ICompletionHandler
       });
     }
 
-    await Console.Error.WriteLineAsync($"[LSP] Returning {completionItems.Count} completion items");
     return new CompletionList(completionItems);
   }
 
@@ -419,7 +405,6 @@ public class CompletionHandler : ICompletionHandler
   {
     try
     {
-      // Read the document content
       var documentPath = request.TextDocument.Uri.GetFileSystemPath();
       if (!File.Exists(documentPath))
       {
@@ -442,13 +427,11 @@ public class CompletionHandler : ICompletionHandler
 
       var textBeforeCursor = line.Substring(0, (int)request.Position.Character);
 
-      // Look for the pattern: word followed by dot at the end
       var match = System.Text.RegularExpressions.Regex.Match(textBeforeCursor, @"(\w+)\.$");
       return match.Success ? match.Groups[1].Value : "";
     }
-    catch (Exception ex)
+    catch
     {
-      await Console.Error.WriteLineAsync($"[LSP] Error analyzing context: {ex.Message}");
       return "";
     }
   }
