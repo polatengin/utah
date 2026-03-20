@@ -6039,13 +6039,13 @@ Execute Utah (.shx) files or commands directly:
 utah script.shx
 utah script.shx -- --name "John" --count 3    # With arguments
 utah -c "console.log('Hello, World!')"
-utah --command "json.installDependencies()"
+utah --command "utility.uuid()"
 
 # Or using explicit 'run' command
 utah run script.shx
 utah run script.shx -- --name "Alice" --verbose    # With arguments
 utah run -c "console.log('Hello, World!')"
-utah run --command "json.installDependencies()"
+utah run --command "utility.uuid()"
 
 # More inline command examples
 utah -c "os.isInstalled('git')"
