@@ -1,0 +1,4 @@
+# Test for docker.list()
+
+let containers: string = docker.list();
+console.log("Running containers: ${containers}");

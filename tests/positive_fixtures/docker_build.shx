@@ -1,0 +1,10 @@
+# Test for docker.build()
+
+# Build with tag only (uses current directory)
+docker.build("myapp:latest");
+
+# Build with tag and path
+docker.build("myapp:v2", "./app");
+
+# Store result
+let result: string = docker.build("myapp:v3");

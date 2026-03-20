@@ -1,0 +1,6 @@
+# Test for docker.restart()
+
+docker.restart("my-nginx");
+
+let container: string = "web-server";
+docker.restart(container);

@@ -225,6 +225,32 @@ public partial class Compiler
         return CompileGitIsCleanExpression();
       case GitResetToCommitExpression gitResetToCommit:
         return CompileGitResetToCommitExpression(gitResetToCommit);
+      case DockerRunExpression dockerRun:
+        return CompileDockerRunExpression(dockerRun);
+      case DockerStopExpression dockerStop:
+        return CompileDockerStopExpression(dockerStop);
+      case DockerRemoveExpression dockerRemove:
+        return CompileDockerRemoveExpression(dockerRemove);
+      case DockerRestartExpression dockerRestart:
+        return CompileDockerRestartExpression(dockerRestart);
+      case DockerLogsExpression dockerLogs:
+        return CompileDockerLogsExpression(dockerLogs);
+      case DockerExecExpression dockerExec:
+        return CompileDockerExecExpression(dockerExec);
+      case DockerIsRunningExpression dockerIsRunning:
+        return CompileDockerIsRunningExpression(dockerIsRunning);
+      case DockerListExpression:
+        return CompileDockerListExpression();
+      case DockerBuildExpression dockerBuild:
+        return CompileDockerBuildExpression(dockerBuild);
+      case DockerPullExpression dockerPull:
+        return CompileDockerPullExpression(dockerPull);
+      case DockerPushExpression dockerPush:
+        return CompileDockerPushExpression(dockerPush);
+      case DockerRemoveImageExpression dockerRemoveImage:
+        return CompileDockerRemoveImageExpression(dockerRemoveImage);
+      case DockerImageExistsExpression dockerImageExists:
+        return CompileDockerImageExistsExpression(dockerImageExists);
       case SshConnectExpression sshConnect:
         return CompileSshConnectExpression(sshConnect);
       case ObjectPropertyAccessExpression objectProperty:
@@ -520,6 +546,154 @@ public partial class Compiler
     }
 
     return $"$(git reset --hard {commitHash})";
+  }
+
+  private string CompileDockerRunExpression(DockerRunExpression expr)
+  {
+    var image = CompileExpression(expr.Image);
+    if (expr.Image is LiteralExpression imgLit && imgLit.Type == "string") image = $"\"{imgLit.Value}\"";
+    else if (expr.Image is VariableExpression imgVar) image = $"${{{imgVar.Name}}}";
+
+    var parts = new List<string> { "docker run -d" };
+    if (expr.Name != null)
+    {
+      var name = CompileExpression(expr.Name);
+      if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") name = nameLit.Value;
+      else if (expr.Name is VariableExpression nameVar) name = $"${{{nameVar.Name}}}";
+      parts.Add($"--name {name}");
+    }
+    if (expr.Ports != null)
+    {
+      var ports = CompileExpression(expr.Ports);
+      if (expr.Ports is LiteralExpression portsLit && portsLit.Type == "string") ports = portsLit.Value;
+      else if (expr.Ports is VariableExpression portsVar) ports = $"${{{portsVar.Name}}}";
+      parts.Add($"-p {ports}");
+    }
+    if (expr.Volumes != null)
+    {
+      var volumes = CompileExpression(expr.Volumes);
+      if (expr.Volumes is LiteralExpression volLit && volLit.Type == "string") volumes = volLit.Value;
+      else if (expr.Volumes is VariableExpression volVar) volumes = $"${{{volVar.Name}}}";
+      parts.Add($"-v {volumes}");
+    }
+    parts.Add(image.Trim('"'));
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileDockerStopExpression(DockerStopExpression expr)
+  {
+    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker stop \"{lit.Value}\")";
+    if (expr.Container is VariableExpression varExpr)
+      return $"$(docker stop ${{{varExpr.Name}}})";
+    return $"$(docker stop {CompileExpression(expr.Container)})";
+  }
+
+  private string CompileDockerRemoveExpression(DockerRemoveExpression expr)
+  {
+    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker rm \"{lit.Value}\")";
+    if (expr.Container is VariableExpression varExpr)
+      return $"$(docker rm ${{{varExpr.Name}}})";
+    return $"$(docker rm {CompileExpression(expr.Container)})";
+  }
+
+  private string CompileDockerRestartExpression(DockerRestartExpression expr)
+  {
+    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker restart \"{lit.Value}\")";
+    if (expr.Container is VariableExpression varExpr)
+      return $"$(docker restart ${{{varExpr.Name}}})";
+    return $"$(docker restart {CompileExpression(expr.Container)})";
+  }
+
+  private string CompileDockerLogsExpression(DockerLogsExpression expr)
+  {
+    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker logs \"{lit.Value}\")";
+    if (expr.Container is VariableExpression varExpr)
+      return $"$(docker logs ${{{varExpr.Name}}})";
+    return $"$(docker logs {CompileExpression(expr.Container)})";
+  }
+
+  private string CompileDockerExecExpression(DockerExecExpression expr)
+  {
+    var container = CompileExpression(expr.Container);
+    if (expr.Container is LiteralExpression cLit && cLit.Type == "string") container = $"\"{cLit.Value}\"";
+    else if (expr.Container is VariableExpression cVar) container = $"${{{cVar.Name}}}";
+
+    var command = CompileExpression(expr.Command);
+    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == "string") command = cmdLit.Value;
+    else if (expr.Command is VariableExpression cmdVar) command = $"${{{cmdVar.Name}}}";
+
+    return $"$(docker exec {container} {command})";
+  }
+
+  private string CompileDockerIsRunningExpression(DockerIsRunningExpression expr)
+  {
+    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker inspect -f '{{{{.State.Running}}}}' \"{lit.Value}\" 2>/dev/null || echo \"false\")";
+    if (expr.Container is VariableExpression varExpr)
+      return $"$(docker inspect -f '{{{{.State.Running}}}}' ${{{varExpr.Name}}} 2>/dev/null || echo \"false\")";
+    return $"$(docker inspect -f '{{{{.State.Running}}}}' {CompileExpression(expr.Container)} 2>/dev/null || echo \"false\")";
+  }
+
+  private string CompileDockerListExpression()
+  {
+    return "$(docker ps --format '{{.Names}}')";
+  }
+
+  private string CompileDockerBuildExpression(DockerBuildExpression expr)
+  {
+    var tag = CompileExpression(expr.Tag);
+    if (expr.Tag is LiteralExpression tagLit && tagLit.Type == "string") tag = $"\"{tagLit.Value}\"";
+    else if (expr.Tag is VariableExpression tagVar) tag = $"${{{tagVar.Name}}}";
+
+    var path = ".";
+    if (expr.Path != null)
+    {
+      if (expr.Path is LiteralExpression pathLit && pathLit.Type == "string") path = $"\"{pathLit.Value}\"";
+      else if (expr.Path is VariableExpression pathVar) path = $"${{{pathVar.Name}}}";
+      else path = CompileExpression(expr.Path);
+    }
+
+    return $"$(docker build -t {tag} {path})";
+  }
+
+  private string CompileDockerPullExpression(DockerPullExpression expr)
+  {
+    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker pull \"{lit.Value}\")";
+    if (expr.Image is VariableExpression varExpr)
+      return $"$(docker pull ${{{varExpr.Name}}})";
+    return $"$(docker pull {CompileExpression(expr.Image)})";
+  }
+
+  private string CompileDockerPushExpression(DockerPushExpression expr)
+  {
+    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker push \"{lit.Value}\")";
+    if (expr.Image is VariableExpression varExpr)
+      return $"$(docker push ${{{varExpr.Name}}})";
+    return $"$(docker push {CompileExpression(expr.Image)})";
+  }
+
+  private string CompileDockerRemoveImageExpression(DockerRemoveImageExpression expr)
+  {
+    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker rmi \"{lit.Value}\")";
+    if (expr.Image is VariableExpression varExpr)
+      return $"$(docker rmi ${{{varExpr.Name}}})";
+    return $"$(docker rmi {CompileExpression(expr.Image)})";
+  }
+
+  private string CompileDockerImageExistsExpression(DockerImageExistsExpression expr)
+  {
+    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+      return $"$(docker image inspect \"{lit.Value}\" > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
+    if (expr.Image is VariableExpression varExpr)
+      return $"$(docker image inspect ${{{varExpr.Name}}} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
+    return $"$(docker image inspect {CompileExpression(expr.Image)} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
   }
 
   private string CompileSshConnectExpression(SshConnectExpression sshConnect)

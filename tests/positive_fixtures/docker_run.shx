@@ -1,0 +1,17 @@
+# Test for docker.run()
+
+# Run with just image
+docker.run("nginx");
+
+# Run with image and name
+docker.run("nginx", "my-nginx");
+
+# Run with image, name, and ports
+docker.run("nginx", "web-server", "8080:80");
+
+# Run with all options
+docker.run("nginx", "full-server", "8080:80", "/data:/usr/share/nginx/html");
+
+# Store container ID
+let containerId: string = docker.run("redis", "my-redis");
+console.log("Started container: ${containerId}");

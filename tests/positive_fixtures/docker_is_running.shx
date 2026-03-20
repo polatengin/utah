@@ -1,0 +1,9 @@
+# Test for docker.isRunning()
+
+let running: boolean = docker.isRunning("my-nginx");
+
+if (running) {
+  console.log("Container is running");
+} else {
+  console.log("Container is not running");
+}

@@ -1,0 +1,10 @@
+# Test for docker.removeImage() and docker.imageExists()
+
+let exists: boolean = docker.imageExists("nginx:latest");
+
+if (exists) {
+  console.log("Image exists");
+  docker.removeImage("nginx:latest");
+} else {
+  console.log("Image not found");
+}

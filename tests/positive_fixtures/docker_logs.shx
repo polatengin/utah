@@ -1,0 +1,7 @@
+# Test for docker.logs()
+
+let output: string = docker.logs("my-nginx");
+console.log("Logs: ${output}");
+
+let container: string = "web-server";
+let logs: string = docker.logs(container);

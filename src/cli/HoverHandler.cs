@@ -135,6 +135,7 @@ public class HoverHandler : IHoverHandler
       "process" => CompletionHandler.GetProcessCompletions(),
       "os" => CompletionHandler.GetOsCompletions(),
       "git" => CompletionHandler.GetGitCompletions(),
+      "docker" => CompletionHandler.GetDockerCompletions(),
       "utility" => CompletionHandler.GetUtilityCompletions(),
       "timer" => CompletionHandler.GetTimerCompletions(),
       "system" => CompletionHandler.GetSystemCompletions(),

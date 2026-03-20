@@ -1,0 +1,7 @@
+# Test for docker.pull() and docker.push()
+
+docker.pull("nginx:latest");
+docker.push("myregistry/myapp:latest");
+
+let image: string = "redis:alpine";
+docker.pull(image);

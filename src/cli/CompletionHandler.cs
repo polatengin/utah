@@ -39,6 +39,7 @@ public class CompletionHandler : ICompletionHandler
         "process" => GetProcessCompletions(),
         "os" => GetOsCompletions(),
         "git" => GetGitCompletions(),
+        "docker" => GetDockerCompletions(),
         "utility" => GetUtilityCompletions(),
         "timer" => GetTimerCompletions(),
         "system" => GetSystemCompletions(),
@@ -261,6 +262,26 @@ public class CompletionHandler : ICompletionHandler
     };
   }
 
+  public static List<CompletionItem> GetDockerCompletions()
+  {
+    return new List<CompletionItem>
+    {
+      M("run", "run(image: string, name?: string, ports?: string, volumes?: string): string", "Run a Docker container"),
+      M("stop", "stop(container: string)", "Stop a running container"),
+      M("remove", "remove(container: string)", "Remove a container"),
+      M("restart", "restart(container: string)", "Restart a container"),
+      M("logs", "logs(container: string): string", "Get container logs"),
+      M("exec", "exec(container: string, command: string): string", "Execute a command in a running container"),
+      M("isRunning", "isRunning(container: string): boolean", "Check if a container is running"),
+      M("list", "list(): string", "List running containers"),
+      M("build", "build(tag: string, path?: string)", "Build a Docker image"),
+      M("pull", "pull(image: string)", "Pull an image from registry"),
+      M("push", "push(image: string)", "Push an image to registry"),
+      M("removeImage", "removeImage(image: string)", "Remove a Docker image"),
+      M("imageExists", "imageExists(image: string): boolean", "Check if an image exists locally"),
+    };
+  }
+
   public static List<CompletionItem> GetUtilityCompletions()
   {
     return new List<CompletionItem>
@@ -463,6 +484,7 @@ public class CompletionHandler : ICompletionHandler
       N("process", "Process management namespace"),
       N("os", "Operating system operations namespace"),
       N("git", "Git operations namespace"),
+      N("docker", "Docker container and image management namespace"),
       N("utility", "Utility functions namespace"),
       N("timer", "Timer operations namespace"),
       N("system", "System information namespace"),

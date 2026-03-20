@@ -1435,6 +1435,152 @@ public partial class Parser
         return new GitResetToCommitExpression(commitHashExpr);
       }
 
+      // Special handling for docker.run()
+      if (functionName == "docker.run")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.run() requires at least 1 argument (image)");
+        }
+        var args = SplitByComma(argsContent);
+        var imageExpr = ParseExpression(args[0]);
+        Expression? nameExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        Expression? portsExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        Expression? volumesExpr = args.Count >= 4 ? ParseExpression(args[3]) : null;
+        return new DockerRunExpression(imageExpr, nameExpr, portsExpr, volumesExpr);
+      }
+
+      // Special handling for docker.stop()
+      if (functionName == "docker.stop")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.stop() requires one argument (container)");
+        }
+        var containerExpr = ParseExpression(argsContent.Trim());
+        return new DockerStopExpression(containerExpr);
+      }
+
+      // Special handling for docker.remove()
+      if (functionName == "docker.remove")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.remove() requires one argument (container)");
+        }
+        var containerExpr = ParseExpression(argsContent.Trim());
+        return new DockerRemoveExpression(containerExpr);
+      }
+
+      // Special handling for docker.restart()
+      if (functionName == "docker.restart")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.restart() requires one argument (container)");
+        }
+        var containerExpr = ParseExpression(argsContent.Trim());
+        return new DockerRestartExpression(containerExpr);
+      }
+
+      // Special handling for docker.logs()
+      if (functionName == "docker.logs")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.logs() requires one argument (container)");
+        }
+        var containerExpr = ParseExpression(argsContent.Trim());
+        return new DockerLogsExpression(containerExpr);
+      }
+
+      // Special handling for docker.exec()
+      if (functionName == "docker.exec")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count == 2)
+        {
+          var containerExpr = ParseExpression(args[0]);
+          var commandExpr = ParseExpression(args[1]);
+          return new DockerExecExpression(containerExpr, commandExpr);
+        }
+        throw new InvalidOperationException("docker.exec() requires exactly 2 arguments (container, command)");
+      }
+
+      // Special handling for docker.isRunning()
+      if (functionName == "docker.isRunning")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.isRunning() requires one argument (container)");
+        }
+        var containerExpr = ParseExpression(argsContent.Trim());
+        return new DockerIsRunningExpression(containerExpr);
+      }
+
+      // Special handling for docker.list()
+      if (functionName == "docker.list" && string.IsNullOrEmpty(argsContent))
+      {
+        return new DockerListExpression();
+      }
+
+      // Special handling for docker.build()
+      if (functionName == "docker.build")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.build() requires at least 1 argument (tag)");
+        }
+        var args = SplitByComma(argsContent);
+        var tagExpr = ParseExpression(args[0]);
+        Expression? pathExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        return new DockerBuildExpression(tagExpr, pathExpr);
+      }
+
+      // Special handling for docker.pull()
+      if (functionName == "docker.pull")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.pull() requires one argument (image)");
+        }
+        var imageExpr = ParseExpression(argsContent.Trim());
+        return new DockerPullExpression(imageExpr);
+      }
+
+      // Special handling for docker.push()
+      if (functionName == "docker.push")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.push() requires one argument (image)");
+        }
+        var imageExpr = ParseExpression(argsContent.Trim());
+        return new DockerPushExpression(imageExpr);
+      }
+
+      // Special handling for docker.removeImage()
+      if (functionName == "docker.removeImage")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.removeImage() requires one argument (image)");
+        }
+        var imageExpr = ParseExpression(argsContent.Trim());
+        return new DockerRemoveImageExpression(imageExpr);
+      }
+
+      // Special handling for docker.imageExists()
+      if (functionName == "docker.imageExists")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("docker.imageExists() requires one argument (image)");
+        }
+        var imageExpr = ParseExpression(argsContent.Trim());
+        return new DockerImageExistsExpression(imageExpr);
+      }
+
       // Special handling for system.cpuCount()
       if (functionName == "system.cpuCount" && string.IsNullOrEmpty(argsContent))
       {

@@ -1,0 +1,12 @@
+# Test for docker.stop() and docker.remove()
+
+# Stop a container by name
+docker.stop("my-nginx");
+
+# Remove a container by name
+docker.remove("my-nginx");
+
+# Stop using a variable
+let container: string = "web-server";
+docker.stop(container);
+docker.remove(container);

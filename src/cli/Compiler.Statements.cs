@@ -254,6 +254,52 @@ public partial class Compiler
             lines.Add($"git reset --hard {resetHash2}");
           }
         }
+        // Special handling for docker.* expressions in statement context
+        else if (exprStmt.Expression is DockerRunExpression dockerRun)
+        {
+          var compiled = CompileDockerRunExpression(dockerRun);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerStopExpression dockerStop)
+        {
+          var compiled = CompileDockerStopExpression(dockerStop);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerRemoveExpression dockerRemove)
+        {
+          var compiled = CompileDockerRemoveExpression(dockerRemove);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerRestartExpression dockerRestart)
+        {
+          var compiled = CompileDockerRestartExpression(dockerRestart);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerExecExpression dockerExec)
+        {
+          var compiled = CompileDockerExecExpression(dockerExec);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerPullExpression dockerPull)
+        {
+          var compiled = CompileDockerPullExpression(dockerPull);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerPushExpression dockerPush)
+        {
+          var compiled = CompileDockerPushExpression(dockerPush);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerBuildExpression dockerBuild)
+        {
+          var compiled = CompileDockerBuildExpression(dockerBuild);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is DockerRemoveImageExpression dockerRemoveImage)
+        {
+          var compiled = CompileDockerRemoveImageExpression(dockerRemoveImage);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
         // Parallel function call
         else if (exprStmt.Expression is ParallelFunctionCall parallelCall)
         {
@@ -442,14 +488,14 @@ public partial class Compiler
           ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
         }
         // Handle boolean function calls (ArrayIsEmpty, ArrayContains, ConsoleIsSudo, etc.)
-        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression || ifs.Condition is GitIsCleanExpression)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression || ifs.Condition is GitIsCleanExpression || ifs.Condition is DockerIsRunningExpression || ifs.Condition is DockerImageExistsExpression)
         {
           // For boolean functions, check if the result equals "true"
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
         else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
-                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression || unary.Operand is GitIsCleanExpression))
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression || unary.Operand is GitIsCleanExpression || unary.Operand is DockerIsRunningExpression || unary.Operand is DockerImageExistsExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
           // For negated boolean functions, check if the result equals "false"

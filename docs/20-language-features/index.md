@@ -92,6 +92,7 @@ Utah provides comprehensive built-in functions organized by functionality:
 ### Development Tools
 
 - **[Git](git.md)** - Version control operations
+- **[Docker](docker.md)** - Container and image management
 - **[SSH](ssh.md)** - Secure shell operations
 - **[Utilities](utilities.md)** - Common utility functions
 - **[Argument Parsing](arguments.md)** - CLI argument handling

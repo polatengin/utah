@@ -1,0 +1,7 @@
+# Test for docker.exec()
+
+let result: string = docker.exec("my-nginx", "ls /usr/share/nginx/html");
+console.log("Files: ${result}");
+
+let container: string = "web-server";
+docker.exec(container, "nginx -s reload");
