@@ -285,13 +285,11 @@ jobs:
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-x64 -o ./publish/osx-x64
           dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-arm64 -o ./publish/osx-arm64
 
-      - name: Ensure artifacts exist
+      - name: Prepare release assets
         run: |
-          ls -R ./publish
-
-          test -f ./publish/linux-x64/utah
-          test -f ./publish/osx-x64/utah
-          test -f ./publish/osx-arm64/utah
+          cp ./publish/linux-x64/utah ./publish/utah-linux-x64
+          cp ./publish/osx-x64/utah ./publish/utah-osx-x64
+          cp ./publish/osx-arm64/utah ./publish/utah-osx-arm64
 
       - name: Create Release
         id: create_release
@@ -304,6 +302,6 @@ jobs:
             --title "Release $TAG" \
             --notes "${{ steps.release_notes.outputs.RELEASE_NOTES }}"
 
-          gh release upload "$TAG" ./publish/linux-x64/utah#utah-linux-x64
-          gh release upload "$TAG" ./publish/osx-x64/utah#utah-osx-x64
-          gh release upload "$TAG" ./publish/osx-arm64/utah#utah-osx-arm64
+          gh release upload "$TAG" ./publish/utah-linux-x64#utah-linux-x64
+          gh release upload "$TAG" ./publish/utah-osx-x64#utah-osx-x64
+          gh release upload "$TAG" ./publish/utah-osx-arm64#utah-osx-arm64
