@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev markdownlint format
+.PHONY: help build build-extension test compile clean install info dev markdownlint format publish
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -363,6 +363,17 @@ info: ## Show project information
 	@echo
 	@echo "Recent Changes:"
 	@git log --oneline -5 2>/dev/null || echo "  Not a git repository"
+
+publish: ## Publish release binaries for all platforms
+	@echo "$(BLUE)📦 Publishing release binaries...$(NC)"
+	dotnet publish $(CLI_DIR)/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r linux-x64 -o ./publish/linux-x64
+	dotnet publish $(CLI_DIR)/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-x64 -o ./publish/osx-x64
+	dotnet publish $(CLI_DIR)/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-arm64 -o ./publish/osx-arm64
+	@echo "$(BLUE)📋 Preparing release assets...$(NC)"
+	cp ./publish/linux-x64/utah ./publish/utah-linux-x64
+	cp ./publish/osx-x64/utah ./publish/utah-osx-x64
+	cp ./publish/osx-arm64/utah ./publish/utah-osx-arm64
+	@echo "$(GREEN)✅ Publish complete$(NC)"
 
 markdownlint: ## Run markdownlint on all markdown files
 	@echo "$(BLUE)📝 Running markdownlint on markdown files...$(NC)"

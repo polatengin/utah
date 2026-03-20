@@ -280,16 +280,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Publish
-        run: |
-          dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r linux-x64 -o ./publish/linux-x64
-          dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-x64 -o ./publish/osx-x64
-          dotnet publish src/cli/utah.csproj --configuration Release -p:PublishSingleFile=true --self-contained true -r osx-arm64 -o ./publish/osx-arm64
-
-      - name: Prepare release assets
-        run: |
-          cp ./publish/linux-x64/utah ./publish/utah-linux-x64
-          cp ./publish/osx-x64/utah ./publish/utah-osx-x64
-          cp ./publish/osx-arm64/utah ./publish/utah-osx-arm64
+        run: make publish
 
       - name: Create Release
         id: create_release
