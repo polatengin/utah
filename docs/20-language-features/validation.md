@@ -17,6 +17,43 @@ Validation functions in Utah:
 - Provide consistent error handling patterns
 - Integrate seamlessly with Utah's conditional logic
 
+## Schema Validation
+
+Utah also supports validating parsed objects against named `interface` and `record` declarations.
+
+### `schema.isValid()`
+
+Check whether an `object` matches a named structured type:
+
+```typescript
+interface Address {
+  city: string;
+  zip: number;
+}
+
+record User {
+  name: string;
+  age: number;
+  active: boolean;
+  address: Address;
+}
+
+let payload: object = json.parse(inputJson);
+let matchesSchema: boolean = schema.isValid(payload, User);
+```
+
+### `schema.validate()`
+
+Validate and return the original object value. If validation fails, the script exits with an error.
+
+```typescript
+let payload: object = json.parse(inputJson);
+let user: User = schema.validate(payload, User);
+
+console.log(user.name);
+console.log(user.address.city);
+```
+
 ## Available Validation Functions
 
 ### Email Validation

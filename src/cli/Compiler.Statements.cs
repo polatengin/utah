@@ -123,7 +123,8 @@ public partial class Compiler
             lines.Add($"{v.Name}={expressionValue}");
           }
         }
-        RegisterVariableType(v.Name, !string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value));
+        var resolvedType = InferExpressionType(v.Value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value));
+        RegisterVariableType(v.Name, resolvedType);
         break;
 
       case ExpressionStatement exprStmt:

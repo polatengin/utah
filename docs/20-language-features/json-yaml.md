@@ -60,6 +60,21 @@ let config: object = json.parse(jsonData);
 console.log("Configuration loaded");
 ```
 
+If you know the expected shape, validate the parsed object against a named type:
+
+```typescript
+record AppConfig {
+  name: string;
+  port: number;
+}
+
+let parsed: object = json.parse(jsonData);
+let config: AppConfig = schema.validate(parsed, AppConfig);
+
+console.log(config.name);
+console.log(config.port);
+```
+
 #### `json.stringify(jsonObject): string`
 
 Convert a JSON object back to a string:

@@ -123,24 +123,84 @@ let firstScore: number = scores[0];
 let arrayLength: number = scores.length;
 ```
 
+### Collection Types
+
+#### `set<T>`
+
+Sets store unique values while preserving insertion order:
+
+```typescript
+let tags: set<string> = ["alpha", "beta", "alpha"];
+let moreTags: set<string> = set.add(tags, "stable");
+
+console.log(array.join(tags, ", "));      // alpha,beta
+console.log(set.has(moreTags, "stable")); // true
+```
+
+#### `map<string, T>` and `dictionary<string, T>`
+
+Maps and dictionaries provide typed key/value storage backed by JSON-style objects:
+
+```typescript
+let retries: map<string, number> = { attempts: 3, timeout: 30 };
+let labels: dictionary<string, string> = { env: "prod", region: "eu" };
+
+console.log(map.get(retries, "attempts"));
+console.log(dictionary.get(labels, "env"));
+```
+
 ### Object Type
 
 #### `object`
 
-For JSON/YAML objects:
+Use `object` when the shape is dynamic or only known at runtime:
 
 ```typescript
-// Parse JSON into object
 let configJson: string = "{\"host\": \"localhost\", \"port\": 8080}";
 let config: object = json.parse(configJson);
-
-// Parse YAML into object
-let yamlConfig: string = "host: localhost\nport: 8080";
-let yamlObj: object = yaml.parse(yamlConfig);
-
-// Access object properties
 let host: string = json.get(config, ".host");
 let port: number = json.get(config, ".port");
+```
+
+### Structured Types
+
+#### `interface` and `record`
+
+Use named structured types when you know the shape ahead of time and want property access with compile-time checks:
+
+```typescript
+interface Address {
+  city: string;
+  zip: number;
+}
+
+record User {
+  name: string;
+  age: number;
+  active: boolean;
+  address: Address;
+  tags: string[];
+  metadata: map<string, string>;
+}
+
+let user: User = { name: "Ada", age: 32, active: true, address: { city: "Ankara", zip: 6800 }, tags: ["builder"], metadata: { team: "compiler" } };
+
+console.log(user.name);
+console.log(user.address.city);
+console.log(user.metadata.team);
+```
+
+#### Schema Validation
+
+When data comes from JSON or YAML, validate it against a named type before treating it as structured data:
+
+```typescript
+let payload: object = json.parse(inputJson);
+let user: User = schema.validate(payload, User);
+
+if (schema.isValid(payload, User)) {
+  console.log(user.name);
+}
 ```
 
 ## Type Inference

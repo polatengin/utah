@@ -424,7 +424,8 @@ public partial class Parser
         var value = ParseExpression(valueStr);
 
         ValidateVariableTypeAssignment(value, type, name);
-        RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+        var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+        RegisterVariableType(name, resolvedType);
 
         return new VariableDeclaration(name, type, value, isConst);
       }
@@ -478,7 +479,8 @@ public partial class Parser
             var value = ParseExpression(valueStr);
 
             ValidateVariableTypeAssignment(value, type, name);
-            RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+            var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+            RegisterVariableType(name, resolvedType);
 
             return new VariableDeclaration(name, type, value, isConst);
           }
@@ -505,7 +507,8 @@ public partial class Parser
       var value = ParseExpression(valueStr);
 
       ValidateVariableTypeAssignment(value, type, name);
-      RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
     }
@@ -530,7 +533,8 @@ public partial class Parser
       var value = ParseExpression(valueStr);
 
       ValidateVariableTypeAssignment(value, type, name);
-      RegisterVariableType(name, !string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      var resolvedType = InferExpressionType(value) == "sshConnection" ? "sshConnection" : (!string.IsNullOrEmpty(type) ? type : InferExpressionType(value));
+      RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
     }
@@ -1479,7 +1483,7 @@ public partial class Parser
     }
 
     if (expectedType == "object" &&
-        (actualType == "object" || _structuredTypes.ContainsKey(actualType) || IsMapType(actualType) || IsDictionaryType(actualType)))
+        (actualType == "object" || actualType == "sshConnection" || _structuredTypes.ContainsKey(actualType) || IsMapType(actualType) || IsDictionaryType(actualType)))
     {
       return true;
     }

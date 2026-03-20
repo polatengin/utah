@@ -95,6 +95,52 @@ let numberString: string = array.join(numbers, "-");      // "1-2-3-4-5"
 console.log("Fruits: ${array.join(fruits, ", ")}");       // "Fruits: apple, banana, cherry"
 ```
 
+### Higher-Order Array Helpers
+
+Callbacks use block lambdas and should return the value you want to keep, transform, or accumulate.
+
+#### `array.map()`
+
+Transform each element into a new array:
+
+```typescript
+let numbers: number[] = [1, 2, 3];
+let doubled: number[] = array.map(numbers, (value, index) => { return value * 2; });
+```
+
+#### `array.filter()`
+
+Keep only elements whose callback returns `true`:
+
+```typescript
+let evens: number[] = array.filter(numbers, (value) => { return value % 2 == 0; });
+```
+
+#### `array.reduce()`
+
+Accumulate an array into a single value:
+
+```typescript
+let total: number = array.reduce(numbers, (acc, value, index) => { return acc + value; }, 0);
+```
+
+#### `array.find()`
+
+Return the first element whose callback matches:
+
+```typescript
+let firstLarge: number = array.find(numbers, (value) => { return value > 2; });
+```
+
+#### `array.some()` and `array.every()`
+
+Run boolean checks across the collection:
+
+```typescript
+let hasOdd: boolean = array.some(numbers, (value) => { return value % 2 != 0; });
+let allPositive: boolean = array.every(numbers, (value) => { return value > 0; });
+```
+
 #### `array.sort()`
 
 Sort array elements in ascending or descending order:
