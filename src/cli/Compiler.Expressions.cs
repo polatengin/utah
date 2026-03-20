@@ -4209,7 +4209,16 @@ _utah_validate_in_range {value} {min} {max}
 
   private string BuildArrayVariableJsonExpression(string variableName)
   {
-    return $"$(printf '%s\\n' \"${{{variableName}[@]}}\" | jq -R . | jq -s .)";
+    var elementType = GetCollectionElementType(GetVariableType(variableName) ?? "") ?? "string";
+    var jqConverter = elementType switch
+    {
+      "number" => "tonumber",
+      "boolean" => ". == \"true\"",
+      _ when IsJsonBackedObjectType(elementType) || IsArrayType(elementType) || IsSetType(elementType) => "fromjson",
+      _ => "."
+    };
+
+    return $"$(printf '%s\\n' \"${{{variableName}[@]}}\" | jq -R '{jqConverter}' | jq -s .)";
   }
 
   private string QuoteForBashWord(string value)

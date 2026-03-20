@@ -1,0 +1,61 @@
+let numbers: number[] = [1, 2, 3, 4, 5];
+let doubled: number[] = array.map(numbers, (num, index) => { return num * 2; });
+console.log("Doubled:");
+console.log(array.join(doubled, ", "));
+
+let evenNumbers: number[] = array.filter(numbers, (num) => { return num % 2 == 0; });
+console.log("Even numbers:");
+console.log(array.join(evenNumbers, ", "));
+
+let total: number = array.reduce(numbers, (acc, item, index) => { return acc + item; }, 0);
+console.log("Total:");
+console.log(total);
+
+let firstOverThree: number = array.find(numbers, (num) => { return num > 3; });
+console.log("First over three:");
+console.log(firstOverThree);
+
+let hasOdd: boolean = array.some(numbers, (num) => { return num % 2 != 0; });
+let allPositive: boolean = array.every(numbers, (num) => { return num > 0; });
+console.log("Has odd:");
+console.log(hasOdd);
+console.log("All positive:");
+console.log(allPositive);
+
+let options: map<string, number> = { retries: 3, timeout: 30 };
+console.log("Retries:");
+console.log(map.get(options, "retries"));
+options = map.set(options, "retries", 5);
+console.log("Updated retries:");
+console.log(map.get(options, "retries"));
+console.log("Has timeout:");
+console.log(map.has(options, "timeout"));
+
+let labels: dictionary<string, string> = { env: "prod", region: "eu" };
+console.log("Label env:");
+console.log(dictionary.get(labels, "env"));
+
+let tags: set<string> = ["alpha", "beta", "alpha", "release"];
+console.log("Tags:");
+console.log(array.join(tags, ", "));
+console.log("Has beta:");
+console.log(set.has(tags, "beta"));
+
+let extendedTags: set<string> = set.add(tags, "stable");
+console.log("Extended tags:");
+console.log(array.join(extendedTags, ", "));
+
+let removedTags: set<string> = set.remove(extendedTags, "alpha");
+console.log("Removed alpha:");
+console.log(array.join(removedTags, ", "));
+
+let moreTags: set<string> = ["release", "nightly", "stable"];
+let unionTags: set<string> = set.union(tags, moreTags);
+let intersectionTags: set<string> = set.intersection(tags, moreTags);
+let differenceTags: set<string> = set.difference(unionTags, moreTags);
+console.log("Union tags:");
+console.log(array.join(unionTags, ", "));
+console.log("Intersection tags:");
+console.log(array.join(intersectionTags, ", "));
+console.log("Difference tags:");
+console.log(array.join(differenceTags, ", "));

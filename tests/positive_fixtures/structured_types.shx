@@ -1,0 +1,32 @@
+interface Address {
+  city: string;
+  zip: number;
+}
+
+record User {
+  name: string;
+  age: number;
+  active: boolean;
+  address: Address;
+  tags: string[];
+  metadata: map<string, string>;
+}
+
+let user: User = { name: "Ada", age: 32, active: true, address: { city: "Ankara", zip: 6800 }, tags: ["builder", "maintainer"], metadata: { team: "compiler", tier: "core" } };
+console.log("User name:");
+console.log(user.name);
+console.log("User city:");
+console.log(user.address.city);
+console.log("User tier:");
+console.log(user.metadata.tier);
+
+let userPayload: object = json.parse('{"name":"Grace","age":37,"active":true,"address":{"city":"Istanbul","zip":34000},"tags":["platform","infra"],"metadata":{"team":"runtime","tier":"infra"}}');
+let validatedUser: User = schema.validate(userPayload, User);
+console.log("Validated user:");
+console.log(validatedUser.name);
+console.log(validatedUser.address.city);
+
+let people: User[] = [user, validatedUser];
+let names: string[] = array.map(people, (person) => { return person.name; });
+console.log("People:");
+console.log(array.join(names, ", "));

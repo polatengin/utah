@@ -1498,14 +1498,14 @@ public partial class Parser
     {
       var expectedElementType = GetCollectionElementType(expectedType)!;
       var actualElementType = GetCollectionElementType(actualType)!;
-      return expectedElementType == "any" || actualElementType == "unknown" || expectedElementType == actualElementType;
+      return expectedElementType == "any" || actualElementType == "unknown" || actualElementType == "any" || expectedElementType == actualElementType;
     }
 
     if (IsSetType(expectedType) && IsSetType(actualType))
     {
       var expectedElementType = GetCollectionElementType(expectedType)!;
       var actualElementType = GetCollectionElementType(actualType)!;
-      return expectedElementType == "any" || actualElementType == "unknown" || expectedElementType == actualElementType;
+      return expectedElementType == "any" || actualElementType == "unknown" || actualElementType == "any" || expectedElementType == actualElementType;
     }
 
     if ((IsMapType(expectedType) || IsDictionaryType(expectedType)) &&

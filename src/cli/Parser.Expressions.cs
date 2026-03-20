@@ -533,7 +533,15 @@ public partial class Parser
         var arrayFunctionName = methodPart.Substring(0, parenIndex).Trim();
 
         // Skip functions that have dedicated AST node handling
-        if (arrayFunctionName != "sort" && arrayFunctionName != "shuffle" && arrayFunctionName != "forEach")
+        if (arrayFunctionName != "sort" &&
+            arrayFunctionName != "shuffle" &&
+            arrayFunctionName != "forEach" &&
+            arrayFunctionName != "map" &&
+            arrayFunctionName != "filter" &&
+            arrayFunctionName != "reduce" &&
+            arrayFunctionName != "find" &&
+            arrayFunctionName != "some" &&
+            arrayFunctionName != "every")
         {
           var argsContent = methodPart.Substring(parenIndex + 1, methodPart.Length - parenIndex - 2).Trim();
 

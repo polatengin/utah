@@ -44,6 +44,7 @@ public class FormatterVisitor
   {
     // Always add blank line before major control structures
     if (currentStatement is FunctionDeclaration || currentStatement is ImportStatement ||
+        currentStatement is StructuredTypeDeclaration ||
         currentStatement is IfStatement || currentStatement is ForLoop ||
         currentStatement is ForInLoop || currentStatement is WhileStatement ||
         currentStatement is SwitchStatement || currentStatement is TryCatchStatement)
@@ -71,8 +72,9 @@ public class FormatterVisitor
   private bool ShouldAddBlankLineBefore(Statement statement)
   {
     return statement is FunctionDeclaration ||
-           statement is ImportStatement ||
-           (statement is IfStatement) ||
+            statement is ImportStatement ||
+            statement is StructuredTypeDeclaration ||
+            (statement is IfStatement) ||
            (statement is ForLoop) ||
            (statement is ForInLoop) ||
            (statement is WhileStatement) ||
@@ -83,7 +85,8 @@ public class FormatterVisitor
   private bool ShouldAddBlankLineAfter(Statement statement)
   {
     return statement is FunctionDeclaration ||
-           statement is ImportStatement;
+            statement is ImportStatement ||
+            statement is StructuredTypeDeclaration;
   }
 
   private void VisitStatement(Statement statement)
@@ -98,6 +101,9 @@ public class FormatterVisitor
         break;
       case FunctionDeclaration funcDecl:
         VisitFunctionDeclaration(funcDecl);
+        break;
+      case StructuredTypeDeclaration structuredType:
+        VisitStructuredTypeDeclaration(structuredType);
         break;
       case IfStatement ifStmt:
         VisitIfStatement(ifStmt);
@@ -210,6 +216,21 @@ public class FormatterVisitor
     foreach (var statement in funcDecl.Body)
     {
       VisitStatement(statement);
+    }
+    _indentLevel--;
+
+    WriteIndentedLine("}");
+  }
+
+  private void VisitStructuredTypeDeclaration(StructuredTypeDeclaration declaration)
+  {
+    var keyword = declaration.IsRecord ? "record" : "interface";
+    WriteIndentedLine($"{keyword} {declaration.Name} {{");
+
+    _indentLevel++;
+    foreach (var field in declaration.Fields)
+    {
+      WriteIndentedLine($"{field.Name}: {field.Type};");
     }
     _indentLevel--;
 
@@ -388,6 +409,9 @@ public class FormatterVisitor
         return literal.Type == "string" ? $"\"{literal.Value}\"" : literal.Value;
       case VariableExpression variable:
         return variable.Name;
+      case ObjectLiteralExpression objectLiteral:
+        var properties = string.Join(", ", objectLiteral.Properties.Select(property => $"{property.Name}: {VisitExpression(property.Value)}"));
+        return $"{{{properties}}}";
       case BinaryExpression binary:
         return $"{VisitExpression(binary.Left)} {binary.Operator} {VisitExpression(binary.Right)}";
       case FunctionCall funcCall:
@@ -428,6 +452,8 @@ public class FormatterVisitor
         return $"{VisitExpression(arrayContains.Array)}.contains({VisitExpression(arrayContains.Item)})";
       case ArrayReverse arrayReverse:
         return $"{VisitExpression(arrayReverse.Array)}.reverse()";
+      case ObjectPropertyAccessExpression propertyAccess:
+        return $"{VisitExpression(propertyAccess.Object)}.{propertyAccess.PropertyName}";
       case UtilityRandomExpression utilityRandom:
         if (utilityRandom.MinValue != null && utilityRandom.MaxValue != null)
           return $"utility.random({VisitExpression(utilityRandom.MinValue)}, {VisitExpression(utilityRandom.MaxValue)})";
@@ -636,6 +662,20 @@ public class FormatterVisitor
       case ArrayNamespaceCallExpression arrayNamespaceCall:
         var arrayArgs = string.Join(", ", arrayNamespaceCall.Arguments.Select(VisitExpression));
         return $"array.{arrayNamespaceCall.FunctionName}({arrayArgs})";
+      case ArrayMapExpression arrayMap:
+        return $"array.map({VisitExpression(arrayMap.Array)}, {VisitExpression(arrayMap.Callback)})";
+      case ArrayFilterExpression arrayFilter:
+        return $"array.filter({VisitExpression(arrayFilter.Array)}, {VisitExpression(arrayFilter.Callback)})";
+      case ArrayReduceExpression arrayReduce:
+        if (arrayReduce.InitialValue != null)
+          return $"array.reduce({VisitExpression(arrayReduce.Array)}, {VisitExpression(arrayReduce.Callback)}, {VisitExpression(arrayReduce.InitialValue)})";
+        return $"array.reduce({VisitExpression(arrayReduce.Array)}, {VisitExpression(arrayReduce.Callback)})";
+      case ArrayFindExpression arrayFind:
+        return $"array.find({VisitExpression(arrayFind.Array)}, {VisitExpression(arrayFind.Callback)})";
+      case ArraySomeExpression arraySome:
+        return $"array.some({VisitExpression(arraySome.Array)}, {VisitExpression(arraySome.Callback)})";
+      case ArrayEveryExpression arrayEvery:
+        return $"array.every({VisitExpression(arrayEvery.Array)}, {VisitExpression(arrayEvery.Callback)})";
       case ValidateIsEmailExpression validateIsEmail:
         return $"validate.isEmail({VisitExpression(validateIsEmail.Email)})";
       case ValidateIsURLExpression validateIsURL:

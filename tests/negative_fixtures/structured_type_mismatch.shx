@@ -1,0 +1,6 @@
+record User {
+  name: string;
+  age: number;
+}
+
+let invalidUser: User = { name: "Ada", age: "thirty-two" };
