@@ -301,8 +301,9 @@ jobs:
           TAG=${{ steps.version.outputs.new_version_tag }}
 
           gh release create "$TAG" \
-            ./publish/linux-x64/utah#utah-linux-x64 \
-            ./publish/osx-x64/utah#utah-osx-x64 \
-            ./publish/osx-arm64/utah#utah-osx-arm64 \
             --title "Release $TAG" \
             --notes "${{ steps.release_notes.outputs.RELEASE_NOTES }}"
+
+          gh release upload "$TAG" ./publish/linux-x64/utah#utah-linux-x64
+          gh release upload "$TAG" ./publish/osx-x64/utah#utah-osx-x64
+          gh release upload "$TAG" ./publish/osx-arm64/utah#utah-osx-arm64
