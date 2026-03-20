@@ -8,6 +8,17 @@ await app.RunAsync(args);
 class UtahApp
 {
   private const string AllowRemoteFlag = "--allow-remote";
+
+  private static readonly bool s_useColor =
+    Environment.GetEnvironmentVariable("NO_COLOR") is null && !Console.IsOutputRedirected;
+
+  private static string C(string text, string color) => s_useColor ? $"{color}{text}\x1b[0m" : text;
+  private static string Bold(string text) => C(text, "\x1b[1m");
+  private static string Yellow(string text) => C(text, "\x1b[33m");
+  private static string Green(string text) => C(text, "\x1b[32m");
+  private static string Cyan(string text) => C(text, "\x1b[36m");
+  private static string Dim(string text) => C(text, "\x1b[2m");
+
   private static readonly HttpClient s_httpClient = CreateHttpClient();
   private static readonly HashSet<string> s_formatExcludedDirectories = new(StringComparer.OrdinalIgnoreCase)
   {
@@ -1004,35 +1015,33 @@ class UtahApp
 
   private void PrintUsage()
   {
-    Console.WriteLine("Usage: utah <command|file.shx|url>");
+    Console.WriteLine($"{Bold("Usage:")} utah {Cyan("<command|file.shx|url>")}");
     Console.WriteLine();
-    Console.WriteLine("Direct Execution:");
-    Console.WriteLine("  <file.shx> [-- script-args...]     Compile and run a .shx file directly.");
-    Console.WriteLine($"  <https://url/file.shx> [{AllowRemoteFlag}] [-- script-args...]");
-    Console.WriteLine("                                     Download and run a remote .shx file.");
-    Console.WriteLine("  -c, --command <command>            Run a single shx command directly.");
+    Console.WriteLine(Yellow("Direct Execution:"));
+    Console.WriteLine($"  {Green("<https://url/file.shx>")} [{Cyan(AllowRemoteFlag)}] [-- script-args...]");
+    Console.WriteLine($"  {Green("<file.shx>")} [-- script-args...]     {Dim("Compile and run a .shx file directly.")}");
+    Console.WriteLine($"  {Green("-c, --command")} <command>            {Dim("Run a single shx command directly.")}");
     Console.WriteLine();
-    Console.WriteLine("Commands:");
-    Console.WriteLine($"  run [{AllowRemoteFlag}] <file.shx|url> [-- script-args...]");
-    Console.WriteLine("                               Compile and run a .shx file or URL.");
-    Console.WriteLine("  run -c, --command <command>  Run a single shx command directly.");
-    Console.WriteLine("  compile <file.shx|url>       Compile a .shx file or URL to a .sh file.");
-    Console.WriteLine("    Options:");
-    Console.WriteLine("      -o, --output <file>      Write compiled output to a specific file.");
-    Console.WriteLine("  format [file.shx]            Format .shx file(s) according to EditorConfig rules.");
-    Console.WriteLine("    Options:");
-    Console.WriteLine("      (no file)                Format all .shx files recursively from current directory.");
-    Console.WriteLine("      -o, --output <file>      Write formatted output to a specific file (single file only).");
-    Console.WriteLine("      --in-place               Format the file(s) in place (overwrite original).");
-    Console.WriteLine("      --check                  Check if file(s) are formatted (exit 1 if not).");
-    Console.WriteLine($"      {AllowRemoteFlag}           Acknowledge and allow executing a remote URL.");
-    Console.WriteLine("  lsp                          Run the language server.");
-    Console.WriteLine("  version (--version, -v)      Show version information.");
+    Console.WriteLine(Yellow("Commands:"));
+    Console.WriteLine($"  {Green("run")} [{Cyan(AllowRemoteFlag)}] <file.shx|url> [-- script-args...]");
+    Console.WriteLine($"  {Green("run")} {Green("-c, --command")} <command>  {Dim("Run a single shx command directly.")}");
+    Console.WriteLine($"  {Green("compile")} <file.shx|url>       {Dim("Compile a .shx file or URL to a .sh file.")}");
+    Console.WriteLine($"    {Yellow("Options:")}");
+    Console.WriteLine($"      {Cyan("-o, --output")} <file>      {Dim("Write compiled output to a specific file.")}");
+    Console.WriteLine($"  {Green("format")} [file.shx]            {Dim("Format .shx file(s) according to EditorConfig rules.")}");
+    Console.WriteLine($"    {Yellow("Options:")}");
+    Console.WriteLine($"      {Dim("(no file)")}                {Dim("Format all .shx files recursively from current directory.")}");
+    Console.WriteLine($"      {Cyan("-o, --output")} <file>      {Dim("Write formatted output to a specific file (single file only).")}");
+    Console.WriteLine($"      {Cyan("--in-place")}               {Dim("Format the file(s) in place (overwrite original).")}");
+    Console.WriteLine($"      {Cyan("--check")}                  {Dim("Check if file(s) are formatted (exit 1 if not).")}");
+    Console.WriteLine($"      {Cyan(AllowRemoteFlag)}           {Dim("Acknowledge and allow executing a remote URL.")}");
+    Console.WriteLine($"  {Green("lsp")}                          {Dim("Run the language server.")}");
+    Console.WriteLine($"  {Green("version")} (--version, -v)      {Dim("Show version information.")}");
     Console.WriteLine();
-    Console.WriteLine("Examples:");
-    Console.WriteLine("  utah script.shx");
-    Console.WriteLine($"  utah run {AllowRemoteFlag} https://utahshx.com/examples/script.shx");
-    Console.WriteLine("  utah compile https://gist.githubusercontent.com/user/hash/raw/script.shx");
+    Console.WriteLine(Yellow("Examples:"));
+    Console.WriteLine($"  {Dim("$")} utah script.shx");
+    Console.WriteLine($"  {Dim("$")} utah run {AllowRemoteFlag} https://utahshx.com/examples/script.shx");
+    Console.WriteLine($"  {Dim("$")} utah compile https://gist.githubusercontent.com/user/hash/raw/script.shx");
   }
 
   private void PrintVersion()
