@@ -3,11 +3,6 @@ using System.Text.RegularExpressions;
 
 public partial class Compiler
 {
-  private static int _randomCounter = 0;
-  private static int _joinCounter = 0;
-  private static int _sortCounter = 0;
-  private static int _watchCounter = 0;
-
   private string CompileExpression(Expression expr)
   {
     switch (expr)
@@ -385,9 +380,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
     bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
     bashCode.AppendLine($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
-    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -e $ssh_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    bashCode.AppendLine($"  SSHPASS=\"${{{connectionVar}[password]}}\" $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
     bashCode.AppendLine($"  if [ $? -eq 0 ]; then");
     bashCode.AppendLine($"    {connectionVar}[connected]=\"true\"");
     bashCode.AppendLine($"  else");
@@ -401,9 +396,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"${{{connectionVar}[authMethod]}}\" = \"key\" ]; then");
     bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i ${{{connectionVar}[keyPath]}}\"");
     bashCode.AppendLine($"  elif [ \"${{{connectionVar}[authMethod]}}\" = \"password\" ]; then");
-    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p ${{{connectionVar}[password]}} $ssh_cmd\"");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -e $ssh_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
+    bashCode.AppendLine($"  SSHPASS=\"${{{connectionVar}[password]}}\" $ssh_cmd -o BatchMode=yes -q \"${{{connectionVar}[username]}}@${{{connectionVar}[host]}}\" -p \"${{{connectionVar}[port]}}\" exit 2>/dev/null");
     bashCode.AppendLine($"  if [ $? -eq 0 ]; then");
     bashCode.AppendLine($"    {connectionVar}[connected]=\"true\"");
     bashCode.AppendLine($"  else");
@@ -451,18 +446,18 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $ssh_cmd\"");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -e $ssh_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
     bashCode.AppendLine($"else");
     bashCode.AppendLine($"  # One-time connection");
     bashCode.AppendLine($"  ssh_cmd=\"ssh\"");
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    ssh_cmd=\"$ssh_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    ssh_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $ssh_cmd\"");
+    bashCode.AppendLine($"    ssh_cmd=\"sshpass -e $ssh_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $ssh_cmd \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\" -p \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {commandExpr}");
     bashCode.AppendLine($"fi");
 
     return $"$({{ {bashCode.ToString().Trim().Replace(Environment.NewLine, "; ")} }})";
@@ -487,9 +482,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -e $scp_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
     bashCode.AppendLine($"  upload_result=$?");
     bashCode.AppendLine($"else");
     bashCode.AppendLine($"  # One-time connection");
@@ -497,9 +492,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -e $scp_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" {localPathExpr} \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr}");
     bashCode.AppendLine($"  upload_result=$?");
     bashCode.AppendLine($"fi");
     bashCode.AppendLine($"if [ $upload_result -eq 0 ]; then echo \"true\"; else echo \"false\"; fi");
@@ -526,9 +521,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -e $scp_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
     bashCode.AppendLine($"  download_result=$?");
     bashCode.AppendLine($"else");
     bashCode.AppendLine($"  # One-time connection");
@@ -536,9 +531,9 @@ public partial class Compiler
     bashCode.AppendLine($"  if [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"key\" ]; then");
     bashCode.AppendLine($"    scp_cmd=\"$scp_cmd -i $(eval \"echo \\${{${{{connVarName}}}[keyPath]}}\")\"");
     bashCode.AppendLine($"  elif [ \"$(eval \"echo \\${{${{{connVarName}}}[authMethod]}}\")\" = \"password\" ]; then");
-    bashCode.AppendLine($"    scp_cmd=\"sshpass -p $(eval \"echo \\${{${{{connVarName}}}[password]}}\") $scp_cmd\"");
+    bashCode.AppendLine($"    scp_cmd=\"sshpass -e $scp_cmd\"");
     bashCode.AppendLine($"  fi");
-    bashCode.AppendLine($"  $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
+    bashCode.AppendLine($"  SSHPASS=\"$(eval \"echo \\${{${{{connVarName}}}[password]}}\")\" $scp_cmd -P \"$(eval \"echo \\${{${{{connVarName}}}[port]}}\")\" \"$(eval \"echo \\${{${{{connVarName}}}[username]}}\")@$(eval \"echo \\${{${{{connVarName}}}[host]}}\")\":{remotePathExpr} {localPathExpr}");
     bashCode.AppendLine($"  download_result=$?");
     bashCode.AppendLine($"fi");
     bashCode.AppendLine($"if [ $download_result -eq 0 ]; then echo \"true\"; else echo \"false\"; fi");
@@ -3235,8 +3230,7 @@ _utah_validate_in_range {value} {min} {max}
     return $"$(echo \"{value}\" | grep -qE '^[A-Za-z0-9]+$' && echo \"true\" || echo \"false\")";
   }
 
-  private static int _uniqueIdCounter = 0;
-  private static int GetUniqueId()
+  private int GetUniqueId()
   {
     return ++_uniqueIdCounter;
   }
