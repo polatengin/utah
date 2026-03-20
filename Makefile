@@ -193,25 +193,58 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		run_test_group "$(MALFORMED_DIR)" "format" "format tests"; \
 		echo "$(BLUE)Testing command-based executions...$(NC)"; \
 		test_command() { \
-			local cmd="$$1" expected_exit="$$2" desc="$$3"; \
+			local cmd="$$1" expected_exit="$$2" desc="$$3" actual_exit; \
 			total=$$((total + 1)); \
 			echo -n "🔍 Testing $$desc... "; \
-			if dotnet run --project $(CLI_DIR) --verbosity quiet -- --command "$$cmd" > /dev/null 2>&1; then \
-				if [ "$$expected_exit" = "0" ]; then \
-					printf "$(GREEN)✅ PASS$(NC)\n"; \
-					passed=$$((passed + 1)); \
-				else \
-					printf "$(RED)❌ FAIL (should have failed)$(NC)\n"; \
-					failed=$$((failed + 1)); \
-				fi; \
+			dotnet run --project $(CLI_DIR) --verbosity quiet -- --command "$$cmd" > /dev/null 2>&1; \
+			actual_exit=$$?; \
+			if [ "$$actual_exit" = "$$expected_exit" ]; then \
+				case "$$expected_exit" in \
+					0) printf "$(GREEN)✅ PASS$(NC)\n" ;; \
+					1) printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n" ;; \
+					*) printf "$(GREEN)✅ PASS (exit $$actual_exit as expected)$(NC)\n" ;; \
+				esac; \
+				passed=$$((passed + 1)); \
 			else \
-				if [ "$$expected_exit" = "1" ]; then \
-					printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
-					passed=$$((passed + 1)); \
-				else \
-					printf "$(RED)❌ FAIL (unexpected failure)$(NC)\n"; \
-					failed=$$((failed + 1)); \
-				fi; \
+				case "$$expected_exit" in \
+					0) printf "$(RED)❌ FAIL (unexpected exit $$actual_exit)$(NC)\n" ;; \
+					1) printf "$(RED)❌ FAIL (should have failed, got $$actual_exit)$(NC)\n" ;; \
+					*) printf "$(RED)❌ FAIL (expected exit $$expected_exit, got $$actual_exit)$(NC)\n" ;; \
+				esac; \
+				failed=$$((failed + 1)); \
+			fi; \
+		}; \
+		test_cli_exit() { \
+			local expected_exit="$$1" desc="$$2"; shift 2; \
+			local actual_exit; \
+			total=$$((total + 1)); \
+			echo -n "🔍 Testing $$desc... "; \
+			dotnet run --project $(CLI_DIR) --verbosity quiet -- "$$@" > /dev/null 2>&1; \
+			actual_exit=$$?; \
+			if [ "$$actual_exit" = "$$expected_exit" ]; then \
+				printf "$(GREEN)✅ PASS$(NC)\n"; \
+				passed=$$((passed + 1)); \
+			else \
+				printf "$(RED)❌ FAIL (expected exit $$expected_exit, got $$actual_exit)$(NC)\n"; \
+				failed=$$((failed + 1)); \
+			fi; \
+		}; \
+		test_format_check_failure() { \
+			local desc="format --check on malformed file"; \
+			local actual_exit tmp_file; \
+			total=$$((total + 1)); \
+			echo -n "🔍 Testing $$desc... "; \
+			tmp_file="$(TEMP_DIR)/format-check-$$RANDOM-$$.shx"; \
+			printf 'let = }\n' > "$$tmp_file"; \
+			dotnet run --project $(CLI_DIR) --verbosity quiet -- format "$$tmp_file" --check > /dev/null 2>&1; \
+			actual_exit=$$?; \
+			rm -f "$$tmp_file"; \
+			if [ "$$actual_exit" = "1" ]; then \
+				printf "$(GREEN)✅ PASS (failed as expected)$(NC)\n"; \
+				passed=$$((passed + 1)); \
+			else \
+				printf "$(RED)❌ FAIL (expected exit 1, got $$actual_exit)$(NC)\n"; \
+				failed=$$((failed + 1)); \
 			fi; \
 		}; \
 		test_command '' 0 "empty command"; \
@@ -235,8 +268,11 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		test_command 'try { let result = git.status(); console.log("Git status: " + result) } catch { console.log("Git error: " + e) }' 0 "git operations with error handling"; \
 		test_command 'let numbers = [1, 2, 3, 4, 5]; let sum = 0; for (let num in numbers) { sum += num } console.log("Sum: " + sum)' 0 "array iteration and calculation"; \
 		test_command 'function validateInput(input) { if (string.length(input) === 0) { exit(1) } return true } try { validateInput("test"); console.log("Valid") } catch { console.log("Invalid") }' 0 "function with validation and error handling"; \
+		test_command 'exit(42)' 42 "exit code propagation"; \
 		test_command 'let = }' 1 "invalid syntax (should fail)"; \
 		test_command 'console.nonexistentFunction()' 1 "nonexistent function (should fail)"; \
+		test_cli_exit 1 "remote execution requires --allow-remote" run https://example.com/test.shx; \
+		test_format_check_failure; \
 		echo; \
 	fi; \
 	echo; \
