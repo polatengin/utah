@@ -1,3 +1,10 @@
+---
+layout: default
+title: SSH Functions
+parent: Language Features
+nav_order: 18
+---
+
 # SSH Functions
 
 Utah provides comprehensive SSH functions for secure remote connections, command execution, and file transfers. These functions enable you to establish both synchronous and asynchronous SSH connections with various authentication methods and perform remote operations directly within your scripts.
