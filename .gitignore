@@ -10,3 +10,5 @@ obj/
 build/
 
 tests/temp/
+
+src/website/static/docfind/

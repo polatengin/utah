@@ -1,6 +1,6 @@
 # Utah Language Development Makefile
 
-.PHONY: help build build-extension test compile clean install info dev markdownlint format publish
+.PHONY: help build build-extension build-website test compile clean install info dev markdownlint format publish
 .DEFAULT_GOAL := help
 
 CLI_DIR := src/cli
@@ -374,6 +374,63 @@ publish: ## Publish release binaries for all platforms
 	cp ./publish/osx-x64/utah ./publish/utah-osx-x64
 	cp ./publish/osx-arm64/utah ./publish/utah-osx-arm64
 	@echo "$(GREEN)✅ Publish complete$(NC)"
+
+build-website: ## Build the documentation website with search index
+	@echo "$(BLUE)🌐 Building documentation website...$(NC)"
+	@mkdir -p src/website/static/docfind
+	@awk '\
+	BEGIN { printf "["; first = 1 } \
+	FNR == 1 { \
+	  if (NR > 1) emit(); \
+	  in_fm=0; fm_n=0; in_code=0; \
+	  title=""; parent=""; plink=""; sl=""; body=""; cf=FILENAME \
+	} \
+	/^---$$/ && !in_code { fm_n++; if (fm_n==1) {in_fm=1; next}; if (fm_n==2) {in_fm=0; next} } \
+	in_fm { \
+	  v=$$0; \
+	  if (v ~ /^title:/) { sub(/^title: */, "", v); gsub(/^"|"$$/, "", v); title=v } \
+	  else if (v ~ /^parent:/) { sub(/^parent: */, "", v); gsub(/^"|"$$/, "", v); parent=v } \
+	  else if (v ~ /^permalink:/) { sub(/^permalink: */, "", v); gsub(/^"|"$$/, "", v); plink=v } \
+	  else if (v ~ /^slug:/) { sub(/^slug: */, "", v); gsub(/^"|"$$/, "", v); sl=v }; \
+	  next \
+	} \
+	/^```/ { in_code = !in_code; next } \
+	in_code { next } \
+	fm_n >= 2 { body = body " " $$0 } \
+	END { emit(); print "\n]" } \
+	function json_esc(s) { gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s); gsub(/\t/, " ", s); return s } \
+	function emit(  href, n, segs, i, b, pre, rest, ci, txt) { \
+	  if (cf == "") return; \
+	  if (title == "") { title = cf; sub(/.*\//, "", title); sub(/\.md$$/, "", title) }; \
+	  if (parent == "") parent = "Introduction"; \
+	  if (plink != "") href = plink; \
+	  else if (sl != "") href = sl; \
+	  else { \
+	    href = cf; sub(/^docs\//, "", href); sub(/\.md$$/, "", href); \
+	    n = split(href, segs, "/"); href = ""; \
+	    for (i = 1; i <= n; i++) { sub(/^[0-9]+-/, "", segs[i]); href = href (i > 1 ? "/" : "") segs[i] }; \
+	    if (href ~ /\/index$$/) sub(/\/index$$/, "", href); \
+	    if (href == "index") href = ""; \
+	    href = "/" href \
+	  }; \
+	  b = body; \
+	  gsub(/`[^`]*`/, "", b); gsub(/<[^>]+>/, "", b); \
+	  gsub(/!\[[^\]]*\]\([^)]*\)/, "", b); \
+	  while (match(b, /\[[^\]]*\]\([^)]*\)/)) { \
+	    pre = substr(b, 1, RSTART - 1); rest = substr(b, RSTART + 1); \
+	    ci = index(rest, "]("); txt = substr(rest, 1, ci - 1); \
+	    b = pre txt substr(b, RSTART + RLENGTH) \
+	  }; \
+	  gsub(/#+ /, "", b); gsub(/\*+/, "", b); gsub(/\|/, " ", b); \
+	  gsub(/[()]/, "", b); gsub(/\./, " ", b); \
+	  gsub(/  +/, " ", b); gsub(/^ +| +$$/, "", b); \
+	  if (!first) printf ","; first = 0; \
+	  printf "\n  {\"title\": \"%s\", \"category\": \"%s\", \"href\": \"%s\", \"body\": \"%s\"}", json_esc(title), json_esc(parent), href, json_esc(b) \
+	}' $$(find docs -name "*.md" -not -name "_config.yml" -type f | sort) \
+	> src/website/static/docfind/documents.json
+	@echo "  Extracted $$(cat src/website/static/docfind/documents.json | grep -c '"title"') documents"
+	@docfind src/website/static/docfind/documents.json src/website/static/docfind
+	@echo "$(GREEN)✅ Website search index ready$(NC)"
 
 markdownlint: ## Run markdownlint on all markdown files
 	@echo "$(BLUE)📝 Running markdownlint on markdown files...$(NC)"

@@ -1,0 +1,184 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Layout from '@theme/Layout';
+import Head from '@docusaurus/Head';
+import Link from '@docusaurus/Link';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import BrowserOnly from '@docusaurus/BrowserOnly';
+import styles from './search.module.css';
+
+interface SearchResult {
+  title: string;
+  category: string;
+  href: string;
+  body: string;
+}
+
+function SearchContent() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const searchFnRef = useRef<((query: string) => Promise<SearchResult[]>) | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Read initial query from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+      setQuery(q);
+    }
+  }, []);
+
+  // Load docfind WASM module
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDocfind() {
+      try {
+        // @ts-expect-error — runtime URL, not a bundled module
+        const mod = await import(/* webpackIgnore: true */ '/docfind/docfind.js');
+        if (cancelled) return;
+        // Initialize WASM module
+        await mod.init();
+        searchFnRef.current = mod.default;
+        setLoading(false);
+      } catch {
+        if (cancelled) return;
+        setError('Failed to load search index. Please try again later.');
+        setLoading(false);
+      }
+    }
+
+    loadDocfind();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Run search when query changes or search becomes available
+  const runSearch = useCallback(async (q: string) => {
+    if (!searchFnRef.current) return;
+
+    if (!q.trim()) {
+      setResults([]);
+      return;
+    }
+
+    try {
+      const res = await searchFnRef.current(q);
+      setResults(res);
+    } catch {
+      setResults([]);
+    }
+  }, []);
+
+  // Trigger search on query change (after loading)
+  useEffect(() => {
+    if (loading) return;
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      runSearch(query);
+
+      // Sync URL
+      const url = new URL(window.location.href);
+      if (query.trim()) {
+        url.searchParams.set('q', query);
+      } else {
+        url.searchParams.delete('q');
+      }
+      window.history.replaceState(null, '', url.toString());
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [query, loading, runSearch]);
+
+  // Run initial search once loaded (if query came from URL)
+  useEffect(() => {
+    if (!loading && query) {
+      runSearch(query);
+    }
+  }, [loading]);
+
+  function truncateBody(body: string, maxLen = 200): string {
+    if (body.length <= maxLen) return body;
+    return body.slice(0, maxLen).trimEnd() + '…';
+  }
+
+  return (
+    <div className={styles.searchContainer}>
+      <h1 className={styles.title}>Search Documentation</h1>
+
+      <div className={styles.inputWrapper}>
+        <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="Search docs..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus
+        />
+      </div>
+
+      {loading && (
+        <div className={styles.status}>
+          <div className={styles.spinner} />
+          Loading search index...
+        </div>
+      )}
+
+      {error && (
+        <div className={styles.statusError}>{error}</div>
+      )}
+
+      {!loading && !error && query.trim() && results.length === 0 && (
+        <div className={styles.status}>No results found for &ldquo;{query}&rdquo;</div>
+      )}
+
+      {results.length > 0 && (
+        <div className={styles.results}>
+          <p className={styles.resultCount}>
+            {results.length} result{results.length !== 1 ? 's' : ''} found
+          </p>
+          {results.map((result, i) => (
+            <Link key={i} to={result.href} className={styles.resultCard}>
+              <div className={styles.resultHeader}>
+                <span className={styles.resultTitle}>{result.title}</span>
+                <span className={styles.resultCategory}>{result.category}</span>
+              </div>
+              {result.body && (
+                <p className={styles.resultBody}>{truncateBody(result.body)}</p>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function SearchPage(): React.JSX.Element {
+  const { siteConfig } = useDocusaurusContext();
+
+  return (
+    <Layout>
+      <Head>
+        <title>Search | {siteConfig.title}</title>
+        <meta name="description" content={`Search ${siteConfig.title} documentation`} />
+      </Head>
+      <BrowserOnly fallback={<div className={styles.status}>Loading...</div>}>
+        {() => <SearchContent />}
+      </BrowserOnly>
+    </Layout>
+  );
+}
