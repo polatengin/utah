@@ -129,4 +129,10 @@
   line-height: 1.5;
   color: var(--ifm-color-emphasis-700);
   margin: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }

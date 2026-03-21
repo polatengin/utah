@@ -123,11 +123,6 @@ function SearchContent() {
     }
   }, [loading]);
 
-  function truncateBody(body: string, maxLen = 200): string {
-    if (body.length <= maxLen) return body;
-    return body.slice(0, maxLen).trimEnd() + '…';
-  }
-
   return (
     <div className={styles.searchContainer}>
       <div className={styles.inputWrapper}>
@@ -172,7 +167,7 @@ function SearchContent() {
                 <span className={styles.resultCategory}>{result.category}</span>
               </div>
               {result.body && (
-                <p className={styles.resultBody}>{truncateBody(result.body)}</p>
+                <p className={styles.resultBody}>{result.body}</p>
               )}
             </Link>
           ))}
