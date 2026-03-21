@@ -130,8 +130,6 @@ function SearchContent() {
 
   return (
     <div className={styles.searchContainer}>
-      <h1 className={styles.title}>Search Documentation</h1>
-
       <div className={styles.inputWrapper}>
         <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="8" />
@@ -140,7 +138,7 @@ function SearchContent() {
         <input
           type="text"
           className={styles.searchInput}
-          placeholder="Search docs..."
+          placeholder="Search documentation..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
