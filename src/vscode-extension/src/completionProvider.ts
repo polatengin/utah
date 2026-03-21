@@ -349,6 +349,48 @@ const keywords = [
   { label: 'exit', detail: 'exit(code?: number)', documentation: 'Exit the script with optional code' },
 ];
 
+interface DocumentVariable {
+  name: string;
+  type: string;
+  isConst: boolean;
+}
+
+interface DocumentFunction {
+  name: string;
+  params: string;
+  returnType: string;
+}
+
+function extractVariables(document: vscode.TextDocument): DocumentVariable[] {
+  const text = document.getText();
+  const variables: DocumentVariable[] = [];
+  const varRegex = /^\s*(?:export\s+)?(let|const)\s+(\w+)\s*:\s*(\w+(?:\[\])?)/gm;
+  let match;
+  while ((match = varRegex.exec(text)) !== null) {
+    variables.push({
+      name: match[2],
+      type: match[3],
+      isConst: match[1] === 'const',
+    });
+  }
+  return variables;
+}
+
+function extractFunctions(document: vscode.TextDocument): DocumentFunction[] {
+  const text = document.getText();
+  const functions: DocumentFunction[] = [];
+  const funcRegex = /^\s*(?:export\s+)?function\s+(\w+)\s*\(([^)]*)\)\s*(?::\s*(\w+(?:\[\])?))?/gm;
+  let match;
+  while ((match = funcRegex.exec(text)) !== null) {
+    functions.push({
+      name: match[1],
+      params: match[2].trim(),
+      returnType: match[3] || 'void',
+    });
+  }
+  return functions;
+}
+
 function getNamespaceBeforeDot(document: vscode.TextDocument, position: vscode.Position): string | undefined {
   const lineText = document.lineAt(position.line).text;
   const textBeforeCursor = lineText.substring(0, position.character);
@@ -423,6 +465,22 @@ export function createCompletionProvider(): vscode.CompletionItemProvider {
         const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Module);
         item.detail = name;
         item.documentation = new vscode.MarkdownString(ns.description);
+        items.push(item);
+      }
+
+      // User-defined variables
+      for (const v of extractVariables(document)) {
+        const item = new vscode.CompletionItem(v.name, v.isConst ? vscode.CompletionItemKind.Constant : vscode.CompletionItemKind.Variable);
+        item.detail = `${v.isConst ? 'const' : 'let'} ${v.name}: ${v.type}`;
+        item.documentation = new vscode.MarkdownString(`User-defined ${v.isConst ? 'constant' : 'variable'} of type \`${v.type}\``);
+        items.push(item);
+      }
+
+      // User-defined functions
+      for (const f of extractFunctions(document)) {
+        const item = new vscode.CompletionItem(f.name, vscode.CompletionItemKind.Function);
+        item.detail = `function ${f.name}(${f.params}): ${f.returnType}`;
+        item.documentation = new vscode.MarkdownString(`User-defined function`);
         items.push(item);
       }
 
