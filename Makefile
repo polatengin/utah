@@ -422,7 +422,7 @@ build-website: ## Build the documentation website with search index
 	    b = pre txt substr(b, RSTART + RLENGTH) \
 	  }; \
 	  gsub(/#+ /, "", b); gsub(/\*+/, "", b); gsub(/\|/, " ", b); \
-	  gsub(/[()]/, "", b); gsub(/\./, " ", b); \
+	  gsub(/[()]/, "", b); \
 	  gsub(/  +/, " ", b); gsub(/^ +| +$$/, "", b); \
 	  if (!first) printf ","; first = 0; \
 	  printf "\n  {\"title\": \"%s\", \"category\": \"%s\", \"href\": \"%s\", \"body\": \"%s\"}", json_esc(title), json_esc(parent), href, json_esc(b) \
