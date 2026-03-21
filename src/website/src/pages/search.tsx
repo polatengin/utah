@@ -19,6 +19,7 @@ function SearchContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchFnRef = useRef<((query: string) => Promise<SearchResult[]>) | null>(null);
+  const allDocsRef = useRef<SearchResult[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Read initial query from URL
@@ -30,18 +31,21 @@ function SearchContent() {
     }
   }, []);
 
-  // Load docfind WASM module
+  // Load docfind WASM module and documents for fallback
   useEffect(() => {
     let cancelled = false;
 
     async function loadDocfind() {
       try {
-        // @ts-expect-error — runtime URL, not a bundled module
-        const mod = await import(/* webpackIgnore: true */ '/docfind/docfind.js');
+        const [mod, docsResp] = await Promise.all([
+          // @ts-expect-error — runtime URL, not a bundled module
+          import(/* webpackIgnore: true */ '/docfind/docfind.js'),
+          fetch('/docfind/documents.json'),
+        ]);
         if (cancelled) return;
-        // Initialize WASM module
         await mod.init();
         searchFnRef.current = mod.default;
+        allDocsRef.current = await docsResp.json();
         setLoading(false);
       } catch {
         if (cancelled) return;
@@ -54,6 +58,21 @@ function SearchContent() {
     return () => { cancelled = true; };
   }, []);
 
+  // Fallback: substring search on title + body when docfind returns nothing
+  function fallbackSearch(q: string): SearchResult[] {
+    const lower = q.toLowerCase();
+    const scored: { doc: SearchResult; score: number }[] = [];
+    for (const doc of allDocsRef.current) {
+      let score = 0;
+      if (doc.title.toLowerCase().includes(lower)) score += 10;
+      if (doc.category.toLowerCase().includes(lower)) score += 5;
+      if (doc.body.toLowerCase().includes(lower)) score += 1;
+      if (score > 0) scored.push({ doc, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map(s => s.doc);
+  }
+
   // Run search when query changes or search becomes available
   const runSearch = useCallback(async (q: string) => {
     if (!searchFnRef.current) return;
@@ -65,9 +84,13 @@ function SearchContent() {
 
     try {
       const res = await searchFnRef.current(q);
-      setResults(res);
+      if (res.length > 0) {
+        setResults(res);
+      } else {
+        setResults(fallbackSearch(q));
+      }
     } catch {
-      setResults([]);
+      setResults(fallbackSearch(q));
     }
   }, []);
 
