@@ -31,7 +31,6 @@ function SearchContent() {
     }
   }, []);
 
-  // Load docfind WASM module and documents for fallback
   useEffect(() => {
     let cancelled = false;
 
@@ -58,7 +57,6 @@ function SearchContent() {
     return () => { cancelled = true; };
   }, []);
 
-  // Fallback: substring search on title + body when docfind returns nothing
   function fallbackSearch(q: string): SearchResult[] {
     const lower = q.toLowerCase();
     const scored: { doc: SearchResult; score: number }[] = [];
@@ -73,7 +71,6 @@ function SearchContent() {
     return scored.map(s => s.doc);
   }
 
-  // Run search when query changes or search becomes available
   const runSearch = useCallback(async (q: string) => {
     if (!searchFnRef.current) return;
 
@@ -94,7 +91,6 @@ function SearchContent() {
     }
   }, []);
 
-  // Trigger search on query change (after loading)
   useEffect(() => {
     if (loading) return;
 
@@ -105,7 +101,6 @@ function SearchContent() {
     debounceRef.current = setTimeout(() => {
       runSearch(query);
 
-      // Sync URL
       const url = new URL(window.location.href);
       if (query.trim()) {
         url.searchParams.set('q', query);
@@ -122,7 +117,6 @@ function SearchContent() {
     };
   }, [query, loading, runSearch]);
 
-  // Run initial search once loaded (if query came from URL)
   useEffect(() => {
     if (!loading && query) {
       runSearch(query);
