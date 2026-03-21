@@ -931,7 +931,6 @@ switch (grade) {
 ## Related Examples
 
 - [Log File Analyzer](log-file-analyzer) - Arrays with conditional logic
-- [String Processing](string-processing) - Text processing with switches
 - [System Health Monitor](system-health-monitor) - Comprehensive system management
 
 ## Extension Ideas

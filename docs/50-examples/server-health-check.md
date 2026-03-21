@@ -454,5 +454,4 @@ ALERT_EMAIL=admin@company.com
 ## Related Examples
 
 - [System Health Monitor](system-health-monitor) - Comprehensive monitoring suite
-- [String Processing](string-processing) - Text manipulation techniques
 - [Log File Analyzer](log-file-analyzer) - Array operations and data structures

@@ -15,11 +15,11 @@ This section contains complete, working Utah script examples that demonstrate va
 
 A comprehensive DevOps automation script demonstrating advanced Utah features including log analysis, performance monitoring, user management, and CI/CD pipeline monitoring.
 
-### 🔍 [Server Health Check](server-health-check)
+### 🔍 [Server Health Check](examples/server-health-check)
 
 A practical server monitoring script that performs health checks, logs issues, and executes automatic recovery procedures.
 
-### 📊 [Log Analytics Pipeline](log-analytics-pipeline)
+### 📊 [Log Analytics Pipeline](examples/log-analytics-pipeline)
 
 A comprehensive real-world example combining loops, string processing, filesystem operations, and arrays to analyze server logs. Demonstrates advanced pattern parsing, data aggregation, and automated reporting.
 
