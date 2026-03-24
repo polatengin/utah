@@ -309,6 +309,7 @@ public class HoverHandler : IHoverHandler
       "scheduler" => CompletionHandler.GetSchedulerCompletions(),
       "array" => CompletionHandler.GetArrayCompletions(),
       "math" => CompletionHandler.GetMathCompletions(),
+      "date" => CompletionHandler.GetDateCompletions(),
       _ => null
     };
   }
