@@ -6,7 +6,6 @@ import {
   ServerOptions,
   TransportKind
 } from 'vscode-languageclient/node';
-import { createCompletionProvider } from './completionProvider';
 
 let client: LanguageClient;
 
@@ -69,17 +68,6 @@ export async function activate() {
     client.onDidChangeState((event) => {
       console.log('LSP client state changed:', event);
     });
-
-    client.onRequest('textDocument/completion', (params) => {
-      console.log('Completion request intercepted:', params);
-      return params;
-    });
-
-    const completionProvider = vscode.languages.registerCompletionItemProvider(
-      { scheme: 'file', language: 'utah' },
-      createCompletionProvider(),
-      '.' // Trigger character
-    );
 
     // Test document language detection
     const activeEditor = vscode.window.activeTextEditor;
