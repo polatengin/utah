@@ -4,6 +4,21 @@ public partial class Compiler
 {
   private List<string> CompileStatement(Statement stmt)
   {
+    var compiledLines = CompileStatementInner(stmt);
+
+    if (_debugMode && stmt.SourceLine > 0 && compiledLines.Count > 0)
+    {
+      var sourceComment = stmt.SourceText != null
+        ? $"# [shx:{stmt.SourceLine}] {stmt.SourceText}"
+        : $"# [shx:{stmt.SourceLine}]";
+      compiledLines.Insert(0, sourceComment);
+    }
+
+    return compiledLines;
+  }
+
+  private List<string> CompileStatementInner(Statement stmt)
+  {
     var lines = new List<string>();
 
     switch (stmt)

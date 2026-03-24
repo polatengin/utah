@@ -2,7 +2,7 @@
 layout: default
 title: Format Command
 parent: CLI Reference
-nav_order: 3
+nav_order: 4
 ---
 
 The `utah format` command formats Utah (.shx) source code according to configurable style rules. It helps maintain consistent code style across teams and projects.

@@ -96,7 +96,7 @@ class UtahApp
   {
     return command switch
     {
-      "lsp" or "compile" or "run" or "format" or "--version" or "-v" or "version" => true,
+      "lsp" or "compile" or "debug" or "run" or "format" or "--version" or "-v" or "version" => true,
       _ => false
     };
   }
@@ -148,6 +148,14 @@ class UtahApp
         }
 
         return await CompileFileAsync(args[1], GetOutputPath(args));
+      case "debug":
+        if (args.Length < 2 || (!args[1].EndsWith(".shx") && !IsValidUrl(args[1])))
+        {
+          PrintDebugUsage();
+          return 1;
+        }
+
+        return await CompileFileAsync(args[1], GetOutputPath(args), debugMode: true);
       case "run":
         if (args.Length < 2)
         {
@@ -363,12 +371,12 @@ class UtahApp
     }
   }
 
-  private static string CompileShxAst(ProgramNode ast)
+  private static string CompileShxAst(ProgramNode ast, bool debugMode = false)
   {
     try
     {
       var compiler = new Compiler();
-      return compiler.Compile(ast);
+      return compiler.Compile(ast, debugMode);
     }
     catch (Exception ex)
     {
@@ -379,6 +387,11 @@ class UtahApp
   private static string CompileShxContent(string shxContent)
   {
     return CompileShxAst(ParseShxContent(shxContent));
+  }
+
+  private static string CompileShxContentDebug(string shxContent)
+  {
+    return CompileShxAst(ParseShxContent(shxContent), debugMode: true);
   }
 
   private async Task<int> CompileAndRunShxContentAsync(string shxContent, string[] scriptArgs)
@@ -745,10 +758,10 @@ class UtahApp
     return null;
   }
 
-  private async Task<int> CompileFileAsync(string inputPath, string? outputPath = null)
+  private async Task<int> CompileFileAsync(string inputPath, string? outputPath = null, bool debugMode = false)
   {
     var content = await LoadShxContentAsync(inputPath);
-    var output = CompileShxContent(content);
+    var output = debugMode ? CompileShxContentDebug(content) : CompileShxContent(content);
 
     var finalOutputPath = outputPath ?? (IsValidUrl(inputPath)
       ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
@@ -993,6 +1006,11 @@ class UtahApp
     Console.WriteLine("Usage: utah compile <file.shx|url> [-o, --output <output.sh>]");
   }
 
+  private void PrintDebugUsage()
+  {
+    Console.WriteLine("Usage: utah debug <file.shx|url> [-o, --output <output.sh>]");
+  }
+
   private void PrintRunUsage()
   {
     Console.WriteLine($"Usage: utah run [{AllowRemoteFlag}] <file.shx|url> [-- script-args...]");
@@ -1031,6 +1049,9 @@ class UtahApp
     Console.WriteLine($"  {Green("run")} [{Cyan(AllowRemoteFlag)}] <file.shx|url> [-- script-args...]");
     Console.WriteLine($"  {Green("run")} {Green("-c, --command")} <command>  {Dim("Run a single shx command directly.")}");
     Console.WriteLine($"  {Green("compile")} <file.shx|url>       {Dim("Compile a .shx file or URL to a .sh file.")}");
+    Console.WriteLine($"    {Yellow("Options:")}");
+    Console.WriteLine($"      {Cyan("-o, --output")} <file>      {Dim("Write compiled output to a specific file.")}");
+    Console.WriteLine($"  {Green("debug")} <file.shx|url>         {Dim("Compile with source-map comments for troubleshooting.")}");
     Console.WriteLine($"    {Yellow("Options:")}");
     Console.WriteLine($"      {Cyan("-o, --output")} <file>      {Dim("Write compiled output to a specific file.")}");
     Console.WriteLine($"  {Green("format")} [file.shx]            {Dim("Format .shx file(s) according to EditorConfig rules.")}");

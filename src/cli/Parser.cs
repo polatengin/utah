@@ -164,6 +164,22 @@ public partial class Parser
 
   private Statement? ParseStatement(string line, ref int i)
   {
+    _currentLineIndex = i;
+    var sourceLine = GetOriginalLineNumber() + 1; // 1-based
+
+    var result = ParseStatementInner(line, ref i);
+
+    if (result != null && result.SourceLine < 0)
+    {
+      result.SourceLine = sourceLine;
+      result.SourceText = line;
+    }
+
+    return result;
+  }
+
+  private Statement? ParseStatementInner(string line, ref int i)
+  {
     if (line.StartsWith("import "))
     {
       return ParseImportStatement(line);

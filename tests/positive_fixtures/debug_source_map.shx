@@ -1,0 +1,5 @@
+let name: string = "world";
+console.log("hello");
+if (name === "world") {
+  console.log("found it");
+}

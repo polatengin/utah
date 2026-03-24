@@ -175,7 +175,11 @@ public record DateSubtractExpression(Expression Timestamp, Expression Amount, Ex
 public record DateDayOfWeekExpression(Expression? Timestamp) : Expression;
 
 // Statements
-public abstract record Statement : Node;
+public abstract record Statement : Node
+{
+  public int SourceLine { get; set; } = -1;
+  public string? SourceText { get; set; }
+}
 
 public record ExpressionStatement(Expression Expression) : Statement;
 public record ProgramNode(List<Statement> Statements) : Node;

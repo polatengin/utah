@@ -54,6 +54,7 @@ utah format --in-place
 | `<file.shx>` | **Direct execution** | `utah <file.shx>` |
 | `-c, --command` | **Direct command** | `utah -c <command>` |
 | `compile` | Transpile .shx to .sh | `utah compile <file.shx> [-o, --output <output.sh>]` |
+| `debug` | Compile with source maps | `utah debug <file.shx> [-o, --output <output.sh>]` |
 | `run` | Compile and execute | `utah run <file.shx>` or `utah run -c <command>` |
 | `format` | Format source code | `utah format [file.shx] [options]` |
 | `lsp` | Language server | `utah lsp` |
@@ -79,6 +80,32 @@ utah compile script.shx --output custom.sh     # Creates custom.sh
 - Generates clean, readable bash code
 - Preserves comments and structure
 - Error reporting with line numbers
+
+### Debug Command
+
+Compiles Utah scripts with source-map comments that trace each bash line back to its `.shx` source:
+
+```bash
+utah debug script.shx                          # Creates script.sh with source maps
+utah debug script.shx -o debug-output.sh       # Custom output path
+utah debug script.shx --output debug-output.sh # Custom output path (long form)
+```
+
+Each compiled statement is preceded by a `# [shx:<line>] <source>` comment:
+
+```bash
+# [shx:1] let name: string = "Utah";
+name="Utah"
+# [shx:2] console.log("Hello");
+echo "Hello"
+```
+
+**Features:**
+
+- Same transpilation as `compile` with embedded source-map comments
+- Trace runtime bash errors back to `.shx` line numbers
+- Comments are valid bash — debug scripts run identically to regular compiled scripts
+- Works with nested statements inside functions, loops, and conditionals
 
 ### Run Command
 
@@ -366,13 +393,18 @@ chmod +x generated_script.sh
 
 ### Debug Mode
 
-Enable verbose output for troubleshooting:
+Use the `debug` command to compile with source-map comments for troubleshooting:
 
 ```bash
-# Set environment variable for debug output
-export UTAH_DEBUG=1
-utah compile script.shx
+# Compile with source-map comments
+utah debug script.shx
+
+# Combine with bash tracing for maximum visibility
+utah debug script.shx -o debug-script.sh
+bash -x debug-script.sh
 ```
+
+See the [Debug Command](debug.md) documentation for details.
 
 ### Getting Help
 
@@ -382,6 +414,7 @@ utah
 
 # Show command-specific help
 utah compile
+utah debug
 utah format
 utah run
 ```

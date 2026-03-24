@@ -2,7 +2,7 @@
 layout: default
 title: VS Code Extension
 parent: CLI Reference
-nav_order: 4
+nav_order: 5
 ---
 
 The Utah VS Code extension currently provides syntax highlighting, `.shx` file association, file icons, and LSP-backed code completion for Utah files. It does **not** currently ship diagnostics, hover, go-to-definition, references, formatting, or command palette commands.

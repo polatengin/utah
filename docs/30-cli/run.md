@@ -2,7 +2,7 @@
 layout: default
 title: Run Command
 parent: CLI Reference
-nav_order: 2
+nav_order: 3
 ---
 
 The `utah run` command compiles and immediately executes Utah (.shx) scripts or individual commands without creating persistent .sh files. This is ideal for development, testing, one-off script execution, and quick command testing.

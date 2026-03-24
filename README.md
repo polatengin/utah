@@ -1,6 +1,6 @@
 # Project Utah
 
-[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy Website](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-196-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
+[![Release Utah CLI](https://github.com/polatengin/utah/actions/workflows/release.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/release.yml) [![Deploy Website](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/polatengin/utah/actions/workflows/deploy-docs.yml) [![Latest Release](https://img.shields.io/github/v/tag/polatengin/utah?label=release&sort=semver)](https://github.com/polatengin/utah/releases) [![Number of tests](https://img.shields.io/badge/Number%20of%20tests-197-blue?logo=codeigniter&logoColor=white)](https://github.com/polatengin/utah)
 
 `utah` is a CLI tool built with .NET 9 that allows to write shell scripts in a strongly typed, typescript-inspired language (`.shx`). It then transpiles `.shx` code into clean, standard `.sh` bash scripts.
 
@@ -6100,6 +6100,29 @@ utah compile script.shx
 # Compile with custom output
 utah compile script.shx -o custom-name.sh
 utah compile script.shx --output custom-name.sh
+```
+
+### Debugging
+
+Compile with source-map comments to trace runtime errors back to `.shx` lines:
+
+```bash
+# Debug compile — adds # [shx:<line>] comments
+utah debug script.shx
+
+# Debug compile with custom output
+utah debug script.shx -o debug-output.sh
+```
+
+Example output:
+
+```bash
+#!/bin/bash
+
+# [shx:1] let name: string = "Utah";
+name="Utah"
+# [shx:2] console.log("Hello");
+echo "Hello"
 ```
 
 ## Development

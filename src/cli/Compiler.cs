@@ -3,6 +3,7 @@ using System.Linq;
 public partial class Compiler
 {
   private bool _hasArgsUsage = false;
+  private bool _debugMode = false;
 
   // Function context tracking for defer statements
   private class FunctionContext
@@ -25,9 +26,10 @@ public partial class Compiler
   private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
   private readonly HashSet<string> _sshConnectionVariables = new(StringComparer.Ordinal);
 
-  public string Compile(ProgramNode program)
+  public string Compile(ProgramNode program, bool debugMode = false)
   {
     ResetState();
+    _debugMode = debugMode;
     CollectStructuredTypes(program);
 
     var lines = new List<string>
@@ -67,6 +69,7 @@ public partial class Compiler
   private void ResetState()
   {
     _hasArgsUsage = false;
+    _debugMode = false;
     _functionStack.Clear();
     _globalDeferCounter = 0;
     _randomCounter = 0;
