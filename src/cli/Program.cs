@@ -745,7 +745,8 @@ class UtahApp
           .AddHandler<RenameHandler>()
           .AddHandler<SignatureHelpHandler>()
           .AddHandler<FoldingRangeHandler>()
-          .AddHandler<InlayHintHandler>());
+          .AddHandler<InlayHintHandler>()
+          .AddHandler<CodeLensHandler>());
     await server.WaitForExit;
   }
 
