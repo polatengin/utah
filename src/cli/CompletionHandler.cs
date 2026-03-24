@@ -22,12 +22,10 @@ public class CompletionHandler : ICompletionHandler
   {
     var completionItems = new List<CompletionItem>();
 
-    bool isDotTriggered = request.Context?.TriggerCharacter == ".";
+    var context = await AnalyzeCompletionContextAsync(request, cancellationToken);
 
-    if (isDotTriggered)
+    if (!string.IsNullOrEmpty(context))
     {
-      var context = await AnalyzeCompletionContextAsync(request, cancellationToken);
-
       var namespaceCompletions = context switch
       {
         "console" => GetConsoleCompletions(),
@@ -77,25 +75,24 @@ public class CompletionHandler : ICompletionHandler
   {
     try
     {
-      var documentPath = request.TextDocument.Uri.GetFileSystemPath();
-      if (!File.Exists(documentPath))
+      var uri = request.TextDocument.Uri;
+      var documentText = DocumentManager.Instance.Get(uri.ToString());
+      if (documentText == null)
       {
-        return "";
+        var documentPath = uri.GetFileSystemPath();
+        if (!File.Exists(documentPath))
+          return "";
+        documentText = await File.ReadAllTextAsync(documentPath, cancellationToken);
       }
 
-      var documentText = await File.ReadAllTextAsync(documentPath, cancellationToken);
       var lines = documentText.Split('\n');
 
       if (request.Position.Line >= lines.Length)
-      {
         return "";
-      }
 
       var line = lines[(int)request.Position.Line];
       if (request.Position.Character > line.Length)
-      {
         return "";
-      }
 
       var textBeforeCursor = line.Substring(0, (int)request.Position.Character);
 
