@@ -7,6 +7,8 @@ nav_order: 2
 
 The `utah debug` command compiles Utah (.shx) source files into bash (.sh) scripts with embedded source-map comments. Each statement in the generated bash is preceded by a comment showing which `.shx` line produced it, making it easy to trace runtime errors back to the original source.
 
+> **Note:** `utah debug` adds *source-map comments* (`# [shx:N]`) to the compiled bash output. This is different from `script.enableDebug()`, which emits `set -x` to turn on bash's built-in execution tracing. See [Script Directives](../20-language-features/script-directives.md) for `set -x` tracing. The two can be combined for maximum visibility.
+
 ## Basic Usage
 
 ```bash
