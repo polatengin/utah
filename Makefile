@@ -281,6 +281,22 @@ test: build ## Run all regression tests (or specific test with FILE=testname)
 		test_cli_exit 1 "remote execution requires --allow-remote" run https://example.com/test.shx; \
 		test_format_check_failure; \
 		echo; \
+		echo "$(BLUE)Testing debug source-map output...$(NC)"; \
+		total=$$((total + 1)); \
+		echo -n "🔍 Testing debug source-map comments... "; \
+		_debug_src="$(TEMP_DIR)/debug_sm_test.shx"; \
+		_debug_out="$(TEMP_DIR)/debug_sm_test.sh"; \
+		printf 'let x: number = 1;\nconsole.log(x);\n' > "$$_debug_src"; \
+		dotnet run --project $(CLI_DIR) --verbosity quiet -- debug "$$_debug_src" -o "$$_debug_out" > /dev/null 2>&1; \
+		if grep -q '# \[shx:' "$$_debug_out" 2>/dev/null; then \
+			printf "$(GREEN)✅ PASS$(NC)\n"; \
+			passed=$$((passed + 1)); \
+		else \
+			printf "$(RED)❌ FAIL (no source-map comments found)$(NC)\n"; \
+			failed=$$((failed + 1)); \
+		fi; \
+		rm -f "$$_debug_src" "$$_debug_out"; \
+		echo; \
 	fi; \
 	echo; \
 	echo "📊 Test Results"; \
