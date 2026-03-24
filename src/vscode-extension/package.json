@@ -34,7 +34,10 @@
     "vscode": "^1.110.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Linters",
+    "Formatters",
+    "Debuggers"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
