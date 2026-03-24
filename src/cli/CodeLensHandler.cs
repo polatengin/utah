@@ -49,9 +49,9 @@ public class CodeLensHandler : ICodeLensHandler
         {
           var name = match.Groups[1].Value;
           var col = lines[i].IndexOf("function", StringComparison.Ordinal);
-          var refCount = CountReferences(lines, name, i);
+          var refs = FindReferences(lines, name, i);
 
-          lenses.Add(CreateLens(i, col, name, refCount, "function"));
+          lenses.Add(CreateLens(uri.ToString(), i, col, name, refs));
           continue;
         }
 
@@ -61,9 +61,9 @@ public class CodeLensHandler : ICodeLensHandler
         {
           var name = match.Groups[2].Value;
           var col = lines[i].IndexOf(name, StringComparison.Ordinal);
-          var refCount = CountReferences(lines, name, i);
+          var refs = FindReferences(lines, name, i);
 
-          lenses.Add(CreateLens(i, col, name, refCount, "variable"));
+          lenses.Add(CreateLens(uri.ToString(), i, col, name, refs));
           continue;
         }
 
@@ -73,9 +73,9 @@ public class CodeLensHandler : ICodeLensHandler
         {
           var name = match.Groups[2].Value;
           var col = lines[i].IndexOf(name, StringComparison.Ordinal);
-          var refCount = CountReferences(lines, name, i);
+          var refs = FindReferences(lines, name, i);
 
-          lenses.Add(CreateLens(i, col, name, refCount, "type"));
+          lenses.Add(CreateLens(uri.ToString(), i, col, name, refs));
           continue;
         }
       }
@@ -88,14 +88,30 @@ public class CodeLensHandler : ICodeLensHandler
     }
   }
 
-  private static CodeLens CreateLens(int line, int col, string symbolName, int refCount, string symbolKind)
+  private static CodeLens CreateLens(string uri, int line, int col, string symbolName, List<(int Line, int Col)> references)
   {
-    var label = refCount switch
+    var label = references.Count switch
     {
       0 => "no references",
       1 => "1 reference",
-      _ => $"{refCount} references"
+      _ => $"{references.Count} references"
     };
+
+    var locationsArray = new Newtonsoft.Json.Linq.JArray(
+      references.Select(r => new Newtonsoft.Json.Linq.JObject(
+        new Newtonsoft.Json.Linq.JProperty("uri", uri),
+        new Newtonsoft.Json.Linq.JProperty("range", new Newtonsoft.Json.Linq.JObject(
+          new Newtonsoft.Json.Linq.JProperty("start", new Newtonsoft.Json.Linq.JObject(
+            new Newtonsoft.Json.Linq.JProperty("line", r.Line),
+            new Newtonsoft.Json.Linq.JProperty("character", r.Col)
+          )),
+          new Newtonsoft.Json.Linq.JProperty("end", new Newtonsoft.Json.Linq.JObject(
+            new Newtonsoft.Json.Linq.JProperty("line", r.Line),
+            new Newtonsoft.Json.Linq.JProperty("character", r.Col + symbolName.Length)
+          ))
+        ))
+      ))
+    );
 
     return new CodeLens
     {
@@ -107,14 +123,21 @@ public class CodeLensHandler : ICodeLensHandler
       {
         Title = label,
         Name = "utah.showReferences",
-        Arguments = new Newtonsoft.Json.Linq.JArray(symbolName, line)
+        Arguments = new Newtonsoft.Json.Linq.JArray(
+          uri,
+          new Newtonsoft.Json.Linq.JObject(
+            new Newtonsoft.Json.Linq.JProperty("line", line),
+            new Newtonsoft.Json.Linq.JProperty("character", Math.Max(0, col))
+          ),
+          locationsArray
+        )
       }
     };
   }
 
-  private static int CountReferences(string[] lines, string symbol, int definitionLine)
+  private static List<(int Line, int Col)> FindReferences(string[] lines, string symbol, int definitionLine)
   {
-    int count = 0;
+    var refs = new List<(int Line, int Col)>();
     var pattern = new Regex($@"\b{Regex.Escape(symbol)}\b");
 
     for (int i = 0; i < lines.Length; i++)
@@ -139,11 +162,11 @@ public class CodeLensHandler : ICodeLensHandler
         // Skip occurrences that are part of a built-in namespace prefix (e.g., "console" in "console.log")
         if (IsNamespacePrefix(line, col, symbol)) continue;
 
-        count++;
+        refs.Add((i, col));
       }
     }
 
-    return count;
+    return refs;
   }
 
   private static bool IsDefinitionOccurrence(string trimmed, string symbol)
