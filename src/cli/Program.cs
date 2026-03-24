@@ -723,8 +723,12 @@ class UtahApp
         options
           .WithInput(Console.OpenStandardInput())
           .WithOutput(Console.OpenStandardOutput())
+          .AddHandler<TextDocumentSyncHandler>()
           .AddHandler<CompletionHandler>()
-          .AddHandler<HoverHandler>());
+          .AddHandler<HoverHandler>()
+          .AddHandler<DefinitionHandler>()
+          .AddHandler<DocumentSymbolHandler>()
+          .AddHandler<FormattingHandler>());
     await server.WaitForExit;
   }
 

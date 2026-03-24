@@ -31,6 +31,11 @@ public class Formatter
     }
   }
 
+  public string FormatContent(string content)
+  {
+    return FormatWithComments(content);
+  }
+
   private string FormatWithComments(string content)
   {
     var lines = content.Split('\n');

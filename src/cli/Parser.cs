@@ -9,13 +9,52 @@ public partial class Parser
   private readonly Stack<string> _functionReturnTypeStack = new Stack<string>();
   private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
   private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
+  private int _currentLineIndex;
+  private int[] _originalLineNumbers = Array.Empty<int>();
 
   public Parser(string input)
   {
     // Pre-process to remove comments, but preserve strings
     var processed = RemoveComments(input);
-    _lines = processed.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    var allLines = processed.Split('\n');
+
+    var lines = new List<string>();
+    var lineMap = new List<int>();
+    for (int idx = 0; idx < allLines.Length; idx++)
+    {
+      var trimmed = allLines[idx].Trim();
+      if (!string.IsNullOrEmpty(trimmed))
+      {
+        lines.Add(trimmed);
+        lineMap.Add(idx);
+      }
+    }
+    _lines = lines.ToArray();
+    _originalLineNumbers = lineMap.ToArray();
     _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+  }
+
+  public int GetOriginalLineNumber()
+  {
+    if (_currentLineIndex >= 0 && _currentLineIndex < _originalLineNumbers.Length)
+      return _originalLineNumbers[_currentLineIndex];
+    return 0;
+  }
+
+  public record ParseError(int Line, string Message);
+
+  public (ProgramNode? Program, List<ParseError> Errors) TryParse()
+  {
+    try
+    {
+      var result = Parse();
+      return (result, new List<ParseError>());
+    }
+    catch (Exception ex)
+    {
+      var line = GetOriginalLineNumber();
+      return (null, new List<ParseError> { new ParseError(line, ex.Message) });
+    }
   }
 
   private string RemoveComments(string input)
@@ -69,7 +108,11 @@ public partial class Parser
           {
             i += 2; // Skip /*
             while (i + 1 < input.Length && !(input[i] == '*' && input[i + 1] == '/'))
+            {
+              if (input[i] == '\n')
+                result.Append('\n'); // Preserve newlines for line number tracking
               i++;
+            }
             if (i + 1 < input.Length)
               i++; // Skip */
           }
@@ -105,6 +148,7 @@ public partial class Parser
 
     for (int i = 0; i < _lines.Length; i++)
     {
+      _currentLineIndex = i;
       var line = _lines[i].Trim();
       if (string.IsNullOrEmpty(line)) continue;
 

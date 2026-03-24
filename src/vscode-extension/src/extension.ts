@@ -35,12 +35,7 @@ export async function activate() {
       outputChannel: vscode.window.createOutputChannel('Utah Language Server'),
       traceOutputChannel: vscode.window.createOutputChannel('Utah Language Server Trace'),
       revealOutputChannelOn: 1, // RevealOutputChannelOn.Error = 1 (show on errors)
-      initializationOptions: {},
-      middleware: {
-        provideCompletionItem: () => {
-          return [];
-        }
-      }
+      initializationOptions: {}
     };
 
     client = new LanguageClient(
