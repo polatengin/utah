@@ -741,7 +741,8 @@ class UtahApp
           .AddHandler<HoverHandler>()
           .AddHandler<DefinitionHandler>()
           .AddHandler<DocumentSymbolHandler>()
-          .AddHandler<FormattingHandler>());
+          .AddHandler<FormattingHandler>()
+          .AddHandler<RenameHandler>());
     await server.WaitForExit;
   }
 
