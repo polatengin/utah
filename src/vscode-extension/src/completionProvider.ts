@@ -249,14 +249,14 @@ const namespaces: Record<string, NamespaceInfo> = {
       M('has', 'has(name: string): boolean', 'Check if a named argument was provided'),
       M('get', 'get(name: string): string', 'Get the value of a named argument'),
       M('all', 'all(): string[]', 'Get all arguments as an array'),
-      M('define', 'define(name: string, options: object)', 'Define an expected argument with type and default'),
+      M('define', 'define(longFlag: string, shortFlag: string, description: string, type?: string, required?: boolean, defaultValue?: any)', 'Define an expected argument with type, help text, and default value'),
     ],
   },
   script: {
     description: 'Script control operations namespace',
     members: [
-      M('enableDebug', 'enableDebug()', 'Enable shell debugging (set -x)'),
-      M('disableDebug', 'disableDebug()', 'Disable shell debugging (set +x)'),
+      M('enableDebug', 'enableDebug()', 'Statement — enable shell debugging (set -x). Cannot be used as an expression.'),
+      M('disableDebug', 'disableDebug()', 'Statement — disable shell debugging (set +x). Cannot be used as an expression.'),
       M('disableGlobbing', 'disableGlobbing()', 'Disable filename globbing (set -f)'),
       M('enableGlobbing', 'enableGlobbing()', 'Enable filename globbing (set +f)'),
       M('exitOnError', 'exitOnError()', 'Exit script on any command failure (set -e)'),
@@ -273,7 +273,7 @@ const namespaces: Record<string, NamespaceInfo> = {
   scheduler: {
     description: 'Task scheduling namespace',
     members: [
-      M('cron', 'cron(expression: string, command: string)', 'Schedule a command with a cron expression'),
+      M('cron', 'cron(cronPattern: string, job: () => void)', 'Schedule a cron job with a lambda function body'),
     ],
   },
   array: {
