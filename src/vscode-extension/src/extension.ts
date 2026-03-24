@@ -12,17 +12,21 @@ let client: LanguageClient;
 
 export async function activate() {
   try {
-    const utahPath = path.join(__dirname, 'server', 'utah');
+    const config = vscode.workspace.getConfiguration('utah');
+    const configuredPath = config.get<string>('server.path', 'utah');
+    const configuredArgs = config.get<string[]>('server.args', ['lsp']);
+
+    const utahPath = path.isAbsolute(configuredPath) ? configuredPath : path.join(__dirname, 'server', configuredPath);
 
     const serverOptions: ServerOptions = {
       run: {
         command: utahPath,
-        args: ['lsp'],
+        args: configuredArgs,
         transport: TransportKind.stdio
       },
       debug: {
         command: utahPath,
-        args: ['lsp'],
+        args: configuredArgs,
         transport: TransportKind.stdio
       }
     };
