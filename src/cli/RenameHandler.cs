@@ -24,7 +24,7 @@ public class RenameHandler : IRenameHandler, IPrepareRenameHandler
   {
     try
     {
-      var (text, _) = await GetDocumentText(request.TextDocument.Uri, cancellationToken);
+      var (text, _) = await GetDocumentTextAsync(request.TextDocument.Uri, cancellationToken);
       if (text == null) return null;
 
       var lines = text.Split('\n');
@@ -59,7 +59,7 @@ public class RenameHandler : IRenameHandler, IPrepareRenameHandler
   {
     try
     {
-      var (text, uri) = await GetDocumentText(request.TextDocument.Uri, cancellationToken);
+      var (text, uri) = await GetDocumentTextAsync(request.TextDocument.Uri, cancellationToken);
       if (text == null) return null;
 
       var lines = text.Split('\n');
@@ -98,7 +98,7 @@ public class RenameHandler : IRenameHandler, IPrepareRenameHandler
     }
   }
 
-  private static async Task<(string? text, OmniSharp.Extensions.LanguageServer.Protocol.DocumentUri uri)> GetDocumentText(
+  private static async Task<(string? text, OmniSharp.Extensions.LanguageServer.Protocol.DocumentUri uri)> GetDocumentTextAsync(
     OmniSharp.Extensions.LanguageServer.Protocol.DocumentUri uri, CancellationToken cancellationToken)
   {
     var text = DocumentManager.Instance.Get(uri.ToString());
