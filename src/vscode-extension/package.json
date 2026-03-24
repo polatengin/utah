@@ -3,7 +3,7 @@
   "displayName": "Utah Shell Extension",
   "description": "Language support for Utah shell scripts (.shx files)",
   "version": "0.0.1",
-  "publisher": "polatengin",
+  "publisher": "enginpolat",
   "author": {
     "name": "Engin Polat"
   },
