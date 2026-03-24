@@ -764,9 +764,7 @@ class UtahApp
     var content = await LoadShxContentAsync(inputPath);
     var output = debugMode ? CompileShxContentDebug(content) : CompileShxContent(content);
 
-    var finalOutputPath = outputPath ?? (IsValidUrl(inputPath)
-      ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh")
-      : Path.ChangeExtension(inputPath, ".sh"));
+    var finalOutputPath = outputPath ?? (IsValidUrl(inputPath) ? Path.ChangeExtension(Path.GetFileName(inputPath), ".sh") : Path.ChangeExtension(inputPath, ".sh"));
 
     EnsureOutputDirectoryExists(finalOutputPath);
     await File.WriteAllTextAsync(finalOutputPath, output);
