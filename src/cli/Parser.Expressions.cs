@@ -239,19 +239,19 @@ public partial class Parser
         return ParseStringInterpolation(input);
       }
 
-      return new LiteralExpression(content, "string");
+      return new LiteralExpression(content, UtahType.String);
     }
 
     // Number literal
     if (double.TryParse(input, out _))
     {
-      return new LiteralExpression(input, "number");
+      return new LiteralExpression(input, UtahType.Number);
     }
 
     // Boolean literal
     if (input == "true" || input == "false")
     {
-      return new LiteralExpression(input, "boolean");
+      return new LiteralExpression(input, UtahType.Boolean);
     }
 
     // Object literal: { name: "Utah", retries: 3 }
@@ -286,7 +286,7 @@ public partial class Parser
     {
       var content = input.Substring(1, input.Length - 2).Trim();
       var elements = new List<Expression>();
-      var elementType = "any";
+      UtahType elementType = UtahType.Any;
 
       if (!string.IsNullOrEmpty(content))
       {
@@ -297,7 +297,7 @@ public partial class Parser
           elements.Add(elementExpr);
 
           // Determine element type from first element
-          if (elementType == "any" && elementExpr is LiteralExpression literal)
+          if (elementType is AnyType && elementExpr is LiteralExpression literal)
           {
             elementType = literal.Type;
           }
@@ -2485,7 +2485,7 @@ public partial class Parser
     }
 
     // Fallback to literal
-    return new LiteralExpression(input, "unknown");
+    return new LiteralExpression(input, UtahType.Unknown);
   }
 
   private List<string> SplitTernary(string input)

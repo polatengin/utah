@@ -35,10 +35,10 @@ echo "Merged array: $(IFS=', '; printf '%s' "${merged[*]}")"
 echo "Unique merged: $(IFS=', '; printf '%s' "${uniqueMerged[*]}")"
 unsorted=(5 2 8 2 1 5 3)
 uniqueUnsorted=($(declare -A _utah_seen; for item in "${unsorted[@]}"; do if [[ -z "${_utah_seen[$item]}" ]]; then _utah_seen["$item"]=1; echo "$item"; fi; done))
-sortedUnique=$(_utah_sort_1=(); while IFS= read -r line; do _utah_sort_1+=("$line"); done < <(printf '%s\n' "${uniqueUnsorted[@]}" | sort); echo "${_utah_sort_1[@]}")
+sortedUnique=$(_utah_sort_1=(); while IFS= read -r line; do _utah_sort_1+=("$line"); done < <(printf '%s\n' "${uniqueUnsorted[@]}" | sort -n); echo "${_utah_sort_1[@]}")
 echo "Original unsorted: $(IFS=', '; printf '%s' "${unsorted[*]}")"
 echo "Unique then sorted: $(IFS=', '; printf '%s' "${sortedUnique[*]}")"
-sortedFirst=$(_utah_sort_2=(); while IFS= read -r line; do _utah_sort_2+=("$line"); done < <(printf '%s\n' "${unsorted[@]}" | sort); echo "${_utah_sort_2[@]}")
+sortedFirst=$(_utah_sort_2=(); while IFS= read -r line; do _utah_sort_2+=("$line"); done < <(printf '%s\n' "${unsorted[@]}" | sort -n); echo "${_utah_sort_2[@]}")
 uniqueAfterSort=($(declare -A _utah_seen; for item in "${sortedFirst[@]}"; do if [[ -z "${_utah_seen[$item]}" ]]; then _utah_seen["$item"]=1; echo "$item"; fi; done))
 echo "Sorted then unique: $(IFS=', '; printf '%s' "${uniqueAfterSort[*]}")"
 testData=("test" "data" "test" "more" "data")

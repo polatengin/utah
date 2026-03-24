@@ -23,7 +23,7 @@ public partial class Compiler
   private int _tryCatchCounter = 0;
   private bool _inTryBlock = false;
   private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
-  private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
+  private readonly Stack<Dictionary<string, UtahType>> _variableTypeScopes = new();
   private readonly HashSet<string> _sshConnectionVariables = new(StringComparer.Ordinal);
 
   public string Compile(ProgramNode program, bool debugMode = false)
@@ -81,7 +81,7 @@ public partial class Compiler
     _inTryBlock = false;
     _structuredTypes.Clear();
     _variableTypeScopes.Clear();
-    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+    _variableTypeScopes.Push(new Dictionary<string, UtahType>(StringComparer.Ordinal));
     _sshConnectionVariables.Clear();
   }
 

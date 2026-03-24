@@ -4,7 +4,7 @@ public abstract record Node;
 // Expressions
 public abstract record Expression : Node;
 
-public record LiteralExpression(string Value, string Type) : Expression;
+public record LiteralExpression(string Value, UtahType Type) : Expression;
 public record VariableExpression(string Name) : Expression;
 public record BinaryExpression(Expression Left, Expression Right, string Operator) : Expression;
 public record UnaryExpression(Expression Operand, string Operator) : Expression;
@@ -40,7 +40,7 @@ public record UtilityBase64EncodeExpression(Expression Text) : Expression;
 public record UtilityBase64DecodeExpression(Expression Text) : Expression;
 public record ObjectLiteralProperty(string Name, Expression Value);
 public record ObjectLiteralExpression(List<ObjectLiteralProperty> Properties) : Expression;
-public record ArrayLiteral(List<Expression> Elements, string ElementType) : Expression;
+public record ArrayLiteral(List<Expression> Elements, UtahType ElementType) : Expression;
 public record ArrayAccess(Expression Array, Expression Index) : Expression;
 public record ArrayLength(Expression Array) : Expression;
 public record ArrayIsEmpty(Expression Array) : Expression;
@@ -201,8 +201,8 @@ public abstract record Statement : Node
 
 public record ExpressionStatement(Expression Expression) : Statement;
 public record ProgramNode(List<Statement> Statements) : Node;
-public record VariableDeclaration(string Name, string Type, Expression Value, bool IsConst) : Statement;
-public record FunctionDeclaration(string Name, List<(string Name, string Type)> Parameters, List<Statement> Body, string? ReturnType) : Statement;
+public record VariableDeclaration(string Name, UtahType? Type, Expression Value, bool IsConst) : Statement;
+public record FunctionDeclaration(string Name, List<(string Name, UtahType Type)> Parameters, List<Statement> Body, UtahType? ReturnType) : Statement;
 public record ConsoleLog(Expression Message) : Statement;
 public record ConsoleClearStatement() : Statement;
 public record ScriptEnableDebugStatement() : Statement;
@@ -222,7 +222,7 @@ public record WhileStatement(Expression Condition, List<Statement> Body) : State
 public record CaseClause(List<Expression> Values, List<Statement> Body, bool HasBreak);
 public record DefaultClause(List<Statement> Body, bool HasBreak);
 public record SwitchStatement(Expression Expression, List<CaseClause> Cases, DefaultClause? DefaultCase) : Statement;
-public record StructuredTypeField(string Name, string Type);
+public record StructuredTypeField(string Name, UtahType Type);
 public record StructuredTypeDeclaration(string Name, List<StructuredTypeField> Fields, bool IsRecord) : Statement;
 public record BreakStatement() : Statement;
 public record ContinueStatement() : Statement;
@@ -233,7 +233,7 @@ public record FsRenameStatement(Expression OldName, Expression NewName) : Statem
 public record FsDeleteStatement(Expression Path) : Statement;
 public record TimerStartStatement() : Statement;
 public record TryCatchStatement(List<Statement> TryBody, List<Statement> CatchBody, string? ErrorMessage) : Statement;
-public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, string Type, bool IsRequired, Expression? DefaultValue) : Statement;
+public record ArgsDefineStatement(string LongFlag, string ShortFlag, string Description, UtahType Type, bool IsRequired, Expression? DefaultValue) : Statement;
 public record ArgsShowHelpStatement() : Statement;
 public record ImportStatement(string FilePath) : Statement;
 public record TemplateUpdateExpression(Expression SourceFilePath, Expression TargetFilePath) : Expression;

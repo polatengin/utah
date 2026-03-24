@@ -198,7 +198,7 @@ public class FormatterVisitor
   private void VisitVariableDeclaration(VariableDeclaration varDecl)
   {
     var keyword = varDecl.IsConst ? "const" : "let";
-    var type = !string.IsNullOrEmpty(varDecl.Type) ? $": {varDecl.Type}" : "";
+    var type = varDecl.Type != null ? $": {varDecl.Type}" : "";
     var value = varDecl.Value != null ? $" = {VisitExpression(varDecl.Value)}" : "";
 
     WriteIndentedLine($"{keyword} {varDecl.Name}{type}{value};");
@@ -207,7 +207,7 @@ public class FormatterVisitor
   private void VisitFunctionDeclaration(FunctionDeclaration funcDecl)
   {
     var parameters = string.Join(", ", funcDecl.Parameters.Select(p => $"{p.Name}: {p.Type}"));
-    var returnType = !string.IsNullOrEmpty(funcDecl.ReturnType) ? $": {funcDecl.ReturnType}" : "";
+    var returnType = funcDecl.ReturnType != null ? $": {funcDecl.ReturnType}" : "";
     var openParen = _options.SpaceBeforeParen ? " (" : "(";
 
     WriteIndentedLine($"function {funcDecl.Name}{openParen}{parameters}){returnType} {{");
@@ -266,7 +266,8 @@ public class FormatterVisitor
 
   private void VisitForLoop(ForLoop forLoop)
   {
-    var init = $"let {forLoop.Initializer.Name}: {forLoop.Initializer.Type} = {VisitExpression(forLoop.Initializer.Value)}";
+    var typeAnnotation = forLoop.Initializer.Type != null ? $": {forLoop.Initializer.Type}" : "";
+    var init = $"let {forLoop.Initializer.Name}{typeAnnotation} = {VisitExpression(forLoop.Initializer.Value)}";
     var condition = VisitExpression(forLoop.Condition);
     var update = VisitExpression(forLoop.Update);
     var openParen = _options.SpaceBeforeParen ? " (" : "(";
@@ -406,7 +407,7 @@ public class FormatterVisitor
     switch (expr)
     {
       case LiteralExpression literal:
-        return literal.Type == "string" ? $"\"{literal.Value}\"" : literal.Value;
+        return literal.Type == UtahType.String ? $"\"{literal.Value}\"" : literal.Value;
       case VariableExpression variable:
         return variable.Name;
       case ObjectLiteralExpression objectLiteral:

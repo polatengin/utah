@@ -28,7 +28,7 @@ public partial class Compiler
           return $"{varName}={value}";
         }
       case LiteralExpression lit:
-        return lit.Type == "string" ? $"\"{lit.Value}\"" : lit.Value;
+        return lit.Type == UtahType.String ? $"\"{lit.Value}\"" : lit.Value;
       case VariableExpression var:
         return $"${{{var.Name}}}";
       case ObjectLiteralExpression objectLiteral:
@@ -437,7 +437,7 @@ public partial class Compiler
     if (expr.Timestamp == null && expr.Format != null)
     {
       var fmt = CompileExpression(expr.Format);
-      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == "string")
+      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == UtahType.String)
       {
         return $"$(date +\"{fmtLiteral.Value}\")";
       }
@@ -445,7 +445,7 @@ public partial class Compiler
     }
     // Both timestamp and format provided
     var timestamp = CompileExpression(expr.Timestamp!);
-    if (expr.Format is LiteralExpression formatLiteral && formatLiteral.Type == "string")
+    if (expr.Format is LiteralExpression formatLiteral && formatLiteral.Type == UtahType.String)
     {
       return $"$(date -d @{timestamp} +\"{formatLiteral.Value}\")";
     }
@@ -456,14 +456,14 @@ public partial class Compiler
   private string CompileDateParseExpression(DateParseExpression expr)
   {
     var dateStr = CompileExpression(expr.DateString);
-    if (expr.DateString is LiteralExpression dateLiteral && dateLiteral.Type == "string")
+    if (expr.DateString is LiteralExpression dateLiteral && dateLiteral.Type == UtahType.String)
     {
       dateStr = $"\"{dateLiteral.Value}\"";
     }
     if (expr.Format != null)
     {
       var fmt = CompileExpression(expr.Format);
-      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == "string")
+      if (expr.Format is LiteralExpression fmtLiteral && fmtLiteral.Type == UtahType.String)
       {
         return $"$(date -d {dateStr} +\"{fmtLiteral.Value}\")";
       }
@@ -483,7 +483,7 @@ public partial class Compiler
     }
 
     var unit = CompileExpression(expr.Unit);
-    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == UtahType.String)
     {
       return unit switch
       {
@@ -502,7 +502,7 @@ public partial class Compiler
     var ts = CompileExpression(expr.Timestamp);
     var amount = CompileExpression(expr.Amount);
 
-    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == UtahType.String)
     {
       return unitLiteral.Value switch
       {
@@ -522,7 +522,7 @@ public partial class Compiler
     var ts = CompileExpression(expr.Timestamp);
     var amount = CompileExpression(expr.Amount);
 
-    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == "string")
+    if (expr.Unit is LiteralExpression unitLiteral && unitLiteral.Type == UtahType.String)
     {
       return unitLiteral.Value switch
       {
@@ -571,7 +571,7 @@ public partial class Compiler
   {
     var commitHash = CompileExpression(expr.CommitHash);
 
-    if (expr.CommitHash is LiteralExpression literal && literal.Type == "string")
+    if (expr.CommitHash is LiteralExpression literal && literal.Type == UtahType.String)
     {
       return $"$(git reset --hard \"{literal.Value}\")";
     }
@@ -587,28 +587,28 @@ public partial class Compiler
   private string CompileDockerRunExpression(DockerRunExpression expr)
   {
     var image = CompileExpression(expr.Image);
-    if (expr.Image is LiteralExpression imgLit && imgLit.Type == "string") image = $"\"{imgLit.Value}\"";
+    if (expr.Image is LiteralExpression imgLit && imgLit.Type == UtahType.String) image = $"\"{imgLit.Value}\"";
     else if (expr.Image is VariableExpression imgVar) image = $"${{{imgVar.Name}}}";
 
     var parts = new List<string> { "docker run -d" };
     if (expr.Name != null)
     {
       var name = CompileExpression(expr.Name);
-      if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") name = nameLit.Value;
+      if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) name = nameLit.Value;
       else if (expr.Name is VariableExpression nameVar) name = $"${{{nameVar.Name}}}";
       parts.Add($"--name {name}");
     }
     if (expr.Ports != null)
     {
       var ports = CompileExpression(expr.Ports);
-      if (expr.Ports is LiteralExpression portsLit && portsLit.Type == "string") ports = portsLit.Value;
+      if (expr.Ports is LiteralExpression portsLit && portsLit.Type == UtahType.String) ports = portsLit.Value;
       else if (expr.Ports is VariableExpression portsVar) ports = $"${{{portsVar.Name}}}";
       parts.Add($"-p {ports}");
     }
     if (expr.Volumes != null)
     {
       var volumes = CompileExpression(expr.Volumes);
-      if (expr.Volumes is LiteralExpression volLit && volLit.Type == "string") volumes = volLit.Value;
+      if (expr.Volumes is LiteralExpression volLit && volLit.Type == UtahType.String) volumes = volLit.Value;
       else if (expr.Volumes is VariableExpression volVar) volumes = $"${{{volVar.Name}}}";
       parts.Add($"-v {volumes}");
     }
@@ -618,7 +618,7 @@ public partial class Compiler
 
   private string CompileDockerStopExpression(DockerStopExpression expr)
   {
-    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+    if (expr.Container is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker stop \"{lit.Value}\")";
     if (expr.Container is VariableExpression varExpr)
       return $"$(docker stop ${{{varExpr.Name}}})";
@@ -627,7 +627,7 @@ public partial class Compiler
 
   private string CompileDockerRemoveExpression(DockerRemoveExpression expr)
   {
-    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+    if (expr.Container is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker rm \"{lit.Value}\")";
     if (expr.Container is VariableExpression varExpr)
       return $"$(docker rm ${{{varExpr.Name}}})";
@@ -636,7 +636,7 @@ public partial class Compiler
 
   private string CompileDockerRestartExpression(DockerRestartExpression expr)
   {
-    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+    if (expr.Container is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker restart \"{lit.Value}\")";
     if (expr.Container is VariableExpression varExpr)
       return $"$(docker restart ${{{varExpr.Name}}})";
@@ -645,7 +645,7 @@ public partial class Compiler
 
   private string CompileDockerLogsExpression(DockerLogsExpression expr)
   {
-    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+    if (expr.Container is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker logs \"{lit.Value}\")";
     if (expr.Container is VariableExpression varExpr)
       return $"$(docker logs ${{{varExpr.Name}}})";
@@ -655,11 +655,11 @@ public partial class Compiler
   private string CompileDockerExecExpression(DockerExecExpression expr)
   {
     var container = CompileExpression(expr.Container);
-    if (expr.Container is LiteralExpression cLit && cLit.Type == "string") container = $"\"{cLit.Value}\"";
+    if (expr.Container is LiteralExpression cLit && cLit.Type == UtahType.String) container = $"\"{cLit.Value}\"";
     else if (expr.Container is VariableExpression cVar) container = $"${{{cVar.Name}}}";
 
     var command = CompileExpression(expr.Command);
-    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == "string") command = cmdLit.Value;
+    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == UtahType.String) command = cmdLit.Value;
     else if (expr.Command is VariableExpression cmdVar) command = $"${{{cmdVar.Name}}}";
 
     return $"$(docker exec {container} {command})";
@@ -667,7 +667,7 @@ public partial class Compiler
 
   private string CompileDockerIsRunningExpression(DockerIsRunningExpression expr)
   {
-    if (expr.Container is LiteralExpression lit && lit.Type == "string")
+    if (expr.Container is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker inspect -f '{{{{.State.Running}}}}' \"{lit.Value}\" 2>/dev/null || echo \"false\")";
     if (expr.Container is VariableExpression varExpr)
       return $"$(docker inspect -f '{{{{.State.Running}}}}' ${{{varExpr.Name}}} 2>/dev/null || echo \"false\")";
@@ -682,13 +682,13 @@ public partial class Compiler
   private string CompileDockerBuildExpression(DockerBuildExpression expr)
   {
     var tag = CompileExpression(expr.Tag);
-    if (expr.Tag is LiteralExpression tagLit && tagLit.Type == "string") tag = $"\"{tagLit.Value}\"";
+    if (expr.Tag is LiteralExpression tagLit && tagLit.Type == UtahType.String) tag = $"\"{tagLit.Value}\"";
     else if (expr.Tag is VariableExpression tagVar) tag = $"${{{tagVar.Name}}}";
 
     var path = ".";
     if (expr.Path != null)
     {
-      if (expr.Path is LiteralExpression pathLit && pathLit.Type == "string") path = $"\"{pathLit.Value}\"";
+      if (expr.Path is LiteralExpression pathLit && pathLit.Type == UtahType.String) path = $"\"{pathLit.Value}\"";
       else if (expr.Path is VariableExpression pathVar) path = $"${{{pathVar.Name}}}";
       else path = CompileExpression(expr.Path);
     }
@@ -698,7 +698,7 @@ public partial class Compiler
 
   private string CompileDockerPullExpression(DockerPullExpression expr)
   {
-    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+    if (expr.Image is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker pull \"{lit.Value}\")";
     if (expr.Image is VariableExpression varExpr)
       return $"$(docker pull ${{{varExpr.Name}}})";
@@ -707,7 +707,7 @@ public partial class Compiler
 
   private string CompileDockerPushExpression(DockerPushExpression expr)
   {
-    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+    if (expr.Image is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker push \"{lit.Value}\")";
     if (expr.Image is VariableExpression varExpr)
       return $"$(docker push ${{{varExpr.Name}}})";
@@ -716,7 +716,7 @@ public partial class Compiler
 
   private string CompileDockerRemoveImageExpression(DockerRemoveImageExpression expr)
   {
-    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+    if (expr.Image is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker rmi \"{lit.Value}\")";
     if (expr.Image is VariableExpression varExpr)
       return $"$(docker rmi ${{{varExpr.Name}}})";
@@ -725,7 +725,7 @@ public partial class Compiler
 
   private string CompileDockerImageExistsExpression(DockerImageExistsExpression expr)
   {
-    if (expr.Image is LiteralExpression lit && lit.Type == "string")
+    if (expr.Image is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(docker image inspect \"{lit.Value}\" > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
     if (expr.Image is VariableExpression varExpr)
       return $"$(docker image inspect ${{{varExpr.Name}}} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
@@ -739,7 +739,7 @@ public partial class Compiler
 
   private string CompileK8sSetContextExpression(K8sSetContextExpression expr)
   {
-    if (expr.Name is LiteralExpression lit && lit.Type == "string")
+    if (expr.Name is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(kubectl config use-context \"{lit.Value}\")";
     if (expr.Name is VariableExpression varExpr)
       return $"$(kubectl config use-context ${{{varExpr.Name}}})";
@@ -753,7 +753,7 @@ public partial class Compiler
 
   private string CompileK8sSetNamespaceExpression(K8sSetNamespaceExpression expr)
   {
-    if (expr.Name is LiteralExpression lit && lit.Type == "string")
+    if (expr.Name is LiteralExpression lit && lit.Type == UtahType.String)
       return $"$(kubectl config set-context --current --namespace=\"{lit.Value}\")";
     if (expr.Name is VariableExpression varExpr)
       return $"$(kubectl config set-context --current --namespace=${{{varExpr.Name}}})";
@@ -774,20 +774,20 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl get" };
 
-    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == UtahType.String) parts.Add($"\"{resLit.Value}\"");
     else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
     else parts.Add(CompileExpression(expr.Resource));
 
     if (expr.Name != null)
     {
-      if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+      if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) parts.Add($"\"{nameLit.Value}\"");
       else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
       else parts.Add(CompileExpression(expr.Name));
     }
 
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String) parts.Add($"-n \"{nsLit.Value}\"");
       else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
       else parts.Add($"-n {CompileExpression(expr.Namespace)}");
     }
@@ -800,17 +800,17 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl describe" };
 
-    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == UtahType.String) parts.Add($"\"{resLit.Value}\"");
     else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
     else parts.Add(CompileExpression(expr.Resource));
 
-    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) parts.Add($"\"{nameLit.Value}\"");
     else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
     else parts.Add(CompileExpression(expr.Name));
 
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String) parts.Add($"-n \"{nsLit.Value}\"");
       else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
       else parts.Add($"-n {CompileExpression(expr.Namespace)}");
     }
@@ -822,17 +822,17 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl get" };
 
-    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == UtahType.String) parts.Add($"\"{resLit.Value}\"");
     else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
     else parts.Add(CompileExpression(expr.Resource));
 
-    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) parts.Add($"\"{nameLit.Value}\"");
     else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
     else parts.Add(CompileExpression(expr.Name));
 
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String) parts.Add($"-n \"{nsLit.Value}\"");
       else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
       else parts.Add($"-n {CompileExpression(expr.Namespace)}");
     }
@@ -844,27 +844,27 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl logs" };
 
-    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == UtahType.String) parts.Add($"\"{podLit.Value}\"");
     else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
     else parts.Add(CompileExpression(expr.Pod));
 
     if (expr.Container != null)
     {
-      if (expr.Container is LiteralExpression cLit && cLit.Type == "string") parts.Add($"--container=\"{cLit.Value}\"");
+      if (expr.Container is LiteralExpression cLit && cLit.Type == UtahType.String) parts.Add($"--container=\"{cLit.Value}\"");
       else if (expr.Container is VariableExpression cVar) parts.Add($"--container=${{{cVar.Name}}}");
       else parts.Add($"--container={CompileExpression(expr.Container)}");
     }
 
     if (expr.Tail != null)
     {
-      if (expr.Tail is LiteralExpression tLit && tLit.Type == "number") parts.Add($"--tail={tLit.Value}");
+      if (expr.Tail is LiteralExpression tLit && tLit.Type == UtahType.Number) parts.Add($"--tail={tLit.Value}");
       else if (expr.Tail is VariableExpression tVar) parts.Add($"--tail=${{{tVar.Name}}}");
       else parts.Add($"--tail={CompileExpression(expr.Tail)}");
     }
 
     if (expr.Previous != null)
     {
-      if (expr.Previous is LiteralExpression pLit && pLit.Type == "boolean" && pLit.Value == "true")
+      if (expr.Previous is LiteralExpression pLit && pLit.Type == UtahType.Boolean && pLit.Value == "true")
         parts.Add("--previous");
       else if (expr.Previous is VariableExpression pVar)
         parts.Add($"$([ \"${{{pVar.Name}}}\" = \"true\" ] && echo \"--previous\")");
@@ -877,20 +877,20 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl exec" };
 
-    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == UtahType.String) parts.Add($"\"{podLit.Value}\"");
     else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
     else parts.Add(CompileExpression(expr.Pod));
 
     if (expr.Container != null)
     {
-      if (expr.Container is LiteralExpression cLit && cLit.Type == "string") parts.Add($"--container=\"{cLit.Value}\"");
+      if (expr.Container is LiteralExpression cLit && cLit.Type == UtahType.String) parts.Add($"--container=\"{cLit.Value}\"");
       else if (expr.Container is VariableExpression cVar) parts.Add($"--container=${{{cVar.Name}}}");
       else parts.Add($"--container={CompileExpression(expr.Container)}");
     }
 
     parts.Add("--");
 
-    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == "string") parts.Add(cmdLit.Value);
+    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == UtahType.String) parts.Add(cmdLit.Value);
     else if (expr.Command is VariableExpression cmdVar) parts.Add($"${{{cmdVar.Name}}}");
     else parts.Add(CompileExpression(expr.Command));
 
@@ -901,7 +901,7 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl port-forward" };
 
-    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == UtahType.String) parts.Add($"\"{podLit.Value}\"");
     else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
     else parts.Add(CompileExpression(expr.Pod));
 
@@ -924,13 +924,13 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl get pod" };
 
-    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == UtahType.String) parts.Add($"\"{podLit.Value}\"");
     else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
     else parts.Add(CompileExpression(expr.Pod));
 
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String) parts.Add($"-n \"{nsLit.Value}\"");
       else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
       else parts.Add($"-n {CompileExpression(expr.Namespace)}");
     }
@@ -945,11 +945,11 @@ public partial class Compiler
     var parts = new List<string> { "kubectl scale" };
 
     string resource, name;
-    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") resource = resLit.Value;
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == UtahType.String) resource = resLit.Value;
     else if (expr.Resource is VariableExpression resVar) resource = $"${{{resVar.Name}}}";
     else resource = CompileExpression(expr.Resource);
 
-    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") name = nameLit.Value;
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) name = nameLit.Value;
     else if (expr.Name is VariableExpression nameVar) name = $"${{{nameVar.Name}}}";
     else name = CompileExpression(expr.Name);
 
@@ -966,13 +966,13 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl get secret" };
 
-    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) parts.Add($"\"{nameLit.Value}\"");
     else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
     else parts.Add(CompileExpression(expr.Name));
 
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String) parts.Add($"-n \"{nsLit.Value}\"");
       else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
       else parts.Add($"-n {CompileExpression(expr.Namespace)}");
     }
@@ -980,7 +980,7 @@ public partial class Compiler
     if (expr.Key != null)
     {
       string key;
-      if (expr.Key is LiteralExpression keyLit && keyLit.Type == "string") key = keyLit.Value;
+      if (expr.Key is LiteralExpression keyLit && keyLit.Type == UtahType.String) key = keyLit.Value;
       else if (expr.Key is VariableExpression keyVar) key = $"${{{keyVar.Name}}}";
       else key = CompileExpression(expr.Key);
 
@@ -996,16 +996,16 @@ public partial class Compiler
   {
     var parts = new List<string> { "kubectl create secret generic" };
 
-    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == UtahType.String) parts.Add($"\"{nameLit.Value}\"");
     else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
     else parts.Add(CompileExpression(expr.Name));
 
     string key, value;
-    if (expr.Key is LiteralExpression keyLit && keyLit.Type == "string") key = keyLit.Value;
+    if (expr.Key is LiteralExpression keyLit && keyLit.Type == UtahType.String) key = keyLit.Value;
     else if (expr.Key is VariableExpression keyVar) key = $"${{{keyVar.Name}}}";
     else key = CompileExpression(expr.Key);
 
-    if (expr.Value is LiteralExpression valLit && valLit.Type == "string") value = valLit.Value;
+    if (expr.Value is LiteralExpression valLit && valLit.Type == UtahType.String) value = valLit.Value;
     else if (expr.Value is VariableExpression valVar) value = $"${{{valVar.Name}}}";
     else value = CompileExpression(expr.Value);
 
@@ -1017,7 +1017,7 @@ public partial class Compiler
   {
     if (expr.Namespace != null)
     {
-      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string")
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == UtahType.String)
         return $"$(kubectl top pods -n \"{nsLit.Value}\")";
       if (expr.Namespace is VariableExpression nsVar)
         return $"$(kubectl top pods -n ${{{nsVar.Name}}})";
@@ -1474,7 +1474,7 @@ public partial class Compiler
     {
       appReference = $"${{{varExpr.Name}}}";
     }
-    else if (osInstalled.AppName is LiteralExpression literal && literal.Type == "string")
+    else if (osInstalled.AppName is LiteralExpression literal && literal.Type == UtahType.String)
     {
       appReference = $"\"{literal.Value}\"";
     }
@@ -1583,7 +1583,7 @@ public partial class Compiler
     {
       pidReference = $"${{{varExpr.Name}}}";
     }
-    else if (processIsRunning.Pid is LiteralExpression literal && literal.Type == "number")
+    else if (processIsRunning.Pid is LiteralExpression literal && literal.Type == UtahType.Number)
     {
       pidReference = literal.Value;
     }
@@ -1605,7 +1605,7 @@ public partial class Compiler
     {
       pidReference = $"${{{varExpr.Name}}}";
     }
-    else if (waitForExit.Pid is LiteralExpression literal && literal.Type == "number")
+    else if (waitForExit.Pid is LiteralExpression literal && literal.Type == UtahType.Number)
     {
       pidReference = literal.Value;
     }
@@ -1670,7 +1670,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     {
       pidReference = $"${{{varExpr.Name}}}";
     }
-    else if (processKill.Pid is LiteralExpression literal && literal.Type == "number")
+    else if (processKill.Pid is LiteralExpression literal && literal.Type == UtahType.Number)
     {
       pidReference = literal.Value;
     }
@@ -1884,9 +1884,9 @@ _utah_wait_for_exit {pidReference} {timeout}
     // For string literals, ensure they are quoted
     return lit.Type switch
     {
-      "string" => $"\"{lit.Value}\"",
-      "number" => lit.Value,
-      "boolean" => lit.Value,
+      StringType => $"\"{lit.Value}\"",
+      NumberType => lit.Value,
+      BooleanType => lit.Value,
       _ => $"\"{lit.Value}\""
     };
   }
@@ -1904,7 +1904,7 @@ _utah_wait_for_exit {pidReference} {timeout}
         bin.Left is LiteralExpression leftLit &&
         string.IsNullOrWhiteSpace(leftLit.Value) &&
         bin.Right is LiteralExpression rightLit &&
-        rightLit.Type == "number")
+        rightLit.Type == UtahType.Number)
     {
       return $"-{rightLit.Value}";
     }
@@ -1939,7 +1939,7 @@ _utah_wait_for_exit {pidReference} {timeout}
     return un.Operator switch
     {
       "!" => $"! {operand}",
-      "-" => un.Operand is LiteralExpression lit && lit.Type == "number"
+      "-" => un.Operand is LiteralExpression lit && lit.Type == UtahType.Number
              ? $"-{lit.Value}"
              : $"$((-${operand}))",
       _ => throw new NotSupportedException($"Unary operator {un.Operator} is not supported")
@@ -2111,8 +2111,8 @@ _utah_wait_for_exit {pidReference} {timeout}
   private bool IsStringConcatenation(BinaryExpression bin)
   {
     // Simple heuristic: if either operand is a string literal or we're adding strings
-    return (bin.Left is LiteralExpression leftLit && leftLit.Type == "string") ||
-           (bin.Right is LiteralExpression rightLit && rightLit.Type == "string");
+    return (bin.Left is LiteralExpression leftLit && leftLit.Type == UtahType.String) ||
+           (bin.Right is LiteralExpression rightLit && rightLit.Type == UtahType.String);
   }
 
   private string CompileArrayLiteral(ArrayLiteral arr)
@@ -2131,7 +2131,7 @@ _utah_wait_for_exit {pidReference} {timeout}
       return compiled;
     }
 
-    if (element is LiteralExpression literal && literal.Type != "string")
+    if (element is LiteralExpression literal && literal.Type != UtahType.String)
     {
       return compiled;
     }
@@ -2334,7 +2334,8 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     var schemaName = ResolveSchemaName(func.Arguments[1]) ??
                      throw new InvalidOperationException("schema.isValid() requires a schema name or string literal as the second argument");
-    var validator = BuildSchemaValidatorFilter(schemaName);
+    var schemaType = UtahType.Parse(schemaName) ?? UtahType.Object;
+    var validator = BuildSchemaValidatorFilter(schemaType);
     var jsonValue = BuildJsonSourceExpression(func.Arguments[0]);
 
     return $"$(echo {QuoteForBashWord(jsonValue)} | jq -ce '{validator}' >/dev/null 2>&1 && echo \"true\" || echo \"false\")";
@@ -2347,7 +2348,8 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     var schemaName = ResolveSchemaName(func.Arguments[1]) ??
                      throw new InvalidOperationException("schema.validate() requires a schema name or string literal as the second argument");
-    var validator = BuildSchemaValidatorFilter(schemaName);
+    var schemaType = UtahType.Parse(schemaName) ?? UtahType.Object;
+    var validator = BuildSchemaValidatorFilter(schemaType);
     var jsonValue = BuildJsonSourceExpression(func.Arguments[0]);
     var valueVar = $"_utah_schema_value_{GetUniqueId()}";
 
@@ -2505,12 +2507,12 @@ _utah_wait_for_exit {pidReference} {timeout}
   private string BuildJqArgumentClause(Expression expression, string argumentName)
   {
     var type = InferExpressionType(expression);
-    if (expression is LiteralExpression literal && literal.Type == "string")
+    if (expression is LiteralExpression literal && literal.Type == UtahType.String)
     {
       return $"--arg {argumentName} {QuoteForBashWord(CompileExpression(expression))}";
     }
 
-    if (type == "number" || type == "boolean" || IsJsonBackedObjectType(type) || IsArrayType(type) || IsSetType(type) ||
+    if (type is NumberType or BooleanType || IsJsonBackedObjectType(type) || type is ArrayType or SetType ||
         expression is ObjectLiteralExpression || expression is ArrayLiteral)
     {
       return $"--argjson {argumentName} {QuoteForBashWord(BuildJsonSourceExpression(expression))}";
@@ -2523,8 +2525,8 @@ _utah_wait_for_exit {pidReference} {timeout}
   {
     if (expression is VariableExpression variableExpression)
     {
-      var variableType = GetVariableType(variableExpression.Name) ?? "";
-      if (IsArrayType(variableType) || IsSetType(variableType))
+      var variableType = GetVariableType(variableExpression.Name);
+      if (variableType is ArrayType or SetType)
       {
         return BuildArrayVariableJsonExpression(variableExpression.Name);
       }
@@ -2540,39 +2542,37 @@ _utah_wait_for_exit {pidReference} {timeout}
     return CompileExpression(expression);
   }
 
-  private string BuildSchemaValidatorFilter(string typeName)
+  private string BuildSchemaValidatorFilter(UtahType typeName)
   {
-    typeName = NormalizeTypeAnnotation(typeName);
-
-    if (string.IsNullOrEmpty(typeName) || typeName == "any" || typeName == "unknown")
+    if (typeName is AnyType or UnknownType)
     {
       return "true";
     }
 
-    if (typeName == "string" || typeName == "number" || typeName == "boolean" || typeName == "object")
+    if (typeName is StringType or NumberType or BooleanType or ObjectType)
     {
       return $"type == \"{typeName}\"";
     }
 
-    if (IsArrayType(typeName))
+    if (typeName is ArrayType arrayType)
     {
-      var elementFilter = BuildSchemaValidatorFilter(GetCollectionElementType(typeName)!);
+      var elementFilter = BuildSchemaValidatorFilter(arrayType.ElementType);
       return $"type == \"array\" and all(.[]; {elementFilter})";
     }
 
-    if (IsSetType(typeName))
+    if (typeName is SetType setType)
     {
-      var elementFilter = BuildSchemaValidatorFilter(GetCollectionElementType(typeName)!);
+      var elementFilter = BuildSchemaValidatorFilter(setType.ElementType);
       return $"type == \"array\" and all(.[]; {elementFilter}) and ((unique | length) == length)";
     }
 
-    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    if (typeName is MapType or DictionaryType)
     {
-      var valueFilter = BuildSchemaValidatorFilter(GetMapValueType(typeName) ?? "any");
+      var valueFilter = BuildSchemaValidatorFilter(GetMapValueType(typeName) ?? UtahType.Any);
       return $"type == \"object\" and all(.[]; {valueFilter})";
     }
 
-    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    if (typeName is StructuredType st && _structuredTypes.TryGetValue(st.Name, out var declaration))
     {
       var orderedFields = declaration.Fields.OrderBy(field => field.Name).ToList();
       var expectedKeys = string.Join(", ", orderedFields.Select(field => $"\"{EscapeJqString(field.Name)}\""));
@@ -2656,7 +2656,7 @@ _utah_wait_for_exit {pidReference} {timeout}
   {
     if (expr is LiteralExpression literal)
     {
-      return literal.Type == "number" || int.TryParse(literal.Value, out _) || double.TryParse(literal.Value, out _);
+      return literal.Type == UtahType.Number || int.TryParse(literal.Value, out _) || double.TryParse(literal.Value, out _);
     }
     return false;
   }
@@ -3015,12 +3015,12 @@ _utah_wait_for_exit {pidReference} {timeout}
       var arrayType = GetArrayType(arrayName);
 
       string sortCommand;
-      if (arrayType == "number")
+      if (arrayType == UtahType.Number)
       {
         // Numeric sort
         sortCommand = sortOrder == "desc" ? "sort -nr" : "sort -n";
       }
-      else if (arrayType == "boolean")
+      else if (arrayType == UtahType.Boolean)
       {
         // Boolean sort: false (0) before true (1)
         if (sortOrder == "desc")
@@ -3102,27 +3102,33 @@ _utah_wait_for_exit {pidReference} {timeout}
     }
   }
 
-  private string GetArrayType(string arrayName)
+  private UtahType GetArrayType(string arrayName)
   {
-    // For now, we'll use a simple heuristic based on common naming patterns
-    // In a full implementation, we'd track variable types through the compilation process
+    // Check tracked variable type first
+    var varType = GetVariableType(arrayName);
+    if (varType is ArrayType at)
+    {
+      return at.ElementType;
+    }
+
+    // Fallback: heuristic based on common naming patterns
 
     // Check for common number array names
     if (arrayName.Contains("number") || arrayName.Contains("num") || arrayName.Contains("int") ||
         arrayName.Contains("float") || arrayName.Contains("double") || arrayName.Contains("single"))
     {
-      return "number";
+      return UtahType.Number;
     }
 
     // Check for common boolean array names
     if (arrayName.Contains("boolean") || arrayName.Contains("bool") || arrayName.Contains("flag") ||
         arrayName.Contains("flags") || arrayName.Contains("switch"))
     {
-      return "boolean";
+      return UtahType.Boolean;
     }
 
     // Default to string for most arrays
-    return "string";
+    return UtahType.String;
   }
 
   private string CompileArrayForEachExpression(ArrayForEachExpression arrayForEach)
@@ -3163,10 +3169,10 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     // Compile the callback body statements
     PushVariableTypeScope();
-    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? "unknown");
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? UtahType.Unknown);
     if (indexVar != null)
     {
-      RegisterVariableType(indexVar, "number");
+      RegisterVariableType(indexVar, UtahType.Number);
     }
     foreach (var statement in arrayForEach.Callback.Body)
     {
@@ -3209,7 +3215,7 @@ _utah_wait_for_exit {pidReference} {timeout}
   private string CompileFsExtensionExpression(FsExtensionExpression fsExtension)
   {
     // Handle string literals specially - extract extension directly
-    if (fsExtension.Path is LiteralExpression literal && literal.Type == "string")
+    if (fsExtension.Path is LiteralExpression literal && literal.Type == UtahType.String)
     {
       // For string literals, we can extract the extension directly
       var fileName = literal.Value;
@@ -4480,7 +4486,7 @@ _utah_validate_in_range {value} {min} {max}
     return $"($(declare -A _utah_seen; for item in \"${{{varName}[@]}}\"; do if [[ -z \"${{_utah_seen[$item]}}\" ]]; then _utah_seen[\"$item\"]=1; echo \"$item\"; fi; done))";
   }
 
-  private sealed record LambdaParameterBinding(string Name, string? Type);
+  private sealed record LambdaParameterBinding(string Name, UtahType? Type);
   private sealed record JqBuildResult(string Expression, List<string> Arguments);
 
   private string CompileArrayMapExpression(ArrayMapExpression arrayMap)
@@ -4492,11 +4498,11 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_map_index_{uniqueId}";
     var itemVar = arrayMap.Callback.Parameters.Count > 0 ? arrayMap.Callback.Parameters[0] : "item";
     var indexVar = arrayMap.Callback.Parameters.Count > 1 ? arrayMap.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayMap.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arrayMap.Array)) ?? UtahType.Unknown;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayMap.Callback, lambdaParameters);
@@ -4514,11 +4520,11 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_filter_index_{uniqueId}";
     var itemVar = arrayFilter.Callback.Parameters.Count > 0 ? arrayFilter.Callback.Parameters[0] : "item";
     var indexVar = arrayFilter.Callback.Parameters.Count > 1 ? arrayFilter.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayFilter.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFilter.Array)) ?? UtahType.Unknown;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayFilter.Callback, lambdaParameters);
@@ -4536,7 +4542,7 @@ _utah_validate_in_range {value} {min} {max}
     var accParam = arrayReduce.Callback.Parameters.Count > 0 ? arrayReduce.Callback.Parameters[0] : "acc";
     var itemParam = arrayReduce.Callback.Parameters.Count > 1 ? arrayReduce.Callback.Parameters[1] : "item";
     var indexParam = arrayReduce.Callback.Parameters.Count > 2 ? arrayReduce.Callback.Parameters[2] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayReduce.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arrayReduce.Array)) ?? UtahType.Unknown;
     var accumulatorType = arrayReduce.InitialValue != null ? InferExpressionType(arrayReduce.InitialValue) : elementType;
     var lambdaParameters = new List<LambdaParameterBinding>
     {
@@ -4545,7 +4551,7 @@ _utah_validate_in_range {value} {min} {max}
     };
     if (indexParam != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexParam, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexParam, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayReduce.Callback, lambdaParameters);
@@ -4570,11 +4576,11 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_find_index_{uniqueId}";
     var itemVar = arrayFind.Callback.Parameters.Count > 0 ? arrayFind.Callback.Parameters[0] : "item";
     var indexVar = arrayFind.Callback.Parameters.Count > 1 ? arrayFind.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayFind.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFind.Array)) ?? UtahType.Unknown;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayFind.Callback, lambdaParameters);
@@ -4591,11 +4597,11 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_some_index_{uniqueId}";
     var itemVar = arraySome.Callback.Parameters.Count > 0 ? arraySome.Callback.Parameters[0] : "item";
     var indexVar = arraySome.Callback.Parameters.Count > 1 ? arraySome.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arraySome.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arraySome.Array)) ?? UtahType.Unknown;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arraySome.Callback, lambdaParameters);
@@ -4612,11 +4618,11 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_every_index_{uniqueId}";
     var itemVar = arrayEvery.Callback.Parameters.Count > 0 ? arrayEvery.Callback.Parameters[0] : "item";
     var indexVar = arrayEvery.Callback.Parameters.Count > 1 ? arrayEvery.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayEvery.Array)) ?? "unknown";
+    var elementType = GetCollectionElementType(InferExpressionType(arrayEvery.Array)) ?? UtahType.Unknown;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
-      lambdaParameters.Add(new LambdaParameterBinding(indexVar, "number"));
+      lambdaParameters.Add(new LambdaParameterBinding(indexVar, UtahType.Number));
     }
 
     var lambdaCommand = CompileLambdaCommand(arrayEvery.Callback, lambdaParameters);
@@ -4667,7 +4673,7 @@ _utah_validate_in_range {value} {min} {max}
 
   private void PushVariableTypeScope()
   {
-    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+    _variableTypeScopes.Push(new Dictionary<string, UtahType>(StringComparer.Ordinal));
   }
 
   private void PopVariableTypeScope()
@@ -4678,17 +4684,17 @@ _utah_validate_in_range {value} {min} {max}
     }
   }
 
-  private void RegisterVariableType(string variableName, string? type)
+  private void RegisterVariableType(string variableName, UtahType? type)
   {
-    if (string.IsNullOrWhiteSpace(variableName) || string.IsNullOrWhiteSpace(type) || _variableTypeScopes.Count == 0)
+    if (string.IsNullOrWhiteSpace(variableName) || type == null || _variableTypeScopes.Count == 0)
     {
       return;
     }
 
-    _variableTypeScopes.Peek()[variableName] = NormalizeTypeAnnotation(type);
+    _variableTypeScopes.Peek()[variableName] = type;
   }
 
-  private string? GetVariableType(string variableName)
+  private UtahType? GetVariableType(string variableName)
   {
     foreach (var scope in _variableTypeScopes)
     {
@@ -4701,67 +4707,66 @@ _utah_validate_in_range {value} {min} {max}
     return null;
   }
 
-  private string NormalizeTypeAnnotation(string type)
-  {
-    return string.IsNullOrWhiteSpace(type) ? "" : Regex.Replace(type.Trim(), @"\s+", "");
-  }
-
-  private string InferExpressionType(Expression expression)
+  private UtahType InferExpressionType(Expression expression)
   {
     return expression switch
     {
       LiteralExpression literal => literal.Type,
-      MultilineStringExpression => "string",
-      ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
-      ObjectLiteralExpression => "object",
-      VariableExpression variable => _sshConnectionVariables.Contains(variable.Name) ? "sshConnection" : GetVariableType(variable.Name) ?? "unknown",
-      SshConnectExpression => "sshConnection",
-      JsonParseExpression => "object",
-      YamlParseExpression => "object",
-      ArrayMapExpression => "any[]",
+      MultilineStringExpression => UtahType.String,
+      ArrayLiteral arrayLiteral => new ArrayType(arrayLiteral.ElementType),
+      ObjectLiteralExpression => UtahType.Object,
+      VariableExpression variable => _sshConnectionVariables.Contains(variable.Name) ? UtahType.SshConnection : GetVariableType(variable.Name) ?? UtahType.Unknown,
+      SshConnectExpression => UtahType.SshConnection,
+      JsonParseExpression => UtahType.Object,
+      YamlParseExpression => UtahType.Object,
+      ArrayMapExpression => new ArrayType(UtahType.Any),
       ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
-      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? "unknown",
-      ArrayReduceExpression => "unknown",
-      ArraySomeExpression => "boolean",
-      ArrayEveryExpression => "boolean",
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? UtahType.Unknown,
+      ArrayReduceExpression => UtahType.Unknown,
+      ArraySomeExpression => UtahType.Boolean,
+      ArrayEveryExpression => UtahType.Boolean,
       FunctionCall functionCall => InferFunctionCallType(functionCall),
       ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
-      _ => "unknown"
+      _ => UtahType.Unknown
     };
   }
 
-  private string InferFunctionCallType(FunctionCall functionCall)
+  private UtahType InferFunctionCallType(FunctionCall functionCall)
   {
     return functionCall.Name switch
     {
-      "schema.validate" => functionCall.Arguments.Count >= 2 ? ResolveSchemaName(functionCall.Arguments[1]) ?? "object" : "object",
-      "schema.isValid" => "boolean",
+      "schema.validate" => functionCall.Arguments.Count >= 2
+        ? UtahType.Parse(ResolveSchemaName(functionCall.Arguments[1])) ?? UtahType.Object
+        : UtahType.Object,
+      "schema.isValid" => UtahType.Boolean,
       "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
-        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? "unknown"
-        : "unknown",
-      "map.has" or "dictionary.has" or "set.has" => "boolean",
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? UtahType.Unknown
+        : UtahType.Unknown,
+      "map.has" or "dictionary.has" or "set.has" => UtahType.Boolean,
       "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
         ? InferExpressionType(functionCall.Arguments[0])
-        : "unknown",
-      _ => "unknown"
+        : UtahType.Unknown,
+      _ => UtahType.Unknown
     };
   }
 
-  private string InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  private UtahType InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
   {
     if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
     {
-      return "unknown";
+      return UtahType.Unknown;
     }
 
-    var currentType = GetVariableType(rootName) ?? "unknown";
+    var currentType = GetVariableType(rootName) ?? UtahType.Unknown;
     foreach (var segment in path)
     {
-      currentType = GetStructuredFieldType(currentType, segment) ?? "unknown";
-      if (currentType == "unknown")
+      var fieldType = GetStructuredFieldType(currentType, segment);
+      if (fieldType == null)
       {
-        break;
+        return UtahType.Unknown;
       }
+
+      currentType = fieldType;
     }
 
     return currentType;
@@ -4788,15 +4793,14 @@ _utah_validate_in_range {value} {min} {max}
     return false;
   }
 
-  private string? GetStructuredFieldType(string typeName, string fieldName)
+  private UtahType? GetStructuredFieldType(UtahType typeName, string fieldName)
   {
-    typeName = NormalizeTypeAnnotation(typeName);
-    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    if (typeName is StructuredType st && _structuredTypes.TryGetValue(st.Name, out var declaration))
     {
       return declaration.Fields.FirstOrDefault(field => field.Name == fieldName)?.Type;
     }
 
-    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    if (typeName is MapType or DictionaryType)
     {
       return GetMapValueType(typeName);
     }
@@ -4804,59 +4808,30 @@ _utah_validate_in_range {value} {min} {max}
     return null;
   }
 
-  private bool IsArrayType(string type) => NormalizeTypeAnnotation(type).EndsWith("[]");
-
-  private bool IsSetType(string type)
+  private static UtahType? GetCollectionElementType(UtahType type)
   {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("set<") && type.EndsWith(">");
-  }
-
-  private bool IsMapType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("map<") && type.EndsWith(">");
-  }
-
-  private bool IsDictionaryType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("dictionary<") && type.EndsWith(">");
-  }
-
-  private string? GetCollectionElementType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    if (IsArrayType(type))
+    return type switch
     {
-      return type[..^2];
-    }
-
-    if (IsSetType(type))
-    {
-      return type[4..^1];
-    }
-
-    return null;
+      ArrayType at => at.ElementType,
+      SetType st => st.ElementType,
+      _ => null
+    };
   }
 
-  private string? GetMapValueType(string type)
+  private static UtahType? GetMapValueType(UtahType type)
   {
-    type = NormalizeTypeAnnotation(type);
-    if (!IsMapType(type) && !IsDictionaryType(type))
+    return type switch
     {
-      return null;
-    }
-
-    var genericContent = type[(type.IndexOf('<') + 1)..^1];
-    var genericParts = genericContent.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-    return genericParts.Length == 2 ? NormalizeTypeAnnotation(genericParts[1]) : null;
+      MapType mt => mt.ValueType,
+      DictionaryType dt => dt.ValueType,
+      _ => null
+    };
   }
 
-  private bool IsJsonBackedObjectType(string? type)
+  private bool IsJsonBackedObjectType(UtahType? type)
   {
-    type = NormalizeTypeAnnotation(type ?? "");
-    return type == "object" || _structuredTypes.ContainsKey(type) || IsMapType(type) || IsDictionaryType(type);
+    if (type == null) return false;
+    return type is ObjectType || (type is StructuredType st && _structuredTypes.ContainsKey(st.Name)) || type is MapType || type is DictionaryType;
   }
 
   private string? ResolveSchemaName(Expression expression)
@@ -4864,7 +4839,7 @@ _utah_validate_in_range {value} {min} {max}
     return expression switch
     {
       VariableExpression variable => variable.Name,
-      LiteralExpression literal when literal.Type == "string" => literal.Value,
+      LiteralExpression literal when literal.Type == UtahType.String => literal.Value,
       _ => null
     };
   }
@@ -4880,7 +4855,7 @@ _utah_validate_in_range {value} {min} {max}
   {
     switch (expression)
     {
-      case LiteralExpression literal when literal.Type == "string":
+      case LiteralExpression literal when literal.Type == UtahType.String:
         return new JqBuildResult($"\"{EscapeJqString(literal.Value)}\"", new List<string>());
       case LiteralExpression literal:
         return new JqBuildResult(literal.Value, new List<string>());
@@ -4911,7 +4886,7 @@ _utah_validate_in_range {value} {min} {max}
 
         return new JqBuildResult($"[{string.Join(", ", elements)}]", args);
       }
-      case VariableExpression variableExpression when IsArrayType(GetVariableType(variableExpression.Name) ?? "") || IsSetType(GetVariableType(variableExpression.Name) ?? ""):
+      case VariableExpression variableExpression when (GetVariableType(variableExpression.Name) is ArrayType or SetType):
       {
         var argName = SanitizeIdentifier(baseName);
         var jsonArray = BuildArrayVariableJsonExpression(variableExpression.Name);
@@ -4923,7 +4898,7 @@ _utah_validate_in_range {value} {min} {max}
         var compiled = CompileExpression(expression);
         var type = InferExpressionType(expression);
 
-        if (type == "number" || type == "boolean" || IsJsonBackedObjectType(type))
+        if (type is NumberType or BooleanType || IsJsonBackedObjectType(type))
         {
           return new JqBuildResult($"${argName}", new List<string> { $"--argjson {argName} {QuoteForBashWord(compiled)}" });
         }
@@ -4935,12 +4910,12 @@ _utah_validate_in_range {value} {min} {max}
 
   private string BuildArrayVariableJsonExpression(string variableName)
   {
-    var elementType = GetCollectionElementType(GetVariableType(variableName) ?? "") ?? "string";
+    var elementType = GetCollectionElementType(GetVariableType(variableName) ?? UtahType.String) ?? UtahType.String;
     var jqConverter = elementType switch
     {
-      "number" => "tonumber",
-      "boolean" => ". == \"true\"",
-      _ when IsJsonBackedObjectType(elementType) || IsArrayType(elementType) || IsSetType(elementType) => "fromjson",
+      NumberType => "tonumber",
+      BooleanType => ". == \"true\"",
+      _ when IsJsonBackedObjectType(elementType) || elementType is ArrayType or SetType => "fromjson",
       _ => "."
     };
 

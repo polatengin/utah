@@ -84,7 +84,7 @@ public partial class Compiler
         {
           lines.AddRange(CompileSshConnectionDeclaration(v.Name, sshConnect, v.IsConst));
         }
-        else if (IsSetType(v.Type))
+        else if (v.Type is SetType)
         {
           lines.AddRange(CompileSetVariableDeclaration(v));
         }
@@ -99,7 +99,7 @@ public partial class Compiler
               binExpr.Left is LiteralExpression leftLit &&
               string.IsNullOrWhiteSpace(leftLit.Value) &&
               binExpr.Right is LiteralExpression rightLit &&
-              rightLit.Type == "number")
+              rightLit.Type == UtahType.Number)
           {
             expressionValue = $"-{rightLit.Value}";
           }
@@ -107,7 +107,7 @@ public partial class Compiler
           else if (v.Value is UnaryExpression unaryExpr &&
               unaryExpr.Operator == "-" &&
               unaryExpr.Operand is LiteralExpression litExpr &&
-              litExpr.Type == "number")
+              litExpr.Type == UtahType.Number)
           {
             expressionValue = $"-{litExpr.Value}";
           }
@@ -148,7 +148,7 @@ public partial class Compiler
           _sshConnectionVariables.Remove(v.Name);
         }
 
-        var resolvedType = !string.IsNullOrEmpty(v.Type) ? v.Type : InferExpressionType(v.Value);
+        var resolvedType = v.Type ?? InferExpressionType(v.Value);
         RegisterVariableType(v.Name, resolvedType);
         break;
 
@@ -215,7 +215,7 @@ public partial class Compiler
             if (funcCall.Arguments.Count == 1)
             {
               var resetHash = CompileExpression(funcCall.Arguments[0]);
-              if (funcCall.Arguments[0] is LiteralExpression resetLiteral && resetLiteral.Type == "string")
+              if (funcCall.Arguments[0] is LiteralExpression resetLiteral && resetLiteral.Type == UtahType.String)
               {
                 lines.Add($"git reset --hard \"{resetLiteral.Value}\"");
               }
@@ -255,7 +255,7 @@ public partial class Compiler
         // Special handling for git.resetToCommit() expressions in statement context
         else if (exprStmt.Expression is GitResetToCommitExpression gitResetToCommit)
         {
-          if (gitResetToCommit.CommitHash is LiteralExpression resetLiteral2 && resetLiteral2.Type == "string")
+          if (gitResetToCommit.CommitHash is LiteralExpression resetLiteral2 && resetLiteral2.Type == UtahType.String)
           {
             lines.Add($"git reset --hard \"{resetLiteral2.Value}\"");
           }
@@ -1109,10 +1109,10 @@ public partial class Compiler
 
     // Compile the callback body statements
     PushVariableTypeScope();
-    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? "unknown");
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? UtahType.Unknown);
     if (indexVar != null)
     {
-      RegisterVariableType(indexVar, "number");
+      RegisterVariableType(indexVar, UtahType.Number);
     }
     foreach (var statement in arrayForEach.Callback.Body)
     {

@@ -6,9 +6,9 @@ public partial class Parser
 {
   private string[] _lines;
   private readonly HashSet<string> _constVariables = new HashSet<string>();
-  private readonly Stack<string> _functionReturnTypeStack = new Stack<string>();
+  private readonly Stack<UtahType> _functionReturnTypeStack = new Stack<UtahType>();
   private readonly Dictionary<string, StructuredTypeDeclaration> _structuredTypes = new(StringComparer.Ordinal);
-  private readonly Stack<Dictionary<string, string>> _variableTypeScopes = new();
+  private readonly Stack<Dictionary<string, UtahType>> _variableTypeScopes = new();
   private int _currentLineIndex;
   private int[] _originalLineNumbers = Array.Empty<int>();
 
@@ -31,7 +31,7 @@ public partial class Parser
     }
     _lines = lines.ToArray();
     _originalLineNumbers = lineMap.ToArray();
-    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+    _variableTypeScopes.Push(new Dictionary<string, UtahType>(StringComparer.Ordinal));
   }
 
   public int GetOriginalLineNumber()
@@ -246,7 +246,7 @@ public partial class Parser
       if (_functionReturnTypeStack.Count > 0)
       {
         var expectedReturnType = _functionReturnTypeStack.Peek();
-        if (!string.IsNullOrEmpty(expectedReturnType) && expectedReturnType != "void")
+        if (expectedReturnType is not VoidType)
         {
           throw new InvalidOperationException($"Function expects return type '{expectedReturnType}' but found void return.");
         }
@@ -473,7 +473,7 @@ public partial class Parser
       if (match.Success)
       {
         var name = match.Groups[2].Value;
-        var type = NormalizeTypeAnnotation(match.Groups[3].Value);
+        var type = UtahType.Parse(match.Groups[3].Value);
         var valueStr = match.Groups[4].Value;
 
         if (isConst)
@@ -483,8 +483,8 @@ public partial class Parser
 
         var value = ParseExpression(valueStr);
 
-        ValidateVariableTypeAssignment(value, type, name);
-        var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
+        if (type != null) ValidateVariableTypeAssignment(value, type, name);
+        var resolvedType = type ?? InferExpressionType(value);
         RegisterVariableType(name, resolvedType);
 
         return new VariableDeclaration(name, type, value, isConst);
@@ -525,7 +525,7 @@ public partial class Parser
         if (match.Success)
         {
           var name = match.Groups[2].Value;
-          var type = NormalizeTypeAnnotation(match.Groups[3].Value);
+          var type = UtahType.Parse(match.Groups[3].Value);
           var valueStr = match.Groups[4].Value;
 
           if (isConst)
@@ -538,8 +538,8 @@ public partial class Parser
           {
             var value = ParseExpression(valueStr);
 
-            ValidateVariableTypeAssignment(value, type, name);
-            var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
+            if (type != null) ValidateVariableTypeAssignment(value, type, name);
+            var resolvedType = type ?? InferExpressionType(value);
             RegisterVariableType(name, resolvedType);
 
             return new VariableDeclaration(name, type, value, isConst);
@@ -556,7 +556,7 @@ public partial class Parser
     if (singleLineMatch.Success)
     {
       var name = singleLineMatch.Groups[2].Value;
-      var type = NormalizeTypeAnnotation(singleLineMatch.Groups[3].Value);
+      var type = UtahType.Parse(singleLineMatch.Groups[3].Value);
       var valueStr = singleLineMatch.Groups[4].Value;
 
       if (isConst)
@@ -566,8 +566,8 @@ public partial class Parser
 
       var value = ParseExpression(valueStr);
 
-      ValidateVariableTypeAssignment(value, type, name);
-      var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
+      if (type != null) ValidateVariableTypeAssignment(value, type, name);
+      var resolvedType = type ?? InferExpressionType(value);
       RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
@@ -582,7 +582,7 @@ public partial class Parser
     if (match.Success)
     {
       var name = match.Groups[2].Value;
-      var type = NormalizeTypeAnnotation(match.Groups[3].Value);
+      var type = UtahType.Parse(match.Groups[3].Value);
       var valueStr = match.Groups[4].Value;
 
       if (isConst)
@@ -592,8 +592,8 @@ public partial class Parser
 
       var value = ParseExpression(valueStr);
 
-      ValidateVariableTypeAssignment(value, type, name);
-      var resolvedType = !string.IsNullOrEmpty(type) ? type : InferExpressionType(value);
+      if (type != null) ValidateVariableTypeAssignment(value, type, name);
+      var resolvedType = type ?? InferExpressionType(value);
       RegisterVariableType(name, resolvedType);
 
       return new VariableDeclaration(name, type, value, isConst);
@@ -607,8 +607,8 @@ public partial class Parser
     if (!headerMatch.Success) throw new Exception("Invalid function declaration");
 
     var name = headerMatch.Groups[1].Value;
-    var returnType = NormalizeTypeAnnotation(headerMatch.Groups[3].Value);
-    var parameters = new List<(string Name, string Type)>();
+    var returnType = UtahType.Parse(headerMatch.Groups[3].Value);
+    var parameters = new List<(string Name, UtahType Type)>();
     var paramList = SplitByComma(headerMatch.Groups[2].Value)
       .Where(p => !string.IsNullOrWhiteSpace(p))
       .ToList();
@@ -616,12 +616,12 @@ public partial class Parser
     {
       var colonIndex = p.IndexOf(':');
       var paramName = colonIndex >= 0 ? p[..colonIndex].Trim() : p.Trim();
-      var paramType = colonIndex >= 0 ? NormalizeTypeAnnotation(p[(colonIndex + 1)..].Trim()) : "any";
+      var paramType = colonIndex >= 0 ? UtahType.Parse(p[(colonIndex + 1)..].Trim()) ?? UtahType.Any : UtahType.Any;
       parameters.Add((paramName, paramType));
     }
 
     // Push return type onto stack for validation
-    _functionReturnTypeStack.Push(returnType ?? "void");
+    _functionReturnTypeStack.Push(returnType ?? UtahType.Void);
     PushVariableTypeScope();
     foreach (var (paramName, paramType) in parameters)
     {
@@ -715,9 +715,9 @@ public partial class Parser
       }
 
       var fieldName = entry[..colonIndex].Trim();
-      var fieldType = NormalizeTypeAnnotation(entry[(colonIndex + 1)..].Trim());
+      var fieldType = UtahType.Parse(entry[(colonIndex + 1)..].Trim());
 
-      if (string.IsNullOrEmpty(fieldName) || string.IsNullOrEmpty(fieldType))
+      if (string.IsNullOrEmpty(fieldName) || fieldType == null)
       {
         throw new InvalidOperationException($"Invalid structured type field declaration: {entry}");
       }
@@ -1159,7 +1159,7 @@ public partial class Parser
       var longFlag = StripQuotes(parameters[0]);
       var shortFlag = StripQuotes(parameters[1]);
       var description = StripQuotes(parameters[2]);
-      var type = parameters.Count > 3 ? StripQuotes(parameters[3]) : "string";
+      var type = parameters.Count > 3 ? UtahType.Parse(StripQuotes(parameters[3])) ?? UtahType.String : UtahType.String;
       var isRequired = parameters.Count > 4 ? bool.Parse(parameters[4]) : false;
       Expression? defaultValue = parameters.Count > 5 ? ParseExpression(parameters[5]) : null;
 
@@ -1282,14 +1282,9 @@ public partial class Parser
     return str;
   }
 
-  private string NormalizeTypeAnnotation(string type)
-  {
-    return string.IsNullOrWhiteSpace(type) ? "" : Regex.Replace(type.Trim(), @"\s+", "");
-  }
-
   private void PushVariableTypeScope()
   {
-    _variableTypeScopes.Push(new Dictionary<string, string>(StringComparer.Ordinal));
+    _variableTypeScopes.Push(new Dictionary<string, UtahType>(StringComparer.Ordinal));
   }
 
   private void PopVariableTypeScope()
@@ -1300,17 +1295,17 @@ public partial class Parser
     }
   }
 
-  private void RegisterVariableType(string variableName, string? type)
+  private void RegisterVariableType(string variableName, UtahType? type)
   {
-    if (string.IsNullOrWhiteSpace(variableName) || string.IsNullOrWhiteSpace(type) || _variableTypeScopes.Count == 0)
+    if (string.IsNullOrWhiteSpace(variableName) || type == null || _variableTypeScopes.Count == 0)
     {
       return;
     }
 
-    _variableTypeScopes.Peek()[variableName] = NormalizeTypeAnnotation(type);
+    _variableTypeScopes.Peek()[variableName] = type;
   }
 
-  private string? LookupVariableType(string variableName)
+  private UtahType? LookupVariableType(string variableName)
   {
     foreach (var scope in _variableTypeScopes)
     {
@@ -1323,7 +1318,7 @@ public partial class Parser
     return null;
   }
 
-  private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, string expectedElementType, string arrayName)
+  private void ValidateArrayElementTypes(ArrayLiteral arrayLiteral, UtahType expectedElementType, string arrayName)
   {
     for (int i = 0; i < arrayLiteral.Elements.Count; i++)
     {
@@ -1335,12 +1330,8 @@ public partial class Parser
     }
   }
 
-  private void ValidateVariableTypeAssignment(Expression value, string expectedType, string variableName)
+  private void ValidateVariableTypeAssignment(Expression value, UtahType expectedType, string variableName)
   {
-    expectedType = NormalizeTypeAnnotation(expectedType);
-    if (string.IsNullOrEmpty(expectedType))
-      return;
-
     if (!IsTypeCompatible(value, expectedType))
     {
       var actualType = InferExpressionType(value);
@@ -1348,10 +1339,9 @@ public partial class Parser
     }
   }
 
-  private void ValidateReturnType(Expression? value, string expectedReturnType)
+  private void ValidateReturnType(Expression? value, UtahType expectedReturnType)
   {
-    expectedReturnType = NormalizeTypeAnnotation(expectedReturnType);
-    if (string.IsNullOrEmpty(expectedReturnType) || expectedReturnType == "void")
+    if (expectedReturnType is VoidType)
       return;
 
     if (value == null)
@@ -1366,64 +1356,66 @@ public partial class Parser
     }
   }
 
-  private string InferExpressionType(Expression expression)
+  private UtahType InferExpressionType(Expression expression)
   {
     return expression switch
     {
       LiteralExpression literal => literal.Type,
-      MultilineStringExpression => "string",
-      ArrayLiteral arrayLiteral => $"{NormalizeTypeAnnotation(arrayLiteral.ElementType)}[]",
-      ObjectLiteralExpression => "object",
-      VariableExpression variable => LookupVariableType(variable.Name) ?? "unknown",
-      SshConnectExpression => "sshConnection",
-      JsonParseExpression => "object",
-      YamlParseExpression => "object",
-      JsonGetExpression => "unknown",
-      YamlGetExpression => "unknown",
-      ArrayMapExpression => "any[]",
+      MultilineStringExpression => UtahType.String,
+      ArrayLiteral arrayLiteral => new ArrayType(arrayLiteral.ElementType),
+      ObjectLiteralExpression => UtahType.Object,
+      VariableExpression variable => LookupVariableType(variable.Name) ?? UtahType.Unknown,
+      SshConnectExpression => UtahType.SshConnection,
+      JsonParseExpression => UtahType.Object,
+      YamlParseExpression => UtahType.Object,
+      JsonGetExpression => UtahType.Unknown,
+      YamlGetExpression => UtahType.Unknown,
+      ArrayMapExpression => new ArrayType(UtahType.Any),
       ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
-      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? "unknown",
-      ArrayReduceExpression => "unknown",
-      ArraySomeExpression => "boolean",
-      ArrayEveryExpression => "boolean",
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? UtahType.Unknown,
+      ArrayReduceExpression => UtahType.Unknown,
+      ArraySomeExpression => UtahType.Boolean,
+      ArrayEveryExpression => UtahType.Boolean,
       FunctionCall functionCall => InferFunctionCallType(functionCall),
       ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
-      _ => "unknown"
+      _ => UtahType.Unknown
     };
   }
 
-  private string InferFunctionCallType(FunctionCall functionCall)
+  private UtahType InferFunctionCallType(FunctionCall functionCall)
   {
     return functionCall.Name switch
     {
-      "schema.validate" => functionCall.Arguments.Count >= 2 ? ResolveSchemaName(functionCall.Arguments[1]) ?? "object" : "object",
-      "schema.isValid" => "boolean",
+      "schema.validate" => functionCall.Arguments.Count >= 2
+        ? UtahType.Parse(ResolveSchemaName(functionCall.Arguments[1])) ?? UtahType.Object
+        : UtahType.Object,
+      "schema.isValid" => UtahType.Boolean,
       "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
-        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? "unknown"
-        : "unknown",
-      "map.has" or "dictionary.has" => "boolean",
-      "set.has" => "boolean",
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? UtahType.Unknown
+        : UtahType.Unknown,
+      "map.has" or "dictionary.has" => UtahType.Boolean,
+      "set.has" => UtahType.Boolean,
       "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
         ? InferExpressionType(functionCall.Arguments[0])
-        : "unknown",
-      _ => "unknown"
+        : UtahType.Unknown,
+      _ => UtahType.Unknown
     };
   }
 
-  private string InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  private UtahType InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
   {
     if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
     {
-      return "unknown";
+      return UtahType.Unknown;
     }
 
-    var currentType = LookupVariableType(rootName) ?? "unknown";
+    var currentType = LookupVariableType(rootName) ?? UtahType.Unknown;
     foreach (var segment in path)
     {
       var fieldType = GetStructuredFieldType(currentType, segment);
       if (fieldType == null)
       {
-        return "unknown";
+        return UtahType.Unknown;
       }
 
       currentType = fieldType;
@@ -1453,15 +1445,14 @@ public partial class Parser
     return false;
   }
 
-  private string? GetStructuredFieldType(string typeName, string fieldName)
+  private UtahType? GetStructuredFieldType(UtahType typeName, string fieldName)
   {
-    typeName = NormalizeTypeAnnotation(typeName);
-    if (_structuredTypes.TryGetValue(typeName, out var declaration))
+    if (typeName is StructuredType st && _structuredTypes.TryGetValue(st.Name, out var declaration))
     {
       return declaration.Fields.FirstOrDefault(field => field.Name == fieldName)?.Type;
     }
 
-    if (IsMapType(typeName) || IsDictionaryType(typeName))
+    if (typeName is MapType or DictionaryType)
     {
       return GetMapValueType(typeName);
     }
@@ -1469,28 +1460,26 @@ public partial class Parser
     return null;
   }
 
-  private bool IsTypeCompatible(Expression value, string expectedType)
+  private bool IsTypeCompatible(Expression value, UtahType expectedType)
   {
-    expectedType = NormalizeTypeAnnotation(expectedType);
-
-    if (string.IsNullOrEmpty(expectedType) || expectedType == "any")
+    if (expectedType is AnyType)
     {
       return true;
     }
 
     if (value is ArrayLiteral arrayLiteral)
     {
-      if (IsArrayType(expectedType))
+      if (expectedType is ArrayType arrayExpected)
       {
-        ValidateArrayElementTypes(arrayLiteral, GetCollectionElementType(expectedType)!, "array literal");
+        ValidateArrayElementTypes(arrayLiteral, arrayExpected.ElementType, "array literal");
         return true;
       }
 
-      if (IsSetType(expectedType))
+      if (expectedType is SetType setExpected)
       {
         foreach (var element in arrayLiteral.Elements)
         {
-          if (!IsTypeCompatible(element, GetCollectionElementType(expectedType)!))
+          if (!IsTypeCompatible(element, setExpected.ElementType))
           {
             return false;
           }
@@ -1504,19 +1493,19 @@ public partial class Parser
 
     if (value is ObjectLiteralExpression objectLiteral)
     {
-      if (expectedType == "object")
+      if (expectedType is ObjectType)
       {
         return true;
       }
 
-      if (_structuredTypes.ContainsKey(expectedType))
+      if (expectedType is StructuredType st && _structuredTypes.ContainsKey(st.Name))
       {
-        return ValidateStructuredObjectLiteral(objectLiteral, expectedType);
+        return ValidateStructuredObjectLiteral(objectLiteral, st.Name);
       }
 
-      if (IsMapType(expectedType) || IsDictionaryType(expectedType))
+      if (expectedType is MapType or DictionaryType)
       {
-        var valueType = GetMapValueType(expectedType) ?? "any";
+        var valueType = GetMapValueType(expectedType) ?? UtahType.Any;
         return objectLiteral.Properties.All(property => IsTypeCompatible(property.Value, valueType));
       }
 
@@ -1525,14 +1514,14 @@ public partial class Parser
 
     if (value is JsonParseExpression or YamlParseExpression)
     {
-      return expectedType == "object" ||
-             _structuredTypes.ContainsKey(expectedType) ||
-             IsMapType(expectedType) ||
-             IsDictionaryType(expectedType);
+      return expectedType is ObjectType ||
+             (expectedType is StructuredType st2 && _structuredTypes.ContainsKey(st2.Name)) ||
+             expectedType is MapType ||
+             expectedType is DictionaryType;
     }
 
-    var actualType = NormalizeTypeAnnotation(InferExpressionType(value));
-    if (string.IsNullOrEmpty(actualType) || actualType == "unknown" || actualType == "any")
+    var actualType = InferExpressionType(value);
+    if (actualType is UnknownType or AnyType)
     {
       return true;
     }
@@ -1542,38 +1531,34 @@ public partial class Parser
       return true;
     }
 
-    if (expectedType == "object" &&
-        (actualType == "object" || actualType == "sshConnection" || _structuredTypes.ContainsKey(actualType) || IsMapType(actualType) || IsDictionaryType(actualType)))
+    if (expectedType is ObjectType &&
+        (actualType is ObjectType or SshConnectionType or MapType or DictionaryType ||
+         (actualType is StructuredType stActual && _structuredTypes.ContainsKey(stActual.Name))))
     {
       return true;
     }
 
-    if (_structuredTypes.ContainsKey(expectedType) && actualType == "object")
+    if (expectedType is StructuredType stExpected && _structuredTypes.ContainsKey(stExpected.Name) && actualType is ObjectType)
     {
       return true;
     }
 
-    if ((IsMapType(expectedType) || IsDictionaryType(expectedType)) && actualType == "object")
+    if (expectedType is MapType or DictionaryType && actualType is ObjectType)
     {
       return true;
     }
 
-    if (IsArrayType(expectedType) && IsArrayType(actualType))
+    if (expectedType is ArrayType expectedArray && actualType is ArrayType actualArray)
     {
-      var expectedElementType = GetCollectionElementType(expectedType)!;
-      var actualElementType = GetCollectionElementType(actualType)!;
-      return expectedElementType == "any" || actualElementType == "unknown" || actualElementType == "any" || expectedElementType == actualElementType;
+      return expectedArray.ElementType is AnyType || actualArray.ElementType is UnknownType or AnyType || expectedArray.ElementType == actualArray.ElementType;
     }
 
-    if (IsSetType(expectedType) && IsSetType(actualType))
+    if (expectedType is SetType expectedSet && actualType is SetType actualSet)
     {
-      var expectedElementType = GetCollectionElementType(expectedType)!;
-      var actualElementType = GetCollectionElementType(actualType)!;
-      return expectedElementType == "any" || actualElementType == "unknown" || actualElementType == "any" || expectedElementType == actualElementType;
+      return expectedSet.ElementType is AnyType || actualSet.ElementType is UnknownType or AnyType || expectedSet.ElementType == actualSet.ElementType;
     }
 
-    if ((IsMapType(expectedType) || IsDictionaryType(expectedType)) &&
-        (IsMapType(actualType) || IsDictionaryType(actualType)))
+    if (expectedType is MapType or DictionaryType && actualType is MapType or DictionaryType)
     {
       return GetMapValueType(expectedType) == GetMapValueType(actualType);
     }
@@ -1611,53 +1596,24 @@ public partial class Parser
     return true;
   }
 
-  private bool IsArrayType(string type) => NormalizeTypeAnnotation(type).EndsWith("[]");
-
-  private bool IsSetType(string type)
+  private static UtahType? GetCollectionElementType(UtahType type)
   {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("set<") && type.EndsWith(">");
-  }
-
-  private bool IsMapType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("map<") && type.EndsWith(">");
-  }
-
-  private bool IsDictionaryType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    return type.StartsWith("dictionary<") && type.EndsWith(">");
-  }
-
-  private string? GetCollectionElementType(string type)
-  {
-    type = NormalizeTypeAnnotation(type);
-    if (IsArrayType(type))
+    return type switch
     {
-      return type[..^2];
-    }
-
-    if (IsSetType(type))
-    {
-      return type[4..^1];
-    }
-
-    return null;
+      ArrayType at => at.ElementType,
+      SetType st => st.ElementType,
+      _ => null
+    };
   }
 
-  private string? GetMapValueType(string type)
+  private static UtahType? GetMapValueType(UtahType type)
   {
-    type = NormalizeTypeAnnotation(type);
-    if (!IsMapType(type) && !IsDictionaryType(type))
+    return type switch
     {
-      return null;
-    }
-
-    var genericContent = type[(type.IndexOf('<') + 1)..^1];
-    var genericParts = SplitByComma(genericContent);
-    return genericParts.Count == 2 ? NormalizeTypeAnnotation(genericParts[1]) : null;
+      MapType mt => mt.ValueType,
+      DictionaryType dt => dt.ValueType,
+      _ => null
+    };
   }
 
   private string? ResolveSchemaName(Expression expression)
@@ -1665,7 +1621,7 @@ public partial class Parser
     return expression switch
     {
       VariableExpression variable => variable.Name,
-      LiteralExpression literal when literal.Type == "string" => literal.Value,
+      LiteralExpression literal when literal.Type == UtahType.String => literal.Value,
       _ => null
     };
   }
