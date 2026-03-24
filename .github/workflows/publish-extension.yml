@@ -1,0 +1,100 @@
+name: Publish VS Code Extension
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+
+      - name: Get next extension version
+        id: version
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            let nextVersion;
+            const prefix = 'ext-v';
+            try {
+              const { data: tags } = await github.rest.repos.listTags({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              });
+              const extTags = tags
+                .filter(t => t.name.startsWith(prefix))
+                .map(t => t.name.replace(prefix, ''))
+                .sort((a, b) => {
+                  const [aMaj, aMin, aPat] = a.split('.').map(Number);
+                  const [bMaj, bMin, bPat] = b.split('.').map(Number);
+                  return bMaj - aMaj || bMin - aMin || bPat - aPat;
+                });
+              if (extTags.length > 0) {
+                let [major, minor, patch] = extTags[0].split('.').map(Number);
+                patch++;
+                nextVersion = `${major}.${minor}.${patch}`;
+              } else {
+                nextVersion = '0.1.0';
+              }
+            } catch (error) {
+              console.log(`Error fetching tags: ${error.message}, starting with 0.1.0`);
+              nextVersion = '0.1.0';
+            }
+            console.log(`Next extension version: ${nextVersion}`);
+            core.setOutput('version', nextVersion);
+            core.setOutput('tag', `${prefix}${nextVersion}`);
+
+      - name: Update extension version in package.json
+        working-directory: src/vscode-extension
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Install dependencies
+        working-directory: src/vscode-extension
+        run: npm ci
+
+      - name: Lint
+        working-directory: src/vscode-extension
+        run: npm run lint
+
+      - name: Check types
+        working-directory: src/vscode-extension
+        run: npm run check-types
+
+      - name: Package extension
+        working-directory: src/vscode-extension
+        run: npx @vscode/vsce package --no-git-tag-version
+
+      - name: Publish to VS Code Marketplace
+        working-directory: src/vscode-extension
+        env:
+          AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
+        run: npx @vscode/vsce publish --no-git-tag-version -p "$AZURE_DEVOPS_TOKEN"
+
+      - name: Tag release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${{ steps.version.outputs.tag }}
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Upload .vsix artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: utah-extension-${{ steps.version.outputs.version }}
+          path: src/vscode-extension/*.vsix
+          retention-days: 90
