@@ -742,7 +742,8 @@ class UtahApp
           .AddHandler<DefinitionHandler>()
           .AddHandler<DocumentSymbolHandler>()
           .AddHandler<FormattingHandler>()
-          .AddHandler<RenameHandler>());
+          .AddHandler<RenameHandler>()
+          .AddHandler<SignatureHelpHandler>());
     await server.WaitForExit;
   }
 
