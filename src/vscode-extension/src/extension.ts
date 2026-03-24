@@ -9,8 +9,22 @@ import {
 
 let client: LanguageClient;
 
-export async function activate() {
+export async function activate(context: vscode.ExtensionContext) {
   try {
+    context.subscriptions.push(
+      vscode.commands.registerCommand('utah.showReferences',
+        (uriStr: string, pos: { line: number; character: number }, locations: Array<{ uri: string; range: { start: { line: number; character: number }; end: { line: number; character: number } } }>) => {
+          const uri = vscode.Uri.parse(uriStr);
+          const position = new vscode.Position(pos.line, pos.character);
+          const locs = (locations ?? []).map(l => new vscode.Location(
+            vscode.Uri.parse(l.uri),
+            new vscode.Range(l.range.start.line, l.range.start.character, l.range.end.line, l.range.end.character)
+          ));
+          return vscode.commands.executeCommand('editor.action.showReferences', uri, position, locs);
+        }
+      )
+    );
+
     const config = vscode.workspace.getConfiguration('utah');
     const configuredPath = config.get<string>('server.path', 'utah');
     const configuredArgs = config.get<string[]>('server.args', ['lsp']);
