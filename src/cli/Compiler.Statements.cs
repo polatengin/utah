@@ -1109,7 +1109,7 @@ public partial class Compiler
 
     // Compile the callback body statements
     PushVariableTypeScope();
-    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? UtahType.Unknown);
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) );
     if (indexVar != null)
     {
       RegisterVariableType(indexVar, UtahType.Number);

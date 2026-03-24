@@ -1325,7 +1325,7 @@ public partial class Parser
       if (!IsTypeCompatible(arrayLiteral.Elements[i], expectedElementType))
       {
         var actualType = InferExpressionType(arrayLiteral.Elements[i]);
-        throw new InvalidOperationException($"Type mismatch in array '{arrayName}' at index {i}. Expected '{expectedElementType}' but found '{actualType}'.");
+        throw new InvalidOperationException($"Type mismatch in array '{arrayName}' at index {i}. Expected '{expectedElementType}' but found '{actualType?.ToString() ?? "unresolved"}'.");
       }
     }
   }
@@ -1335,7 +1335,7 @@ public partial class Parser
     if (!IsTypeCompatible(value, expectedType))
     {
       var actualType = InferExpressionType(value);
-      throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType}'.");
+      throw new InvalidOperationException($"Type mismatch in variable '{variableName}'. Expected '{expectedType}' but found '{actualType?.ToString() ?? "unresolved"}'.");
     }
   }
 
@@ -1352,11 +1352,11 @@ public partial class Parser
     if (!IsTypeCompatible(value, expectedReturnType))
     {
       var actualType = InferExpressionType(value);
-      throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType}'.");
+      throw new InvalidOperationException($"Function return type mismatch. Expected '{expectedReturnType}' but found '{actualType?.ToString() ?? "unresolved"}'.");
     }
   }
 
-  private UtahType InferExpressionType(Expression expression)
+  private UtahType? InferExpressionType(Expression expression)
   {
     return expression switch
     {
@@ -1364,25 +1364,25 @@ public partial class Parser
       MultilineStringExpression => UtahType.String,
       ArrayLiteral arrayLiteral => new ArrayType(arrayLiteral.ElementType),
       ObjectLiteralExpression => UtahType.Object,
-      VariableExpression variable => LookupVariableType(variable.Name) ?? UtahType.Unknown,
+      VariableExpression variable => LookupVariableType(variable.Name),
       SshConnectExpression => UtahType.SshConnection,
       JsonParseExpression => UtahType.Object,
       YamlParseExpression => UtahType.Object,
-      JsonGetExpression => UtahType.Unknown,
-      YamlGetExpression => UtahType.Unknown,
+      JsonGetExpression => null,
+      YamlGetExpression => null,
       ArrayMapExpression => new ArrayType(UtahType.Any),
       ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
-      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? UtahType.Unknown,
-      ArrayReduceExpression => UtahType.Unknown,
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)),
+      ArrayReduceExpression => null,
       ArraySomeExpression => UtahType.Boolean,
       ArrayEveryExpression => UtahType.Boolean,
       FunctionCall functionCall => InferFunctionCallType(functionCall),
       ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
-      _ => UtahType.Unknown
+      _ => null
     };
   }
 
-  private UtahType InferFunctionCallType(FunctionCall functionCall)
+  private UtahType? InferFunctionCallType(FunctionCall functionCall)
   {
     return functionCall.Name switch
     {
@@ -1391,34 +1391,31 @@ public partial class Parser
         : UtahType.Object,
       "schema.isValid" => UtahType.Boolean,
       "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
-        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? UtahType.Unknown
-        : UtahType.Unknown,
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0]))
+        : null,
       "map.has" or "dictionary.has" => UtahType.Boolean,
       "set.has" => UtahType.Boolean,
       "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
         ? InferExpressionType(functionCall.Arguments[0])
-        : UtahType.Unknown,
-      _ => UtahType.Unknown
+        : null,
+      _ => null
     };
   }
 
-  private UtahType InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  private UtahType? InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
   {
     if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
     {
-      return UtahType.Unknown;
+      return null;
     }
 
-    var currentType = LookupVariableType(rootName) ?? UtahType.Unknown;
+    UtahType? currentType = LookupVariableType(rootName);
+    if (currentType == null) return null;
+
     foreach (var segment in path)
     {
-      var fieldType = GetStructuredFieldType(currentType, segment);
-      if (fieldType == null)
-      {
-        return UtahType.Unknown;
-      }
-
-      currentType = fieldType;
+      currentType = GetStructuredFieldType(currentType, segment);
+      if (currentType == null) return null;
     }
 
     return currentType;
@@ -1445,7 +1442,7 @@ public partial class Parser
     return false;
   }
 
-  private UtahType? GetStructuredFieldType(UtahType typeName, string fieldName)
+  private UtahType? GetStructuredFieldType(UtahType? typeName, string fieldName)
   {
     if (typeName is StructuredType st && _structuredTypes.TryGetValue(st.Name, out var declaration))
     {
@@ -1521,7 +1518,7 @@ public partial class Parser
     }
 
     var actualType = InferExpressionType(value);
-    if (actualType is UnknownType or AnyType)
+    if (actualType == null || actualType is UnknownType or AnyType)
     {
       return true;
     }
@@ -1581,7 +1578,7 @@ public partial class Parser
       if (!IsTypeCompatible(property.Value, field.Type))
       {
         var actualType = InferExpressionType(property.Value);
-        throw new InvalidOperationException($"Field '{field.Name}' in type '{structuredTypeName}' expects '{field.Type}' but found '{actualType}'.");
+        throw new InvalidOperationException($"Field '{field.Name}' in type '{structuredTypeName}' expects '{field.Type}' but found '{actualType?.ToString() ?? "unresolved"}'.");
       }
     }
 
@@ -1596,7 +1593,7 @@ public partial class Parser
     return true;
   }
 
-  private static UtahType? GetCollectionElementType(UtahType type)
+  private static UtahType? GetCollectionElementType(UtahType? type)
   {
     return type switch
     {
@@ -1606,7 +1603,7 @@ public partial class Parser
     };
   }
 
-  private static UtahType? GetMapValueType(UtahType type)
+  private static UtahType? GetMapValueType(UtahType? type)
   {
     return type switch
     {

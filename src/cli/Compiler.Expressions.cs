@@ -3169,7 +3169,7 @@ _utah_wait_for_exit {pidReference} {timeout}
 
     // Compile the callback body statements
     PushVariableTypeScope();
-    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) ?? UtahType.Unknown);
+    RegisterVariableType(itemVar, GetCollectionElementType(InferExpressionType(arrayForEach.Array)) );
     if (indexVar != null)
     {
       RegisterVariableType(indexVar, UtahType.Number);
@@ -4498,7 +4498,7 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_map_index_{uniqueId}";
     var itemVar = arrayMap.Callback.Parameters.Count > 0 ? arrayMap.Callback.Parameters[0] : "item";
     var indexVar = arrayMap.Callback.Parameters.Count > 1 ? arrayMap.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayMap.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayMap.Array)) ;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
@@ -4520,7 +4520,7 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_filter_index_{uniqueId}";
     var itemVar = arrayFilter.Callback.Parameters.Count > 0 ? arrayFilter.Callback.Parameters[0] : "item";
     var indexVar = arrayFilter.Callback.Parameters.Count > 1 ? arrayFilter.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayFilter.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFilter.Array)) ;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
@@ -4542,7 +4542,7 @@ _utah_validate_in_range {value} {min} {max}
     var accParam = arrayReduce.Callback.Parameters.Count > 0 ? arrayReduce.Callback.Parameters[0] : "acc";
     var itemParam = arrayReduce.Callback.Parameters.Count > 1 ? arrayReduce.Callback.Parameters[1] : "item";
     var indexParam = arrayReduce.Callback.Parameters.Count > 2 ? arrayReduce.Callback.Parameters[2] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayReduce.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayReduce.Array)) ;
     var accumulatorType = arrayReduce.InitialValue != null ? InferExpressionType(arrayReduce.InitialValue) : elementType;
     var lambdaParameters = new List<LambdaParameterBinding>
     {
@@ -4576,7 +4576,7 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_find_index_{uniqueId}";
     var itemVar = arrayFind.Callback.Parameters.Count > 0 ? arrayFind.Callback.Parameters[0] : "item";
     var indexVar = arrayFind.Callback.Parameters.Count > 1 ? arrayFind.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayFind.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayFind.Array)) ;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
@@ -4597,7 +4597,7 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_some_index_{uniqueId}";
     var itemVar = arraySome.Callback.Parameters.Count > 0 ? arraySome.Callback.Parameters[0] : "item";
     var indexVar = arraySome.Callback.Parameters.Count > 1 ? arraySome.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arraySome.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arraySome.Array)) ;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
@@ -4618,7 +4618,7 @@ _utah_validate_in_range {value} {min} {max}
     var loopIndexVar = $"_utah_every_index_{uniqueId}";
     var itemVar = arrayEvery.Callback.Parameters.Count > 0 ? arrayEvery.Callback.Parameters[0] : "item";
     var indexVar = arrayEvery.Callback.Parameters.Count > 1 ? arrayEvery.Callback.Parameters[1] : null;
-    var elementType = GetCollectionElementType(InferExpressionType(arrayEvery.Array)) ?? UtahType.Unknown;
+    var elementType = GetCollectionElementType(InferExpressionType(arrayEvery.Array)) ;
     var lambdaParameters = new List<LambdaParameterBinding> { new(itemVar, elementType) };
     if (indexVar != null)
     {
@@ -4707,7 +4707,7 @@ _utah_validate_in_range {value} {min} {max}
     return null;
   }
 
-  private UtahType InferExpressionType(Expression expression)
+  private UtahType? InferExpressionType(Expression expression)
   {
     return expression switch
     {
@@ -4715,23 +4715,23 @@ _utah_validate_in_range {value} {min} {max}
       MultilineStringExpression => UtahType.String,
       ArrayLiteral arrayLiteral => new ArrayType(arrayLiteral.ElementType),
       ObjectLiteralExpression => UtahType.Object,
-      VariableExpression variable => _sshConnectionVariables.Contains(variable.Name) ? UtahType.SshConnection : GetVariableType(variable.Name) ?? UtahType.Unknown,
+      VariableExpression variable => _sshConnectionVariables.Contains(variable.Name) ? UtahType.SshConnection : GetVariableType(variable.Name),
       SshConnectExpression => UtahType.SshConnection,
       JsonParseExpression => UtahType.Object,
       YamlParseExpression => UtahType.Object,
       ArrayMapExpression => new ArrayType(UtahType.Any),
       ArrayFilterExpression filterExpression => InferExpressionType(filterExpression.Array),
-      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)) ?? UtahType.Unknown,
-      ArrayReduceExpression => UtahType.Unknown,
+      ArrayFindExpression findExpression => GetCollectionElementType(InferExpressionType(findExpression.Array)),
+      ArrayReduceExpression => null,
       ArraySomeExpression => UtahType.Boolean,
       ArrayEveryExpression => UtahType.Boolean,
       FunctionCall functionCall => InferFunctionCallType(functionCall),
       ObjectPropertyAccessExpression propertyAccess => InferObjectPropertyType(propertyAccess),
-      _ => UtahType.Unknown
+      _ => null
     };
   }
 
-  private UtahType InferFunctionCallType(FunctionCall functionCall)
+  private UtahType? InferFunctionCallType(FunctionCall functionCall)
   {
     return functionCall.Name switch
     {
@@ -4740,33 +4740,30 @@ _utah_validate_in_range {value} {min} {max}
         : UtahType.Object,
       "schema.isValid" => UtahType.Boolean,
       "map.get" or "dictionary.get" => functionCall.Arguments.Count > 0
-        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0])) ?? UtahType.Unknown
-        : UtahType.Unknown,
+        ? GetMapValueType(InferExpressionType(functionCall.Arguments[0]))
+        : null,
       "map.has" or "dictionary.has" or "set.has" => UtahType.Boolean,
       "set.add" or "set.remove" or "set.union" or "set.intersection" or "set.difference" => functionCall.Arguments.Count > 0
         ? InferExpressionType(functionCall.Arguments[0])
-        : UtahType.Unknown,
-      _ => UtahType.Unknown
+        : null,
+      _ => null
     };
   }
 
-  private UtahType InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
+  private UtahType? InferObjectPropertyType(ObjectPropertyAccessExpression propertyAccess)
   {
     if (!TryGetPropertyPath(propertyAccess, out var rootName, out var path))
     {
-      return UtahType.Unknown;
+      return null;
     }
 
-    var currentType = GetVariableType(rootName) ?? UtahType.Unknown;
+    UtahType? currentType = GetVariableType(rootName);
+    if (currentType == null) return null;
+
     foreach (var segment in path)
     {
-      var fieldType = GetStructuredFieldType(currentType, segment);
-      if (fieldType == null)
-      {
-        return UtahType.Unknown;
-      }
-
-      currentType = fieldType;
+      currentType = GetStructuredFieldType(currentType, segment);
+      if (currentType == null) return null;
     }
 
     return currentType;
@@ -4793,7 +4790,7 @@ _utah_validate_in_range {value} {min} {max}
     return false;
   }
 
-  private UtahType? GetStructuredFieldType(UtahType typeName, string fieldName)
+  private UtahType? GetStructuredFieldType(UtahType? typeName, string fieldName)
   {
     if (typeName is StructuredType st && _structuredTypes.TryGetValue(st.Name, out var declaration))
     {
@@ -4808,7 +4805,7 @@ _utah_validate_in_range {value} {min} {max}
     return null;
   }
 
-  private static UtahType? GetCollectionElementType(UtahType type)
+  private static UtahType? GetCollectionElementType(UtahType? type)
   {
     return type switch
     {
@@ -4818,7 +4815,7 @@ _utah_validate_in_range {value} {min} {max}
     };
   }
 
-  private static UtahType? GetMapValueType(UtahType type)
+  private static UtahType? GetMapValueType(UtahType? type)
   {
     return type switch
     {
@@ -4910,7 +4907,7 @@ _utah_validate_in_range {value} {min} {max}
 
   private string BuildArrayVariableJsonExpression(string variableName)
   {
-    var elementType = GetCollectionElementType(GetVariableType(variableName) ?? UtahType.String) ?? UtahType.String;
+    var elementType = GetCollectionElementType(GetVariableType(variableName)) ?? UtahType.String;
     var jqConverter = elementType switch
     {
       NumberType => "tonumber",
