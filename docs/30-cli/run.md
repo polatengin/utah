@@ -589,9 +589,6 @@ time utah run script.shx     # Total time
 # Good: Quick testing during development
 utah run dev-test.shx
 
-# Good: Interactive debugging
-utah run debug-helper.shx --verbose
-
 # Avoid: Production deployment
 # utah run production-script.shx  # Use compile instead
 ```
