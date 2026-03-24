@@ -1,0 +1,33 @@
+# Test for k8s.get(), k8s.describe(), k8s.exists()
+
+# Get all pods
+let allPods: string = k8s.get("pods");
+
+# Get a specific pod
+let pod: string = k8s.get("pods", "my-pod");
+
+# Get a pod in a specific namespace
+let podInNs: string = k8s.get("deployments", "web-app", "production");
+
+# Get using variables
+let resourceType: string = "services";
+let resourceName: string = "api-gateway";
+let result: string = k8s.get(resourceType, resourceName);
+
+# Describe a pod
+let desc: string = k8s.describe("pod", "my-pod");
+
+# Describe with namespace
+let descNs: string = k8s.describe("deployment", "web-app", "staging");
+
+# Check if a resource exists
+let exists: boolean = k8s.exists("pod", "my-pod");
+if (exists) {
+  console.log("Pod exists");
+}
+
+# Check existence with namespace
+let svcExists: boolean = k8s.exists("service", "api-svc", "default");
+if (!svcExists) {
+  console.log("Service not found");
+}

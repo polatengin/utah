@@ -1,0 +1,7 @@
+# Test for k8s.clientVersion() and k8s.serverVersion()
+
+let clientVer: string = k8s.clientVersion();
+console.log("Client version: ${clientVer}");
+
+let serverVer: string = k8s.serverVersion();
+console.log("Server version: ${serverVer}");

@@ -1,0 +1,13 @@
+# Test for k8s.scale()
+
+# Scale a deployment
+k8s.scale("deployment", "web-app", 3);
+
+# Scale using variables
+let resource: string = "statefulset";
+let name: string = "database";
+let replicas: number = 5;
+k8s.scale(resource, name, replicas);
+
+# Store result
+let result: string = k8s.scale("deployment", "api-server", 2);

@@ -251,6 +251,42 @@ public partial class Compiler
         return CompileDockerRemoveImageExpression(dockerRemoveImage);
       case DockerImageExistsExpression dockerImageExists:
         return CompileDockerImageExistsExpression(dockerImageExists);
+      case K8sGetContextExpression:
+        return CompileK8sGetContextExpression();
+      case K8sSetContextExpression k8sSetContext:
+        return CompileK8sSetContextExpression(k8sSetContext);
+      case K8sGetNamespaceExpression:
+        return CompileK8sGetNamespaceExpression();
+      case K8sSetNamespaceExpression k8sSetNamespace:
+        return CompileK8sSetNamespaceExpression(k8sSetNamespace);
+      case K8sClientVersionExpression:
+        return CompileK8sClientVersionExpression();
+      case K8sServerVersionExpression:
+        return CompileK8sServerVersionExpression();
+      case K8sGetExpression k8sGet:
+        return CompileK8sGetExpression(k8sGet);
+      case K8sDescribeExpression k8sDescribe:
+        return CompileK8sDescribeExpression(k8sDescribe);
+      case K8sExistsExpression k8sExists:
+        return CompileK8sExistsExpression(k8sExists);
+      case K8sLogsExpression k8sLogs:
+        return CompileK8sLogsExpression(k8sLogs);
+      case K8sExecExpression k8sExec:
+        return CompileK8sExecExpression(k8sExec);
+      case K8sPortForwardExpression k8sPortForward:
+        return CompileK8sPortForwardExpression(k8sPortForward);
+      case K8sIsReadyExpression k8sIsReady:
+        return CompileK8sIsReadyExpression(k8sIsReady);
+      case K8sScaleExpression k8sScale:
+        return CompileK8sScaleExpression(k8sScale);
+      case K8sGetSecretExpression k8sGetSecret:
+        return CompileK8sGetSecretExpression(k8sGetSecret);
+      case K8sSetSecretExpression k8sSetSecret:
+        return CompileK8sSetSecretExpression(k8sSetSecret);
+      case K8sTopPodsExpression k8sTopPods:
+        return CompileK8sTopPodsExpression(k8sTopPods);
+      case K8sTopNodesExpression:
+        return CompileK8sTopNodesExpression();
       case SshConnectExpression sshConnect:
         return CompileSshConnectExpression(sshConnect);
       case ObjectPropertyAccessExpression objectProperty:
@@ -694,6 +730,305 @@ public partial class Compiler
     if (expr.Image is VariableExpression varExpr)
       return $"$(docker image inspect ${{{varExpr.Name}}} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
     return $"$(docker image inspect {CompileExpression(expr.Image)} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileK8sGetContextExpression()
+  {
+    return "$(kubectl config current-context)";
+  }
+
+  private string CompileK8sSetContextExpression(K8sSetContextExpression expr)
+  {
+    if (expr.Name is LiteralExpression lit && lit.Type == "string")
+      return $"$(kubectl config use-context \"{lit.Value}\")";
+    if (expr.Name is VariableExpression varExpr)
+      return $"$(kubectl config use-context ${{{varExpr.Name}}})";
+    return $"$(kubectl config use-context {CompileExpression(expr.Name)})";
+  }
+
+  private string CompileK8sGetNamespaceExpression()
+  {
+    return "$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null || echo \"default\")";
+  }
+
+  private string CompileK8sSetNamespaceExpression(K8sSetNamespaceExpression expr)
+  {
+    if (expr.Name is LiteralExpression lit && lit.Type == "string")
+      return $"$(kubectl config set-context --current --namespace=\"{lit.Value}\")";
+    if (expr.Name is VariableExpression varExpr)
+      return $"$(kubectl config set-context --current --namespace=${{{varExpr.Name}}})";
+    return $"$(kubectl config set-context --current --namespace={CompileExpression(expr.Name)})";
+  }
+
+  private string CompileK8sClientVersionExpression()
+  {
+    return "$(kubectl version --client -o json 2>/dev/null | jq -r '.clientVersion.gitVersion')";
+  }
+
+  private string CompileK8sServerVersionExpression()
+  {
+    return "$(kubectl version -o json 2>/dev/null | jq -r '.serverVersion.gitVersion')";
+  }
+
+  private string CompileK8sGetExpression(K8sGetExpression expr)
+  {
+    var parts = new List<string> { "kubectl get" };
+
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Resource));
+
+    if (expr.Name != null)
+    {
+      if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+      else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
+      else parts.Add(CompileExpression(expr.Name));
+    }
+
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
+      else parts.Add($"-n {CompileExpression(expr.Namespace)}");
+    }
+
+    parts.Add("-o json");
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sDescribeExpression(K8sDescribeExpression expr)
+  {
+    var parts = new List<string> { "kubectl describe" };
+
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Resource));
+
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Name));
+
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
+      else parts.Add($"-n {CompileExpression(expr.Namespace)}");
+    }
+
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sExistsExpression(K8sExistsExpression expr)
+  {
+    var parts = new List<string> { "kubectl get" };
+
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") parts.Add($"\"{resLit.Value}\"");
+    else if (expr.Resource is VariableExpression resVar) parts.Add($"${{{resVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Resource));
+
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Name));
+
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
+      else parts.Add($"-n {CompileExpression(expr.Namespace)}");
+    }
+
+    return $"$({string.Join(" ", parts)} > /dev/null 2>&1 && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileK8sLogsExpression(K8sLogsExpression expr)
+  {
+    var parts = new List<string> { "kubectl logs" };
+
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Pod));
+
+    if (expr.Container != null)
+    {
+      if (expr.Container is LiteralExpression cLit && cLit.Type == "string") parts.Add($"--container=\"{cLit.Value}\"");
+      else if (expr.Container is VariableExpression cVar) parts.Add($"--container=${{{cVar.Name}}}");
+      else parts.Add($"--container={CompileExpression(expr.Container)}");
+    }
+
+    if (expr.Tail != null)
+    {
+      if (expr.Tail is LiteralExpression tLit && tLit.Type == "number") parts.Add($"--tail={tLit.Value}");
+      else if (expr.Tail is VariableExpression tVar) parts.Add($"--tail=${{{tVar.Name}}}");
+      else parts.Add($"--tail={CompileExpression(expr.Tail)}");
+    }
+
+    if (expr.Previous != null)
+    {
+      if (expr.Previous is LiteralExpression pLit && pLit.Type == "boolean" && pLit.Value == "true")
+        parts.Add("--previous");
+      else if (expr.Previous is VariableExpression pVar)
+        parts.Add($"$([ \"${{{pVar.Name}}}\" = \"true\" ] && echo \"--previous\")");
+    }
+
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sExecExpression(K8sExecExpression expr)
+  {
+    var parts = new List<string> { "kubectl exec" };
+
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Pod));
+
+    if (expr.Container != null)
+    {
+      if (expr.Container is LiteralExpression cLit && cLit.Type == "string") parts.Add($"--container=\"{cLit.Value}\"");
+      else if (expr.Container is VariableExpression cVar) parts.Add($"--container=${{{cVar.Name}}}");
+      else parts.Add($"--container={CompileExpression(expr.Container)}");
+    }
+
+    parts.Add("--");
+
+    if (expr.Command is LiteralExpression cmdLit && cmdLit.Type == "string") parts.Add(cmdLit.Value);
+    else if (expr.Command is VariableExpression cmdVar) parts.Add($"${{{cmdVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Command));
+
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sPortForwardExpression(K8sPortForwardExpression expr)
+  {
+    var parts = new List<string> { "kubectl port-forward" };
+
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Pod));
+
+    string localPort, remotePort;
+    if (expr.LocalPort is LiteralExpression lpLit) localPort = lpLit.Value;
+    else if (expr.LocalPort is VariableExpression lpVar) localPort = $"${{{lpVar.Name}}}";
+    else localPort = CompileExpression(expr.LocalPort);
+
+    if (expr.RemotePort is LiteralExpression rpLit) remotePort = rpLit.Value;
+    else if (expr.RemotePort is VariableExpression rpVar) remotePort = $"${{{rpVar.Name}}}";
+    else remotePort = CompileExpression(expr.RemotePort);
+
+    parts.Add($"{localPort}:{remotePort}");
+    parts.Add("> /dev/null 2>&1 &");
+
+    return $"$({string.Join(" ", parts)} echo $!)";
+  }
+
+  private string CompileK8sIsReadyExpression(K8sIsReadyExpression expr)
+  {
+    var parts = new List<string> { "kubectl get pod" };
+
+    if (expr.Pod is LiteralExpression podLit && podLit.Type == "string") parts.Add($"\"{podLit.Value}\"");
+    else if (expr.Pod is VariableExpression podVar) parts.Add($"${{{podVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Pod));
+
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
+      else parts.Add($"-n {CompileExpression(expr.Namespace)}");
+    }
+
+    parts.Add("-o jsonpath='{.status.conditions[?(@.type==\"Ready\")].status}'");
+
+    return $"$({string.Join(" ", parts)} 2>/dev/null | grep -qi \"true\" && echo \"true\" || echo \"false\")";
+  }
+
+  private string CompileK8sScaleExpression(K8sScaleExpression expr)
+  {
+    var parts = new List<string> { "kubectl scale" };
+
+    string resource, name;
+    if (expr.Resource is LiteralExpression resLit && resLit.Type == "string") resource = resLit.Value;
+    else if (expr.Resource is VariableExpression resVar) resource = $"${{{resVar.Name}}}";
+    else resource = CompileExpression(expr.Resource);
+
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") name = nameLit.Value;
+    else if (expr.Name is VariableExpression nameVar) name = $"${{{nameVar.Name}}}";
+    else name = CompileExpression(expr.Name);
+
+    parts.Add($"{resource}/{name}");
+
+    if (expr.Replicas is LiteralExpression repLit) parts.Add($"--replicas={repLit.Value}");
+    else if (expr.Replicas is VariableExpression repVar) parts.Add($"--replicas=${{{repVar.Name}}}");
+    else parts.Add($"--replicas={CompileExpression(expr.Replicas)}");
+
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sGetSecretExpression(K8sGetSecretExpression expr)
+  {
+    var parts = new List<string> { "kubectl get secret" };
+
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Name));
+
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string") parts.Add($"-n \"{nsLit.Value}\"");
+      else if (expr.Namespace is VariableExpression nsVar) parts.Add($"-n ${{{nsVar.Name}}}");
+      else parts.Add($"-n {CompileExpression(expr.Namespace)}");
+    }
+
+    if (expr.Key != null)
+    {
+      string key;
+      if (expr.Key is LiteralExpression keyLit && keyLit.Type == "string") key = keyLit.Value;
+      else if (expr.Key is VariableExpression keyVar) key = $"${{{keyVar.Name}}}";
+      else key = CompileExpression(expr.Key);
+
+      parts.Add($"-o jsonpath='{{.data.{key}}}'");
+      return $"$({string.Join(" ", parts)} | base64 -d)";
+    }
+
+    parts.Add("-o json");
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sSetSecretExpression(K8sSetSecretExpression expr)
+  {
+    var parts = new List<string> { "kubectl create secret generic" };
+
+    if (expr.Name is LiteralExpression nameLit && nameLit.Type == "string") parts.Add($"\"{nameLit.Value}\"");
+    else if (expr.Name is VariableExpression nameVar) parts.Add($"${{{nameVar.Name}}}");
+    else parts.Add(CompileExpression(expr.Name));
+
+    string key, value;
+    if (expr.Key is LiteralExpression keyLit && keyLit.Type == "string") key = keyLit.Value;
+    else if (expr.Key is VariableExpression keyVar) key = $"${{{keyVar.Name}}}";
+    else key = CompileExpression(expr.Key);
+
+    if (expr.Value is LiteralExpression valLit && valLit.Type == "string") value = valLit.Value;
+    else if (expr.Value is VariableExpression valVar) value = $"${{{valVar.Name}}}";
+    else value = CompileExpression(expr.Value);
+
+    parts.Add($"--from-literal={key}={value}");
+    return $"$({string.Join(" ", parts)})";
+  }
+
+  private string CompileK8sTopPodsExpression(K8sTopPodsExpression expr)
+  {
+    if (expr.Namespace != null)
+    {
+      if (expr.Namespace is LiteralExpression nsLit && nsLit.Type == "string")
+        return $"$(kubectl top pods -n \"{nsLit.Value}\")";
+      if (expr.Namespace is VariableExpression nsVar)
+        return $"$(kubectl top pods -n ${{{nsVar.Name}}})";
+      return $"$(kubectl top pods -n {CompileExpression(expr.Namespace)})";
+    }
+    return "$(kubectl top pods)";
+  }
+
+  private string CompileK8sTopNodesExpression()
+  {
+    return "$(kubectl top nodes)";
   }
 
   private string CompileSshConnectExpression(SshConnectExpression sshConnect)

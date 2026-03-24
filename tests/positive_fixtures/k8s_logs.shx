@@ -1,0 +1,18 @@
+# Test for k8s.logs()
+
+# Basic pod logs
+let output: string = k8s.logs("my-pod");
+
+# Logs with container
+let containerLogs: string = k8s.logs("my-pod", "nginx");
+
+# Logs with container and tail
+let tailedLogs: string = k8s.logs("my-pod", "nginx", 100);
+
+# Logs with all options
+let prevLogs: string = k8s.logs("my-pod", "sidecar", 50, true);
+
+# Using variables
+let podName: string = "api-server";
+let containerName: string = "app";
+let logs: string = k8s.logs(podName, containerName);

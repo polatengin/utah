@@ -1581,6 +1581,209 @@ public partial class Parser
         return new DockerImageExistsExpression(imageExpr);
       }
 
+      // Special handling for k8s.getContext()
+      if (functionName == "k8s.getContext" && string.IsNullOrEmpty(argsContent))
+      {
+        return new K8sGetContextExpression();
+      }
+
+      // Special handling for k8s.setContext()
+      if (functionName == "k8s.setContext")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.setContext() requires one argument (name)");
+        }
+        var nameExpr = ParseExpression(argsContent.Trim());
+        return new K8sSetContextExpression(nameExpr);
+      }
+
+      // Special handling for k8s.getNamespace()
+      if (functionName == "k8s.getNamespace" && string.IsNullOrEmpty(argsContent))
+      {
+        return new K8sGetNamespaceExpression();
+      }
+
+      // Special handling for k8s.setNamespace()
+      if (functionName == "k8s.setNamespace")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.setNamespace() requires one argument (name)");
+        }
+        var nameExpr = ParseExpression(argsContent.Trim());
+        return new K8sSetNamespaceExpression(nameExpr);
+      }
+
+      // Special handling for k8s.clientVersion()
+      if (functionName == "k8s.clientVersion" && string.IsNullOrEmpty(argsContent))
+      {
+        return new K8sClientVersionExpression();
+      }
+
+      // Special handling for k8s.serverVersion()
+      if (functionName == "k8s.serverVersion" && string.IsNullOrEmpty(argsContent))
+      {
+        return new K8sServerVersionExpression();
+      }
+
+      // Special handling for k8s.get()
+      if (functionName == "k8s.get")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.get() requires at least 1 argument (resource)");
+        }
+        var args = SplitByComma(argsContent);
+        var resourceExpr = ParseExpression(args[0]);
+        Expression? nameExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        Expression? nsExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        return new K8sGetExpression(resourceExpr, nameExpr, nsExpr);
+      }
+
+      // Special handling for k8s.describe()
+      if (functionName == "k8s.describe")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 2)
+        {
+          throw new InvalidOperationException("k8s.describe() requires at least 2 arguments (resource, name)");
+        }
+        var resourceExpr = ParseExpression(args[0]);
+        var nameExpr = ParseExpression(args[1]);
+        Expression? nsExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        return new K8sDescribeExpression(resourceExpr, nameExpr, nsExpr);
+      }
+
+      // Special handling for k8s.exists()
+      if (functionName == "k8s.exists")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 2)
+        {
+          throw new InvalidOperationException("k8s.exists() requires at least 2 arguments (resource, name)");
+        }
+        var resourceExpr = ParseExpression(args[0]);
+        var nameExpr = ParseExpression(args[1]);
+        Expression? nsExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        return new K8sExistsExpression(resourceExpr, nameExpr, nsExpr);
+      }
+
+      // Special handling for k8s.logs()
+      if (functionName == "k8s.logs")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.logs() requires at least 1 argument (pod)");
+        }
+        var args = SplitByComma(argsContent);
+        var podExpr = ParseExpression(args[0]);
+        Expression? containerExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        Expression? tailExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        Expression? previousExpr = args.Count >= 4 ? ParseExpression(args[3]) : null;
+        return new K8sLogsExpression(podExpr, containerExpr, tailExpr, previousExpr);
+      }
+
+      // Special handling for k8s.exec()
+      if (functionName == "k8s.exec")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count < 2)
+        {
+          throw new InvalidOperationException("k8s.exec() requires at least 2 arguments (pod, command)");
+        }
+        var podExpr = ParseExpression(args[0]);
+        var commandExpr = ParseExpression(args[1]);
+        Expression? containerExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        return new K8sExecExpression(podExpr, commandExpr, containerExpr);
+      }
+
+      // Special handling for k8s.portForward()
+      if (functionName == "k8s.portForward")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 3)
+        {
+          throw new InvalidOperationException("k8s.portForward() requires exactly 3 arguments (pod, localPort, remotePort)");
+        }
+        var podExpr = ParseExpression(args[0]);
+        var localPortExpr = ParseExpression(args[1]);
+        var remotePortExpr = ParseExpression(args[2]);
+        return new K8sPortForwardExpression(podExpr, localPortExpr, remotePortExpr);
+      }
+
+      // Special handling for k8s.isReady()
+      if (functionName == "k8s.isReady")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.isReady() requires at least 1 argument (pod)");
+        }
+        var args = SplitByComma(argsContent);
+        var podExpr = ParseExpression(args[0]);
+        Expression? nsExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        return new K8sIsReadyExpression(podExpr, nsExpr);
+      }
+
+      // Special handling for k8s.scale()
+      if (functionName == "k8s.scale")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 3)
+        {
+          throw new InvalidOperationException("k8s.scale() requires exactly 3 arguments (resource, name, replicas)");
+        }
+        var resourceExpr = ParseExpression(args[0]);
+        var nameExpr = ParseExpression(args[1]);
+        var replicasExpr = ParseExpression(args[2]);
+        return new K8sScaleExpression(resourceExpr, nameExpr, replicasExpr);
+      }
+
+      // Special handling for k8s.getSecret()
+      if (functionName == "k8s.getSecret")
+      {
+        if (string.IsNullOrEmpty(argsContent))
+        {
+          throw new InvalidOperationException("k8s.getSecret() requires at least 1 argument (name)");
+        }
+        var args = SplitByComma(argsContent);
+        var nameExpr = ParseExpression(args[0]);
+        Expression? keyExpr = args.Count >= 2 ? ParseExpression(args[1]) : null;
+        Expression? nsExpr = args.Count >= 3 ? ParseExpression(args[2]) : null;
+        return new K8sGetSecretExpression(nameExpr, keyExpr, nsExpr);
+      }
+
+      // Special handling for k8s.setSecret()
+      if (functionName == "k8s.setSecret")
+      {
+        var args = SplitByComma(argsContent);
+        if (args.Count != 3)
+        {
+          throw new InvalidOperationException("k8s.setSecret() requires exactly 3 arguments (name, key, value)");
+        }
+        var nameExpr = ParseExpression(args[0]);
+        var keyExpr = ParseExpression(args[1]);
+        var valueExpr = ParseExpression(args[2]);
+        return new K8sSetSecretExpression(nameExpr, keyExpr, valueExpr);
+      }
+
+      // Special handling for k8s.topPods()
+      if (functionName == "k8s.topPods")
+      {
+        Expression? nsExpr = null;
+        if (!string.IsNullOrEmpty(argsContent))
+        {
+          nsExpr = ParseExpression(argsContent.Trim());
+        }
+        return new K8sTopPodsExpression(nsExpr);
+      }
+
+      // Special handling for k8s.topNodes()
+      if (functionName == "k8s.topNodes" && string.IsNullOrEmpty(argsContent))
+      {
+        return new K8sTopNodesExpression();
+      }
+
       // Special handling for system.cpuCount()
       if (functionName == "system.cpuCount" && string.IsNullOrEmpty(argsContent))
       {

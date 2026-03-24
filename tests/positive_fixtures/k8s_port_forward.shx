@@ -1,0 +1,12 @@
+# Test for k8s.portForward()
+
+# Port forward as statement
+k8s.portForward("my-pod", 8080, 80);
+
+# Port forward with variable result (returns PID)
+let pid: string = k8s.portForward("api-pod", 3000, 8080);
+console.log("Port forward PID: ${pid}");
+
+# Using variables
+let podName: string = "web-pod";
+k8s.portForward(podName, 9090, 443);

@@ -93,6 +93,7 @@ Utah provides comprehensive built-in functions organized by functionality:
 
 - **[Git](git.md)** - Version control operations
 - **[Docker](docker.md)** - Container and image management
+- **[Kubernetes](kubernetes.md)** - Cluster and workload management
 - **[SSH](ssh.md)** - Secure shell operations
 - **[Utilities](utilities.md)** - Common utility functions
 - **[Argument Parsing](arguments.md)** - CLI argument handling
@@ -427,4 +428,5 @@ Explore each language feature in detail:
 8. **[Utilities](utilities.md)** - Common utility functions
 9. **[Web](web.md)** - HTTP requests and web operations
 10. **[SSH](ssh.md)** - Secure shell operations
-11. **[Template](template.md)** - Template processing and substitution
+11. **[Kubernetes](kubernetes.md)** - Cluster and workload management
+12. **[Template](template.md)** - Template processing and substitution

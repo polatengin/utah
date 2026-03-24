@@ -1,0 +1,17 @@
+# Test for k8s.getContext(), k8s.setContext(), k8s.getNamespace(), k8s.setNamespace()
+
+let ctx: string = k8s.getContext();
+console.log("Current context: ${ctx}");
+
+k8s.setContext("production");
+
+let ns: string = k8s.getNamespace();
+console.log("Current namespace: ${ns}");
+
+k8s.setNamespace("kube-system");
+
+let targetCtx: string = "staging";
+k8s.setContext(targetCtx);
+
+let targetNs: string = "monitoring";
+k8s.setNamespace(targetNs);

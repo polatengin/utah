@@ -4652,6 +4652,255 @@ Utah's `git.undoLastCommit()` uses `git reset --soft HEAD~1`, which is the safes
 - **Safe for collaboration**: Won't affect other developers until you push
 - **Git history**: Only removes the commit, doesn't delete file contents
 
+## ☸️ Kubernetes Functions
+
+Utah provides Kubernetes functions for managing clusters, workloads, and resources directly from your scripts. These functions wrap `kubectl` commands into clean, type-safe operations that compile to efficient bash.
+
+### Available Kubernetes Functions
+
+#### Cluster & Context
+
+- `k8s.getContext()` - Get the current kubectl context name
+- `k8s.setContext(name)` - Switch to a different kubectl context
+- `k8s.getNamespace()` - Get the current namespace (defaults to "default")
+- `k8s.setNamespace(name)` - Set the active namespace for the current context
+- `k8s.clientVersion()` - Get the kubectl client version
+- `k8s.serverVersion()` - Get the Kubernetes server version
+
+#### Resource Operations
+
+- `k8s.get(resource, name?, namespace?)` - Get resource(s) as JSON output
+- `k8s.describe(resource, name, namespace?)` - Get detailed description of a resource
+- `k8s.exists(resource, name, namespace?)` - Check if a resource exists (returns boolean)
+
+#### Pod Operations
+
+- `k8s.logs(pod, container?, tail?, previous?)` - Get pod logs with optional filtering
+- `k8s.exec(pod, command, container?)` - Execute a command inside a pod
+- `k8s.portForward(pod, localPort, remotePort)` - Forward a local port to a pod (runs in background)
+- `k8s.isReady(pod, namespace?)` - Check if a pod is in Ready state (returns boolean)
+
+#### Scaling
+
+- `k8s.scale(resource, name, replicas)` - Scale a resource to the specified number of replicas
+
+#### Secrets
+
+- `k8s.getSecret(name, key?, namespace?)` - Get a secret (full JSON or base64-decoded key value)
+- `k8s.setSecret(name, key, value)` - Create a generic secret with a key-value pair
+
+#### Monitoring
+
+- `k8s.topPods(namespace?)` - Show resource usage (CPU/memory) for pods
+- `k8s.topNodes()` - Show resource usage (CPU/memory) for nodes
+
+### Kubernetes Context Management
+
+```typescript
+// Get the current context
+let ctx: string = k8s.getContext();
+console.log("Current context: ${ctx}");
+
+// Switch to a different context
+k8s.setContext("production");
+
+// Get the current namespace
+let ns: string = k8s.getNamespace();
+console.log("Namespace: ${ns}");
+
+// Switch namespace
+k8s.setNamespace("kube-system");
+
+// Use variables for dynamic context switching
+let targetCtx: string = "staging";
+k8s.setContext(targetCtx);
+```
+
+### Kubernetes Version Information
+
+```typescript
+let clientVer: string = k8s.clientVersion();
+console.log("Client: ${clientVer}");
+
+let serverVer: string = k8s.serverVersion();
+console.log("Server: ${serverVer}");
+```
+
+### Resource Operations Usage
+
+```typescript
+// List all pods as JSON
+let allPods: string = k8s.get("pods");
+
+// Get a specific deployment
+let deploy: string = k8s.get("deployments", "web-app");
+
+// Get a resource in a specific namespace
+let svc: string = k8s.get("services", "api-gateway", "production");
+
+// Describe a pod
+let desc: string = k8s.describe("pod", "my-pod");
+
+// Describe with namespace
+let details: string = k8s.describe("deployment", "web-app", "staging");
+
+// Check if a resource exists (returns boolean)
+let exists: boolean = k8s.exists("pod", "my-pod");
+if (exists) {
+  console.log("Pod exists");
+}
+
+// Check existence with namespace
+if (!k8s.exists("service", "api-svc", "default")) {
+  console.log("Service not found");
+}
+```
+
+### Pod Operations Usage
+
+```typescript
+// Get pod logs
+let output: string = k8s.logs("my-pod");
+
+// Get logs from a specific container
+let containerLogs: string = k8s.logs("my-pod", "nginx");
+
+// Get last 100 lines from a container
+let tailedLogs: string = k8s.logs("my-pod", "nginx", 100);
+
+// Get previous container logs (useful for crash debugging)
+let prevLogs: string = k8s.logs("my-pod", "sidecar", 50, true);
+
+// Execute a command in a pod
+let result: string = k8s.exec("my-pod", "ls /app");
+
+// Execute in a specific container
+let config: string = k8s.exec("my-pod", "cat /etc/config", "nginx");
+
+// Execute as a statement (no return value needed)
+k8s.exec("my-pod", "nginx -s reload");
+
+// Port forward (runs in background, returns PID)
+let pid: string = k8s.portForward("api-pod", 3000, 8080);
+console.log("Port forward PID: ${pid}");
+
+// Port forward as a statement
+k8s.portForward("my-pod", 8080, 80);
+
+// Check if a pod is ready
+let ready: boolean = k8s.isReady("my-pod");
+if (ready) {
+  console.log("Pod is ready to serve traffic");
+}
+
+// Check readiness in a specific namespace
+if (!k8s.isReady("api-pod", "production")) {
+  console.log("Pod is not ready yet");
+}
+```
+
+### Scaling Usage
+
+```typescript
+// Scale a deployment to 3 replicas
+k8s.scale("deployment", "web-app", 3);
+
+// Scale using variables
+let resource: string = "statefulset";
+let name: string = "database";
+let replicas: number = 5;
+k8s.scale(resource, name, replicas);
+```
+
+### Secrets Usage
+
+```typescript
+// Get full secret as JSON
+let secretData: string = k8s.getSecret("my-secret");
+
+// Get a specific key (automatically base64 decoded)
+let password: string = k8s.getSecret("db-credentials", "password");
+
+// Get a secret key from a specific namespace
+let token: string = k8s.getSecret("api-key", "token", "production");
+
+// Create a new secret
+k8s.setSecret("my-secret", "api-key", "abc123");
+
+// Create using variables
+let secretName: string = "db-creds";
+let key: string = "password";
+let value: string = "s3cret";
+k8s.setSecret(secretName, key, value);
+```
+
+### Monitoring Usage
+
+```typescript
+// Get pod resource usage
+let podUsage: string = k8s.topPods();
+console.log("Pod usage: ${podUsage}");
+
+// Get pod usage in a specific namespace
+let nsUsage: string = k8s.topPods("kube-system");
+
+// Get node resource usage
+let nodeUsage: string = k8s.topNodes();
+console.log("Node usage: ${nodeUsage}");
+```
+
+### Generated Bash Code for Kubernetes Functions
+
+Utah compiles Kubernetes functions to efficient `kubectl` commands:
+
+| Utah Code | Generated Bash |
+|-----------|---------------|
+| `k8s.getContext()` | `kubectl config current-context` |
+| `k8s.setContext("prod")` | `kubectl config use-context "prod"` |
+| `k8s.getNamespace()` | `kubectl config view --minify --output 'jsonpath={..namespace}'` |
+| `k8s.setNamespace("app")` | `kubectl config set-context --current --namespace="app"` |
+| `k8s.clientVersion()` | `kubectl version --client -o json \| jq -r '.clientVersion.gitVersion'` |
+| `k8s.serverVersion()` | `kubectl version -o json \| jq -r '.serverVersion.gitVersion'` |
+| `k8s.get("pods")` | `kubectl get "pods" -o json` |
+| `k8s.get("pods", "my-pod", "ns")` | `kubectl get "pods" "my-pod" -n "ns" -o json` |
+| `k8s.describe("pod", "my-pod")` | `kubectl describe "pod" "my-pod"` |
+| `k8s.exists("pod", "my-pod")` | `kubectl get "pod" "my-pod" > /dev/null 2>&1 && echo "true" \|\| echo "false"` |
+| `k8s.logs("pod", "ctr", 100)` | `kubectl logs "pod" --container="ctr" --tail=100` |
+| `k8s.exec("pod", "cmd")` | `kubectl exec "pod" -- cmd` |
+| `k8s.portForward("pod", 8080, 80)` | `kubectl port-forward "pod" 8080:80 &` |
+| `k8s.isReady("pod")` | `kubectl get pod "pod" -o jsonpath=... \| grep -qi "true"` |
+| `k8s.scale("deploy", "app", 3)` | `kubectl scale deploy/app --replicas=3` |
+| `k8s.getSecret("s", "key")` | `kubectl get secret "s" -o jsonpath='{.data.key}' \| base64 -d` |
+| `k8s.setSecret("s", "k", "v")` | `kubectl create secret generic "s" --from-literal=k=v` |
+| `k8s.topPods()` | `kubectl top pods` |
+| `k8s.topNodes()` | `kubectl top nodes` |
+
+### Kubernetes Functions Features
+
+- **Type-safe**: All parameters are validated at compile time
+- **JSON output**: `k8s.get()` returns JSON for easy parsing with `json.*` functions
+- **Boolean checks**: `k8s.exists()` and `k8s.isReady()` work directly in `if` conditions
+- **Background port forwarding**: `k8s.portForward()` runs in background and returns PID
+- **Secret decoding**: `k8s.getSecret()` with a key automatically base64-decodes the value
+- **Variable support**: All functions accept both string literals and variables
+
+### Kubernetes Functions Use Cases
+
+- **Deployment scripts**: Automate Kubernetes deployments with context switching and scaling
+- **Health checks**: Monitor pod readiness and resource usage in CI/CD pipelines
+- **Secret management**: Create and retrieve secrets for application configuration
+- **Debugging**: Access pod logs, exec into containers, and port-forward for local debugging
+- **Cluster administration**: Monitor resource usage across nodes and namespaces
+
+### Kubernetes Functions Technical Notes
+
+- All functions require `kubectl` to be installed and configured
+- `k8s.clientVersion()` and `k8s.serverVersion()` require `jq` for JSON parsing
+- `k8s.getNamespace()` falls back to `"default"` if no namespace is set
+- `k8s.portForward()` runs in the background using `&` and redirects output to `/dev/null`
+- `k8s.isReady()` checks the pod's `Ready` condition status via jsonpath
+- `k8s.getSecret()` with a key automatically pipes through `base64 -d` for decoding
+
 ## 🔐 SSH Functions
 
 Utah provides SSH functions for secure remote connections and command execution. These functions allow you to establish SSH connections with different authentication methods and manage remote server interactions directly within your scripts.

@@ -1,0 +1,16 @@
+# Test for k8s.topPods() and k8s.topNodes()
+
+# Get pod resource usage
+let podUsage: string = k8s.topPods();
+console.log("Pod usage: ${podUsage}");
+
+# Get pod usage in a specific namespace
+let nsUsage: string = k8s.topPods("kube-system");
+
+# Get node resource usage
+let nodeUsage: string = k8s.topNodes();
+console.log("Node usage: ${nodeUsage}");
+
+# Using a variable for namespace
+let ns: string = "monitoring";
+let monUsage: string = k8s.topPods(ns);

@@ -1,0 +1,13 @@
+# Test for k8s.isReady()
+
+# Check if pod is ready
+let ready: boolean = k8s.isReady("my-pod");
+if (ready) {
+  console.log("Pod is ready");
+}
+
+# Check with namespace
+let readyInNs: boolean = k8s.isReady("api-pod", "production");
+if (!readyInNs) {
+  console.log("Pod is not ready yet");
+}

@@ -1,0 +1,15 @@
+# Test for k8s.exec()
+
+# Basic exec
+let result: string = k8s.exec("my-pod", "ls /app");
+
+# Exec with container
+let output: string = k8s.exec("my-pod", "cat /etc/config", "nginx");
+
+# Exec as statement
+k8s.exec("my-pod", "nginx -s reload");
+
+# Using variables
+let pod: string = "web-server";
+let cmd: string = "whoami";
+k8s.exec(pod, cmd);

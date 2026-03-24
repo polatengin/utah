@@ -315,6 +315,41 @@ public partial class Compiler
           var compiled = CompileDockerRemoveImageExpression(dockerRemoveImage);
           lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
         }
+        // Special handling for k8s.* expressions in statement context
+        else if (exprStmt.Expression is K8sSetContextExpression k8sSetContext)
+        {
+          var compiled = CompileK8sSetContextExpression(k8sSetContext);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is K8sSetNamespaceExpression k8sSetNamespace)
+        {
+          var compiled = CompileK8sSetNamespaceExpression(k8sSetNamespace);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is K8sExecExpression k8sExec)
+        {
+          var compiled = CompileK8sExecExpression(k8sExec);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is K8sPortForwardExpression k8sPortForward)
+        {
+          var compiled = CompileK8sPortForwardExpression(k8sPortForward);
+          var stripped = compiled.Length > 3 ? compiled[2..^1] : compiled;
+          // Remove trailing "echo $!" for statement context - just run in background
+          var echoIndex = stripped.LastIndexOf(" echo $!");
+          if (echoIndex >= 0) stripped = stripped[..echoIndex];
+          lines.Add(stripped);
+        }
+        else if (exprStmt.Expression is K8sScaleExpression k8sScale)
+        {
+          var compiled = CompileK8sScaleExpression(k8sScale);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
+        else if (exprStmt.Expression is K8sSetSecretExpression k8sSetSecret)
+        {
+          var compiled = CompileK8sSetSecretExpression(k8sSetSecret);
+          lines.Add(compiled.Length > 3 ? compiled[2..^1] : compiled);
+        }
         // Parallel function call
         else if (exprStmt.Expression is ParallelFunctionCall parallelCall)
         {
@@ -503,14 +538,14 @@ public partial class Compiler
           ifCondition = $"\"${{{negVarExpr.Name}}}\" = \"false\"";
         }
         // Handle boolean function calls (ArrayIsEmpty, ArrayContains, ConsoleIsSudo, etc.)
-        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression || ifs.Condition is GitIsCleanExpression || ifs.Condition is DockerIsRunningExpression || ifs.Condition is DockerImageExistsExpression)
+        else if (ifs.Condition is ArrayIsEmpty || ifs.Condition is ArrayContains || ifs.Condition is ConsoleIsSudoExpression || ifs.Condition is ConsolePromptYesNoExpression || ifs.Condition is OsIsInstalledExpression || ifs.Condition is ArgsHasExpression || ifs.Condition is GitIsCleanExpression || ifs.Condition is DockerIsRunningExpression || ifs.Condition is DockerImageExistsExpression || ifs.Condition is K8sExistsExpression || ifs.Condition is K8sIsReadyExpression)
         {
           // For boolean functions, check if the result equals "true"
           ifCondition = $"\"{ifCondition}\" = \"true\"";
         }
         // Handle unary expressions with boolean functions
         else if (ifs.Condition is UnaryExpression unary && unary.Operator == "!" &&
-                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression || unary.Operand is GitIsCleanExpression || unary.Operand is DockerIsRunningExpression || unary.Operand is DockerImageExistsExpression))
+                 (unary.Operand is ArrayIsEmpty || unary.Operand is ArrayContains || unary.Operand is ConsoleIsSudoExpression || unary.Operand is ConsolePromptYesNoExpression || unary.Operand is OsIsInstalledExpression || unary.Operand is ArgsHasExpression || unary.Operand is GitIsCleanExpression || unary.Operand is DockerIsRunningExpression || unary.Operand is DockerImageExistsExpression || unary.Operand is K8sExistsExpression || unary.Operand is K8sIsReadyExpression))
         {
           var operandCondition = CompileExpression(unary.Operand);
           // For negated boolean functions, check if the result equals "false"
