@@ -74,6 +74,11 @@ jobs:
         working-directory: src/vscode-extension
         run: npm run check-types
 
+      - name: Copy LICENSE and README from root
+        run: |
+          cp LICENSE src/vscode-extension/LICENSE
+          cp README.md src/vscode-extension/README.md
+
       - name: Package extension
         working-directory: src/vscode-extension
         run: npx @vscode/vsce package --no-git-tag-version
