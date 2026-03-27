@@ -140,20 +140,11 @@ function SearchContent() {
         />
       </div>
 
-      {loading && (
-        <div className={styles.status}>
-          <div className={styles.spinner} />
-          Loading search index...
-        </div>
-      )}
+      {loading && (<></>)}
 
-      {error && (
-        <div className={styles.statusError}>{error}</div>
-      )}
+      {error && (<div className={styles.statusError}>{error}</div>)}
 
-      {!loading && !error && query.trim() && results.length === 0 && (
-        <div className={styles.status}>No results found for &ldquo;{query}&rdquo;</div>
-      )}
+      {!loading && !error && query.trim() && results.length === 0 && (<div>No results found for &ldquo;{query}&rdquo;</div>)}
 
       {results.length > 0 && (
         <div className={styles.results}>

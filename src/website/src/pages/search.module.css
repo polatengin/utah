@@ -46,21 +46,6 @@
   font-size: 0.95rem;
 }
 
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--ifm-color-emphasis-300);
-  border-top-color: var(--ifm-color-primary);
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .results {
   display: flex;
   flex-direction: column;
