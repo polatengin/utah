@@ -186,7 +186,7 @@ export default function SearchPage(): React.JSX.Element {
         <title>Search | {siteConfig.title}</title>
         <meta name="description" content={`Search ${siteConfig.title} documentation`} />
       </Head>
-      <BrowserOnly fallback={<div className={styles.status}>Loading...</div>}>
+      <BrowserOnly fallback={<div></div>}>
         {() => <SearchContent />}
       </BrowserOnly>
     </Layout>
