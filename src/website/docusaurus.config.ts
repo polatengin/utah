@@ -118,6 +118,7 @@ const config: Config = {
           label: 'Discussions',
           href: 'https://github.com/polatengin/utah/discussions',
           position: 'right',
+          className: 'navbar-discussions-link',
         },
       ],
     },
