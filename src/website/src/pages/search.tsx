@@ -144,7 +144,7 @@ function SearchContent() {
 
       {error && (<div className={styles.statusError}>{error}</div>)}
 
-      {!loading && !error && query.trim() && results.length === 0 && (<div>No results found for &ldquo;{query}&rdquo;</div>)}
+      {!loading && !error && query.trim() && results.length === 0 && (<div className={styles.resultCount}>No results found for &ldquo;{query}&rdquo;</div>)}
 
       {results.length > 0 && (
         <div className={styles.results}>
