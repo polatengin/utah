@@ -1,18 +1,10 @@
 {
   "name": "Utah Development Environment",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble",
   "features": {
     "ghcr.io/devcontainers/features/node:1.7.1": {},
-    "ghcr.io/devcontainers/features/go:1.3.3": {},
-    "ghcr.io/azutake/devcontainer-features/go-packages-install:0": {
-      "packages": [
-        "mvdan.cc/sh/v3/cmd/shfmt@latest"
-      ]
-    },
     "ghcr.io/devcontainers-extra/features/npm-packages:1.0.1": {
       "packages": [
-        "yo@latest",
-        "generator-code@latest",
         "npm-check-updates@latest"
       ]
     }
