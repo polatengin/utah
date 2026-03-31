@@ -27,5 +27,6 @@
       ]
     }
   },
-  "forwardPorts": [ 6274, 6277 ]
+  "forwardPorts": [ 6274, 6277 ],
+  "postCreateCommand": "DOCFIND_VERSION=$(curl -sIL -o /dev/null -w '%{url_effective}' https://github.com/microsoft/docfind/releases/latest | sed 's|.*/tag/||') && mkdir -p ~/.local/bin && curl -fsSL https://github.com/microsoft/docfind/releases/download/${DOCFIND_VERSION}/docfind-x86_64-unknown-linux-musl.tar.gz | tar -xz -C ~/.local/bin && chmod +x ~/.local/bin/docfind"
 }
