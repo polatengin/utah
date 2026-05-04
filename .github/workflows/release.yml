@@ -56,18 +56,18 @@ jobs:
           sed -i 's|<FileVersion>.*</FileVersion>|<FileVersion>${{ steps.version.outputs.version }}</FileVersion>|' src/cli/utah.csproj
 
       - name: Run CodeQL Analysis
-        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v3.27.6
+        uses: github/codeql-action/init@e46ed2cbd01164d986452f91f178727624ae40d7 # v3.27.6
         with:
           languages: 'csharp,javascript'
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v3.27.6
+        uses: github/codeql-action/autobuild@e46ed2cbd01164d986452f91f178727624ae40d7 # v3.27.6
 
       - name: Build
         run: dotnet build src/cli/utah.csproj --configuration Release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v3.27.6
+        uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # v3.27.6
 
       - name: Run Tests
         run: |
