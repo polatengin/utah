@@ -2,7 +2,7 @@
   "name": "Utah Development Environment",
   "image": "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble",
   "features": {
-    "ghcr.io/devcontainers/features/node:1.7.1": {},
+    "ghcr.io/devcontainers/features/node:2.0.0": {},
     "ghcr.io/devcontainers-extra/features/npm-packages:1.0.1": {
       "packages": [
         "npm-check-updates@latest"
