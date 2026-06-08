@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.19.9" />
-    <PackageReference Include="EditorConfig" Version="0.15.0" />
+    <PackageReference Include="EditorConfig" Version="0.16.2" />
   </ItemGroup>
 
 </Project>
