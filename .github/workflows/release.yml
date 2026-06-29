@@ -56,7 +56,7 @@ jobs:
           sed -i 's|<FileVersion>.*</FileVersion>|<FileVersion>${{ steps.version.outputs.version }}</FileVersion>|' src/cli/utah.csproj
 
       - name: Run CodeQL Analysis
-        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v3.27.6
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v3.27.6
         with:
           languages: 'csharp,javascript'
 
